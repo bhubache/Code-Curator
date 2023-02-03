@@ -1,0 +1,37 @@
+Remove Duplicates from Sorted Array
+
+Ok, so the problem is as follows
+
+Given an integer array nums sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same.
+Since it is impossible to change the length of the array in some languages, you must instead have the result be placed in the first part of the array nums. More formally, if there are k elements after removing the duplicates, then the first k elements of nums should hold the final result. It does not matter what you leave beyond the first k elements.
+Return k after placing the final result in the first k slots of nums.
+Do not allocate extra space for another array. You must do this by modifying the input array in-place with O(1) extra memory.
+
+The constraints are listed below
+
+nums.length is greater than or equal to 1 and less than or equal 3 times 10 to the fourth, or, 30,000
+<<<display>>> 1 <= nums.length <= 3 * 10^4
+nums at i is greater than or equal to -100 and less than or equal to positive 100
+<<<display>>> -100 <= nums[i] <= 100
+nums is sorted in non-decreasing order
+
+Ok, now that we've been introduced to the problem, let's try to understand the constraints, because they can often provide insight about to the solution.
+
+The first constraint places a lower and upper bound on the length of nums. Why is the lower bound 1 and not 0? If the lower bound were say, 5, we should be suspicious because that is oddly specific. But the upper bound seems oddly specific doesn't it? Why 30,000? While I'm not absolutely sure, this appears to be arbitrary so don't worry about it. So, this constraint seems to imply that we don't have to consider the length of the array when solving this problem and so it is not pertinent.
+<<<display>>> Not pertinent
+Similarly, the second constraint places a lower and upper bound on the value that a cell in nums can have. There doesn't seem to be anything special about -100 and positive 100, so we can say that this constraint is not pertinent.
+<<<display>>> Not pertinent
+The last constraint is very important because it enforces an ordering that affects the position of duplicate values. <!!!>Take a look at these two arrays. The top one is not sorted and the bottom one is sorted in non-decreasing order. The crucial thing to notice here is that if a value has duplicates, they will all be right next to each other!</!!!>
+<<<display>>> Duplicates will be next to each other
+
+Now, considering everything about this problem, let's identify and examine the key pieces of information. These will typically be constraints or parts of the problem statement that restrict the time or space complexity.........
+We already have the last constraint, that nums is sorted in non-decreasing order, so <FadeIn>let's put</FadeIn> that down.
+<<<display>>> nums is sorted in non-decreasing order
+The next one is that this should be done in-place, or in other words, <FadeIn>using constant space</FadeIn>. This is crucial for two reasons. Firstly, if the problem were not solved this way, the solution would simply be considered incorrect. Secondly, you don't have to worry about the plethora of auxillary data structures you could use.
+<<<display>>> Use constant space
+Lastly, if there are k unique elements, they should <FadeIn>be placed at the</FadeIn> front of nums, with the elements following the kth element being irrelevant. This implies that whenever a new value is encountered, it should be moved somewhere to the front part of nums. More specifically, we'll need a way of tracking where values are moved to.
+<<<display>>> The unique elements must be placed at the front of nums
+
+Ok, now that we've analyzed the constraints and identified the key points, let's look at an example and try to devise an algorithm.
+
+Look at the following input and output array. Because the values following the kth unique element are ignored in the output array, there are technically an infinite number of solutions, hence the question marks. 
