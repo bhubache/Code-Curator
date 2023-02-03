@@ -172,6 +172,6 @@ poetry.toml
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 
-C:\Users\brand\Documents\ManimCS\media\
-C:\Users\brand\Documents\ManimCS\mce
-C:\Users\brand\Documents\ManimCS\mobjects_pickle
+media/
+mce/
+mobjects_pickle
