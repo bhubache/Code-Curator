@@ -81,7 +81,6 @@ class BaseScene(ABC, Scene):
                 # pickle data
                 mobjects_on_screen_before_animation = self.mobjects.copy()
                 with open(self._mobjects_pickle, 'wb') as write_file:
-                    print(mobjects_on_screen_before_animation)
                     dill.dump(mobjects_on_screen_before_animation, write_file)
 
             for animation in animation_info.animations:

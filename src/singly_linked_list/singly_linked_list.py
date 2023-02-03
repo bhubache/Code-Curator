@@ -144,8 +144,6 @@ class SinglyLinkedList(VMobject):
     # FIXME: Hardcoded shift value
     # NOTE: Has the side effect of moving the pointer on the scene without the animation as well
     def _move_pointer(self, pointer: Pointer, num_nodes: int) -> Iterable[Animation]:
-        print(self._index_of_pointer(pointer) + num_nodes)
-        print(len(self._nodes))
         return pointer.move(num_nodes, self._nodes[self._index_of_pointer(pointer) + num_nodes])
 
     def _index_of_pointer(self, pointer):

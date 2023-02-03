@@ -52,7 +52,6 @@ class PointerRow(Row):
         to_cell = self._cells[self._index_of_pointer(name) + num_positions]
 
         pointer_to_move = from_cell.get_pointer(name)
-        print(id(pointer_to_move))
         animations = []
 
         # Create animations for and internally add pointer to new cell

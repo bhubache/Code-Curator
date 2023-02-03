@@ -30,7 +30,6 @@ class ScriptParser:
 
         # FIXME: This is bad! It will change if this module is moved.. which it probably will be
         script_path_parts = self._script_path.split('\\')
-        print(script_path_parts)
         index = script_path_parts.index('ManimCS') + 1
         important_module = importlib.import_module(f'{script_path_parts[index]}.{script_path_parts[index + 1]}.{script_path_parts[index + 2]}.problem_analysis')
         num_constraint_explanations = len(important_module.EXPLANATIONS)

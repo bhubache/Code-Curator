@@ -14,7 +14,11 @@ from leetcode.script_parser import ScriptParser
 from typing import Iterable
 
 # To open the movie after render.
-from manim.utils.file_ops import open_file as open_media_file 
+from manim.utils.file_ops import open_file as open_media_file
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 

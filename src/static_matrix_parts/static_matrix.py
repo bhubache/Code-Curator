@@ -191,8 +191,8 @@ class StaticMatrixBuilder:
 
         self._instance._matrix = matrix
 
-        for row in self._instance._matrix:
-            print(id(row))
+        # for row in self._instance._matrix:
+        #     print(id(row))
         return self
 
     def build(self) -> StaticMatrix:

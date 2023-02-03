@@ -44,13 +44,12 @@ class BaseProblemAnalysis(BaseScene):
                 self._animations[i] = super().add_overriding_animation(obj)
 
     def construct(self):
+        return
         for i, obj in enumerate(self._animations):
             if isinstance(obj, list):
                 for anim in obj:
-                    print(anim.run_time)
                     self.play(anim)
             elif isinstance(obj, Animation):
-                print(obj.run_time)
                 self.play(obj)
             else:
                 obj()
