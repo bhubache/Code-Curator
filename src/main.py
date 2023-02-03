@@ -1,15 +1,12 @@
-from manim import *
+# from manim import *
 import importlib
 import os
 import time
 
-from leetcode.script_scene import ScriptScene
+from script_handling.components.animation_script.aligned_animation_script import AlignedAnimationScript
 
-from leetcode.aligned_script import AlignedScript
-from leetcode.aligned_animation_script import AlignedAnimationScript
-
-from leetcode.alignment_parser import AlignmentParser
-from leetcode.script_parser import ScriptParser
+from script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
+from script_handling.components.animation_script.script_parser import ScriptParser
 
 from typing import Iterable
 
@@ -21,6 +18,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
+
+ALIGNED_SCRIPT_PATH = r'generated_files\aligned_script.txt'
+ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
+
+CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
+CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
 
 def create_class(*bases):
     class MyScene(*bases):
@@ -49,12 +52,12 @@ def create_class(*bases):
 
 def get_scene_classes():
     scene_classes = []
-    present_problem_module = importlib.import_module(f'leetcode.problems.{PROBLEM_NAME}.present_problem')
+    present_problem_module = importlib.import_module(CONCRETE_PRESENT_PROBLEM_PATH)
     present_problem_cls = getattr(present_problem_module, 'PresentProblem')
-    problem_dir = os.path.split(present_problem_module.__file__)[0]
+    problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
     # scene_classes.append(present_problem_cls)
 
-    problem_analysis_module = importlib.import_module(f'leetcode.problems.{PROBLEM_NAME}.problem_analysis')
+    problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
     scene_classes.append(problem_analysis_cls)
     
@@ -93,8 +96,8 @@ def _get_animation_timing_iterable(aligned_animation_script: AlignedAnimationScr
 if __name__ == '__main__':
     scene_classes, problem_dir = get_scene_classes()
     aligned_animation_script = get_aligned_animation_script(
-        alignment_path=os.path.join(problem_dir, 'generated/aligned_script.txt'),
-        script_path=os.path.join(problem_dir, 'required/script.txt')
+        alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
+        script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
         )
     # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
     create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])

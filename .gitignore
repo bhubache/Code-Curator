@@ -174,4 +174,4 @@ poetry.toml
 
 media/
 mce/
-mobjects_pickle
+*.pkl
