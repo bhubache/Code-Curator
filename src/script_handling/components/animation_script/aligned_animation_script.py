@@ -5,7 +5,7 @@ from typing import Iterable
 
 class AlignedAnimationScript:
     def __init__(self, scenes: Iterable[ScriptScene]):
-        self._scenes = scenes
+        self._scenes: Iterable[ScriptScene] = scenes
 
     def __str__(self):
         output = ''
@@ -14,7 +14,7 @@ class AlignedAnimationScript:
         return output
 
     @property
-    def scenes(self):
+    def scenes(self) -> Iterable[ScriptScene]:
         return self._scenes
 
     def apply_alignments(self, aligned_script: AlignedScript):
@@ -23,7 +23,7 @@ class AlignedAnimationScript:
             scene.apply_alignments(aligned_script.get_words_from_to(start=word_count_start, end=word_count_start + scene.num_words - 1), word_count_start=word_count_start)
             word_count_start += scene.num_words
 
-    def get_animation_timings(self):
+    def get_animation_timings(self) -> dict:
         timing_info = {}
         for scene in self._scenes:
             timing_info[scene.scene_id] = scene.get_animation_timings()

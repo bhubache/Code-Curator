@@ -65,7 +65,7 @@ def get_scene_classes():
     return scene_classes, problem_dir
 
 def get_aligned_animation_script(alignment_path: str, script_path: str):
-    aligned_script = AlignmentParser(alignment_path=alignment_path).parse()
+    aligned_script = AlignmentParser(file_path=alignment_path).parse()
     parsed_script = ScriptParser(script_path=script_path).parse()
     parsed_script.apply_alignments(aligned_script)
     return parsed_script

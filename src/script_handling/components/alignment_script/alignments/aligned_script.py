@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import json
+from typing import Union
 
 from .aligned_word import AlignedWord
 
 class AlignedScript:
-    def __init__(self, text_data: dict):
-        self._words = self._dict_to_words(text_data) if not self._dict_contains_aligned_words(text_data) else text_data
+    def __init__(self, text_data: Union[dict[int, str], dict[int, AlignedWord]]):
+        self._words: dict[AlignedWord] = self._strs_to_words(text_data) if not self._dict_contains_aligned_words(text_data) else text_data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self._words, indent=4, default=str)
 
     def get_word(self, word_number: int) -> AlignedWord:
@@ -27,9 +28,9 @@ class AlignedScript:
         return self.get_word(word_number=word_number).duration
 
     def get_full_duration(self) -> float:
-        index = 0
-        first = 0
-        last = 0
+        index: int = 0
+        first: int = 0
+        last:  int = 0
         for key in self._words:
             if index == 0:
                 first = key
@@ -41,15 +42,12 @@ class AlignedScript:
     def get_words_from_to(self, start: int, end: int) -> AlignedScript:
         ''' Inclusive bounds'''
         sub_dict = {}
-        # sub_dict_index = 1
         for word_num in range(start, end + 1):
-            # sub_dict[sub_dict_index] = self.get_word(word_num)
             sub_dict[word_num] = self.get_word(word_num)
-            # sub_dict_index += 1
         return AlignedScript(text_data=sub_dict)
 
     def get_word_duration_from_to(self, start: int, end: int) -> float:
-        return self.get_word_end(end) - self.get_word_start(start)
+        return round(self.get_word_end(end) - self.get_word_start(start), 2)
 
     def get_occurrences(self, text: str) -> Iterable[AlignedWord]:
         pass
@@ -59,7 +57,7 @@ class AlignedScript:
             if isinstance(value, AlignedWord): return True
         return False
 
-    def _dict_to_words(self, all_text_data: dict) -> dict[AlignedWord]:
+    def _strs_to_words(self, all_text_data: dict) -> dict[AlignedWord]:
         all_words_data = {}
         for word_num, text_data in all_text_data.items():
             if not isinstance(word_num, int): continue

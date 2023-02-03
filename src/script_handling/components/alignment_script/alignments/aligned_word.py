@@ -3,7 +3,7 @@ class AlignedWord:
         self._start = word_info['start']
         self._end = word_info['end']
         self._text = word_info['text']
-        self._duration = self._end - self._start
+        self._duration = round(self._end - self._start, 2)
 
     def __str__(self):
         return self._text
