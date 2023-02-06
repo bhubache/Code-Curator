@@ -1,12 +1,11 @@
-# from manim import *
 import importlib
 import os
 import time
 
-from script_handling.components.animation_script.aligned_animation_script import AlignedAnimationScript
+from script_handling.simple_script_parser_factory import SimpleScriptParserFactory
+from script_handling.aligned_animation_script import AlignedAnimationScript
 
 from script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from script_handling.components.animation_script.script_parser import ScriptParser
 
 from typing import Iterable
 
@@ -29,11 +28,11 @@ def create_class(*bases):
     class MyScene(*bases):
         # config.disable_caching = True
 
-        def __init__(self, problem_dir, aligned_animation_script):
+        def __init__(self, problem_dir, aligned_animation_scene):
             self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
             self._classes = bases
             for cls in self._classes:
-                cls.__init__(self, problem_dir=problem_dir, aligned_animation_script=aligned_animation_script)
+                cls.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
 
         def setup(self):
             pass
@@ -66,14 +65,15 @@ def get_scene_classes():
 
 def get_aligned_animation_script(alignment_path: str, script_path: str):
     aligned_script = AlignmentParser(file_path=alignment_path).parse()
-    parsed_script = ScriptParser(script_path=script_path).parse()
-    parsed_script.apply_alignments(aligned_script)
-    return parsed_script
+    script_parser_factory = SimpleScriptParserFactory(script_path=script_path)
+    animation_script = script_parser_factory.create_script_parser('leetcode').parse()
+    aligned_animation_script = AlignedAnimationScript(aligned_script=aligned_script, animation_script=animation_script)
+    return aligned_animation_script
 
 def create_scenes(scene_classes: list, problem_dir: str, aligned_animation_scene_scripts: Iterable[dict]):
     for index, (cls, script_scene) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
         # scene = create_class(cls)(problem_dir=problem_dir, aligned_animation_script=script_scene)
-        scene = create_class(cls)(problem_dir=problem_dir, aligned_animation_script=script_scene)
+        scene = create_class(cls)(problem_dir=problem_dir, aligned_animation_scene=script_scene)
         scene.render()
         _give_scene_ordered_name(scene, index)
 
@@ -86,7 +86,7 @@ def _give_scene_ordered_name(scene_instance, index):
 
     os.rename(old_file_path, new_file_path)
 
-def _get_animation_timing_iterable(aligned_animation_script: AlignedAnimationScript) -> Iterable[dict]:
+def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
     animation_timings_list = []
     for timing_info in aligned_animation_script.get_animation_timings().values():
         animation_timings_list.append(timing_info)
@@ -100,8 +100,9 @@ if __name__ == '__main__':
         script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
         )
     # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
-    create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
+    # create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
+    create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[1]])
 
-    aligned_animation_script.print_animation_timings()
+    # aligned_animation_script.print_animation_timings()
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)

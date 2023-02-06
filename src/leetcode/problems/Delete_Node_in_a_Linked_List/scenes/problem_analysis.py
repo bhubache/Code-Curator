@@ -2,6 +2,7 @@ from manim import *
 from leetcode.scenes.problem_analysis.base_problem_analysis import BaseProblemAnalysis
 from leetcode.problem_text import ProblemText
 from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from typing import Iterable
 
@@ -14,22 +15,22 @@ EXPLANATIONS.append('Not pertinent')
 EXPLANATIONS.append('It\'s impossible to delete the tail')
 
 class ProblemAnalysis(BaseProblemAnalysis):
-    def __init__(self, problem_dir: str, aligned_animation_script):
+    def __init__(self, problem_dir: str, aligned_animation_scene: CompositeAnimationScript):
         super().__init__(
             constraints=CONSTRAINTS,
             explanations=EXPLANATIONS,
             problem_dir=problem_dir,
-            aligned_animation_script=aligned_animation_script
+            aligned_animation_scene=aligned_animation_scene
         )
-        self.add_overriding_animation(self.explanation_1_pre)
+        self.add_overriding_animation(self.explanation_1)
 
-    def explanation_1_pre(self) -> Iterable[Animation]:
+    def explanation_1(self) -> Iterable[Animation]:
         sll = SinglyLinkedList(0, 1)
         add_node_animation = AnimationGroup(*sll.add_last(2))
 
         square = Square()
 
-        return [Wait(), FadeIn(square), square.animate.rotate(45)]
+        return [Wait(), FadeIn(square), FadeIn(Circle().move_to([1, 1, 0]))]
 
     def third_constraint_animation(self):
         title = ProblemText.create_title('Remove the value 2 from the linked list')

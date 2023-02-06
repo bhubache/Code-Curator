@@ -1,4 +1,4 @@
-from manim import *
+# from manim import *
 
 from .edge import Edge
 

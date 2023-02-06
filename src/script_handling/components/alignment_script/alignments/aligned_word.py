@@ -1,3 +1,5 @@
+import json
+
 class AlignedWord:
     def __init__(self, word_info: dict):
         self._start = word_info['start']
@@ -6,7 +8,7 @@ class AlignedWord:
         self._duration = round(self._end - self._start, 2)
 
     def __str__(self):
-        return self._text
+        return f'word: {self._text}  start: {self._start}  end: {self._end}  duration: {self._duration}'
 
     def __repr__(self):
         return self._text

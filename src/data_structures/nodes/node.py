@@ -1,4 +1,4 @@
-from manim import *
+from manim import VMobject
 
 class Node(VMobject):
     def __init__(self, shape, data):

@@ -8,7 +8,7 @@ from leetcode.problem_text import ProblemText
 # from .animation_timer import AnimationTimer
 import os
 
-from typing import Iterable
+from typing import Iterable, final
 
 '''
 TODO

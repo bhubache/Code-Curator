@@ -1,4 +1,4 @@
-from manim import *
+from manim import DOWN, RIGHT
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 from data_structures.static_array_parts.values.element import Element

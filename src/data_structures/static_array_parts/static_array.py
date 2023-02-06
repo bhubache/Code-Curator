@@ -1,4 +1,4 @@
-from manim import *
+from manim import VMobject, Animation, LEFT, DOWN
 
 from static_array_parts.rows.row_factory import RowFactory
 from static_array_parts.rows.index_row import IndexRowBuilder

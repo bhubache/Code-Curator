@@ -10,7 +10,7 @@ class AlignedScript:
         self._words: dict[AlignedWord] = self._strs_to_words(text_data) if not self._dict_contains_aligned_words(text_data) else text_data
 
     def __str__(self) -> str:
-        return json.dumps(self._words, indent=4, default=str)
+        return '\n'.join(f'{word_num} -> {word}' for word_num, word in self._words.items())
 
     def get_word(self, word_number: int) -> AlignedWord:
         return self._words[word_number]
@@ -39,12 +39,27 @@ class AlignedScript:
             index += 1
         return self.get_word_duration_from_to(first, last)
 
+    # def get_words_from_to(self, start: int, end: int) -> AlignedScript:
+    #     ''' Inclusive bounds'''
+    #     sub_dict = {}
+    #     for word_num in range(start, end + 1):
+    #         sub_dict[word_num] = self.get_word(word_num)
+    #     return AlignedScript(text_data=sub_dict)
+
     def get_words_from_to(self, start: int, end: int) -> AlignedScript:
-        ''' Inclusive bounds'''
-        sub_dict = {}
-        for word_num in range(start, end + 1):
-            sub_dict[word_num] = self.get_word(word_num)
-        return AlignedScript(text_data=sub_dict)
+        ''' Exclusive bounds'''
+        try:
+            sub_dict = {}
+            new_index = 1
+            for word_num in range(start, end):
+                sub_dict[new_index] = self.get_word(word_num)
+                new_index += 1
+            return AlignedScript(text_data=sub_dict)
+        except Exception:
+            print('keys available')
+            print(self._words.keys())
+            print(self._words.values())
+            raise
 
     def get_word_duration_from_to(self, start: int, end: int) -> float:
         return round(self.get_word_end(end) - self.get_word_start(start), 2)

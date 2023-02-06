@@ -1,4 +1,4 @@
-from manim import *
+from manim import Line
 
 class Edge(Line):
     def __init__(self, start = None, end = None, weight = None):

@@ -1,45 +1,56 @@
-from manim import *
+from manim import Scene, config, Animation, FadeOut, FadeIn
+from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from scene_scheduler import SceneScheduler
 
 from abc import ABC, abstractmethod
 import dill
+import types
 
 from typing import Iterable
 
 class BaseScene(ABC, Scene):
     config.background_color = '#000E15'
-    def __init__(self, problem_dir):
+    def __init__(self, problem_dir, aligned_animation_scene: CompositeAnimationScript):
         Scene.__init__(self)
+        self.__aligned_animation_scene = aligned_animation_scene
         self.__problem_dir = problem_dir
         self._animation_spec = None
+        self._scene_scheduler = SceneScheduler(self.__aligned_animation_scene)
         self._mobjects_pickle = 'mobjects_pickle.pkl'
 
+    # NOTE: This may not work with multiple scenes!!!
+    # NOTE: May have to name mangle self._animation_spec
     def setup(self):
-        pass
+        # Add animations from self._animation_spec to self.__aligned_animation_scene
+        for section_name, animations in self._animation_spec.items():
+            if self.__aligned_animation_scene.add_animations(unique_id=section_name, animations=animations, is_overriding_animation=False):
+                raise RuntimeError(f'Unable to add animation for {section_name}')
+
+        
+        rolled_up_animations = self._scene_scheduler.schedule()
+
+        for i, composite in enumerate(rolled_up_animations):
+            if composite.is_overriding_animation:
+                rolled_up_animations[i] = self.super_add_overriding_animation(composite)
+
+        self._animations = rolled_up_animations
 
     def construct(self):
-        pass
+        self.run_animations()
 
     def tear_down(self):
         self.play(FadeOut(*self.mobjects))
 
     @abstractmethod
-    def _schedule_scene(self):
+    def create_animation_spec(self):
         pass
 
-    def run_animations(self, animation_spec = None):
-        if animation_spec is None:
-            animation_spec = self._animation_spec
-        for section, animation_chunk in animation_spec.items():
-            for order, animation in animation_chunk.items():
-                if animation is None: continue
-
-                if isinstance(animation, dict):
-                    self.run_animations(animation)
-                    continue
-
-                anim_obj = animation()
-                if anim_obj is not None:
-                    self.play(anim_obj)
+    def run_animations(self):
+        for obj in self._animations:
+            if isinstance(obj, types.FunctionType):
+                obj()
+            else:
+                self.play(obj.animation)
 
     # TODO: Timing aligned with script audio
     def _make_successive_animations(self, *animations) -> Animation:
@@ -53,60 +64,16 @@ class BaseScene(ABC, Scene):
                 ) for anim in animations]
             )
 
-    def add_animation(self, section, order, animation, constraint_num = None, constraint_order = None):
-        callable_animation = animation
-        if not callable(animation):
-            callable_animation = lambda : animation
-        if section not in self._animation_spec:
-            raise KeyError(f'{section} is not a valid key for animation_spec')
-        
-        if order not in self._animation_spec[section]:
-            raise KeyError(f'{order} is not a valid key for the section')
-
-        if section == 'constraints' and order == 'during':
-            if constraint_num not in self._animation_spec[section][order]:
-                raise KeyError(f'{constraint_num} is not a valid constraint number')
-
-            if constraint_order not in self._animation_spec[section][order][constraint_num]:
-                raise KeyError(f'{constraint_order} is not a valid constraint order')
-
-            self._animation_spec[section][order][constraint_num][constraint_order] = callable_animation
-        else:
-            self._animation_spec[section][order] = callable_animation
-
-    def add_overriding_animation(self, animation_info):
+    def super_add_overriding_animation(self, composite: CompositeAnimationScript):
         def inner():
-            # Save mobjects currently on screen so we can fade them back in after the animation
-            if animation_info.next_is_overriding_animation:
-                # pickle data
-                mobjects_on_screen_before_animation = self.mobjects.copy()
-                with open(self._mobjects_pickle, 'wb') as write_file:
-                    dill.dump(mobjects_on_screen_before_animation, write_file)
+            mobjects_on_screen_before_animation = self.mobjects.copy()
 
-            for animation in animation_info.animations:
-                self.play(animation)
+            self.play(FadeOut(*self.mobjects), run_time=composite.override_start_time)
 
-            if animation_info.next_is_overriding_animation:
-                self.play(FadeOut(*self.mobjects), run_time=animation_info.next_is_overriding_fade_time)
+            for child in composite.children:
+                self.play(child.animation)
 
-            # FIXME: Fading time
-            if animation_info.is_overriding_animation:
-                with open(self._mobjects_pickle, 'rb') as read_file:
-                    mobjects_on_screen_before_animation = dill.load(read_file)
+            self.play(FadeOut(*self.mobjects), run_time=composite.override_end_time)
 
-                    # Fade out all mobjects involved with animation
-                    self.play(FadeOut(*self.mobjects, run_time=animation_info.is_overriding_fade_out_time / 2))
-                    self.play(FadeIn(*mobjects_on_screen_before_animation, run_time=animation_info.is_overriding_fade_out_time / 2))
+            self.play(FadeIn(*mobjects_on_screen_before_animation), run_time=composite.override_end_time)
         return inner
-
-    def add_constraint_animation(self, animation, constraint_num, constraint_order = 'post'):
-        return self.add_overriding_animation(section='constraints', order='during', animation=animation, constraint_num=constraint_num, constraint_order=constraint_order)
-
-    def _add_animation(self, *keys, animation):
-        self.dynamically_set_nested_dict(*keys, d=self._animation_spec, value=animation)
-
-    def dynamically_set_nested_dict(self, *keys, d, value):
-        last_key = keys[-1]
-        for key in keys[:-1]:
-            d = d[key]
-        d[last_key] = value

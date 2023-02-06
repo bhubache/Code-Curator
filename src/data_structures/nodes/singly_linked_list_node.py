@@ -1,4 +1,4 @@
-from manim import *
+from manim import Circle
 
 from .linear_node import LinearNode
 from data_structures.static_array_parts.values.element import Element
