@@ -1,4 +1,4 @@
-from manim import RIGHT
+from manim import RIGHT, Animation, FadeIn
 
 from .node import Node
 
