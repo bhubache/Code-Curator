@@ -54,7 +54,7 @@ def get_scene_classes():
     present_problem_module = importlib.import_module(CONCRETE_PRESENT_PROBLEM_PATH)
     present_problem_cls = getattr(present_problem_module, 'PresentProblem')
     problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
-    # scene_classes.append(present_problem_cls)
+    scene_classes.append(present_problem_cls)
 
     problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
@@ -94,15 +94,15 @@ def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
 
 
 if __name__ == '__main__':
-    scene_classes, problem_dir = get_scene_classes()
-    aligned_animation_script = get_aligned_animation_script(
-        alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
-        script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
-        )
-    # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
-    # create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
-    create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[1]])
+    code_module = importlib.import_module(f'leetcode.scenes.code.base_code_scene')
+    code_cls = getattr(code_module, 'BaseCodeScene')
+    create_scenes([code_cls], 'hi', 'hi')
+    
+    # scene_classes, problem_dir = get_scene_classes()
+    # aligned_animation_script = get_aligned_animation_script(
+    #     alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
+    #     script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
+    #     )
+    # create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[0]])
 
-    # aligned_animation_script.print_animation_timings()
-
-    # open_media_file(scene.renderer.file_writer.movie_file_path)
+    # # open_media_file(scene.renderer.file_writer.movie_file_path)

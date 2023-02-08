@@ -1,4 +1,4 @@
-from manim import Scene, config, Animation, FadeOut, FadeIn
+from manim import Scene, config, Animation, FadeOut, FadeIn, Succession, Wait
 from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 from scene_scheduler import SceneScheduler
 
