@@ -1,4 +1,4 @@
-from manim import VMobject, DOWN, LEFT, UP, FadeIn, Animation, 
+from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, Animation
 
 from ..nodes.singly_linked_list_node import SLLNode as Node
 from ..pointers.pointer import Pointer

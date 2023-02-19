@@ -23,6 +23,7 @@ ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
+CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
 def create_class(*bases):
     class MyScene(*bases):
@@ -58,7 +59,11 @@ def get_scene_classes():
 
     problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
-    scene_classes.append(problem_analysis_cls)
+    # scene_classes.append(problem_analysis_cls)
+
+    code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
+    code_solution_cls = getattr(code_solution_module, 'CodeSolution')
+    scene_classes.append(code_solution_cls)
     
     # FIXME: Bad practice returning a tuple with loosely understood ordering
     return scene_classes, problem_dir
