@@ -64,11 +64,11 @@ def get_scene_classes():
     present_problem_module = importlib.import_module(CONCRETE_PRESENT_PROBLEM_PATH)
     present_problem_cls = getattr(present_problem_module, 'PresentProblem')
     problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
-    # scene_classes.append(present_problem_cls)
+    scene_classes.append(present_problem_cls)
 
     problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
-    scene_classes.append(problem_analysis_cls)
+    # scene_classes.append(problem_analysis_cls)
 
     code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     code_solution_cls = getattr(code_solution_module, 'CodeSolution')
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         )
     # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
     # create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
-    create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[1]])
+    create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[0]])
 
     # aligned_animation_script.print_animation_timings()
 

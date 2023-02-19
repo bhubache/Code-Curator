@@ -12,18 +12,22 @@ class BaseScene(ABC, Scene):
     config.background_color = '#000E15'
     def __init__(self, problem_dir, aligned_animation_scene: CompositeAnimationScript):
         Scene.__init__(self)
-        self.__aligned_animation_scene = aligned_animation_scene
+        self._aligned_animation_scene = aligned_animation_scene
         self.__problem_dir = problem_dir
         self._animation_spec = None
-        self._scene_scheduler = SceneScheduler(self.__aligned_animation_scene)
+        self._scene_scheduler = SceneScheduler(self._aligned_animation_scene)
         self._mobjects_pickle = 'mobjects_pickle.pkl'
+
+    @property
+    def aligned_animation_scene(self) -> CompositeAnimationScript:
+        return self._aligned_animation_scene
 
     # NOTE: This may not work with multiple scenes!!!
     # NOTE: May have to name mangle self._animation_spec
     def setup(self):
-        # Add animations from self._animation_spec to self.__aligned_animation_scene
+        # Add animations from self._animation_spec to self._aligned_animation_scene
         for section_name, animations in self._animation_spec.items():
-            if self.__aligned_animation_scene.add_animations(unique_id=section_name, animations=animations, is_overriding_animation=False):
+            if self._aligned_animation_scene.add_animations(unique_id=section_name, animations=animations, is_overriding_animation=False):
                 raise RuntimeError(f'Unable to add animation for {section_name}')
 
         

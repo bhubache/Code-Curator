@@ -1,8 +1,16 @@
 from __future__ import annotations
+from typing import Union, Callable
+
 from manim import Animation
 from .animation_script_interface import IAnimationScript
 from .animation_leaf import AnimationLeaf
 from script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
+
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
+
+
+# TODO: ORGANIZE
 
 class CompositeAnimationScript(IAnimationScript):
     def __init__(self, unique_id: str, children: list[AnimationLeaf]):
@@ -42,6 +50,12 @@ class CompositeAnimationScript(IAnimationScript):
             total_words += child.get_num_words()
         return total_words
 
+    def get_child(self, unique_id: str) -> Union[IAnimationScript, None]:
+        for child in self.children:
+            if child.unique_id == unique_id:
+                return child
+        return None
+
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         for child in self.children:
             # sub_aligned_script = aligned_script.get_words_from_to(start, child.get_num_words() + 1, aligned_script)
@@ -51,6 +65,13 @@ class CompositeAnimationScript(IAnimationScript):
 
     # TODO: Get rid of the try except statement
     def add_animations(self, unique_id: str, animations: list[Animation], is_overriding_animation: bool) -> bool:
+        # FIXME: Check for using closures to pass animation information to capture dependencies like position elements on screen
+        if callable(animations):
+            logger.info('add a callable!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            # logger.info(f'Composite unique_id: {self.unique_id}')
+            # for child in self.children:
+            #     logger.info(child)
+            actual_animations = animations()
         found_composite = False
         if self.unique_id != unique_id:
             for child in self.children:

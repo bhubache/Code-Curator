@@ -1,14 +1,10 @@
+import os
+from typing import Iterable, final
+
 from manim import *
-
-# from problem_setup.problem_text import ProblemText
-# from problem_text import ProblemText
-
 from base_scene import BaseScene
 from leetcode.problem_text import ProblemText
-# from .animation_timer import AnimationTimer
-import os
-
-from typing import Iterable, final
+from script_handling.components.animation_script.animation_leaf import AnimationLeaf
 
 '''
 TODO
@@ -96,7 +92,7 @@ class BasePresentProblem(BaseScene):
 
     def create_animation_spec(self):
         spec = {
-            'title': self.present_problem_title(),
+            'title': self.present_problem_title(self.aligned_animation_scene.get_child('title')),
             'statement_header': self.present_problem_statement_header(),
             'statement': self.present_problem_statement(),
             'constraints_header': self.present_problem_constraints_header(),
@@ -122,10 +118,13 @@ class BasePresentProblem(BaseScene):
             constraints_dict[index] = self.present_single_problem_constraint(index=index)
         return constraints_dict
 
-    def present_problem_title(self):
-        # def inner():
-        return [FadeIn(self._title), Wait(), self._title.animate.to_edge(UP)]
-        # return inner
+    def present_problem_title(self, aligned_animation_section: AnimationLeaf):
+        def inner():
+            return [
+                FadeIn(self._title, run_time)
+            ]
+            return [FadeIn(self._title), Wait(), self._title.animate.to_edge(UP)]
+        return inner
 
     def present_problem_statement_header(self):
         # def inner():

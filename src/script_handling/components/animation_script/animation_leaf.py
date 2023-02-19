@@ -19,7 +19,18 @@ class AnimationLeaf(IAnimationScript):
         self._tags = tags
 
     def __str__(self) -> str:
-        return f'{self._unique_id}:\n{self._text}\n{self._animation}  {self.audio_duration}  {self.animation_run_time}\n\n'
+        lines = [
+            f'Section Name: {self.unique_id}',
+            f'Text        : {self.get_text()}',
+            f'Animation               Animation Run Time               Audio Duration',
+            f'{self._animation}{" " * ((len("Animation") + 15) - len(str(self._animation)))}{self.animation_run_time}{" " * ((len("Animation Run Time") + 15) - len(str(self.animation_run_time)))}{self.audio_duration}{" " * ((len("Audio Duration") + 15) - len(str(self.audio_duration)))}'
+        ]
+        return '\n'.join(lines)
+        # return f'{self._unique_id}:\n{self._text}\n{self._animation}  {self.audio_duration}  {self.animation_run_time}\n\n'
+
+    # @property
+    # def text(self) -> str:
+    #     return self.text.strip()
 
     def get_text(self) -> str:
         return self._text.strip()
@@ -40,6 +51,11 @@ class AnimationLeaf(IAnimationScript):
         self._is_overriding_start = is_overriding_start
         self._is_overriding_end = is_overriding_end
         self._animation = animation
+
+    def get_child(self, unique_id: str) -> IAnimationScript:
+        if unique_id != self.unique_id:
+            raise RuntimeError(f'This leaf isn\t correct: {self.unique_id} != {unique_id}')
+        return self
 
     @property
     def is_overriding_animation(self):
