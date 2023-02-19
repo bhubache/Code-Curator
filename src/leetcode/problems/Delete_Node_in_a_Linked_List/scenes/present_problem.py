@@ -14,7 +14,7 @@ CONSTRAINTS.append('The value of each node in the list is unique')
 CONSTRAINTS.append('The node to be deleted is in the list and is not a tail node')
 
 class PresentProblem(BasePresentProblem):
-    def __init__(self, problem_dir: str, aligned_animation_script):
+    def __init__(self, problem_dir: str, aligned_animation_scene):
         super().__init__(
             title=TITLE,
             statement_header='Statement',
@@ -22,5 +22,5 @@ class PresentProblem(BasePresentProblem):
             constraints_header='Constraints',
             constraints=CONSTRAINTS,
             problem_dir=problem_dir,
-            aligned_animation_script=aligned_animation_script
+            aligned_animation_scene=aligned_animation_scene
         )

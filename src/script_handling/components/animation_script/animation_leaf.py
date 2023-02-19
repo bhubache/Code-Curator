@@ -1,10 +1,10 @@
 from manim import Animation, Wait
 from .animation_script_interface import IAnimationScript
 from script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
-# from .composite_animation_script import CompositeAnimationScript
+from script_handling.tag import Tag
 
 class AnimationLeaf(IAnimationScript):
-    def __init__(self, unique_id, text: str, is_wait_animation: bool):
+    def __init__(self, unique_id, text: str, is_wait_animation: bool, tags: list[Tag]):
         self._unique_id: str = unique_id
         self._text: str = text
         self._start: float = None
@@ -16,6 +16,7 @@ class AnimationLeaf(IAnimationScript):
         self._is_overriding_end = None
         self._parent = None
         self._is_overriding_animation = False
+        self._tags = tags
 
     def __str__(self) -> str:
         return f'{self._unique_id}:\n{self._text}\n{self._animation}  {self.audio_duration}  {self.animation_run_time}\n\n'
@@ -107,7 +108,7 @@ class AnimationLeaf(IAnimationScript):
         # assert self.animation_run_time <= self.audio_duration, f'{self.unique_id}'
         # Separate explicit animation from the extra wait time!
         if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
-            wait_padding_explicit_animation_leaf = AnimationLeaf(unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True)
+            wait_padding_explicit_animation_leaf = AnimationLeaf(unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[])
             wait_padding_explicit_animation_leaf.add_animation(Wait(round(self.audio_duration - self.animation_run_time, 2)))
             wait_padding_explicit_animation_leaf.audio_duration = wait_padding_explicit_animation_leaf.animation_run_time
 
