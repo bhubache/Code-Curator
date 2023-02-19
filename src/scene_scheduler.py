@@ -1,14 +1,16 @@
 from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 from script_handling.components.animation_script.animation_leaf import AnimationLeaf
 
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
+
 class SceneScheduler:
-    def __init__(self, aligned_animation_scene: CompositeAnimationScript):
-        self._aligned_animation_scene = aligned_animation_scene
+    def __init__(self):
         self._override_start_time = 1
         self._override_end_time = 0.5
 
-    def schedule(self):
-        flattened: list[AnimationLeaf] = self._aligned_animation_scene.get_flattened_iterable()
+    def schedule(self, aligned_animation_scene: CompositeAnimationScript):
+        flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
 
         # Give spare time from Wait animations to other animations
         for i in range(len(flattened) - 1):
