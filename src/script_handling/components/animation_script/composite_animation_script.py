@@ -19,14 +19,13 @@ class CompositeAnimationScript(IAnimationScript):
         self._parent = None
         self._animations: list[Animation] = []
 
-    def __str__(self):
+    def __str__(self) -> str:
         new_line = '\n'
         tab = '\t'
         new_line_and_tab = new_line + tab
         return f'{self._unique_id}{new_line}{new_line_and_tab.join([tab+str(child) for child in self._children])}'
 
     def get_flattened_iterable(self) -> list:
-        logger.info(self.unique_id)
         flattened = []
         for child in self.children:
             flattened += child.get_flattened_iterable()
@@ -41,15 +40,39 @@ class CompositeAnimationScript(IAnimationScript):
         self._parent = new_parent
         for child in self.children:
             child.parent = self
-
-    def get_text(self):
+    
+    @property
+    def text(self):
         raise NotImplementedError()
 
-    def get_num_words(self):
+    @property
+    def num_words(self):
         total_words = 0
         for child in self.children:
-            total_words += child.get_num_words()
+            total_words += child.num_words
         return total_words
+
+    @property
+    def children(self):
+        return self._children
+
+    @property
+    def unique_id(self):
+        return self._unique_id
+
+    @property
+    def audio_duration(self):
+        total_duration = 0.0
+        for child in self.children:
+            total_duration += child.audio_duration
+        return total_duration
+
+    @property
+    def animation_run_time(self):
+        total_run_time = 0.0
+        for child in self.children:
+            total_run_time += child.animation_run_time
+        return total_run_time
 
     def get_child(self, unique_id: str) -> Union[IAnimationScript, None]:
         for child in self.children:
@@ -74,10 +97,9 @@ class CompositeAnimationScript(IAnimationScript):
 
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         for child in self.children:
-            # sub_aligned_script = aligned_script.get_words_from_to(start, child.get_num_words() + 1, aligned_script)
-            child.apply_alignments(start, start + child.get_num_words() - 1, aligned_script)
+            child.apply_alignments(start, start + child.num_words - 1, aligned_script)
 
-            start += child.get_num_words()
+            start += child.num_words
 
     def component_uses_code_timing(self, leaf_unique_id: str) -> bool:
         comp = self.get_component(leaf_unique_id)
@@ -92,7 +114,7 @@ class CompositeAnimationScript(IAnimationScript):
     def use_code_timing(self):
         return False
 
-    def convert_leaf_to_composite(self, section_name: str, func: Callable):
+    def apply_code_timing(self, section_name: str, func: Callable):
         comp = self.get_component(section_name)
         comp_animations = func()
         parent = comp.parent
@@ -100,10 +122,10 @@ class CompositeAnimationScript(IAnimationScript):
         new_leaves = []
         for i, animation in enumerate(comp_animations):
             new_leaf_id = f'{section_name}_{i}'
-            new_leaf = AnimationLeaf(unique_id=new_leaf_id, text=comp.get_text(), is_wait_animation=False)
+            logger.info(type(comp))
+            new_leaf = AnimationLeaf(unique_id=new_leaf_id, text=comp.text, is_wait_animation=False)
             new_leaf.add_animation(new_leaf_id, func, animation)
             new_leaf.audio_duration = animation.run_time
-            # new_leaf.func = func
             new_leaves.append(new_leaf)
         new_composite = CompositeAnimationScript(unique_id=section_name, children=new_leaves)
         self.set_child(unique_id=section_name, new_child=new_composite)
@@ -140,7 +162,7 @@ class CompositeAnimationScript(IAnimationScript):
     #         if section_leaf.use_code_timing:
     #             new_leaves = []
     #             for i, animation in enumerate(actual_animations):
-    #                 new_leaf = AnimationLeaf(unique_id=f'{section_leaf.unique_id}_{i}', text=section_leaf.get_text(), is_wait_animation=False)
+    #                 new_leaf = AnimationLeaf(unique_id=f'{section_leaf.unique_id}_{i}', text=section_leaf.text, is_wait_animation=False)
     #                 new_leaf.add_animation(animation)
     #                 new_leaf.audio_duration = animation.run_time
     #                 new_leaves.append(new_leaf)
@@ -175,25 +197,3 @@ class CompositeAnimationScript(IAnimationScript):
     #                 is_overriding_end = True
     #             child.add_animation(anim, is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end)
     #     return found_composite
-
-    @property
-    def children(self):
-        return self._children
-
-    @property
-    def unique_id(self):
-        return self._unique_id
-
-    @property
-    def audio_duration(self):
-        total_duration = 0.0
-        for child in self.children:
-            total_duration += child.audio_duration
-        return total_duration
-
-    @property
-    def animation_run_time(self):
-        total_run_time = 0.0
-        for child in self.children:
-            total_run_time += child.animation_run_time
-        return total_run_time

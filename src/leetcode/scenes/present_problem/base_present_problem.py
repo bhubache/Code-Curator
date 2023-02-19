@@ -31,13 +31,13 @@ class BasePresentProblem(BaseScene):
                  constraints = CONSTRAINTS,
                  problem_dir = None,
                  aligned_animation_scene = None):
-        BaseScene.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
+        super().__init__(problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
+        # BaseScene.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
         self._title = ProblemText.create_title(title)
         self._statement_header = ProblemText.create_header(statement_header)
         self._statement = ProblemText.create_statement(statement)
         self._constraints_header = ProblemText.create_header(constraints_header)
         self._constraints = ProblemText.create_constraints_list(constraints)
-        self._problem_dir = problem_dir
 
         self._animation_spec = self.create_animation_spec()
         self.add_base_animations()
@@ -48,7 +48,7 @@ class BasePresentProblem(BaseScene):
             'statement_header': self.present_problem_statement_header(),
             'statement': self.present_problem_statement(),
             'constraints_header': self.present_problem_constraints_header(),
-            # 'constraints': self._init_constraints_animations()
+            'constraints': self._init_constraints_animations()
             }
         return spec
 

@@ -41,10 +41,6 @@ def create_class(scene_classes: list[BaseScene], aligned_animation_scene_scripts
             for cls, scene_script in zip(scene_classes, aligned_animation_scene_scripts):
                 self._scene_instances.append(cls(problem_dir, scene_script))
 
-            # self._classes = bases
-            # for cls in self._classes:
-            #     cls.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
-
         def setup(self):
             pass
 
@@ -115,10 +111,6 @@ if __name__ == '__main__':
         alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
         script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
         )
-    # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
-    # create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
     create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[0]])
-
-    # aligned_animation_script.print_animation_timings()
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)

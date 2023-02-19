@@ -1,11 +1,9 @@
-from manim import *
+import json
+from typing import Iterable
 
+from manim import *
 from base_scene import BaseScene
 from leetcode.problem_text import ProblemText
-
-import json
-
-from typing import Iterable
 
 class BaseProblemAnalysis(BaseScene):
     def __init__(self, constraints, explanations, problem_dir, aligned_animation_scene):
@@ -51,10 +49,6 @@ class BaseProblemAnalysis(BaseScene):
         opacity_fade_in_animation = self._get_constraint_explanations()[index].animate.set_opacity(1)
         opacity_fade_in_animation.run_time = 1
         return [opacity_fade_in_animation]
-    # def _present_single_problem_explanation(self, index):
-    #     def inner():
-    #         return [self._get_constraint_explanations()[index].animate.set_opacity(1)]
-    #     return inner
 
     def animate_analysis_setup(self):
         self._title.to_edge(UP)

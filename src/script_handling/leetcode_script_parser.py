@@ -14,7 +14,7 @@ class LeetcodeScriptParser(AnimationScriptParser):
         super().__init__(script_path=script_path)
         self._wait_animation_prefix = '_IMPLICIT_WAIT_'
 
-    def parse(self) -> LeetcodeScriptParser:
+    def parse(self) -> CompositeAnimationScript:
         contents = self._get_file_contents()
 
         scene_map = self._get_scene_map(file_contents=contents)
@@ -69,7 +69,7 @@ class LeetcodeScriptParser(AnimationScriptParser):
                         is_wait_animation = True
                     composite_sections.append(AnimationLeaf(unique_id=section_name, text=animation_lines[0], is_wait_animation=is_wait_animation, tags=tags))
                 else:
-                    # Composite)
+                    # Composite
                     composite_sections.append(
                         CompositeAnimationScript(
                             unique_id=section_name,

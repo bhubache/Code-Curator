@@ -2,20 +2,18 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import re
 
-
 from .tag import Tag
 
 class AnimationScriptParser(ABC):
     def __init__(self, script_path: str):
-        self._script_path:        str  = script_path
+        self._script_path:         str = script_path
         self._start_scene_pattern: str = '<<([^\/].*)>>'
-        self._end_scene_pattern: str = '<<\/(.*)>>'
-        self._start_scene_format: str = '<<{}>>'
-        self._end_scene_format: str = '<</{}>>'
-
-        self._section_split = '\n\n'
-        self._section_pattern = '<(.*)>'
-        self._name_tag_separator = ':'
+        self._end_scene_pattern:   str = '<<\/(.*)>>'
+        self._start_scene_format:  str = '<<{}>>'
+        self._end_scene_format:    str = '<</{}>>'
+        self._section_split:       str = '\n\n'
+        self._section_pattern:     str = '<(.*)>'
+        self._name_tag_separator:  str = ':'
 
     @abstractmethod
     def parse(self) -> AnimationScriptParser:
@@ -31,6 +29,11 @@ class AnimationScriptParser(ABC):
         return contents
 
     def _is_starting_scene_line(self, line: str) -> bool:
+        '''
+        Takes in a line from the script and outputs a
+        boolean stating whether or not the line is the
+        start of a scene
+        '''
         match = re.search(pattern=self._start_scene_pattern, string=line)
         return match is not None
 
@@ -46,11 +49,9 @@ class AnimationScriptParser(ABC):
         if self._is_explicit_animation_section(section):
             animation_chunks['animation_lines'] = [line for i, line in enumerate(section.splitlines()) if i != 0]
             animation_chunks['tags'] = self._get_animation_section_tags(section)
-            # return [line for i, line in enumerate(section.splitlines()) if i != 0]
         else:
             animation_chunks['animation_lines'] = [line for line in section.splitlines()]
         return animation_chunks
-        # return [line for line in section.splitlines()]
 
     def _get_end_scene_line(self, start_scene_line: str) -> str:
         return self._end_scene_format.format(self.get_scene_name_from_start_line(start_scene_line))
