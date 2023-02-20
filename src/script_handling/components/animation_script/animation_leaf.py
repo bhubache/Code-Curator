@@ -22,7 +22,7 @@ class AnimationLeaf(IAnimationScript):
         self._parent = None
         self._is_overriding_animation = False
         self._tags = tags
-        self._func = None
+        self._func = lambda : 0
 
     def __str__(self) -> str:
         lines = [
@@ -80,7 +80,7 @@ class AnimationLeaf(IAnimationScript):
 
     @is_overriding_end.setter
     def is_overriding_end(self, value: bool) -> None:
-        self._is_overiding_end = value
+        self._is_overriding_end = value
 
     @property
     def is_wait_animation(self):

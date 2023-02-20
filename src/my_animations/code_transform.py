@@ -85,8 +85,6 @@ class CodeTransform:
 
         highlighter_animation = FadeIn(Square().set_opacity(0))
         if self.src_code_obj.has_highlighter():
-            import json
-            print(json.dumps(self.src_to_dst_map, indent=4))
             if self.src_code_obj.highlighter.curr_line_num not in self.src_to_dst_map:
                 # Line with highlighter gets removed
                 highlighter_animation = FadeOut(src.src_code_obj.highlighter)
@@ -135,10 +133,6 @@ class CodeTransform:
                     while(index < len(self.diff) and self.diff.line_unique_to_dst_code(self.diff[index])):
                         similarity_score = self.diff.get_sequence_similarity(unique_to_src_line, self.diff[index])
 
-                        print(unique_to_src_line)
-                        print(self.diff[index])
-                        print(similarity_score)
-                        print()
                         if similarity_score > highest_similarity_score:
                             highest_similarity_score = similarity_score
                             other_changed_line_index = index
@@ -196,8 +190,6 @@ class CodeTransform:
             # Remove the '- ' or '+ ' from the lines
             cleaned_src_line = self.diff[src_index][2:]
             cleaned_dst_line = self.diff[dst_index][2:]
-            print(f'Cleaned source line: {cleaned_src_line}')
-            print(f'Cleaned dst line: {cleaned_dst_line}')
             # cleaned_src_line = line[2:]
             # cleaned_dst_line = self.diff[line_index + 1][2:]
 

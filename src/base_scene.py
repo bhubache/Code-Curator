@@ -5,6 +5,7 @@ from typing import Iterable, Callable
 
 from manim import Scene, config, Animation, FadeOut, FadeIn
 from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from script_handling.components.animation_script.animation_leaf import AnimationLeaf
 from scene_scheduler import SceneScheduler
 
 from custom_logging.custom_logger import CustomLogger
@@ -47,7 +48,14 @@ class BaseScene(ABC, Scene):
         self._animations = rolled_up_animations
 
     def construct(self):
-        self.run_animations()
+        for obj in self._animations:
+            if isinstance(obj, AnimationLeaf):
+                obj.func()
+                self.play(obj.animation)
+            elif isinstance(obj, Callable):
+                obj()
+            else:
+                raise RuntimeError(f'Unexpected type {type(obj)} when running animations')
 
     def tear_down(self):
         self.play(FadeOut(*self.mobjects))
@@ -55,16 +63,6 @@ class BaseScene(ABC, Scene):
     @abstractmethod
     def create_animation_spec(self):
         pass
-
-    def run_animations(self):
-        for obj in self._animations:
-            logger.info(obj.unique_id)
-            obj.func()
-            self.play(obj.animation)
-            # if isinstance(obj, types.FunctionType):
-            #     obj()
-            # else:
-            #     self.play(obj.animation)
 
     def super_add_overriding_animation(self, composite: CompositeAnimationScript):
         def inner():
@@ -81,16 +79,12 @@ class BaseScene(ABC, Scene):
         return inner
 
     def add_base_animations(self):
-        logger.info(self.aligned_animation_scene)
         for section_name, func in self.animation_spec.items():
             if self.aligned_animation_scene.component_uses_code_timing(section_name):
                 self.aligned_animation_scene.apply_code_timing(section_name, func)
             else:
                 if self._func_outputs_list_of_funcs(func):
-                    logger.info('LIST OF FUNCS')
                     list_of_funcs = func()
-                    print(section_name)
-                    print(list_of_funcs)
                     for i, anim_func in enumerate(list_of_funcs):
                         self.aligned_animation_scene.add_animation(unique_id=f'{section_name}_{i}', func=anim_func, animation=anim_func(), is_overriding_animation=False)
                 else:

@@ -30,11 +30,13 @@ class SceneScheduler:
         rolled_up_animations = []
         for i, leaf in enumerate(flattened):
             if leaf.is_overriding_end:
+                logger.critical('leaf is overriding end')
                 self.handle_override_end(flattened[i], flattened[i + 1], flattened[i].parent)
                 in_overriding_animation_group = False
             elif in_overriding_animation_group:
                 continue
             elif leaf.is_overriding_start:
+                logger.critical('leaf is overriding start')
                 parent = leaf.parent
                 self.handle_override_start(flattened[i], flattened[i - 1], flattened[i].parent)
                 rolled_up_animations.append(leaf.parent)

@@ -104,7 +104,6 @@ class App:
         self.outline_button.place(x=SCREEN_WIDTH // 2 - 250, y=SCREEN_HEIGHT // 2)
 
     def create_outline(self):
-        print('Creating base video outline')
         forced_aligner = ForcedAligner(title=self.selected_title)
         forced_aligner.run()
 
@@ -113,7 +112,7 @@ class App:
         self.video_button.place(x=SCREEN_WIDTH // 2 - 250, y=SCREEN_HEIGHT // 2 + 100)
 
     def create_video(self):
-        print('Creating video')
+        pass
 
 
 if __name__ == '__main__':

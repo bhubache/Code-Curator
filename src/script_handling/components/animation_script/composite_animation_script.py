@@ -18,6 +18,7 @@ class CompositeAnimationScript(IAnimationScript):
         self._children = children
         self._parent = None
         self._animations: list[Animation] = []
+        self._is_overriding_animation = False
 
     def __str__(self) -> str:
         new_line = '\n'
@@ -30,6 +31,14 @@ class CompositeAnimationScript(IAnimationScript):
         for child in self.children:
             flattened += child.get_flattened_iterable()
         return flattened
+
+    @property
+    def is_overriding_animation(self) -> bool:
+        return self._is_overriding_animation
+
+    @is_overriding_animation.setter
+    def is_overriding_animation(self, value: bool) -> None:
+        self._is_overriding_animation = value
 
     @property
     def parent(self):
@@ -104,9 +113,9 @@ class CompositeAnimationScript(IAnimationScript):
     def component_uses_code_timing(self, leaf_unique_id: str) -> bool:
         comp = self.get_component(leaf_unique_id)
         if comp is None:
-            raise ValueError(f'Component by the name {leaf_unique_id} does not exist')
-
-        logger.info(comp.unique_id)
+            logger.error(f'Component by the name {leaf_unique_id} does not exist')
+            # raise ValueError(f'Component by the name {leaf_unique_id} does not exist')
+            return False
 
         return comp.use_code_timing
 
@@ -122,7 +131,6 @@ class CompositeAnimationScript(IAnimationScript):
         new_leaves = []
         for i, animation in enumerate(comp_animations):
             new_leaf_id = f'{section_name}_{i}'
-            logger.info(type(comp))
             new_leaf = AnimationLeaf(unique_id=new_leaf_id, text=comp.text, is_wait_animation=False)
             new_leaf.add_animation(new_leaf_id, func, animation)
             new_leaf.audio_duration = animation.run_time
@@ -138,23 +146,37 @@ class CompositeAnimationScript(IAnimationScript):
                 child.add_animation(unique_id, func, func()[0], is_overriding_animation)
         else:
             animations = func()
-            logger.info(animations)
             assert len(self.children) == len(animations)
 
+            self.is_overriding_animation = True
+
             for i, (child, animation) in enumerate(zip(self.children, animations)):
-                if isinstance(animation, Callable):
-                    func = animation
-                    animation = animation()
-                if i == 0:
-                    child.add_animation(unique_id=f'{unique_id}_{i}', func=func, animation=animation)
-                else:
-                    child.add_animation(unique_id=f'{unique_id}_{i}', func=lambda : 0, animation=animation)
+                logger.info(animation)
+                # if isinstance(animation, Callable):
+                #     func = animation
+                #     animation = animation()
+                is_overriding_start = i == 0
+                is_overriding_end = i == len(self.children) - 1
+
+                logger.info(i)
+                logger.info(animation)
+                logger.info(f'is overriding start: {is_overriding_start}')
+                logger.info(f'is overriding end: {is_overriding_end}')
+                logger.info('')
+                if i > 0:
+                    # We only want the real function to be called once so we let the first leaf have it
+                    func = lambda : 0
+
+                child.add_animation(unique_id=f'{unique_id}_{i}', func=func, animation=animation, is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end)
+                # if i == 0:
+                #     child.add_animation(unique_id=f'{unique_id}_{i}', func=func, animation=animation)
+                # else:
+                #     child.add_animation(unique_id=f'{unique_id}_{i}', func=lambda : 0, animation=animation)
 
     # # TODO: Get rid of the try except statement
     # def add_animations(self, unique_id: str, animations: list[Animation], is_overriding_animation: bool) -> bool:
     #     found_composite = False
     #     # FIXME: Check for using closures to pass animation information to capture dependencies like position elements on screen
-    #     logger.info(unique_id)
     #     if callable(animations) and self.get_child(unique_id).use_code_timing:
     #         found_composite = False
     #         section_leaf = self.get_child(unique_id)
