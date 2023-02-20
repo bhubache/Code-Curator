@@ -1,14 +1,13 @@
+import os
+from typing import Iterable, final, Callable
+
 from manim import *
-
-# from problem_setup.problem_text import ProblemText
-# from problem_text import ProblemText
-
 from base_scene import BaseScene
 from leetcode.problem_text import ProblemText
-# from .animation_timer import AnimationTimer
-import os
+from script_handling.components.animation_script.animation_leaf import AnimationLeaf
 
-from typing import Iterable, final
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
 
 '''
 TODO
@@ -30,132 +29,84 @@ class BasePresentProblem(BaseScene):
                  statement = STATEMENT,
                  constraints_header = 'Constraints',
                  constraints = CONSTRAINTS,
-                 problem_dir = None):
-        BaseScene.__init__(self, problem_dir=problem_dir)
+                 problem_dir = None,
+                 aligned_animation_scene = None):
+        super().__init__(problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
+        # BaseScene.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
         self._title = ProblemText.create_title(title)
         self._statement_header = ProblemText.create_header(statement_header)
         self._statement = ProblemText.create_statement(statement)
         self._constraints_header = ProblemText.create_header(constraints_header)
         self._constraints = ProblemText.create_constraints_list(constraints)
-        self._problem_dir = problem_dir
-        # self._animation_timer = AnimationTimer(
-        #     script_path=os.path.join(problem_dir, 'script.txt'),
-        #     alignment_path=os.path.join(problem_dir, 'aligned_script.txt')
-        # )
 
-        # self._animation_timings = self._animation_timer.get_timings()
+        self._animation_spec = self.create_animation_spec()
+        self.add_base_animations()
 
-        self._title_key, self._statement_header_key, self._statement_key, self._constraints_header_key, self._consraints_key = self._animation_timings.keys()
-
-        # self._title_key = self._animation_timer._script_keys[0]
-        # self._statement_header_key = self._animation_timer._script_keys[1]
-        # self._statement_key = self._animation_timer._script_keys[2]
-        # self._constraints_header_key = self._animation_timer._script_keys[3]
-        # self._constraints_key = '<constraints>'
-
-        # animation_spec breaks the PresentProblem Scene down into its major components:
-        # - title
-        # - statement header
-        # - statement
-        # - constraint header
-        # - constraints
-        #
-        # To allow flexibility in creating a scene, every section is made up of three portions: pre, during, and post
-        # The value of these three keys must be either an Animation of some kind, or a dictionary that follows the same
-        # structure (this enables recursion)
-        self._animation_spec = {
-            self._title_key: {
-                'pre': None,
-                'during': self.present_problem_title(self._animation_timings[self._title_key]),
-                'post': None
-            },
-            self._statement_header_key: {
-                'pre': None,
-                'during': self.present_problem_statement_header(self._animation_timings[self._statement_header_key]),
-                'post': None
-            },
-            self._statement_key: {
-                'pre': None,
-                'during': self.present_problem_statement(self._animation_timings[self._statement_key]),
-                'post': None
-            },
-            self._constraints_header_key: {
-                'pre': None,
-                'during': self.present_problem_constraints_header(self._animation_timings[self._constraints_header_key]),
-                'post': None
-            },
-            self._constraints_key: {
-                'pre': None,
-                'during': self._init_constraints_animations(),
-                'post': None
-            },
-        }
+    def create_animation_spec(self) -> dict:
+        spec = {
+            'title': self.present_problem_title(self.aligned_animation_scene.get_child('title')),
+            'statement_header': self.present_problem_statement_header(),
+            'statement': self.present_problem_statement(),
+            'constraints_header': self.present_problem_constraints_header(),
+            'constraints': self._init_constraints_animations()
+            }
+        return spec
 
     def setup(self):
-        pass
+        super().setup()
 
     def construct(self):
-        self.run_animations()
+        super().construct()
 
     def tear_down(self):
-        self.play(FadeOut(*self.mobjects))
+        super().tear_down()
 
-    def _init_constraints_animations(self):
-        constraints_dict = {}
-        for index in range(len(self._constraints)):
-            constraints_dict[index + 1] = {
-                'pre': None,
-                'during': self.present_single_problem_constraint(index=index),
-                'post': None
-            }
-        return constraints_dict
-
-    def present_problem_title(self, animation_timings):
+    # FIXME
+    def _init_constraints_animations(self) -> Callable:
         def inner():
-            # Fade in title         - 50%
-            # Wait                  - 25%
-            # Move title to edge up - 25
-            fade_in_percentage = 0.25
-            wait_percentage = 0.25
-            move_up_percentage = 1.0 - fade_in_percentage - wait_percentage
-            duration = float(animation_timings['duration'])
-            return self._make_successive_animations(
-                FadeIn(self._title, run_time=duration * fade_in_percentage),
-                Wait(duration * wait_percentage),
-                self._title.animate(run_time=duration * move_up_percentage).to_edge(UP)
-            )
+            constraint_animations = []
+            for index in range(len(self._constraints)):
+                constraint_animations.append(self.present_single_problem_constraint(index=index))
+            return constraint_animations
         return inner
 
-    def present_problem_statement_header(self, animation_timings):
-        def inner():
+    def present_problem_title(self, aligned_animation_section: AnimationLeaf) -> Callable[..., list[Animation]]:
+        audio_duration = aligned_animation_section.audio_duration
+        def inner() -> list[Animation]:
+            fade_in_duration = round(audio_duration * 0.3, 2)
+            wait_duration = round(audio_duration * 0.3, 2)
+            move_duration = round(audio_duration - fade_in_duration - wait_duration, 2)
+            move_animation = self._title.animate(run_time=move_duration).to_edge(UP)
+            move_animation.run_time = move_duration
+            return [
+                FadeIn(self._title, run_time=fade_in_duration),
+                Wait(run_time=wait_duration),
+                move_animation
+            ]
+        return inner
+
+    def present_problem_statement_header(self) -> Callable[..., list[Animation]]:
+        def inner() -> list[Animation]:
             self._position_element_below_other(self._statement_header, self._title)
-            return self._make_successive_animations(
-                FadeIn(self._statement_header)
-            )
+            return [FadeIn(self._statement_header)]
         return inner
 
-    def present_problem_statement(self, animation_timings):
-        def inner():
+    def present_problem_statement(self) -> Callable[..., list[Animation]]:
+        def inner() -> list[Animation]:
             self._position_element_below_other(self._statement, self._statement_header)
-            return self._make_successive_animations(
-                FadeIn(self._statement)
-            )
+            return [FadeIn(self._statement)]
         return inner
 
-    def present_problem_constraints_header(self, animation_timings):
-        def inner():
+    def present_problem_constraints_header(self) -> Callable[..., list[Animation]]:
+        def inner() -> list[Animation]:
             self._position_element_below_other(self._constraints_header, self._statement)
-            return self._make_successive_animations(
-                FadeIn(self._constraints_header)
-            )
+            return [FadeIn(self._constraints_header)]
         return inner
 
-    def present_single_problem_constraint(self, index):
-        def inner():
+    def present_single_problem_constraint(self, index) -> Callable[..., list[Animation]]:
+        def inner() -> list[Animation]:
             self._position_element_below_other(self._constraints, self._constraints_header)
-            return self._make_successive_animations(
-                FadeIn(self._constraints[index])
-            )
+            return [FadeIn(self._constraints[index])]
         return inner
 
     def _position_element_below_other(self, element, other):

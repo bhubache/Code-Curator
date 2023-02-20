@@ -1,5 +1,5 @@
-<Present_Problem>
-<title>
+<<Present_Problem>>
+<title:code_timing>
 Delete Node in a Linked list
 
 <statement_header>
@@ -16,14 +16,23 @@ The number of nodes in the given list is in the range 2 to 100 inclusive
 The node’s value is greater than or equal to negative 100 and less than or equal to positive 100
 The value of each node in the list is unique
 And the node to be deleted is in the list and is not a tail node
-</Present_Problem>
+<</Present_Problem>>
 
 
-<Constraints_Analysis>
+<<Constraints_Analysis>>
 <intro>
-Ok, now that we’ve been introduced to the problem, let’s try to understand the problem constraints, because they can often provide insight about the solution.
+Ok, now that we’ve been introduced to the problem, let’s try to understand the problem constraints, because they can often provide insight about the solution. At first glance, the first constraint may seem quite strange. Why is the lower bound 2? Is there something special about 2? Well, if we consider all the information about the problem, we can see that this can actually be derived from the fourth constraint.
 
 <explanation_1>
-At first glance, the first constraint may seem quite strange. Why is the lower bound 2? Is there something special about 2? Well, if we consider all the information about the problem, we can see that this can actually be derived from the fourth constraint. <pre>Because the node to be deleted is in the list, we know there must be at <a>least</a> one node. And, when there’s only one node in a list, that node is both the <a>head</a> and the tail. But, because the node</pre> to be deleted is <during>not</during> the tail, there must be at least 2 nodes in the linked list! I can’t find a similar justification for the upper bound on the number of nodes, 1000 seems arbitrary.
-</Constraints_Analysis>
+Because the node to be deleted is in the list, we know there must be at
+least one node. And, when there’s only one node in a list, that node is both the
+head and the tail. But, because the node
+
+to be deleted is
+
+<explanation_1_fade_in>
+not
+
+the tail, there must be at least 2 nodes in the linked list! I can’t find a similar justification for the upper bound on the number of nodes, 1000 seems arbitrary.
+<</Constraints_Analysis>>
 

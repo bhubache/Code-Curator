@@ -3,12 +3,18 @@ from .animation_script_parser import AnimationScriptParser
 from .components.animation_script.composite_animation_script import CompositeAnimationScript
 from .components.animation_script.animation_leaf import AnimationLeaf
 
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
+
+# TODO
+# Make exceptions/assertions to enforce formatting of animation script
+
 class LeetcodeScriptParser(AnimationScriptParser):
     def __init__(self, script_path):
         super().__init__(script_path=script_path)
         self._wait_animation_prefix = '_IMPLICIT_WAIT_'
 
-    def parse(self) -> LeetcodeScriptParser:
+    def parse(self) -> CompositeAnimationScript:
         contents = self._get_file_contents()
 
         scene_map = self._get_scene_map(file_contents=contents)
@@ -50,7 +56,9 @@ class LeetcodeScriptParser(AnimationScriptParser):
         composite_scenes = []
         for scene_name, section_map in animation_script_map.items():
             composite_sections = []
-            for section_name, animation_lines in section_map.items():
+            for section_name, section_info in section_map.items():
+                animation_lines = section_info['animation_lines']
+                tags = section_info['tags']
                 assert len(animation_lines) > 0, 'Every section should have at least one animation'
 
 
@@ -59,13 +67,13 @@ class LeetcodeScriptParser(AnimationScriptParser):
                     is_wait_animation = False
                     if section_name.startswith(self._wait_animation_prefix):
                         is_wait_animation = True
-                    composite_sections.append(AnimationLeaf(unique_id=section_name, text=animation_lines[0], is_wait_animation=is_wait_animation))
+                    composite_sections.append(AnimationLeaf(unique_id=section_name, text=animation_lines[0], is_wait_animation=is_wait_animation, tags=tags))
                 else:
-                    # Composite)
+                    # Composite
                     composite_sections.append(
                         CompositeAnimationScript(
                             unique_id=section_name,
-                            children=[AnimationLeaf(unique_id=f'{section_name}_{i}', text=line, is_wait_animation=False) for i, line in enumerate(animation_lines)]
+                            children=[AnimationLeaf(unique_id=f'{section_name}_{i}', text=line, is_wait_animation=False, tags=tags) for i, line in enumerate(animation_lines)]
                         )
                     )
 

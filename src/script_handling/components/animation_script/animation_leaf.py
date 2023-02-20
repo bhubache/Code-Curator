@@ -1,44 +1,66 @@
+from typing import Callable
+
 from manim import Animation, Wait
 from .animation_script_interface import IAnimationScript
 from script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
-# from .composite_animation_script import CompositeAnimationScript
+from script_handling.tag import Tag
+
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
 
 class AnimationLeaf(IAnimationScript):
-    def __init__(self, unique_id, text: str, is_wait_animation: bool):
+    def __init__(self, unique_id, text: str, is_wait_animation: bool, tags: list[Tag] = None):
         self._unique_id: str = unique_id
         self._text: str = text
         self._start: float = None
         self._end: float = None
-        self._duration: float = None
+        self._audio_duration: float = None
         self._animation: Animation = None
         self._is_wait_animation = is_wait_animation
         self._is_overriding_start = None
         self._is_overriding_end = None
         self._parent = None
         self._is_overriding_animation = False
+        self._tags = tags
+        self._func = lambda : 0
 
     def __str__(self) -> str:
-        return f'{self._unique_id}:\n{self._text}\n{self._animation}  {self.audio_duration}  {self.animation_run_time}\n\n'
+        lines = [
+            f'Section Name: {self.unique_id}',
+            f'Text        : {self.text}',
+            f'Tags        : {self.tags}',
+            f'Animation               Animation Run Time               Audio Duration',
+            f'{self._animation}{" " * ((len("Animation") + 15) - len(str(self._animation)))}{self.animation_run_time}{" " * ((len("Animation Run Time") + 15) - len(str(self.animation_run_time)))}{self.audio_duration}{" " * ((len("Audio Duration") + 15) - len(str(self.audio_duration)))}'
+        ]
+        return '\n'.join(lines)
 
-    def get_text(self) -> str:
+    @property
+    def text(self) -> str:
         return self._text.strip()
 
-    def get_num_words(self) -> int:
-        return len(self.get_text().split())
+    @property
+    def num_words(self):
+        return len(self.text.split())
 
-    def apply_alignments(self, start, end, aligned_script: AlignedScript):
-        self._start = aligned_script.get_word_start(start)
-        self._end = aligned_script.get_word_end(end)
-        self._duration = aligned_script.get_word_duration_from_to(start, end)
+    @property
+    def start(self) -> float:
+        return self._start
 
-        # Default animation to Wait
-        self._animation = Wait(self._duration)
+    @start.setter
+    def start(self, new_start: float) -> None:
+        self._start = new_start
 
-    # TODO: Ideally, member variables are initialized in __init__
-    def add_animation(self, animation: Animation, is_overriding_start: bool = False, is_overriding_end: bool = False):
-        self._is_overriding_start = is_overriding_start
-        self._is_overriding_end = is_overriding_end
-        self._animation = animation
+    @property
+    def tags(self) -> list[Tag]:
+        return self._tags
+
+    @property
+    def func(self) -> Callable:
+        return self._func
+
+    @func.setter
+    def func(self, new_func: Callable) -> None:
+        self._func = new_func
 
     @property
     def is_overriding_animation(self):
@@ -48,9 +70,17 @@ class AnimationLeaf(IAnimationScript):
     def is_overriding_start(self):
         return self._is_overriding_start
 
+    @is_overriding_start.setter
+    def is_overriding_start(self, value: bool) -> None:
+        self._is_overriding_start = value
+
     @property
     def is_overriding_end(self):
         return self._is_overriding_end
+
+    @is_overriding_end.setter
+    def is_overriding_end(self, value: bool) -> None:
+        self._is_overriding_end = value
 
     @property
     def is_wait_animation(self):
@@ -70,11 +100,11 @@ class AnimationLeaf(IAnimationScript):
 
     @property
     def audio_duration(self) -> float:
-        return self._duration
+        return self._audio_duration
 
     @audio_duration.setter
     def audio_duration(self, new_duration):
-        self._duration = new_duration
+        self._audio_duration = new_duration
 
     @property
     def parent(self):
@@ -88,27 +118,62 @@ class AnimationLeaf(IAnimationScript):
     def animation(self):
         return self._animation
 
+    @animation.setter
+    def animation(self, new_animation: Animation) -> None:
+        self._animation = new_animation
+
     @property
     def animation_run_time(self) -> float:
         return self._animation.run_time
-        # if self._animation is None: return -1.0
-        # try:
-        #     return self._animation.run_time
-        # except Exception:
-        #     print(self._animation)
-        #     print(self.unique_id)
-        #     raise
 
     @animation_run_time.setter
     def animation_run_time(self, new_run_time: float):
         self._animation.run_time = new_run_time
 
+    @property
+    def use_code_timing(self) -> bool:
+        return Tag.CODE_TIMING in self.tags
+
+    def apply_alignments(self, start, end, aligned_script: AlignedScript):
+        self.start = aligned_script.get_word_start(start)
+        self.end = aligned_script.get_word_end(end)
+        self.audio_duration = aligned_script.get_word_duration_from_to(start, end)
+
+        # Default animation to Wait
+        self.animation = Wait(self._audio_duration)
+
+    def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_start: bool = False, is_overriding_end: bool = False):
+        if self.unique_id != unique_id: return False
+
+        self.is_overriding_start = is_overriding_start
+        self.is_overriding_end = is_overriding_end
+        self.animation = animation
+        self.func = func
+        return True
+
+    # # TODO: Ideally, member variables are initialized in __init__
+    # def add_animation(self, unique_id: str, animation: Animation, is_overriding_start: bool = False, is_overriding_end: bool = False):
+    #     if self.unique_id != unique_id: return False
+
+    #     self._is_overriding_start = is_overriding_start
+    #     self._is_overriding_end = is_overriding_end
+    #     self._animation = animation
+    #     return True
+
+    def get_child(self, unique_id: str) -> IAnimationScript:
+        if unique_id != self.unique_id:
+            raise RuntimeError(f'This leaf isn\t correct: {self.unique_id} != {unique_id}')
+        return self
+
+    def get_component(self, unique_id: str) -> IAnimationScript:
+        if unique_id == self.unique_id: return self
+        return None
+
     def get_flattened_iterable(self) -> list:
-        # assert self.animation_run_time <= self.audio_duration, f'{self.unique_id}'
         # Separate explicit animation from the extra wait time!
         if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
-            wait_padding_explicit_animation_leaf = AnimationLeaf(unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True)
-            wait_padding_explicit_animation_leaf.add_animation(Wait(round(self.audio_duration - self.animation_run_time, 2)))
+            wait_padding_explicit_animation_leaf = AnimationLeaf(unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[])
+            wait_padding_explicit_animation_leaf.add_animation('WAIT_PADDING', lambda : 0, Wait(round(self.audio_duration - self.animation_run_time, 2)), False)
             wait_padding_explicit_animation_leaf.audio_duration = wait_padding_explicit_animation_leaf.animation_run_time
 
             self.audio_duration = self.animation_run_time

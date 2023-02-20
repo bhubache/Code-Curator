@@ -2,6 +2,9 @@ import importlib
 import os
 import time
 
+from base_scene import BaseScene
+from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+
 from script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 from script_handling.aligned_animation_script import AlignedAnimationScript
 
@@ -11,6 +14,9 @@ from typing import Iterable
 
 # To open the movie after render.
 from manim.utils.file_ops import open_file as open_media_file
+from manim import Scene
+
+from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -25,24 +31,27 @@ CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.presen
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
 CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
-def create_class(*bases):
-    class MyScene(*bases):
+def create_class(scene_classes: list[BaseScene], aligned_animation_scene_scripts: list[CompositeAnimationScript]):
+    class MyScene(Scene):
         # config.disable_caching = True
 
-        def __init__(self, problem_dir, aligned_animation_scene):
+        def __init__(self, problem_dir: str):
+            super().__init__()
             self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
-            self._classes = bases
-            for cls in self._classes:
-                cls.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
+            self._scene_instances = []
+            for cls, scene_script in zip(scene_classes, aligned_animation_scene_scripts):
+                scene_inst = cls(problem_dir, scene_script)
+                scene_inst.video_dir = self._video_dir
+                self._scene_instances.append(scene_inst)
 
         def setup(self):
             pass
 
         def construct(self):
-            for cls in self._classes:
-                cls.setup(self)
-                cls.construct(self)
-                cls.tear_down(self)
+            for i, scene_inst in enumerate(self._scene_instances):
+                # Only calling render seems to get the video to save
+                scene_inst.render()
+                _give_scene_ordered_name(scene_inst, i)
 
         def tear_down(self):
             pass
@@ -55,18 +64,23 @@ def get_scene_classes():
     present_problem_module = importlib.import_module(CONCRETE_PRESENT_PROBLEM_PATH)
     present_problem_cls = getattr(present_problem_module, 'PresentProblem')
     problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
-    # scene_classes.append(present_problem_cls)
+    scene_classes.append(present_problem_cls)
 
     problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
-    # scene_classes.append(problem_analysis_cls)
+    scene_classes.append(problem_analysis_cls)
 
     code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     code_solution_cls = getattr(code_solution_module, 'CodeSolution')
-    scene_classes.append(code_solution_cls)
+    # scene_classes.append(code_solution_cls)
     
     # FIXME: Bad practice returning a tuple with loosely understood ordering
     return scene_classes, problem_dir
+
+def concatenate_scenes(video_dir, num_scenes):
+    scene_video_paths = [VideoFileClip(os.path.join(video_dir, f'{str(i)}.mp4')) for i in range(num_scenes)]
+    final_clip = concatenate_videoclips(scene_video_paths)
+    final_clip.write_videofile(os.path.join(video_dir, 'output.mp4'))
 
 def get_aligned_animation_script(alignment_path: str, script_path: str):
     aligned_script = AlignmentParser(file_path=alignment_path).parse()
@@ -75,16 +89,15 @@ def get_aligned_animation_script(alignment_path: str, script_path: str):
     aligned_animation_script = AlignedAnimationScript(aligned_script=aligned_script, animation_script=animation_script)
     return aligned_animation_script
 
-def create_scenes(scene_classes: list, problem_dir: str, aligned_animation_scene_scripts: Iterable[dict]):
-    for index, (cls, script_scene) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
-        # scene = create_class(cls)(problem_dir=problem_dir, aligned_animation_script=script_scene)
-        scene = create_class(cls)(problem_dir=problem_dir, aligned_animation_scene=script_scene)
-        scene.render()
-        _give_scene_ordered_name(scene, index)
+def create_scenes(scene_classes: list[BaseScene], problem_dir: str, aligned_animation_scene_scripts: Iterable[CompositeAnimationScript]):
+    scene = create_class(scene_classes, aligned_animation_scene_scripts)(problem_dir)
+    scene.render()
+
+    concatenate_scenes(scene._video_dir, len(scene_classes))
 
 def _give_scene_ordered_name(scene_instance, index):
-    old_file_path = os.path.join(scene_instance._video_dir, f'{scene_instance.__class__.__name__}.mp4')
-    new_file_path = os.path.join(scene_instance._video_dir, f'{index}.mp4')
+    old_file_path = os.path.join(scene_instance.video_dir, f'{scene_instance.__class__.__name__}.mp4')
+    new_file_path = os.path.join(scene_instance.video_dir, f'{index}.mp4')
 
     if os.path.exists(new_file_path):
         os.remove(new_file_path)
@@ -104,10 +117,6 @@ if __name__ == '__main__':
         alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
         script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
         )
-    # create_scenes(scene_classes, problem_dir, _get_animation_timing_iterable(aligned_animation_script))
-    # create_scenes(scene_classes, problem_dir, [_get_animation_timing_iterable(aligned_animation_script)[1]])
-    create_scenes(scene_classes, problem_dir, [aligned_animation_script.get_scenes()[1]])
-
-    # aligned_animation_script.print_animation_timings()
+    create_scenes(scene_classes, problem_dir, aligned_animation_script.get_scenes())
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)

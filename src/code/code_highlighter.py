@@ -29,7 +29,6 @@ class CodeHighlighter(Rectangle):
         if width is None:
             width = code.line_width + 0.1
 
-        print(height)
         super().__init__(height=height, width=width, color=color, stroke_width=stroke_width)
 
         self._code = code
