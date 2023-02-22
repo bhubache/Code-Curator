@@ -1,4 +1,4 @@
-from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, Animation, AnimationGroup
+from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, Circle
 
 from ..nodes.singly_linked_list_node import SLLNode as Node
 from ..pointers.pointer import Pointer
@@ -49,40 +49,94 @@ class SinglyLinkedList(VMobject):
 
     # NOTE: 1/22/2023
     # self._nodes.append(node) moved above animation appends to see if self._move_pointer is fixed
-    def add_last(self, data) -> Iterable[Animation]:
+    def add_last(self, data, num_animations: int) -> Iterable[Animation]:
         node = Node(data)
-        self.add(node)
         self._place_node_next_to(node, self._tail)
         self._tail.set_next(node)
+        self.add(node)
+        FadeOut(node)
+
+        self.add(self._tail._pointer_to_next)
+        FadeOut(self._tail._pointer_to_next)
 
         self._nodes.append(node)
 
-        animations = []
-        animations.append(AnimationGroup(FadeIn(self._tail._pointer_to_next), FadeIn(node)))
-        animations.append(self.animate.move_to([0, 0, 0]))
-        animations.append(self._move_pointer(self._tail_pointer, 1))
+        def update_sll(mobject, alpha):
+            self._nodes[len(self._nodes) - 2]._pointer_to_next.fade(1 - alpha)
+            node.fade(1 - alpha)
+
+
+        # NOTE THIS WAS HERE
+        # NOTE: This may not be correct
         self._tail = node
 
-        # self._nodes.append(node)
-        return animations
+        AnimationTiming = None
+        if num_animations == 1:
+            AnimationTiming = AnimationGroup
+        elif num_animations == 2:
+            AnimationTiming = Succession
+        else:
+            raise NotImplementedError()
+
+        # starting_end = self._tail_pointer.end
+        # sll_location = self.get_center()
+        # self.move_to([0, 0, 0])
+        # ending_start = [self._nodes[-1].get_x(), self._tail_pointer.start[1] - self._tail_pointer.end[1] + self._nodes[-1].get_top()[1], 0]
+        # ending_end = self._nodes[-1].get_top()
+        # self.move_to(sll_location)
+        # self._tail_pointer._node = self._nodes[-1]
+
+        return AnimationTiming(AnimationGroup(
+            self.animate.move_to([0, 0, 0]),
+            UpdateFromAlphaFunc(self, update_sll)
+        ),
+        # self._tail_pointer.animate.put_start_and_end_on(ending_start, ending_end))
+        self._move_pointer(self._tail_pointer, self.copy().move_to([0, 0, 0])._nodes[-1]))
 
     def prepend(self, data) -> Iterable[Animation]:
         return self.add_first(data)
 
-    def add_first(self, data) -> Iterable[Animation]:
+    def add_first(self, data, num_animations: int) -> Iterable[Animation]:
         node = Node(data)
-        self.add(node)
         self._place_node_next_to(node, self._head, LEFT)
         node.set_next(self._head)
+        self.add(node)
+        FadeOut(node)
+        
+        self.add(node._pointer_to_next)
+        FadeOut(node._pointer_to_next)
 
-        animations = []
-        animations.append(FadeIn(node))
-        animations.append(self.animate.move_to([0, 0, 0]))
-        animations.append(self._move_pointer(self._head_pointer, -1))
+        def update_sll(mobject, alpha):
+            node._pointer_to_next.fade(1 - alpha)
+            node.fade(1 - alpha)
+
         self._head = node
 
         self._nodes.insert(0, node)
-        return animations
+
+        AnimationTiming = None
+        if num_animations == 1:
+            AnimationTiming = AnimationGroup
+        elif num_animations == 2:
+            AnimationTiming = Succession
+        else:
+            raise NotImplementedError()
+
+        starting_end = self._head_pointer.end
+        sll_location = self.get_center()
+        self.move_to([0, 0, 0])
+        ending_start = [self._nodes[0].get_x(), self._head_pointer.start[1] - self._head_pointer.end[1] + self._nodes[0].get_top()[1], 0]
+        ending_end = self._nodes[0].get_top()
+        self.move_to(sll_location)
+        self._head_pointer._node = self._nodes[0]
+
+        return AnimationTiming(AnimationGroup(
+            self.animate.move_to([0, 0, 0]),
+            UpdateFromAlphaFunc(self, update_sll)
+        ),
+        self._head_pointer.animate.put_start_and_end_on(ending_start, ending_end))
+        # self._move_pointer(self._head_pointer, node))
+        # return animations
 
     def insert_at_index(self, index: int, data) -> Iterable[Animation]:
         trav = Pointer(self._head, 'trav', UP)
@@ -133,7 +187,42 @@ class SinglyLinkedList(VMobject):
         self._move_pointer(trav, -num_to_shift)
         return animations
 
-    def remove_at_inex(self):
+    def remove_last(self, num_animations: int):
+        # node = Node(data)
+        # self._place_node_next_to(node, self._tail)
+        # self._tail.set_next(node)
+        # self.add(node)
+        # FadeOut(node)
+
+        # self.add(self._tail._pointer_to_next)
+        # FadeOut(self._tail._pointer_to_next)
+
+        # self._nodes.append(node)
+        tail_temp = self._tail
+
+        def update_sll(mobject, alpha):
+            self._nodes[-1]._pointer_to_next.fade(alpha)
+            tail_temp.fade(alpha)
+
+
+        self._nodes.remove(self._nodes[-1])
+        self._tail = self._nodes[-1]
+
+        AnimationTiming = None
+        if num_animations == 1:
+            AnimationTiming = AnimationGroup
+        elif num_animations == 2:
+            AnimationTiming = Succession
+        else:
+            raise NotImplementedError()
+
+        return AnimationTiming(AnimationGroup(
+            self.animate.move_to([0, 0, 0]),
+            UpdateFromAlphaFunc(self, update_sll)
+        ),
+        self._move_pointer(self._tail_pointer, self._tail))
+
+    def remove_at_index(self):
         pass
 
     def remove(self):
@@ -143,8 +232,9 @@ class SinglyLinkedList(VMobject):
 
     # FIXME: Hardcoded shift value
     # NOTE: Has the side effect of moving the pointer on the scene without the animation as well
-    def _move_pointer(self, pointer: Pointer, num_nodes: int) -> Iterable[Animation]:
-        return pointer.move(num_nodes, self._nodes[self._index_of_pointer(pointer) + num_nodes])
+    def _move_pointer(self, pointer: Pointer, node) -> Iterable[Animation]:
+        return pointer.move(node)
+        # return pointer.move(num_nodes, self._nodes[self._index_of_pointer(pointer) + num_nodes])
 
     def _index_of_pointer(self, pointer):
         return self._nodes.index(pointer.node)

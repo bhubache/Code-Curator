@@ -14,7 +14,7 @@ from typing import Iterable
 
 # To open the movie after render.
 from manim.utils.file_ops import open_file as open_media_file
-from manim import Scene
+from manim import *
 
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
@@ -110,13 +110,33 @@ def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
         animation_timings_list.append(timing_info)
     return animation_timings_list
 
+class TestScene(Scene):
+    config.disable_caching = True
+    def construct(self):
+        from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+        sll = SinglyLinkedList(1, 2, 3, 4, 5)
+        self.play(FadeIn(sll))
+        self.play(sll.add_last(6, num_animations=2))
+        # self.wait(0.5)
+        # self.play(sll.add_last(7, num_animations=1))
+        # self.play(sll.add_first(0, num_animations=2))
+        # self.play(sll.add_first(-1, num_animations=1))
+        # self.play(sll.add_first(0, num_animations=1))
+        self.wait()
+
 
 if __name__ == '__main__':
-    scene_classes, problem_dir = get_scene_classes()
-    aligned_animation_script = get_aligned_animation_script(
-        alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
-        script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
-        )
-    create_scenes(scene_classes, problem_dir, aligned_animation_script.get_scenes())
+    test_data_structure = True
+    if not test_data_structure:
+        scene_classes, problem_dir = get_scene_classes()
+        aligned_animation_script = get_aligned_animation_script(
+            alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
+            script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
+            )
+        create_scenes(scene_classes, problem_dir, aligned_animation_script.get_scenes())
+    else:
+        test_scene = TestScene()
+        test_scene.render()
+
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)

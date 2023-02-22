@@ -1,4 +1,4 @@
-from manim import DOWN, RIGHT, Animation
+from manim import DOWN, RIGHT, LEFT, UP, Animation, RED, YELLOW, AnimationGroup, Create, Circle, FadeOut
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 from data_structures.static_array_parts.values.element import Element
@@ -21,9 +21,12 @@ class Pointer(SinglyDirectedEdge):
         self._node = node
         self._node_list = [self._node]
         self._direction = direction
-        end = end if end is not None else self._node.get_node_bottom()
+        end = end if end is not None else self._node.get_node_bottom
         if self._direction[1] == -1:
-            end = self._node.get_node_top()
+            end = self._node.get_node_top
+
+        self._relative_placement = end.__func__
+        end = end()
             
         start_x = end[0]
         start_y = end[1] - 1.25
@@ -37,32 +40,14 @@ class Pointer(SinglyDirectedEdge):
         self._label.next_to(self, opposite_of_direction(self._direction))
         self.add(self._label)
 
-        # def my_closure(self, node):
-        #     def position_updater(self):
-        #         location = node.get_node_bottom() if self._direction[1] == 1 else node.get_node_top()
-        #         self.next_to(location, opposite_of_direction(self._direction), buff=0)
-
-        #         # location = self._node.get_node_bottom() if self._direction[1] == 1 else self._node.get_node_top()
-        #         # self.next_to(location, opposite_of_direction(self._direction), buff=0)
-        #     return position_updater
-
-        # self.add_updater(position_updater)
-        self.add_updater(self.my_closure(self._node))
-
     @property
     def node(self):
         return self._node
 
-    def move(self, num_nodes: int, node) -> Iterable[Animation]:
-        # self.suspend_updating()
-        self.remove_updater(self.my_closure(self._node))
+    def move(self, node) -> Iterable[Animation]:
         self._node = node
-        # self.resume_updating()
-        animation = self.animate.shift(RIGHT * num_nodes * 2)
-        self.shift(RIGHT * num_nodes * 2)
-        # self.resume_updating()
-        self.add_updater(self.my_closure(node))
-        return animation
+        return self.animate.put_start_and_end_on([node.get_center()[0], self._relative_placement(node)[1] + self.length, 0], self._relative_placement(node))
+
 
 # FIXME: VERY VERY basic
 def opposite_of_direction(direction):

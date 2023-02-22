@@ -12,6 +12,16 @@ class LinearNode(Node):
         self._next = None
         self._pointer_to_next = None
 
+    def get_node_x(self):
+        if self._pointer_to_next is None:
+            return self.get_x()
+        print(self.get_x())
+        self.remove(self._pointer_to_next)
+        x = self.get_x()
+        print(x)
+        # self.add(self._pointer_to_next)
+        return x
+
     @property
     def next(self):
         return self._next
