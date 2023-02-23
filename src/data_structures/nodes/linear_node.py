@@ -54,16 +54,11 @@ class LinearNode(Node):
         return bottom
 
     def get_node_top(self):
-        print('!!!!!!!!!!!!!!!!')
-        print(self.get_top())
         if self._pointer_to_next is None \
         or self._pointer_to_next not in self.submobjects:
             return self.get_top()
         
         self.remove(self._pointer_to_next)
-        print(self.get_top())
         top = self.get_top()
-        print(f'top: {top}')
         self.add(self._pointer_to_next)
-        print(f'top again: {top}')
         return top

@@ -4,16 +4,18 @@ from ..nodes.singly_linked_list_node import SLLNode as Node
 from ..pointers.pointer import Pointer
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 
-from typing import Iterable
+from typing import Iterable, Any
 
 import inspect
 
 def create_sll(data_list):
     return SinglyLinkedList(*data_list)
 
+# TODO: A lot of duplicate code that needs to be removed.
+
 
 class SinglyLinkedList(VMobject):
-    def __init__(self, *elements, shape = None):
+    def __init__(self, *elements: list[Any], shape = None) -> None:
         super().__init__()
         self._nodes = []
         self._head = None
@@ -52,17 +54,32 @@ class SinglyLinkedList(VMobject):
 
         self.move_to([0, 0, 0])
 
-        # for node in self._nodes:
-        #     node.remove(node._pointer_to_next)
-        #     if node._pointer_to_next is not None:
-        #         self.add(node._pointer_to_next)
-
-    def append(self, data) -> Iterable[Animation]:
+    def append(self, data: Any, num_animations: int) -> Iterable[Animation]:
+        '''Delegates to add_last.'''
         return self.add_last(data)
 
-    # NOTE: 1/22/2023
-    # self._nodes.append(node) moved above animation appends to see if self._move_pointer is fixed
-    def add_last(self, data, num_animations: int) -> Iterable[Animation]:
+
+    # TODO: Clean up!
+    def add_last(self, data: Any, num_animations: int) -> Iterable[Animation]:
+        '''Adds a node to the end of the linked list.
+
+        Note any side effects or similar things here.
+
+        Args:
+            data: Value to be stored in the new node.
+            num_animations: The number of sequential animations to be played.
+
+        Returns:
+            An animation grouping that will play the animations according
+            to the number of animations specified by num_animations.
+            
+            For instance:
+                If 1 animation is specified, then the animations
+                will be returned within an AnimationGroup.
+
+                If 2 animations is specified, then the animations
+                will be returned within a Succession.
+        '''
         node = Node(data)
         self._place_node_next_to(node, self._tail)
         self._tail.set_next(node)
@@ -73,15 +90,11 @@ class SinglyLinkedList(VMobject):
         # FadeOut(self._tail._pointer_to_next)
 
         self._nodes.append(node)
+        self._tail = node
 
         def update_sll(mobject, alpha):
             self._nodes[len(self._nodes) - 2]._pointer_to_next.fade(1 - alpha)
             node.fade(1 - alpha)
-
-
-        # NOTE THIS WAS HERE
-        # NOTE: This may not be correct
-        self._tail = node
 
         AnimationTiming = None
         if num_animations == 1:
@@ -91,16 +104,38 @@ class SinglyLinkedList(VMobject):
         else:
             raise NotImplementedError()
 
+        positioned_node = self.copy().move_to([0, 0, 0])._nodes[-1]
+
         return AnimationTiming(AnimationGroup(
             self.animate.move_to([0, 0, 0]),
             UpdateFromAlphaFunc(self, update_sll)
         ),
-        self._move_pointer(self._tail_pointer, self.copy().move_to([0, 0, 0])._nodes[-1], self._nodes[-1]))
+        self._move_pointer(self._tail_pointer, positioned_node, self._nodes[-1]))
 
-    def prepend(self, data) -> Iterable[Animation]:
+    def prepend(self, data: Any, num_animations: int) -> Iterable[Animation]:
+        '''Delegates to add_first.'''
         return self.add_first(data)
 
     def add_first(self, data, num_animations: int) -> Iterable[Animation]:
+        '''Add a new node to the front of the linked list.
+
+        Note any side effects or similar things here.
+
+        Args:
+            data: Value to be stored in the new node.
+            num_animations: The number of sequential animations to be played.
+
+        Returns:
+            An animation grouping that will play the animations according
+            to the number of animations specified by num_animations.
+            
+            For instance:
+                If 1 animation is specified, then the animations
+                will be returned within an AnimationGroup.
+
+                If 2 animations is specified, then the animations
+                will be returned within a Succession.
+        '''
         node = Node(data)
         self._place_node_next_to(node, self._head, LEFT)
         node.set_next(self._head)
@@ -187,16 +222,34 @@ class SinglyLinkedList(VMobject):
     #     return animations
 
     def remove_last(self, num_animations: int):
+        '''Removes the last node from the linked list.
+
+        Note any side effects or similar things here.
+
+        Args:
+            num_animations: The number of sequential animations to be played.
+
+        Returns:
+            An animation grouping that will play the animations according
+            to the number of animations specified by num_animations.
+            
+            For instance:
+                If 1 animation is specified, then the animations
+                will be returned within an AnimationGroup.
+
+                If 2 animations is specified, then the animations
+                will be returned within a Succession.
+        '''
         tail_temp = self._tail
 
         def update_sll(mobject, alpha):
             self._nodes[-1]._pointer_to_next.fade(alpha)
             tail_temp.fade(alpha)
 
-        self._nodes[-1].remove(self._nodes[-1]._pointer_to_next)
-        # self.remove(self._nodes[-1])
+        # self._nodes[-1].remove(self._nodes[-1]._pointer_to_next)
 
 
+        # self._nodes[-2].remove(self._nodes[-2]._pointer_to_next)
         self._nodes.remove(self._nodes[-1])
         self._tail = self._nodes[-1]
 
@@ -215,6 +268,24 @@ class SinglyLinkedList(VMobject):
         self._move_pointer(self._tail_pointer, self._tail.copy(), self._tail))
 
     def remove_first(self, num_animations: int):
+        '''Removes the first node from the linked list.
+
+        Note any side effects or similar things here.
+
+        Args:
+            num_animations: The number of sequential animations to be played.
+
+        Returns:
+            An animation grouping that will play the animations according
+            to the number of animations specified by num_animations.
+            
+            For instance:
+                If 1 animation is specified, then the animations
+                will be returned within an AnimationGroup.
+
+                If 2 animations is specified, then the animations
+                will be returned within a Succession.
+        '''
         head_temp = self._head
 
         def update_sll(mobject, alpha):
