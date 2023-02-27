@@ -111,56 +111,23 @@ def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
     return animation_timings_list
 
 class TestScene(Scene):
-    config.disable_caching = True
-
-    def remove_last(self):
-        animation = self.sll.remove_last(num_animations=1)
-        self.play(animation)
-        print(self.sll[len(self.sll._nodes) - 2].submobjects)
-        self.sll.remove(self.sll[len(self.sll._nodes) - 2])
-        # self.sll._nodes[len(self.sll._nodes) - 2]._pointer_to_next.fade(1 - alpha)
+    config.disable_caching = False
 
     def construct(self):
         from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
-        self.sll = SinglyLinkedList(1, 2, 3, 4)
+        self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
         self.play(FadeIn(self.sll))
-        self.play(self.sll.add_last(7, num_animations=1))
-        self.play(self.sll.add_last(8, num_animations=1))
-        self.remove_last()
-        self.remove_last()
-        # self.play(self.sll.remove_last(num_animations=1))
-        # self.play(self.sll.remove_last(num_animations=1))
-        self.play(self.sll.add_last(7, num_animations=1))
-        self.play(self.sll.add_last(8, num_animations=1))
-
-        # self.play(self.sll.add_last(-101, num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.add_last(-101, num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.add_last(-101, num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.wait(0.5)
-        # # self.wait(0.5)
-        # self.play(self.sll.add_last(-10, num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.add_last(-2, num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.wait(0.5)
-        # self.play(self.sll.add_last(7, num_animations=1))
-        # self.play(self.sll.add_last(0, num_animations=2))
-        # self.play(self.sll.remove_last(num_animations=2))
-        # self.play(self.sll.add_last(101, num_animations=2))
-        # self.play(self.sll.remove_last(num_animations=1))
-        # self.play(self.sll.remove_last(num_animations=1))
-        # self.play(self.sll.add_last(0, num_animations=1))
+        # self.play(self.sll.insert(3, 1111))
+        # self.wait(1)
+        # self.play(self.sll.add_last(10, 1))
+        # self.wait(1)
+        self.play(self.sll.remove_at_index(3))
+        self.wait(1)
+        self.play(self.sll.insert(1, 10))
+        self.wait(1)
+        self.play(self.sll.remove_at_index(2))
+        self.wait(1)
+        self.play(self.sll.insert(2, 10))
         self.wait()
 
 

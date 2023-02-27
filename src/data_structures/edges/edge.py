@@ -16,4 +16,5 @@ class Edge(Line):
 
     @property
     def length(self):
-        raise NotImplementedError()
+        return self.get_length()
+        # raise NotImplementedError()

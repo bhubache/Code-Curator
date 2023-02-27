@@ -1,4 +1,4 @@
-from manim import RIGHT, Animation, FadeIn
+from manim import RIGHT, LEFT, Animation, FadeIn
 
 from .node import Node
 
@@ -12,16 +12,6 @@ class LinearNode(Node):
         self._next = None
         self._pointer_to_next = None
 
-    # def get_node_x(self):
-    #     if self._pointer_to_next is None:
-    #         return self.get_x()
-    #     print(self.get_x())
-    #     self.remove(self._pointer_to_next)
-    #     x = self.get_x()
-    #     print(x)
-    #     # self.add(self._pointer_to_next)
-    #     return x
-
     @property
     def next(self):
         return self._next
@@ -32,33 +22,23 @@ class LinearNode(Node):
 
     def set_next(self, node, add_pointer_to_node = True):
         self.next = node
+        # self.next_to(node, LEFT, buff=1)
         self._pointer_to_next = SinglyDirectedEdge(start=self, end=node)
         self.add(self._pointer_to_next)
-        # if add_pointer_to_node:
-        #     self.add(self._pointer_to_next)
-        # return [FadeIn(self._pointer_to_next)]
 
     def move(self, num_nodes: int) -> Iterable[Animation]:
         animation = self.animate.shift(RIGHT * num_nodes * 2)
         self.shift(RIGHT * num_nodes * 2)
         return animation
 
-    def get_node_bottom(self):
-        if self._pointer_to_next is None \
-        or self._pointer_to_next not in self.submobjects:
-            return self.get_bottom()
-        
-        self.remove(self._pointer_to_next)
-        bottom = self.get_bottom()
-        self.add(self._pointer_to_next)
-        return bottom
+    def get_next_pointer_top(self):
+        return self._pointer_to_next.get_top()
 
-    def get_node_top(self):
-        if self._pointer_to_next is None \
-        or self._pointer_to_next not in self.submobjects:
-            return self.get_top()
-        
-        self.remove(self._pointer_to_next)
-        top = self.get_top()
-        self.add(self._pointer_to_next)
-        return top
+    def get_next_pointer_right(self):
+        return self._pointer_to_next.get_right()
+
+    def get_next_pointer_bottom(self):
+        return self._pointer_to_next.get_bottom()
+
+    def get_next_pointer_left(self):
+        return self._pointer_to_next.get_left()
