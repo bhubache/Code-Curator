@@ -1,14 +1,13 @@
 import math
 import inspect
 
-from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, Circle, Create, Transform, ReplacementTransform, TransformMatchingShapes, VGroup, ArcBetweenPoints, Wait
+from typing import Iterable, Any
 
 from ..nodes.singly_linked_list_node import SLLNode as Node
 from ..pointers.pointer import Pointer
 from ..edges.singly_directed_edge import SinglyDirectedEdge
-
-from typing import Iterable, Any
-
+from data_structures.singly_linked_list.add_first import AddFirst
+from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, Circle, Create, Transform, ReplacementTransform, TransformMatchingShapes, VGroup, ArcBetweenPoints, Wait
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
@@ -26,6 +25,8 @@ class SinglyLinkedList(VMobject):
         self._nodes = []
         self._head = None
         self._tail = None
+
+        self._add_first = AddFirst(self)
 
         if len(elements) == 0:
             raise AttributeError('Linked List cannot have zero elements')
@@ -51,12 +52,12 @@ class SinglyLinkedList(VMobject):
             self._nodes.append(curr)
             self.add(curr)
 
-        self._head_pointer = Pointer(self._head, 'head', DOWN)
+        self._head_pointer = Pointer(self._head, self, 'head', DOWN)
         self._tail_pointer = None
         if len(elements) == 1:
-            self._tail_pointer = Pointer(self._tail, 'tail', UP)
+            self._tail_pointer = Pointer(self._tail, self, 'tail', UP)
         elif len(elements) > 1:
-            self._tail_pointer = Pointer(self._tail, 'tail', DOWN)
+            self._tail_pointer = Pointer(self._tail, self, 'tail', DOWN)
 
         self.add(self._head_pointer)
         self.add(self._tail_pointer)
@@ -76,8 +77,24 @@ class SinglyLinkedList(VMobject):
         def inner(obj, *args, **kwargs):
             for sub in obj._nodes:
                 if sub not in obj.submobjects:
-                    logger.info('NOT IN')
+                    logger.info(f'NOT IN: {sub}')
                 obj.add(sub)
+
+            return func(obj, *args, **kwargs)
+        
+        return inner
+
+    def ensure_test(func):
+        def inner(obj, *args, **kwargs):
+            for sub in obj._nodes:
+                if sub not in obj.submobjects:
+                    logger.info(f'TEST SUB NOT IN: {sub}')
+                    obj.add(sub)
+
+                for component in sub.get_visible_components():
+                    if component not in sub.submobjects:
+                        logger.info(f'TEST COMPONENT NOT IN: {component}')
+                        sub.add(component)
 
             return func(obj, *args, **kwargs)
         
@@ -135,7 +152,7 @@ class SinglyLinkedList(VMobject):
         positioned_node = self.copy().move_to([0, 0, 0])._nodes[-1]
 
         return AnimationTiming(AnimationGroup(
-            self._move_to_origin(),
+            self.move_to_origin(),
             UpdateFromAlphaFunc(self, update_sll)
         ),
         self._move_pointer(self._tail_pointer, positioned_node, self._nodes[-1]))
@@ -166,6 +183,8 @@ class SinglyLinkedList(VMobject):
                 If 2 animations is specified, then the animations
                 will be returned within a Succession.
         '''
+        # return self._add_first.three_animations(data)
+        return self._add_first.three_animations(data)
         node = Node(data)
         self._place_node_next_to(node, self._head, LEFT)
         node.set_next(self._head)
@@ -191,7 +210,7 @@ class SinglyLinkedList(VMobject):
 
 
         return AnimationTiming(AnimationGroup(
-            self._move_to_origin(),
+            self.move_to_origin(),
             UpdateFromAlphaFunc(self, update_sll)
         ),
         self._move_pointer(self._head_pointer, positioned_node, self._nodes[0]))
@@ -204,7 +223,7 @@ class SinglyLinkedList(VMobject):
         if index == 0: return self.add_first(data)
         if index == len(self._nodes) - 1: return self.add_last(data)
 
-        trav = Pointer(self._head, 'trav', direction=self._head_pointer.opposite_of_direction())
+        trav = Pointer(self._head, self, 'trav', direction=self._head_pointer.opposite_of_direction())
 
         move_trav_animations = []
         for i, node in enumerate(self._nodes):
@@ -435,7 +454,7 @@ class SinglyLinkedList(VMobject):
         # positioned_node.remove(positioned_node._pointer_to_next)
 
         return AnimationTiming(AnimationGroup(
-            # self._move_to_origin(),
+            # self.move_to_origin(),
             self.animate.shift(LEFT * shift_left_value),
             UpdateFromAlphaFunc(self, update_sll)
         ),
@@ -451,8 +470,8 @@ class SinglyLinkedList(VMobject):
 
         original_prev_removed_node_next_pointer_copy = self._nodes[index - 1]._pointer_to_next.copy()
 
-        p1 = Pointer(self._head, 'p1', direction=self._head_pointer.opposite_of_direction())
-        p2 = Pointer(self._nodes[1], 'p2', direction=self._head_pointer.opposite_of_direction())
+        p1 = Pointer(self._head, self, 'p1', direction=self._head_pointer.opposite_of_direction())
+        p2 = Pointer(self._nodes[1], self, 'p2', direction=self._head_pointer.opposite_of_direction())
 
         move_trav_animations = []
         for i, node in enumerate(self._nodes):
@@ -612,16 +631,16 @@ class SinglyLinkedList(VMobject):
         )
 
         
-
-    def _move_to_origin(self):
-        # for _ in dir(self.submobjects[0]):
-        #     print(_)
-        for sub in self.submobjects:
-            # logger.info(sub)
-            if isinstance(sub, Node) and not sub.is_visible:
-                logger.info(sub)
-                # self.remove(sub)
-        return self.animate.move_to([0, 0, 0])
+    # @ensure_submobjects_added
+    # @ensure_test
+    def move_to_origin(self):
+        logger.info(self.submobjects)
+        logger.info(len(self.submobjects))
+        sll = VGroup(*self.submobjects)
+        logger.info(f'sll center: {sll.get_center()}')
+        logger.info(f'self center: {self.get_center()}')
+        return VGroup(*self.submobjects).animate.move_to([0, 0, 0])
+        # return self.animate.move_to([0, 0, 0])
 
     
 
@@ -648,5 +667,17 @@ class SinglyLinkedList(VMobject):
         animations = []
         for self_node, flattened_node in zip(self._nodes, flattened_copy._nodes):
             animations.append(self_node.animate.move_to(flattened_node))
-        # animations.append(self._move_to_origin())
+        # animations.append(self.move_to_origin())
         return animations
+
+    def fade_out_node(self, node: Node) -> None:
+        FadeOut(node)
+
+    def fade_in_node(self, node: Node) -> None:
+        FadeIn(node)
+
+    def animate_fade_out_node(self, node: Node) -> Animation:
+        return FadeOut(node)
+
+    def animate_fade_in_node(self, node: Node) -> Animation:
+        return FadeIn(node)

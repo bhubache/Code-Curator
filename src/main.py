@@ -111,23 +111,26 @@ def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
     return animation_timings_list
 
 class TestScene(Scene):
-    config.disable_caching = False
+    config.disable_caching = True
 
     def construct(self):
         from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
         self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
         self.play(FadeIn(self.sll))
+        self.play(self.sll.add_first(0, 1))
+        self.play(self.sll.add_first(1000, 1))
+        # self.play(self.sll.add_last(7, 1))
         # self.play(self.sll.insert(3, 1111))
         # self.wait(1)
         # self.play(self.sll.add_last(10, 1))
         # self.wait(1)
-        self.play(self.sll.remove_at_index(3))
-        self.wait(1)
-        self.play(self.sll.insert(1, 10))
-        self.wait(1)
-        self.play(self.sll.remove_at_index(2))
-        self.wait(1)
-        self.play(self.sll.insert(2, 10))
+        # self.play(self.sll.remove_at_index(3))
+        # self.wait(1)
+        # self.play(self.sll.insert(1, 10))
+        # self.wait(1)
+        # self.play(self.sll.remove_at_index(2))
+        # self.wait(1)
+        # self.play(self.sll.insert(2, 10))
         self.wait()
 
 

@@ -1,4 +1,4 @@
-from manim import VMobject
+from manim import VMobject, FadeOut, FadeIn, Animation
 
 class Node(VMobject):
     def __init__(self, shape, data):
@@ -9,12 +9,21 @@ class Node(VMobject):
         self._shape = shape
         self._data = data
         self._container = self._shape(radius=self._radius, stroke_width=self._stroke_width, color=self.color)
+        self._container._is_visible = True
+        self._container.add(self._data)
         self.add(self._container)
-        self.add(self._data)
+        # self.add(self._data)
 
     @property
     def data(self):
         return self._data
+
+    def get_visible_components(self):
+        visible_components = []
+        if self._container._is_visible:
+            visible_components.append(self._container)
+        
+        return visible_components
 
     def get_container_center(self):
         return self._container.get_center()
@@ -30,3 +39,32 @@ class Node(VMobject):
 
     def get_container_left(self):
         return self._container.get_left()
+
+    def animate_fade_out_container(self) -> Animation:
+        self._container._is_visible = False
+        return FadeOut(self._container)
+
+    def animate_fade_in_container(self) -> Animation:
+        self.add(self._container)
+        self._container._is_visible = True
+        return FadeIn(self._container)
+
+    def fade_out_container(self) -> None:
+        self._container._is_visible = False
+        FadeOut(self._container)
+
+    def fade_in_container(self) -> None:
+        self._container._is_visible = True
+        FadeIn(self._container)
+
+    # def fade_out(self):
+    #     FadeOut(self)
+
+    # def fade_in(self):
+    #     FadeIn(self)
+
+    # def animate_fade_out(self):
+    #     return FadeOut(self)
+
+    # def animate_fade_in(self):
+    #     return FadeIn(self)

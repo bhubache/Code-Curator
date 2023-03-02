@@ -1,4 +1,4 @@
-from manim import Line
+from manim import Line, FadeIn, FadeOut
 
 class Edge(Line):
     def __init__(self, start = None, end = None, weight = None):
@@ -18,3 +18,15 @@ class Edge(Line):
     def length(self):
         return self.get_length()
         # raise NotImplementedError()
+
+    # def fade_out(self):
+    #     FadeOut(self)
+
+    # def fade_in(self):
+    #     FadeIn(self)
+
+    # def animate_fade_out(self):
+    #     return FadeOut(self)
+
+    # def animate_fade_in(self):
+    #     return FadeIn(self)
