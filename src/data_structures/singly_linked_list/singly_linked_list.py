@@ -163,7 +163,7 @@ class SinglyLinkedList(VMobject):
         return self.add_first(data)
 
     @ensure_submobjects_added
-    def add_first(self, data, num_animations: int):
+    def add_first(self, data):
         '''Add a new node to the front of the linked list.
 
         Note any side effects or similar things here.
@@ -183,37 +183,7 @@ class SinglyLinkedList(VMobject):
                 If 2 animations is specified, then the animations
                 will be returned within a Succession.
         '''
-        # return self._add_first.three_animations(data)
-        return self._add_first.three_animations(data)
-        node = Node(data)
-        self._place_node_next_to(node, self._head, LEFT)
-        node.set_next(self._head)
-        self.add(node)
-        FadeOut(node)
-
-        def update_sll(mobject, alpha):
-            node.fade(1 - alpha)
-
-        self._head = node
-
-        self._nodes.insert(0, node)
-
-        AnimationTiming = None
-        if num_animations == 1:
-            AnimationTiming = AnimationGroup
-        elif num_animations == 2:
-            AnimationTiming = Succession
-        else:
-            raise NotImplementedError()
-
-        positioned_node = self.copy().move_to([0, 0, 0])._nodes[0]
-
-
-        return AnimationTiming(AnimationGroup(
-            self.move_to_origin(),
-            UpdateFromAlphaFunc(self, update_sll)
-        ),
-        self._move_pointer(self._head_pointer, positioned_node, self._nodes[0]))
+        return self._add_first.node_then_everything_else(data)
 
     @ensure_submobjects_added
     def insert(self, index: int, data: Any):

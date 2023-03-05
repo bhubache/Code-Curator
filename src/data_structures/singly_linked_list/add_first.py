@@ -1,269 +1,380 @@
 from typing import Any
 
-# import data_structures.singly_linked_list.singly_linked_list as 
 # from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
-from ..nodes.singly_linked_list_node import SLLNode as Node
+from ..nodes.singly_linked_list_node import SLLNode
 from ..edges.singly_directed_edge import SinglyDirectedEdge
-from manim import LEFT, AnimationGroup, Succession, FadeOut, UpdateFromAlphaFunc, FadeIn, Create, Circle, UP
-from manim import *
+from manim import LEFT, Animation, linear, smooth, Scene
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Allow specifying the time that each animation should take within this class animation
 #       alpha should be scaled accordingly
+# TODO: Create unaligned addfirst
+# TODO: Create generic adding node animation (not just to front)
 
 
-'''
-Let's try and list all the possible animation variants
-------------------------------------------------------
+class _AddToFront(Animation):
+    '''
+    Private class for animating adding to the front of a linked list.
 
-0 Animation (Immediately add everything to scene)
+    This class is intended to be able to handle various ways of animating
+    the addition of a node to the front of a singly linked list. It can
+    vary by:
+        - Number of subanimations
+        - Grouping of subanimations
+        - Order of subanimations
+        - Runtime
+        - Rate function
+        - How certain mobjects are made to appear on the screen
+            * Fading in
+            * Creation
+            * etc...
 
-1 Animation
-    1. Quick
-        a. Node fades in, pointer fades in (or grows), head pointer moves to new head, everything becomes centered
+    Attributes:
+        sll: SinglyLinkedList
+            The linked list to which the node will be added.
+        node: SLLNode
+            The node that will be added.
+        mob_groups: dict
+            A dictionary that contains the mobjects ordered
+            and grouped in the way that they will be animated.
 
-2 Animations
-    1. NodeFirst
-        a. Node fades in
-        b. Pointer fades in (or grows), head pointer moves, everything centers
+            Example:
+            {
+                "1": {
+                    "container": "Circle"
+                },
+                "2": {
+                    "pointer_to_next": "SinglyDirectedEdge",
+                    "head_pointer": "Pointer",
+                    "sll": "SinglyLinkedList"
+                }
+            }
 
-    2. NodeAndPointerFirst
-        a. Node and pointer fades in (or pointer grows)
-        b. Head pointer moves and everything becomes centered
+            This dictionary states that there will be two animations
+            where the first animation fades in the node container and
+            the second animation fades in the nodes' next pointer, moves
+            the head trav, and centers the linked list.
+        run_time: int
+            How long the animation will run for.
+        rate_func: function
+            Maps the animation progression [0, 1] to some function.
 
-    3. NodeAndPointerAndFlatten
-        a. Node and pointer fades in (or pointer grows) but not in line with linked list
-        b. Node and pointer flatten, head pointer moves, everything becomes centered
+            Example:
+                linear simply maps the animation progression 1:1.
+                So, if the animation were 37% complete, the linear
+                function outputs 0.37.
+        num_animations: int
+            The number of subanimations that make up this animation.
+        alpha_thresholds: dict
+            A mapping of a animation number to the animation progression
+            (alpha) at which point the subanimation will be complete.
 
-    4. AlignedCenterLast
-        a. Node fades in, pointer fades in (or grows), head pointer moves
-        b. Everything centers
+            Example:
+            {
+                "1": 0.25,
+                "2": 0.5,
+                "3": 0.75,
+                "4": 1.0
+            }
+            This dictionary states that subanimation 1 will be finished
+            at the animation progression (alpha) value of 0.25, and
+            subanimation 2 will be finished at alpha 0.5 etc...
+        alpha_step_size: float
+            The amount of animation progress that each subanimation gets.
 
-    5. UnalignedCenterLast
-        a. Node fades in, pointer fades in (or grows) (these aren't in line with linked list), head pointer moves, list flattens
-        b. Everything centers
-
-3 Animations
-    1. Some name
-        a. Node fades in
-        b. Pointer fades in
-        c. Head pointer moves and everything centers
-
-    2. Some name
-        a. Node fades in and pointer fades in
-        b. Head pointer moves
-        c. Everything centers
-
-    3. Some name
-        a. Node fades in
-        b. pointer fades in, head pointer moves
-        c. Everything centers
-
-    4. Some name
-        a. Node fades in, pointer fades in (unaligned)
-        b. 
-'''
-
-
-
-class ThreeAnimations(Animation):
+    Methods:
+        begin:
+            Performs setup for the animation.
+        interpolate_mobject:
+            Logic for the progression of the animation.
+        clean_up_from_scene:
+            Adding and removing of mobjects from scene.
+    '''
     def __init__(
         self,
         sll,
-        node,
-        run_time = 3,
+        node:      SLLNode,
+        mob_anims: dict,
+        run_time:  int = 1,
         rate_func = linear,
         **kwargs
     ):
+        run_time = len(mob_anims)
         super().__init__(sll, run_time=run_time, rate_func=rate_func, **kwargs)
         self.sll = sll
         self.node = node
-        self.container = self.node._container
-        self.pointer = self.node._pointer_to_next
-        self.num_animations = 3
-        self.norm = 0.33
-        self.upper_alpha_bounds = [val / self.num_animations for val in range(1, self.num_animations + 1)]
-
-    def _get_animation_num(self, alpha: float) -> int:
-        for i, upper_alpha in enumerate(self.upper_alpha_bounds):
-            if alpha <= upper_alpha:
-                return i + 1
-        raise RuntimeError(f'Alpha value {alpha} out of bounds for ThreeAnimations AddFirst animation')
-
-    def _get_normalized_alpha(self, rate_func_alpha: float, animation_num: int) -> float:
-        normalized_alpha = (rate_func_alpha - (self.norm * (animation_num - 1))) / self.norm
-        if normalized_alpha > 1:
-            normalized_alpha = 1
-        return normalized_alpha
-
-    def begin(self):
-        self.pointer.save_state()
+        self.mob_groups = mob_anims
+        self.num_animations = len(self.mob_groups)
+        self.alpha_thresholds = {num: num / self.num_animations for num in mob_anims}
+        self.alpha_step_size = 1 / self.num_animations
+        
+    def begin(self) -> None:
         self.sll.save_state()
-        self.container.set_opacity(0)
-        self.pointer.set_opacity(0)
+        self.node._pointer_to_next.save_state()
+        self.sll._head_pointer.save_state()
+
+        self.original_sll_location = self.sll.get_center()
+
+        self.node._container.set_opacity(0)
+        self.node._pointer_to_next.set_opacity(0)
         super().begin()
 
-    def interpolate_mobject(self, alpha):
-        rate_func_alpha = self.rate_func(alpha)
+    def interpolate_mobject(self, alpha: float) -> None:
+        for animation_num, mob_group in self.mob_groups.items():
+            for mob_name, mob in mob_group.items():
+                normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
 
-        animation_num = self._get_animation_num(rate_func_alpha)
-        normalized_alpha = self._get_normalized_alpha(rate_func_alpha, animation_num)
+                if normalized_alpha <= 0 or normalized_alpha >= 1:
+                    continue
 
-        if animation_num == 1:
-            # print(normalized_alpha)
-            self.container.set_stroke(opacity=normalized_alpha)
-            for container_sub in self.container.submobjects:
-                container_sub.set_opacity(normalized_alpha)
-        elif animation_num == 2:
-            self.pointer.restore()
-            original_start, original_end = self.pointer.get_start_and_end()
-            new_end = [self.pointer.tip.length, 0, 0] + original_start + ((original_end - original_start - [self.pointer.tip.length, 0, 0]) * [smooth(normalized_alpha), 1, 1])
-            self.pointer.become(SinglyDirectedEdge(start=original_start, end=new_end))
-            self.pointer.set_opacity(normalized_alpha)
-        elif animation_num == 3:
-            self.sll.restore()
-            self.sll.move_to([self.sll.get_center()[0] - (self.sll.get_center()[0] * smooth(normalized_alpha)), 0, 0])
-
-            self.sll._head_pointer.move_immediately_alpha(self.node, self.node, smooth(normalized_alpha))
-            
-
-
+                if mob_name == 'container':
+                    mob.set_stroke(opacity=normalized_alpha)
+                    for container_sub in mob.submobjects:
+                        container_sub.set_opacity(normalized_alpha)
+                elif mob_name == 'pointer_to_next':
+                    if self._get_mob_animation_num('pointer_to_next') == self._get_mob_animation_num('sll'):
+                        curr_start, curr_end = mob.get_start_and_end()
+                        mob.become(SinglyDirectedEdge(start=curr_start, end=curr_end))
+                    else:
+                        mob.restore()
+                        original_start, original_end = mob.get_start_and_end()
+                        new_end = [mob.tip.length, 0, 0] + original_start + ((original_end - original_start - [mob.tip.length, 0, 0]) * [smooth(normalized_alpha), 1, 1])
+                        mob.become(SinglyDirectedEdge(start=original_start, end=new_end))
+                    mob.set_opacity(normalized_alpha)
+                elif mob_name == 'head_pointer':
+                    mob.restore()
+                    mob.move_immediately_alpha(self.node, self.node, smooth(normalized_alpha))
+                elif mob_name == 'sll':
+                    mob.move_to([self.original_sll_location[0] - (self.original_sll_location[0] * smooth(normalized_alpha)), 0, 0])
 
     def clean_up_from_scene(self, scene: Scene = None) -> None:
         scene.add(self.node)
         self.node.remove(self.sll)
         super().clean_up_from_scene(scene)
-        # self.interpolate(0)
+
+    def _get_normalized_alpha(self, alpha: float, animation_num: int) -> float:
+        start_alpha = self.alpha_thresholds[animation_num] - self.alpha_step_size
+        end_alpha = start_alpha + self.alpha_step_size
+
+        if alpha < start_alpha:
+            return 0
+        elif start_alpha <= alpha <= end_alpha:
+            alpha = (alpha - (self.alpha_step_size * (animation_num - 1))) / self.alpha_step_size
+            if alpha > 1:
+                alpha = 1
+            return alpha
+        elif alpha > end_alpha:
+            return 1
+        else:
+            raise Exception(f'Animation number {animation_num} has alpha {alpha}')
+        
+    def _get_mob_animation_num(self, mob_name: str) -> int:
+        for animation_num, mob_group in self.mob_groups.items():
+            if mob_name in mob_group:
+                return animation_num
+        raise
 
 
 class AddFirst:
+    '''
+    Handles the internal manipulation and animation of adding a node to the front of a linked list.
+
+    Attributes:
+        sll: SinglyLinkedList
+            The linked list to which the node will be added.
+        node: SLLNode
+            The node that will be added.
+        mob_anims: dict
+            See `mob_groups` in _AddToFront.
+
+    Methods:
+        all_together:
+            1. Perform all subanimations at once.
+        node_then_everything_else:
+            1. Animate the node.
+            2. Animate everything else.
+        node_and_pointer_then_everything_else:
+            1. Animate the node and pointer.
+            2. Animate everything else.
+        node_and_pointer_and_trav_then_center
+            1. Animate the node, pointer, and trav.
+            2. Animate everything else.
+        node_then_pointer_then_trav_and_center
+            1. Animate the node.
+            2. Animate the pointer.
+            3. Animate everything else.
+        node_and_pointer_then_trav_then_center:
+            1. Animate the node and pointer.
+            2. Animate the head trav.
+            3. Animate the linked list centering.
+        node_then_pointer_and_trav_then_center:
+            1. Animate the node.
+            2. Animate the pointer and trav.
+            3. Animate the linked list centering.
+        node_then_pointer_then_trav_then_center
+            1. Animate the node.
+            2. Animate the pointer.
+            3. Animate the trav.
+            4. Animate the linked list centering.
+    '''
     def __init__(self, sll):
         self._sll = sll
+        self._node = None
+        self._mob_anims = None
 
-    def one_animation(self, data: Any):
-        node = Node(data)
-        self._sll._place_node_next_to(node, self._sll._head, LEFT)
-        node.set_next(self._sll._head)
-        self._sll.add(node)
-        FadeOut(node)
+    def _add_node_and_animate(fn):
+        def inner(self, *args, **kwargs):
+            self._node = self._add_node(*args, **kwargs)
+            fn(self, *args, **kwargs)
+            return self._create_animation()
+        return inner
 
-        def update_sll(mobject, alpha):
-            node.fade(1 - alpha)
+    #################
+    # One animation #
+    #################
+    @_add_node_and_animate
+    def all_together(self, data: Any) -> Animation:
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+                'pointer_to_next': self._node._pointer_to_next,
+                'head_pointer': self._sll._head_pointer,
+                'sll': self._sll
+            }
+        }
+    
+    ##################
+    # Two animations #
+    ##################
+    @_add_node_and_animate
+    def node_then_everything_else(self, data: Any) -> Animation:
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+            },
+            2: {
+                'pointer_to_next': self._node._pointer_to_next,
+                'head_pointer': self._sll._head_pointer,
+                'sll': self._sll
+            }
+        }
 
-        self._sll._head = node
+    @_add_node_and_animate
+    def node_and_pointer_then_everything_else(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+                'pointer_to_next': self._node._pointer_to_next,
+            },
+            2: {
+                'head_pointer': self._sll._head_pointer,
+                'sll': self._sll
+            }
+        }
 
-        self._sll._nodes.insert(0, node)
+    @_add_node_and_animate
+    def node_and_pointer_and_trav_then_center(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+                'pointer_to_next': self._node._pointer_to_next,
+                'head_pointer': self._sll._head_pointer
+            },
+            2: {
+                'sll': self._sll
+            }
+        }
 
-        positioned_node = self._sll.copy().move_to([0, 0, 0])._nodes[0]
+    ####################
+    # Three animations #
+    ####################
+    @_add_node_and_animate
+    def node_then_pointer_then_trav_and_center(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+            },
+            2: {
+                'pointer_to_next': self._node._pointer_to_next
+            },
+            3: {
+                'head_pointer': self._sll._head_pointer,
+                'sll': self._sll
+            }
+        }
 
+    @_add_node_and_animate
+    def node_and_pointer_then_trav_then_center(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container,
+                'pointer_to_next': self._node._pointer_to_next
+            },
+            2: {
+                'head_pointer': self._sll._head_pointer
+            },
+            3: {
+                'sll': self._sll
+            }
+        }
 
-        return AnimationGroup(
-            AnimationGroup(
-                self._sll.move_to_origin(),
-                UpdateFromAlphaFunc(self._sll, update_sll)
-            ),
-            self._sll._move_pointer(self._sll._head_pointer, positioned_node, self._sll._nodes[0])
-        )
+    @_add_node_and_animate
+    def node_then_pointer_and_trav_then_center(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container
+            },
+            2: {
+                'pointer_to_next': self._node._pointer_to_next,
+                'head_pointer': self._sll._head_pointer
+            },
+            3: {
+                'sll': self._sll
+            }
+        }
 
-    def two_animations(self, data):
-        node = Node(data)
-        self._sll._place_node_next_to(node, self._sll._head, LEFT)
-        node.set_next(self._sll._head)
-        self._sll.add(node)
-        FadeOut(node)
-
-        def update_sll(mobject, alpha):
-            node.fade(1 - alpha)
-
-        self._sll._head = node
-
-        self._sll._nodes.insert(0, node)
-
-        positioned_node = self._sll.copy().move_to([0, 0, 0])._nodes[0]
-
-
-        return Succession(
-            AnimationGroup(
-                self._sll.move_to_origin(),
-                UpdateFromAlphaFunc(self._sll, update_sll)
-            ),
-            self._sll._move_pointer(self._sll._head_pointer, positioned_node, self._sll._nodes[0])
-        )
-
-    def three_animations(self, data):
-        # node = self._add_first(data)
-        node = Node(data)
+    ###################
+    # Four animations #
+    ###################
+    @_add_node_and_animate
+    def node_then_pointer_then_trav_then_center(self, data: Any):
+        self._mob_anims = {
+            1: {
+                'container': self._node._container
+            },
+            2: {
+                'pointer_to_next': self._node._pointer_to_next
+            },
+            3: {
+                'head_pointer': self._sll._head_pointer
+            },
+            4: {
+                'sll': self._sll
+            }
+        }
+    
+    def _add_node(self, data: Any) -> None:
+        node = SLLNode(data)
         node.next_to(self._sll._head, LEFT, buff=1)
-        node.set_next(self._sll._head)
+        node.set_next(self._sll._nodes[0])
 
         node.add(node._pointer_to_next)
         node.add(node._container)
 
-        logger.info(self._sll.submobjects)
-
         self._sll._nodes.insert(0, node)
         self._sll.add(node)
 
         self._sll._head = node
-
-
-
-        # self._sll.move_to([0, 2, 0])
-
-        # self._sll.remove(node)
-
-        # node._container.fade(0.9)
-        # node._pointer_to_next.fade(0)
-
-        # node.remove(node._container)
-        # node.remove(node._pointer_to_next)
-
-        s = Square()
-        s._container = None
-        s._pointer_to_next = None
-
-        # return Succession(
-        #     Transform(self._sll, self._sll.copy().move_to([1, 0, 0])),
-        #     Transform(self._sll, self._sll.copy().move_to([-1, 0, 0])),
-        #     Transform(self._sll, self._sll.copy().move_to([1, 1, 0]))
-        # )
-
-        # return ThreeAnimations(node, self._sll)
-        return ThreeAnimations(self._sll, node)
-
-        sq = Square().scale(2)
-        self._sll.add(sq)
-
-        return Succession(
-            UpdateFromAlphaFunc(sq, move_square_multiple_times),
-            run_time=5
-            # sq.animate.move_to([0, 2, 0]),
-            # sq.animate.move_to([1, -1, 0]),
-            # sq.animate.move_to([-1, 0, 0]),
-            # UpdateFromAlphaFunc(node, lambda mob, alpha : mob._container.fade(1 - alpha)),
-            # UpdateFromAlphaFunc(node, lambda mob, alpha : mob._pointer_to_next.fade(1 - alpha)),
-            # node._pointer_to_next.animate.fade(0),
-            # node.animate_fade_in_container(),
-            # node.animate_fade_in_pointer(),
-            # self._sll.animate.move_to([0, 2, 0]),
-            # self._sll.animate.move_to([1, -2, 0]),
-            # Create(Circle(radius=0.01).move_to(self._sll.get_left())),
-            # self._sll._move_pointer(self._sll._head_pointer, self._sll._nodes[0], self._sll._nodes[0]),
-            # self._sll.move_to_origin(),
-        )
-
-    def four_animations(self):
-        pass
-
-    
-    def _add_first(self, data: Any) -> Node:
-        node = Node(data)
-        self._sll._place_node_next_to(node, self._sll._head, LEFT)
-        node.set_next(self._sll._head)
-
-        self._sll._head = node
-        self._sll._nodes.insert(0, node)
-        self._sll.add(node)
         return node
+    
+    def _create_animation(self):
+        if self._node is None or self._mob_anims is None:
+            raise RuntimeError('Make node or mob_anims has not been set yet!')
+        
+        return _AddToFront(
+            sll=self._sll,
+            node=self._node,
+            mob_anims=self._mob_anims
+        )
