@@ -1,13 +1,16 @@
 import math
-import inspect
 
 from typing import Iterable, Any
 
-from ..nodes.singly_linked_list_node import SLLNode as Node
+from ..nodes.singly_linked_list_node import SLLNode
 from ..pointers.pointer import Pointer
 from ..edges.singly_directed_edge import SinglyDirectedEdge
-from data_structures.singly_linked_list.add_first import AddFirst
-from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, Circle, Create, Transform, ReplacementTransform, TransformMatchingShapes, VGroup, ArcBetweenPoints, Wait
+from animations.singly_linked_list.add_first import AddFirst
+from animations.singly_linked_list.add_last import AddLast
+from animations.singly_linked_list.remove_first import RemoveFirst
+from animations.singly_linked_list.remove_last import RemoveLast
+from animations.singly_linked_list.insert import Insert
+from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, VGroup
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
@@ -27,6 +30,10 @@ class SinglyLinkedList(VMobject):
         self._tail = None
 
         self._add_first = AddFirst(self)
+        self._insert = Insert(self)
+        self._add_last = AddLast(self)
+        self._remove_first = RemoveFirst(self)
+        self._remove_last = RemoveLast(self)
 
         if len(elements) == 0:
             raise AttributeError('Linked List cannot have zero elements')
@@ -34,14 +41,14 @@ class SinglyLinkedList(VMobject):
         for i in range (1, len(elements)):
             prev = None
             if i == 1:
-                prev = Node(elements[i - 1])
+                prev = SLLNode(elements[i - 1])
                 self._head = prev
                 self._nodes.append(prev)
                 self.add(prev)
             else:
                 prev = self._nodes[i - 1]
 
-            curr = Node(elements[i])
+            curr = SLLNode(elements[i])
 
             self._place_node_next_to(curr, prev, RIGHT)
             prev.set_next(curr)
@@ -52,17 +59,31 @@ class SinglyLinkedList(VMobject):
             self._nodes.append(curr)
             self.add(curr)
 
-        self._head_pointer = Pointer(self._head, self, 'head', DOWN)
-        self._tail_pointer = None
+        self.head_pointer = Pointer(self._head, self, 'head', DOWN)
+        self.tail_pointer = None
         if len(elements) == 1:
-            self._tail_pointer = Pointer(self._tail, self, 'tail', UP)
+            self.tail_pointer = Pointer(self._tail, self, 'tail', UP)
         elif len(elements) > 1:
-            self._tail_pointer = Pointer(self._tail, self, 'tail', DOWN)
+            self.tail_pointer = Pointer(self._tail, self, 'tail', DOWN)
 
-        self.add(self._head_pointer)
-        self.add(self._tail_pointer)
+        self.add(self.head_pointer)
+        self.add(self.tail_pointer)
 
         self.move_to([0, 0, 0])
+
+    def __getitem__(self, index: int) -> SLLNode:
+        if index < 0:
+            raise IndexError(f'Index {index} is out of bounds for length {len(self)}')
+        return self._nodes[index]
+    
+    def __setitem__(self, index: int, value: SLLNode) -> None:
+        self._nodes[index] = value
+
+    def __iter__(self):
+        return self._nodes.__iter__()
+    
+    def __len__(self):
+        return len(self._nodes)
 
     def ensure_submobjects_added(func):
         '''Ensures all nodes in linked list are added to the VMobject.
@@ -108,7 +129,7 @@ class SinglyLinkedList(VMobject):
 
     # TODO: Clean up!
     @ensure_submobjects_added
-    def add_last(self, data: Any, num_animations: int):
+    def add_last(self, data: Any):
         '''Adds a node to the end of the linked list.
 
         Note any side effects or similar things here.
@@ -128,34 +149,7 @@ class SinglyLinkedList(VMobject):
                 If 2 animations is specified, then the animations
                 will be returned within a Succession.
         '''
-        node = Node(data)
-        self._place_node_next_to(node, self._tail)
-        self._tail.set_next(node)
-        self.add(node)
-        FadeOut(node)
-
-        self._nodes.append(node)
-        self._tail = node
-
-        def update_sll(mobject, alpha):
-            self._nodes[len(self._nodes) - 2]._pointer_to_next.fade(1 - alpha)
-            node.fade(1 - alpha)
-
-        AnimationTiming = None
-        if num_animations == 1:
-            AnimationTiming = AnimationGroup
-        elif num_animations == 2:
-            AnimationTiming = Succession
-        else:
-            raise NotImplementedError()
-
-        positioned_node = self.copy().move_to([0, 0, 0])._nodes[-1]
-
-        return AnimationTiming(AnimationGroup(
-            self.move_to_origin(),
-            UpdateFromAlphaFunc(self, update_sll)
-        ),
-        self._move_pointer(self._tail_pointer, positioned_node, self._nodes[-1]))
+        return self._add_last.node_then_pointer_then_trav_then_center(data)
 
     @ensure_submobjects_added
     def prepend(self, data: Any, num_animations: int):
@@ -187,13 +181,22 @@ class SinglyLinkedList(VMobject):
 
     @ensure_submobjects_added
     def insert(self, index: int, data: Any):
+        return self._insert.one_by_one(
+            index=index,
+            data=data,
+            aligned=False,
+            trav_displayed=False,
+            prev_node_pointer_is_first=False,
+            trav_position='start'
+        )
+        return self._insert.one_by_one_trav_start(index, data)
         if index < 0 or index >= len(self._nodes):
             raise IndexError(f'Index {index} is out of bounds for bounds [0, {len(self._nodes)})')
 
         if index == 0: return self.add_first(data)
         if index == len(self._nodes) - 1: return self.add_last(data)
 
-        trav = Pointer(self._head, self, 'trav', direction=self._head_pointer.opposite_of_direction())
+        trav = Pointer(self._head, self, 'trav', direction=self.head_pointer.opposite_of_direction())
 
         move_trav_animations = []
         for i, node in enumerate(self._nodes):
@@ -205,7 +208,7 @@ class SinglyLinkedList(VMobject):
                 break
 
         prev_node = self._nodes[index - 1]
-        new_node = Node(data)
+        new_node = SLLNode(data)
         # FIXME: Hardcoded relative positioning DOWN
         new_node.next_to(self._nodes[index]._container, DOWN)
         new_node.set_next(self._nodes[index])
@@ -229,7 +232,7 @@ class SinglyLinkedList(VMobject):
         new_node.save_state()
         self.save_state()
         trav.save_state()
-        self._tail_pointer.save_state()
+        self.tail_pointer.save_state()
 
         self._nodes.insert(index, new_node)
 
@@ -259,8 +262,8 @@ class SinglyLinkedList(VMobject):
                 if i == index - 1:
                     break
 
-            self._tail_pointer.restore()
-            self._tail_pointer.shift(RIGHT * shift_left_value * alpha)
+            self.tail_pointer.restore()
+            self.tail_pointer.shift(RIGHT * shift_left_value * alpha)
             def rotate_start():
                 start, _ = new_node._pointer_to_next.get_start_and_end()
                 curr_x = start[0]
@@ -315,7 +318,7 @@ class SinglyLinkedList(VMobject):
         )
 
     @ensure_submobjects_added
-    def remove_last(self, num_animations: int):
+    def remove_last(self):
         '''Removes the last node from the linked list.
 
         Note any side effects or similar things here.
@@ -334,12 +337,13 @@ class SinglyLinkedList(VMobject):
                 If 2 animations is specified, then the animations
                 will be returned within a Succession.
         '''
+        return self._remove_last.all_together()
         tail_temp = self._tail
 
         self_copy = self.copy()
         self_copy.remove(self_copy._nodes[-1])
         self_copy._nodes[-2].remove(self_copy._nodes[-2]._pointer_to_next)
-        self_copy.remove(self_copy._tail_pointer)
+        self_copy.remove(self_copy.tail_pointer)
         self_copy.move_to([0, 0, 0])
         shift_left_value = self.get_left()[0] - self_copy.get_left()[0]
 
@@ -367,10 +371,10 @@ class SinglyLinkedList(VMobject):
             self.animate.shift(LEFT * shift_left_value),
             UpdateFromAlphaFunc(self, update_sll)
         ),
-        self._move_pointer(self._tail_pointer, self_copy._nodes[-2], self._tail))
+        self._move_pointer(self.tail_pointer, self_copy._nodes[-2], self._tail))
 
     @ensure_submobjects_added
-    def remove_first(self, num_animations: int):
+    def remove_first(self):
         '''Removes the first node from the linked list.
 
         Note any side effects or similar things here.
@@ -389,12 +393,13 @@ class SinglyLinkedList(VMobject):
                 If 2 animations is specified, then the animations
                 will be returned within a Succession.
         '''
+        return self._remove_first.all_together()
         head_temp = self._head
 
         self_copy = self.copy()
         self_copy.remove(self_copy._nodes[0])
         self_copy._nodes[0].remove(self_copy._nodes[0]._pointer_to_next)
-        self_copy.remove(self_copy._head_pointer)
+        self_copy.remove(self_copy.head_pointer)
         self_copy.move_to([0, 0, 0])
         shift_left_value = self.get_right()[0] - self_copy.get_right()[0]
         logger.info(shift_left_value)
@@ -428,7 +433,7 @@ class SinglyLinkedList(VMobject):
             self.animate.shift(LEFT * shift_left_value),
             UpdateFromAlphaFunc(self, update_sll)
         ),
-        self._move_pointer(self._head_pointer, self_copy._nodes[1], self._head))
+        self._move_pointer(self.head_pointer, self_copy._nodes[1], self._head))
 
     @ensure_submobjects_added
     def remove_at_index(self, index: int):
@@ -440,8 +445,8 @@ class SinglyLinkedList(VMobject):
 
         original_prev_removed_node_next_pointer_copy = self._nodes[index - 1]._pointer_to_next.copy()
 
-        p1 = Pointer(self._head, self, 'p1', direction=self._head_pointer.opposite_of_direction())
-        p2 = Pointer(self._nodes[1], self, 'p2', direction=self._head_pointer.opposite_of_direction())
+        p1 = Pointer(self._head, self, 'p1', direction=self.head_pointer.opposite_of_direction())
+        p2 = Pointer(self._nodes[1], self, 'p2', direction=self.head_pointer.opposite_of_direction())
 
         move_trav_animations = []
         for i, node in enumerate(self._nodes):
@@ -537,7 +542,7 @@ class SinglyLinkedList(VMobject):
         # shift_left_value = self._nodes[0].get_left() - self._nodes[0].get_right()
 
         curved_end = p1.node._pointer_to_next.get_start_and_end()[1]
-        sub_list_to_flatten = VGroup(*self._nodes[index:], self._tail_pointer)
+        sub_list_to_flatten = VGroup(*self._nodes[index:], self.tail_pointer)
         sub_list_to_flatten.save_state()
         self.prev_alpha = 0
         def flatten_list(mobject, alpha):
@@ -640,14 +645,14 @@ class SinglyLinkedList(VMobject):
         # animations.append(self.move_to_origin())
         return animations
 
-    def fade_out_node(self, node: Node) -> None:
+    def fade_out_node(self, node: SLLNode) -> None:
         FadeOut(node)
 
-    def fade_in_node(self, node: Node) -> None:
+    def fade_in_node(self, node: SLLNode) -> None:
         FadeIn(node)
 
-    def animate_fade_out_node(self, node: Node) -> Animation:
+    def animate_fade_out_node(self, node: SLLNode) -> Animation:
         return FadeOut(node)
 
-    def animate_fade_in_node(self, node: Node) -> Animation:
+    def animate_fade_in_node(self, node: SLLNode) -> Animation:
         return FadeIn(node)

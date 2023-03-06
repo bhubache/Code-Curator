@@ -117,8 +117,10 @@ class TestScene(Scene):
         from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
         self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
         self.play(FadeIn(self.sll))
-        self.play(self.sll.add_first(0))
-        self.play(self.sll.add_first(0))
+        self.play(self.sll.remove_last())
+        # self.play(self.sll.remove_first())
+        # self.play(self.sll.insert(3, -1))
+        # self.play(self.sll.add_first(0))
         # self.play(self.sll.add_first(1000, 1))
         # self.play(self.sll.add_last(7, 1))
         # self.play(self.sll.insert(3, 1111))

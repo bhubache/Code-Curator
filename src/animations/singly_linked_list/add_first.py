@@ -1,8 +1,9 @@
 from typing import Any
 
 # from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
-from ..nodes.singly_linked_list_node import SLLNode
-from ..edges.singly_directed_edge import SinglyDirectedEdge
+from animations.singly_linked_list.base_sll_animation import BaseSLLAnimation
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import LEFT, Animation, linear, smooth, Scene
 
 from custom_logging.custom_logger import CustomLogger
@@ -102,23 +103,28 @@ class _AddToFront(Animation):
         **kwargs
     ):
         run_time = len(mob_anims)
-        super().__init__(sll, run_time=run_time, rate_func=rate_func, **kwargs)
+        super().__init__(
+            sll,
+            run_time=run_time,
+            rate_func=rate_func,
+            **kwargs
+        )
         self.sll = sll
         self.node = node
         self.mob_groups = mob_anims
         self.num_animations = len(self.mob_groups)
-        self.alpha_thresholds = {num: num / self.num_animations for num in mob_anims}
+        self.alpha_thresholds = {num: num / self.num_animations for num in self.mob_groups}
         self.alpha_step_size = 1 / self.num_animations
         
     def begin(self) -> None:
         self.sll.save_state()
         self.node._pointer_to_next.save_state()
-        self.sll._head_pointer.save_state()
+        self.sll.head_pointer.save_state()
 
         self.original_sll_location = self.sll.get_center()
 
-        self.node._container.set_opacity(0)
-        self.node._pointer_to_next.set_opacity(0)
+        self.node.container.set_opacity(0)
+        self.node.pointer_to_next.set_opacity(0)
         super().begin()
 
     def interpolate_mobject(self, alpha: float) -> None:
@@ -240,7 +246,7 @@ class AddFirst:
             1: {
                 'container': self._node._container,
                 'pointer_to_next': self._node._pointer_to_next,
-                'head_pointer': self._sll._head_pointer,
+                'head_pointer': self._sll.head_pointer,
                 'sll': self._sll
             }
         }
@@ -256,7 +262,7 @@ class AddFirst:
             },
             2: {
                 'pointer_to_next': self._node._pointer_to_next,
-                'head_pointer': self._sll._head_pointer,
+                'head_pointer': self._sll.head_pointer,
                 'sll': self._sll
             }
         }
@@ -269,7 +275,7 @@ class AddFirst:
                 'pointer_to_next': self._node._pointer_to_next,
             },
             2: {
-                'head_pointer': self._sll._head_pointer,
+                'head_pointer': self._sll.head_pointer,
                 'sll': self._sll
             }
         }
@@ -280,7 +286,7 @@ class AddFirst:
             1: {
                 'container': self._node._container,
                 'pointer_to_next': self._node._pointer_to_next,
-                'head_pointer': self._sll._head_pointer
+                'head_pointer': self._sll.head_pointer
             },
             2: {
                 'sll': self._sll
@@ -300,7 +306,7 @@ class AddFirst:
                 'pointer_to_next': self._node._pointer_to_next
             },
             3: {
-                'head_pointer': self._sll._head_pointer,
+                'head_pointer': self._sll.head_pointer,
                 'sll': self._sll
             }
         }
@@ -313,7 +319,7 @@ class AddFirst:
                 'pointer_to_next': self._node._pointer_to_next
             },
             2: {
-                'head_pointer': self._sll._head_pointer
+                'head_pointer': self._sll.head_pointer
             },
             3: {
                 'sll': self._sll
@@ -328,7 +334,7 @@ class AddFirst:
             },
             2: {
                 'pointer_to_next': self._node._pointer_to_next,
-                'head_pointer': self._sll._head_pointer
+                'head_pointer': self._sll.head_pointer
             },
             3: {
                 'sll': self._sll
@@ -348,7 +354,7 @@ class AddFirst:
                 'pointer_to_next': self._node._pointer_to_next
             },
             3: {
-                'head_pointer': self._sll._head_pointer
+                'head_pointer': self._sll.head_pointer
             },
             4: {
                 'sll': self._sll

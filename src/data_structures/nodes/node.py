@@ -57,14 +57,6 @@ class Node(VMobject):
         self._container._is_visible = True
         FadeIn(self._container)
 
-    # def fade_out(self):
-    #     FadeOut(self)
-
-    # def fade_in(self):
-    #     FadeIn(self)
-
-    # def animate_fade_out(self):
-    #     return FadeOut(self)
-
-    # def animate_fade_in(self):
-    #     return FadeIn(self)
+    @property
+    def container(self):
+        return self._container

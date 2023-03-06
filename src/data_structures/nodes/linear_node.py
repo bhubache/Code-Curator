@@ -69,3 +69,7 @@ class LinearNode(Node):
 
     def get_next_pointer_left(self):
         return self._pointer_to_next.get_left()
+    
+    @property
+    def pointer_to_next(self):
+        return self._pointer_to_next
