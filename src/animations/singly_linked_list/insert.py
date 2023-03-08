@@ -419,25 +419,25 @@ class Insert:
         value = {'mobject': self._sll_group_to_shift}
         self._add_to_mob_anims(group_num, key, value)
 
-    def _set_add_to_front(self, add_to_front: bool) -> None:
-        self._anim_pre_reqs['add_to_front'] = add_to_front
-        self._anim_pre_reqs['add_to_back'] = not add_to_front
+    # def _set_add_to_front(self, add_to_front: bool) -> None:
+    #     self._anim_pre_reqs['add_to_front'] = add_to_front
+    #     self._anim_pre_reqs['add_to_back'] = not add_to_front
 
-    def _set_add_to_back(self, add_to_back: bool) -> None:
-        self._anim_pre_reqs['add_to_back'] = add_to_back
-        self._anim_pre_reqs['add_to_front'] = not add_to_back
+    # def _set_add_to_back(self, add_to_back: bool) -> None:
+    #     self._anim_pre_reqs['add_to_back'] = add_to_back
+    #     self._anim_pre_reqs['add_to_front'] = not add_to_back
 
     def _set_trav_conditions(self, *, index: int, aligned: bool, trav_displayed: bool, trav_position: str, **kwargs) -> None:
         self._set_aligned(aligned)
-        if index == 0:
-            self._set_add_to_front(True)
+        # if index == 0:
+        #     self._set_add_to_front(True)
         if (aligned and (index == 0 or index == len(self._sll))) \
         or not aligned:
             self._set_trav_display(trav_displayed)
             self._set_trav_position(trav_position)
 
-            if index == 0:
-                self._remove_prev_node_pointer_to_next_move()
+            # if index == 0:
+            #     self._remove_prev_node_pointer_to_next_move()
         else:
             self._set_trav_display(False)
 
