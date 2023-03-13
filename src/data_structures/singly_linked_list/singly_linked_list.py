@@ -62,13 +62,6 @@ class SinglyLinkedList(VMobject):
         self._saved_states = {}
         self._animation_package = AnimationPackage(self)
 
-        self._add_first = AddFirst(self)
-        self._insert = Insert(self)
-        self._add_last = AddLast(self)
-        self._remove_first = RemoveFirst(self)
-        self._remove_last = RemoveLast(self)
-        self._remove_at = RemoveAt(self)
-
         if len(elements) == 0:
             raise AttributeError('Linked List cannot have zero elements')
 
@@ -190,46 +183,46 @@ class SinglyLinkedList(VMobject):
     # The following animations add a node to the front of the linked list #
     #######################################################################
     def add_first_all_together(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.all_together(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).all_together(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_and_pointer_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_and_pointer_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_and_pointer_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_and_pointer_and_trav_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_and_pointer_and_trav_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_and_pointer_and_trav_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_and_trav_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_and_trav_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_and_trav_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_and_center_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_and_center_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_and_center_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_pointer_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_pointer_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_pointer_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_trav_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_trav_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_trav_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_center_then_rest(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_center_then_rest(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_center_then_rest(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_pointer_then_trav_then_center(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_pointer_then_trav_then_center(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_pointer_then_trav_then_center(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_center_then_pointer_then_trav(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_center_then_pointer_then_trav(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_center_then_pointer_then_trav(self._add_node(0, data), pointer_animation_type)
     
     def add_first_node_then_center_then_trav_then_pointer(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.node_then_center_then_trav_then_pointer(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).node_then_center_then_trav_then_pointer(self._add_node(0, data), pointer_animation_type)
     
     def add_first_center_then_node_then_pointer_then_trav(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.center_then_node_then_pointer_then_trav(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).center_then_node_then_pointer_then_trav(self._add_node(0, data), pointer_animation_type)
     
     def add_first_center_then_node_then_trav_then_pointer(self, data: Any, pointer_animation_type: str = 'grow') -> PackageAnimation:
-        return self._add_first.center_then_node_then_trav_then_pointer(self._add_node(0, data), pointer_animation_type)
+        return AddFirst(self).center_then_node_then_trav_then_pointer(self._add_node(0, data), pointer_animation_type)
     
     #############################################################
     # The following animations insert a node in the linked list #
@@ -246,9 +239,7 @@ class SinglyLinkedList(VMobject):
     
     # TODO: Figure out using the same instantiation of Insert makes this incredibly slow!!!
     def insert_all_together(self, index: int, data: Any, pointer_animation_type: str = 'fade'):
-        logger.info(id(self))
-        insert_obj = Insert(self)
-        return insert_obj.all_together(
+        return Insert(self).all_together(
             index,
             self._add_node(index, data),
             pointer_animation_type=pointer_animation_type,

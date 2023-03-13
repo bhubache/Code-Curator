@@ -1,7 +1,7 @@
 from typing import Any
 import math
 
-from animations.singly_linked_list.base_sll_animation import BaseSLLAnimation
+from .base_sll_packager import BaseSLLPackager
 from data_structures.singly_linked_list import singly_linked_list
 from animations.singly_linked_list.add_first import AddFirst
 from data_structures.nodes.singly_linked_list_node import SLLNode
@@ -27,204 +27,197 @@ from manim import Animation, linear, smooth, Scene, LEFT, UP, DOWN, RIGHT, VGrou
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-class _Insert(BaseSLLAnimation):
-    def __init__(
-        self,
-        sll,
-        index:     int,
-        node:      SLLNode,
-        prev_node_pointer_to_next = None,
-        trav = None,
-        sll_group_to_shift = None,
-        mob_anims: dict = None,
-        run_time:  int = 1,
-        rate_func = linear,
-        **kwargs
-    ):
-        # import json
-        # print(json.dumps(mob_anims, indent=4, default=str))
-        run_time = len(mob_anims)
-        super().__init__(
-            sll,
-            index=index,
-            node=node,
-            run_time=run_time,
-            mob_groups=mob_anims,
-            rate_func=rate_func,
-            **kwargs
-        )
-        self.prev_node_pointer_to_next = prev_node_pointer_to_next
-        self.trav = trav
-        self.sll_group_to_shift = sll_group_to_shift
-        self.container = self.node.container
-        self.pointer_to_next = self.node.pointer_to_next
+# class _Insert:
+#     def __init__(
+#         self,
+#         sll,
+#         index:     int,
+#         node:      SLLNode,
+#         prev_node_pointer_to_next = None,
+#         trav = None,
+#         sll_group_to_shift = None,
+#         mob_anims: dict = None,
+#         run_time:  int = 1,
+#         rate_func = linear,
+#         **kwargs
+#     ):
+#         # import json
+#         # print(json.dumps(mob_anims, indent=4, default=str))
+#         run_time = len(mob_anims)
+#         super().__init__(
+#             sll,
+#             index=index,
+#             node=node,
+#             run_time=run_time,
+#             mob_groups=mob_anims,
+#             rate_func=rate_func,
+#             **kwargs
+#         )
+#         self.prev_node_pointer_to_next = prev_node_pointer_to_next
+#         self.trav = trav
+#         self.sll_group_to_shift = sll_group_to_shift
+#         self.container = self.node.container
+#         self.pointer_to_next = self.node.pointer_to_next
 
-    def begin(self):
-        self.sll.save_state()
-        self.node.save_state()
-        self.node.pointer_to_next.save_state()
-        self.sll.head_pointer.save_state()
-        self._save_state_prev_node_pointer_to_next()
-        self.sll_group_to_shift.save_state()
-        self.trav.save_state()
+#     def begin(self):
+#         self.sll.save_state()
+#         self.node.save_state()
+#         self.node.pointer_to_next.save_state()
+#         self.sll.head_pointer.save_state()
+#         self._save_state_prev_node_pointer_to_next()
+#         self.sll_group_to_shift.save_state()
+#         self.trav.save_state()
 
-        self.final_list_copy = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll])
-        self.shift_left_value = self.sll.get_left()[0] - self.final_list_copy.get_left()[0]
+#         self.final_list_copy = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll])
+#         self.shift_left_value = self.sll.get_left()[0] - self.final_list_copy.get_left()[0]
 
-        self.distance_to_shift = abs(self.sll[0].get_left() - self.sll[1].get_left())
-        self.distance_up = None
-        if self.index == 0:
-            self.distance_up = abs(self.node.get_container_top() - self.sll[1].get_container_top())
-        else:
-            self.distance_up = abs(self.node.get_container_top() - self.sll[0].get_container_top())
+#         self.distance_to_shift = abs(self.sll[0].get_left() - self.sll[1].get_left())
+#         self.distance_up = None
+#         if self.index == 0:
+#             self.distance_up = abs(self.node.get_container_top() - self.sll[1].get_container_top())
+#         else:
+#             self.distance_up = abs(self.node.get_container_top() - self.sll[0].get_container_top())
 
-        self.original_sll_location = self.sll.get_center()
+#         self.original_sll_location = self.sll.get_center()
 
-        self.node.container.set_opacity(0)
-        self.node.pointer_to_next.set_opacity(0)
-        super().begin()
+#         self.node.container.set_opacity(0)
+#         self.node.pointer_to_next.set_opacity(0)
+#         super().begin()
 
-    def interpolate_mobject(self, alpha: float):
-        for animation_num, mob_group in self.mob_groups.items():
-            for animation_str, mob_info in mob_group.items():
-                normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
+#     def interpolate_mobject(self, alpha: float):
+#         for animation_num, mob_group in self.mob_groups.items():
+#             for animation_str, mob_info in mob_group.items():
+#                 normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
 
-                if normalized_alpha <= 0 or normalized_alpha > 1:
-                    continue
+#                 if normalized_alpha <= 0 or normalized_alpha > 1:
+#                     continue
 
-                mobject = mob_info['mobject']
+#                 mobject = mob_info['mobject']
 
-                if animation_str == 'trav_fade_in':
-                    self.trav.set_opacity(normalized_alpha)
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav.save_state()
-                    # self.trav.save_state()
-                elif animation_str == 'trave_fade_out':
-                    self.trav.set_opacity(1 - normalized_alpha)
-                elif animation_str == 'trav_move':
-                    self.trav.restore()
-                    next_node = mob_info['next_node']
-                    self.trav.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav.save_state()
-                elif animation_str == 'container_fade_in':
-                    self.container.set_stroke(opacity=normalized_alpha)
-                    for container_sub in self.container.submobjects:
-                        container_sub.set_opacity(normalized_alpha)
-                elif animation_str == 'pointer_to_next_fade_in':
-                    self.pointer_to_next.set_opacity(normalized_alpha)
-                elif animation_str == 'prev_node_pointer_to_next_move':
-                    self.prev_node_pointer_to_next.restore()
-                    original_start, original_end = self.prev_node_pointer_to_next.get_start_and_end()
-                    final_end = original_end + ((self.node.get_container_left() - original_end) * smooth(normalized_alpha))
-                    self.prev_node_pointer_to_next.become(
-                        SinglyDirectedEdge(
-                            start=original_start,
-                            end=final_end
-                        )
-                    )
-                elif animation_str == 'shift_sub_list':
-                    self.sll.restore()
-                    self.node.restore()
-                    self.sll_group_to_shift.restore()
-                    self.sll.shift(LEFT * self.shift_left_value * smooth(alpha))
-                    self.sll_group_to_shift.shift(RIGHT * self.distance_to_shift * smooth(alpha))
-                elif animation_str == 'flatten':
-                    self.sll.restore()
-                    self.node.restore()
-                    self.sll_group_to_shift.restore()
-                    self.trav.restore()
+#                 if animation_str == 'trav_fade_in':
+#                     self.trav.set_opacity(normalized_alpha)
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav.save_state()
+#                     # self.trav.save_state()
+#                 elif animation_str == 'trave_fade_out':
+#                     self.trav.set_opacity(1 - normalized_alpha)
+#                 elif animation_str == 'trav_move':
+#                     self.trav.restore()
+#                     next_node = mob_info['next_node']
+#                     self.trav.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav.save_state()
+#                 elif animation_str == 'container_fade_in':
+#                     self.container.set_stroke(opacity=normalized_alpha)
+#                     for container_sub in self.container.submobjects:
+#                         container_sub.set_opacity(normalized_alpha)
+#                 elif animation_str == 'pointer_to_next_fade_in':
+#                     self.pointer_to_next.set_opacity(normalized_alpha)
+#                 elif animation_str == 'prev_node_pointer_to_next_move':
+#                     self.prev_node_pointer_to_next.restore()
+#                     original_start, original_end = self.prev_node_pointer_to_next.get_start_and_end()
+#                     final_end = original_end + ((self.node.get_container_left() - original_end) * smooth(normalized_alpha))
+#                     self.prev_node_pointer_to_next.become(
+#                         SinglyDirectedEdge(
+#                             start=original_start,
+#                             end=final_end
+#                         )
+#                     )
+#                 elif animation_str == 'shift_sub_list':
+#                     self.sll.restore()
+#                     self.node.restore()
+#                     self.sll_group_to_shift.restore()
+#                     self.sll.shift(LEFT * self.shift_left_value * smooth(alpha))
+#                     self.sll_group_to_shift.shift(RIGHT * self.distance_to_shift * smooth(alpha))
+#                 elif animation_str == 'flatten':
+#                     self.sll.restore()
+#                     self.node.restore()
+#                     self.sll_group_to_shift.restore()
+#                     self.trav.restore()
                     
-                    def flatten_list(self, alpha):
-                        # self.sll.restore()
-                        if self.index == 0:
-                            self.sll.shift(RIGHT * self.shift_left_value * smooth(alpha))
-                        else:
-                            self.sll.shift(LEFT * self.shift_left_value * smooth(alpha))
+#                     def flatten_list(self, alpha):
+#                         # self.sll.restore()
+#                         if self.index == 0:
+#                             self.sll.shift(RIGHT * self.shift_left_value * smooth(alpha))
+#                         else:
+#                             self.sll.shift(LEFT * self.shift_left_value * smooth(alpha))
 
-                        # self.node.restore()
-                        if self.index == 0:
-                            self.node.shift(LEFT * self.shift_left_value * smooth(alpha) * 2)
-                        self.node.shift(UP * self.distance_up * smooth(alpha))
+#                         # self.node.restore()
+#                         if self.index == 0:
+#                             self.node.shift(LEFT * self.shift_left_value * smooth(alpha) * 2)
+#                         self.node.shift(UP * self.distance_up * smooth(alpha))
 
-                        # self.sll_group_to_shift.restore()
-                        # self.sll_group_to_shift.shift(LEFT * self.shift_left_value * smooth(alpha))
-                        self.sll_group_to_shift.shift(RIGHT * self.distance_to_shift * smooth(alpha))
+#                         # self.sll_group_to_shift.restore()
+#                         # self.sll_group_to_shift.shift(LEFT * self.shift_left_value * smooth(alpha))
+#                         self.sll_group_to_shift.shift(RIGHT * self.distance_to_shift * smooth(alpha))
 
-                        if self.prev_node_pointer_to_next is not None:
-                            self.prev_node_pointer_to_next.become(SinglyDirectedEdge(start=self.sll[self.index - 1].get_container_right(), end=self.sll[self.index].get_container_left()))
+#                         if self.prev_node_pointer_to_next is not None:
+#                             self.prev_node_pointer_to_next.become(SinglyDirectedEdge(start=self.sll[self.index - 1].get_container_right(), end=self.sll[self.index].get_container_left()))
 
-                        self.trav.set_opacity(1 - alpha)
+#                         self.trav.set_opacity(1 - alpha)
 
-                        def rotate_start():
-                            start, _ = self.node.pointer_to_next.get_start_and_end()
-                            curr_x = start[0]
-                            curr_y = start[1]
+#                         def rotate_start():
+#                             start, _ = self.node.pointer_to_next.get_start_and_end()
+#                             curr_x = start[0]
+#                             curr_y = start[1]
 
-                            origin_x, origin_y, _ = self.node.get_container_center()
-                            angle = -(math.pi / 2 * smooth(alpha))
-                            sine = math.sin(angle)
-                            cosine = math.cos(angle)
+#                             origin_x, origin_y, _ = self.node.get_container_center()
+#                             angle = -(math.pi / 2 * smooth(alpha))
+#                             sine = math.sin(angle)
+#                             cosine = math.cos(angle)
 
-                            new_x = origin_x + cosine * (curr_x - origin_x) - sine * (curr_y - origin_y)
-                            new_y = origin_y - sine * (curr_x - origin_x) + cosine * (curr_y - origin_y)
-                            return [new_x, new_y, 0]
+#                             new_x = origin_x + cosine * (curr_x - origin_x) - sine * (curr_y - origin_y)
+#                             new_y = origin_y - sine * (curr_x - origin_x) + cosine * (curr_y - origin_y)
+#                             return [new_x, new_y, 0]
 
-                        def rotate_end():
-                            # FIXME: Hardcoded bottom of container
-                            curr_x, curr_y, _ = self.sll[self.index + 1].get_container_bottom()
+#                         def rotate_end():
+#                             # FIXME: Hardcoded bottom of container
+#                             curr_x, curr_y, _ = self.sll[self.index + 1].get_container_bottom()
 
-                            angle = -(math.pi / 2 * smooth(alpha))
-                            sine = math.sin(angle)
-                            cosine = math.cos(angle)
+#                             angle = -(math.pi / 2 * smooth(alpha))
+#                             sine = math.sin(angle)
+#                             cosine = math.cos(angle)
 
-                            origin_x, origin_y, _ = self.sll[self.index + 1].get_container_center()
-                            curr_x = curr_x - origin_x
-                            curr_y = curr_y - origin_y
+#                             origin_x, origin_y, _ = self.sll[self.index + 1].get_container_center()
+#                             curr_x = curr_x - origin_x
+#                             curr_y = curr_y - origin_y
 
-                            new_x = curr_x * cosine - curr_y * sine
-                            new_y = curr_x * sine + curr_y * cosine
+#                             new_x = curr_x * cosine - curr_y * sine
+#                             new_y = curr_x * sine + curr_y * cosine
 
-                            new_x += origin_x
-                            new_y += origin_y
-                            return [new_x, new_y, 0]
+#                             new_x += origin_x
+#                             new_y += origin_y
+#                             return [new_x, new_y, 0]
 
-                        # Move next pointer on node being inserted
-                        # new_node_start, new_node_end = new_node._pointer_to_next.get_start_and_end()
-                        self.node.pointer_to_next.become(
-                            SinglyDirectedEdge(
-                                start=rotate_start(),
-                                end=rotate_end()
-                            )
-                        )
-                    flatten_list(self, normalized_alpha)
+#                         # Move next pointer on node being inserted
+#                         # new_node_start, new_node_end = new_node._pointer_to_next.get_start_and_end()
+#                         self.node.pointer_to_next.become(
+#                             SinglyDirectedEdge(
+#                                 start=rotate_start(),
+#                                 end=rotate_end()
+#                             )
+#                         )
+#                     flatten_list(self, normalized_alpha)
 
-    def clean_up_from_scene(self, scene: Scene = None) -> None:
-        scene.add(self.node)
-        self.node.remove(self.sll)
-        scene.remove(self.trav)
-        super().clean_up_from_scene(scene)
+#     def clean_up_from_scene(self, scene: Scene = None) -> None:
+#         scene.add(self.node)
+#         self.node.remove(self.sll)
+#         scene.remove(self.trav)
+#         super().clean_up_from_scene(scene)
 
-    def _save_state_prev_node_pointer_to_next(self):
-        if self.prev_node_pointer_to_next is not None:
-            self.prev_node_pointer_to_next.save_state()
+#     def _save_state_prev_node_pointer_to_next(self):
+#         if self.prev_node_pointer_to_next is not None:
+#             self.prev_node_pointer_to_next.save_state()
 
-    def _restore_prev_node_pointer_to_next(self):
-        if self.prev_node_pointer_to_next is not None:
-            self.prev_node_pointer_to_next.restore()
+#     def _restore_prev_node_pointer_to_next(self):
+#         if self.prev_node_pointer_to_next is not None:
+#             self.prev_node_pointer_to_next.restore()
 
 
-class Insert:
+class Insert(BaseSLLPackager):
     def __init__(self, sll):
         self._sll = sll
         self._trav = Circle().set_opacity(0)
-        # self._index = None
-        # self._prev_node_pointer_to_next = None
-        # self._inserted_node = None
-        # self._sll_group_to_shift = None
-        # self._trav = None
-        # self._anim_pre_reqs = self._get_mob_anim_template()
-        # self._mob_anims = {}
 
         self._animation_package = AnimationPackage(self._sll)
         self._fade_in_node = None
@@ -272,12 +265,10 @@ class Insert:
         else:
             self._center_sll = CenterSLL(self._sll, restore_sll_at_interpolate=True)
 
-            # FIXME: Not all insertions will be unaligned
             added_node.container.next_to(self._sll[index + 1].container, DOWN)
             added_node.pointer_to_next.become(SinglyDirectedEdge(start=self._sll[index].get_container_top(), end=self._sll[index + 1].get_container_bottom()))
             self._change_next_pointer = ChangeNextPointer(self._sll, self._sll[index - 1].pointer_to_next, added_node)
             self._flatten_list = FlattenList(self._sll, index, added_node)
-
 
         if display_trav:
             trav_starting_node = self._sll[0] if trav_position == 'start' else self._sll[index - 1]
@@ -310,7 +301,6 @@ class Insert:
         pointer_animation_type: str,
         **kwargs
     ) -> PackageAnimation:
-        logger.info(id(self._sll))
         self._animation_package.append_concurrent_animations(
             self._fade_in_node,
             self._pointer_animation,
@@ -330,8 +320,11 @@ class Insert:
         trav_position: str,
         **kwargs
     ) -> PackageAnimation:
-        self._animation_package.append_successive_animations(
+        self._animation_package.append_concurrent_animations(
             self._fade_in_node,
+            self._pointer_animation,
+            self._shift_sub_list,
+            self._center_sll
             # self._pointer_animation,
             # self._change_next_pointer,
             # self._flatten_list,

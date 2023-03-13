@@ -17,6 +17,7 @@ Ex:
 from __future__ import annotations
 import copy
 
+import pandas as pd
 from manim import Mobject, Animation, Scene
 
 from custom_logging.custom_logger import CustomLogger
@@ -124,6 +125,14 @@ class AnimationPackage:
         an sll that has all the qualities of the what their sll should like at the conclusion of 
         their subanimation group, they should be able to perform their animations correctly.
         '''
+        # Iterate through self._subanimation_lists, for all subanimations that are alone in their group
+        # or are orthogonal to all the subanimations in their group, use the successive subanimation. For
+        # subanimations that are not orthogonal in a group, they need to use the non-successive version
+        # and be given the target mobject at the conclusion of their group's subanimations.
+        from pprint import pprint
+        pprint(self._subanimation_lists)
+        df_subanimation_orth = pd.read_csv(r'C:\Users\brand\Documents\ManimCS\src\animations\singly_linked_list\subanimations\subanimation_orthogonality.csv')
+        print(df_subanimation_orth)
         # Same subanimations as self but every subanimation is successive
         successive_package = self._convert_to_successive_subanimations()
         successive_group_index = 0

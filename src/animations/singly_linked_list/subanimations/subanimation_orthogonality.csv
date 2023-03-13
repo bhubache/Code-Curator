@@ -1,4 +1,4 @@
-,1,ChangeNextPointer,FadeInContainer,FadeInPointer,FadeInTrav,FadeOutContainer,FadeOutPointer,FadeOutTrav,FlattenList,GrowPointer,MoveTrav,1
+AnimationName,1,ChangeNextPointer,FadeInContainer,FadeInPointer,FadeInTrav,FadeOutContainer,FadeOutPointer,FadeOutTrav,FlattenList,GrowPointer,MoveTrav,ShiftSubList
 CenterSLL,1,1,,,,,,,1,,1,1
 ChangeNextPointer,-,1,,,,,,,1,1,,1
 FadeInContainer,-,-,1,,,1

@@ -1,6 +1,6 @@
 from typing import Any
 
-from .base_sll_animation import BaseSLLAnimation
+from .base_sll_packager import BaseSLLPackager
 from data_structures.nodes.singly_linked_list_node import SLLNode
 from data_structures.pointers.pointer import Pointer
 from data_structures.singly_linked_list import singly_linked_list
@@ -10,226 +10,226 @@ from manim import linear, smooth, VGroup, Animation, Circle, UP, LEFT, RIGHT, Sc
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-class _RemoveAt(BaseSLLAnimation):
-    def __init__(
-        self,
-        sll,
-        index:     int,
-        node:      SLLNode,
-        prev_node_pointer_to_next = None,
-        trav_first = None,
-        trav_second = None,
-        sll_group_to_shift = None,
-        mob_anims: dict = None,
-        run_time:  int = 1,
-        rate_func = linear,
-        **kwargs
-    ):
-        run_time = len(mob_anims)
-        print(run_time)
-        super().__init__(
-            sll,
-            index=index,
-            node=node,
-            run_time=run_time,
-            mob_groups=mob_anims,
-            rate_func=rate_func,
-            **kwargs
-        )
-        self.group_to_shift = VGroup(*[node for i, node in enumerate(self.sll) if i >= self.index], self.sll.tail_pointer)
-        self.prev_node_pointer_to_next = prev_node_pointer_to_next
-        self.trav_first = trav_first
-        self.trav_second = trav_second
-        self.sll_group_to_shift = sll_group_to_shift
-        self.container = self.node.container
-        self.pointer_to_next = self.node.pointer_to_next
+# class _RemoveAt(BaseSLLAnimation):
+#     def __init__(
+#         self,
+#         sll,
+#         index:     int,
+#         node:      SLLNode,
+#         prev_node_pointer_to_next = None,
+#         trav_first = None,
+#         trav_second = None,
+#         sll_group_to_shift = None,
+#         mob_anims: dict = None,
+#         run_time:  int = 1,
+#         rate_func = linear,
+#         **kwargs
+#     ):
+#         run_time = len(mob_anims)
+#         print(run_time)
+#         super().__init__(
+#             sll,
+#             index=index,
+#             node=node,
+#             run_time=run_time,
+#             mob_groups=mob_anims,
+#             rate_func=rate_func,
+#             **kwargs
+#         )
+#         self.group_to_shift = VGroup(*[node for i, node in enumerate(self.sll) if i >= self.index], self.sll.tail_pointer)
+#         self.prev_node_pointer_to_next = prev_node_pointer_to_next
+#         self.trav_first = trav_first
+#         self.trav_second = trav_second
+#         self.sll_group_to_shift = sll_group_to_shift
+#         self.container = self.node.container
+#         self.pointer_to_next = self.node.pointer_to_next
 
-        self.new_sll = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll._nodes])
-        self.shift_left_value = self.sll.get_left()[0] - self.new_sll.get_left()[0]
-        self.original_prev_removed_node_next_pointer_copy = self.sll._nodes[index - 1].pointer_to_next.copy()
+#         self.new_sll = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll._nodes])
+#         self.shift_left_value = self.sll.get_left()[0] - self.new_sll.get_left()[0]
+#         self.original_prev_removed_node_next_pointer_copy = self.sll._nodes[index - 1].pointer_to_next.copy()
 
-    def begin(self):
-        import json
-        # print(json.dumps(self.mob_groups, indent=4, default=str))
-        self.sll.save_state()
-        self.node.save_state()
-        self.node.pointer_to_next.save_state()
-        self.sll.head_pointer.save_state()
-        self._save_state_prev_node_pointer_to_next()
-        self.sll_group_to_shift.save_state()
-        self.trav_first.save_state()
-        self.trav_second.save_state()
-        self.group_to_shift.save_state()
+#     def begin(self):
+#         import json
+#         # print(json.dumps(self.mob_groups, indent=4, default=str))
+#         self.sll.save_state()
+#         self.node.save_state()
+#         self.node.pointer_to_next.save_state()
+#         self.sll.head_pointer.save_state()
+#         self._save_state_prev_node_pointer_to_next()
+#         self.sll_group_to_shift.save_state()
+#         self.trav_first.save_state()
+#         self.trav_second.save_state()
+#         self.group_to_shift.save_state()
 
-        self.final_list_copy = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll])
-        self.shift_left_value = self.sll.get_left()[0] - self.final_list_copy.get_left()[0]
-        self.final_list_copy.save_state()
+#         self.final_list_copy = singly_linked_list.SinglyLinkedList(*[node.data._value for node in self.sll])
+#         self.shift_left_value = self.sll.get_left()[0] - self.final_list_copy.get_left()[0]
+#         self.final_list_copy.save_state()
 
-        self.distance_to_shift = abs(self.sll[0].get_left() - self.sll[1].get_left())
+#         self.distance_to_shift = abs(self.sll[0].get_left() - self.sll[1].get_left())
 
-        self.prev_list_shift_alpha = 0
-        # self.distance_up = None
-        # self.distance_up = abs(self.node.get_container_top() - self.sll[0].get_container_top())
+#         self.prev_list_shift_alpha = 0
+#         # self.distance_up = None
+#         # self.distance_up = abs(self.node.get_container_top() - self.sll[0].get_container_top())
 
-        self.original_sll_location = self.sll.get_center()
-        super().begin()
+#         self.original_sll_location = self.sll.get_center()
+#         super().begin()
 
-    def interpolate_mobject(self, alpha: float):
-        for animation_num, mob_group in self.mob_groups.items():
-            for animation_str, mob_info in mob_group.items():
-                normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
+#     def interpolate_mobject(self, alpha: float):
+#         for animation_num, mob_group in self.mob_groups.items():
+#             for animation_str, mob_info in mob_group.items():
+#                 normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
 
-                if normalized_alpha <= 0 or normalized_alpha > 1:
-                    continue
+#                 if normalized_alpha <= 0 or normalized_alpha > 1:
+#                     continue
 
-                mobject = mob_info['mobject']
+#                 mobject = mob_info['mobject']
 
-                if animation_str == 'trav_first_fade_in':
-                    self.trav_first.set_opacity(normalized_alpha)
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_first.save_state()
-                elif animation_str == 'trav_second_fade_in':
-                    self.trav_second.set_opacity(normalized_alpha)
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_second.save_state()
-                elif animation_str == 'trav_first_move':
-                    self.trav_first.restore()
-                    next_node = mob_info['next_node']
-                    self.trav_first.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_first.save_state()
-                elif animation_str == 'trav_second_move':
-                    self.trav_second.restore()
-                    next_node = mob_info['next_node']
-                    self.trav_second.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_second.save_state()
-                elif animation_str == 'pointer_shrink':
-                    self.prev_node_pointer_to_next.restore()
-                    diff_width = (
-                        abs((self.prev_node_pointer_to_next.get_start_and_end()[1] - self.prev_node_pointer_to_next.get_start_and_end()[0])[0] * (1 - smooth(normalized_alpha)))
-                    )
-                    width = (self.prev_node_pointer_to_next.get_start_and_end()[1] - self.prev_node_pointer_to_next.get_start_and_end()[0])[0]
-                    self.prev_node_pointer_to_next.become(
-                        SinglyDirectedEdge(
-                            start=self.prev_node_pointer_to_next.get_start_and_end()[0],
-                            end=(self.prev_node_pointer_to_next.get_start_and_end()[0] + [self.prev_node_pointer_to_next.tip.length * (smooth(normalized_alpha)), 0, 0]) + [diff_width, 0, 0]
-                        )
-                    )
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_first.node.pointer_to_next.save_state()
-                elif animation_str == 'pointer_grow':
-                    # NOTE: Seems like there might be a little over extension in the animation?
-                    self.prev_node_pointer_to_next.restore()
-                    self.prev_node_pointer_to_next.become(
-                        SinglyDirectedEdge(
-                        start=self.trav_first.node.pointer_to_next.get_start_and_end()[0],
-                        end=(
-                            self.prev_node_pointer_to_next.get_start_and_end()[1]
-                            + (
-                                (self.trav_first.node.next.get_container_left() - self.prev_node_pointer_to_next.get_start_and_end()[0]) * [smooth(normalized_alpha), 0, 0]
-                            )
-                            - [(self.prev_node_pointer_to_next.tip.length * smooth(normalized_alpha)), 0, 0]
-                            )
-                        )
-                    )
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_first.node.pointer_to_next.save_state()
-                elif animation_str == 'pointer_curve':
-                    self.prev_node_pointer_to_next.restore()
-                    start = self.prev_node_pointer_to_next.get_start_and_end()[0]
-                    end = self.prev_node_pointer_to_next.get_start_and_end()[1] + ((self.trav_second.node.get_container_left() - self.prev_node_pointer_to_next.get_start_and_end()[1]) * [smooth(normalized_alpha), 0, 0])
+#                 if animation_str == 'trav_first_fade_in':
+#                     self.trav_first.set_opacity(normalized_alpha)
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_first.save_state()
+#                 elif animation_str == 'trav_second_fade_in':
+#                     self.trav_second.set_opacity(normalized_alpha)
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_second.save_state()
+#                 elif animation_str == 'trav_first_move':
+#                     self.trav_first.restore()
+#                     next_node = mob_info['next_node']
+#                     self.trav_first.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_first.save_state()
+#                 elif animation_str == 'trav_second_move':
+#                     self.trav_second.restore()
+#                     next_node = mob_info['next_node']
+#                     self.trav_second.move_immediately_alpha(next_node, next_node, smooth(normalized_alpha))
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_second.save_state()
+#                 elif animation_str == 'pointer_shrink':
+#                     self.prev_node_pointer_to_next.restore()
+#                     diff_width = (
+#                         abs((self.prev_node_pointer_to_next.get_start_and_end()[1] - self.prev_node_pointer_to_next.get_start_and_end()[0])[0] * (1 - smooth(normalized_alpha)))
+#                     )
+#                     width = (self.prev_node_pointer_to_next.get_start_and_end()[1] - self.prev_node_pointer_to_next.get_start_and_end()[0])[0]
+#                     self.prev_node_pointer_to_next.become(
+#                         SinglyDirectedEdge(
+#                             start=self.prev_node_pointer_to_next.get_start_and_end()[0],
+#                             end=(self.prev_node_pointer_to_next.get_start_and_end()[0] + [self.prev_node_pointer_to_next.tip.length * (smooth(normalized_alpha)), 0, 0]) + [diff_width, 0, 0]
+#                         )
+#                     )
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_first.node.pointer_to_next.save_state()
+#                 elif animation_str == 'pointer_grow':
+#                     # NOTE: Seems like there might be a little over extension in the animation?
+#                     self.prev_node_pointer_to_next.restore()
+#                     self.prev_node_pointer_to_next.become(
+#                         SinglyDirectedEdge(
+#                         start=self.trav_first.node.pointer_to_next.get_start_and_end()[0],
+#                         end=(
+#                             self.prev_node_pointer_to_next.get_start_and_end()[1]
+#                             + (
+#                                 (self.trav_first.node.next.get_container_left() - self.prev_node_pointer_to_next.get_start_and_end()[0]) * [smooth(normalized_alpha), 0, 0]
+#                             )
+#                             - [(self.prev_node_pointer_to_next.tip.length * smooth(normalized_alpha)), 0, 0]
+#                             )
+#                         )
+#                     )
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_first.node.pointer_to_next.save_state()
+#                 elif animation_str == 'pointer_curve':
+#                     self.prev_node_pointer_to_next.restore()
+#                     start = self.prev_node_pointer_to_next.get_start_and_end()[0]
+#                     end = self.prev_node_pointer_to_next.get_start_and_end()[1] + ((self.trav_second.node.get_container_left() - self.prev_node_pointer_to_next.get_start_and_end()[1]) * [smooth(normalized_alpha), 0, 0])
 
-                    self.prev_node_pointer_to_next.become(
-                        SinglyDirectedEdge.create_curved_pointer(
-                        start=start,
-                        end=end,
-                        angle=(smooth(normalized_alpha) * (1.25 + self.trav_first.node.radius))
-                        )
-                    )
-                    if round(normalized_alpha, 3) == 1:
-                        self.trav_first.node.pointer_to_next.save_state()
-                elif animation_str == 'container_fade_out':
-                    self.container.set_stroke(opacity=1 - smooth(normalized_alpha))
-                    for sub in self.container.submobjects:
-                        sub.set_opacity(1 - smooth(normalized_alpha))
-                elif animation_str == 'pointer_fade_out':
-                    self.pointer_to_next.set_opacity(1 - smooth(normalized_alpha))
-                elif animation_str == 'center_list':
-                    d_alpha = smooth(normalized_alpha) - smooth(self.prev_list_shift_alpha)
-                    self.prev_list_shift_alpha = normalized_alpha
-                    self.sll.shift(LEFT * self.shift_left_value * d_alpha)
-                elif animation_str == 'shift_sub_list':
-                    # d_alpha = smooth(normalized_alpha) - smooth(self.prev_list_shift_alpha)
-                    # self.prev_list_shift_alpha = normalized_alpha
-                    # self.sll.shift(LEFT * self.shift_left_value * d_alpha)
+#                     self.prev_node_pointer_to_next.become(
+#                         SinglyDirectedEdge.create_curved_pointer(
+#                         start=start,
+#                         end=end,
+#                         angle=(smooth(normalized_alpha) * (1.25 + self.trav_first.node.radius))
+#                         )
+#                     )
+#                     if round(normalized_alpha, 3) == 1:
+#                         self.trav_first.node.pointer_to_next.save_state()
+#                 elif animation_str == 'container_fade_out':
+#                     self.container.set_stroke(opacity=1 - smooth(normalized_alpha))
+#                     for sub in self.container.submobjects:
+#                         sub.set_opacity(1 - smooth(normalized_alpha))
+#                 elif animation_str == 'pointer_fade_out':
+#                     self.pointer_to_next.set_opacity(1 - smooth(normalized_alpha))
+#                 elif animation_str == 'center_list':
+#                     d_alpha = smooth(normalized_alpha) - smooth(self.prev_list_shift_alpha)
+#                     self.prev_list_shift_alpha = normalized_alpha
+#                     self.sll.shift(LEFT * self.shift_left_value * d_alpha)
+#                 elif animation_str == 'shift_sub_list':
+#                     # d_alpha = smooth(normalized_alpha) - smooth(self.prev_list_shift_alpha)
+#                     # self.prev_list_shift_alpha = normalized_alpha
+#                     # self.sll.shift(LEFT * self.shift_left_value * d_alpha)
 
-                    # if self._get_mob_animation_num('shift_sub_list') == self._get_mob_animation_num('center_list'):
-                    final_start = self.original_prev_removed_node_next_pointer_copy.get_start_and_end()[0]
-                    final_end = self.original_prev_removed_node_next_pointer_copy.get_start_and_end()[1] + (LEFT * self.shift_left_value * smooth(normalized_alpha))
+#                     # if self._get_mob_animation_num('shift_sub_list') == self._get_mob_animation_num('center_list'):
+#                     final_start = self.original_prev_removed_node_next_pointer_copy.get_start_and_end()[0]
+#                     final_end = self.original_prev_removed_node_next_pointer_copy.get_start_and_end()[1] + (LEFT * self.shift_left_value * smooth(normalized_alpha))
 
-                    if self._get_mob_animation_num('shift_sub_list') != self._get_mob_animation_num('center_list'):
-                        self.final_list_copy.restore()
-                        self.group_to_shift.restore()
-                        point_to_shift_to = self.final_list_copy[self.index - 1].get_container_right()
-                        self.group_to_shift.shift(LEFT * (self.group_to_shift[0].get_left() - point_to_shift_to) * smooth(normalized_alpha))
-                        # self.group_to_shift.shift(LEFT * (self.node.radius + self.node.pointer_to_next.length) * smooth(normalized_alpha))
-                        # self.group_to_shift.shift(LEFT * abs(self.final_list_copy[self.index - 1].pointer_to_next.get_start_and_end()[1] - self.trav_second.node.get_container_left()) * smooth(normalized_alpha))
-                        end = self.group_to_shift[0].get_container_left()
+#                     if self._get_mob_animation_num('shift_sub_list') != self._get_mob_animation_num('center_list'):
+#                         self.final_list_copy.restore()
+#                         self.group_to_shift.restore()
+#                         point_to_shift_to = self.final_list_copy[self.index - 1].get_container_right()
+#                         self.group_to_shift.shift(LEFT * (self.group_to_shift[0].get_left() - point_to_shift_to) * smooth(normalized_alpha))
+#                         # self.group_to_shift.shift(LEFT * (self.node.radius + self.node.pointer_to_next.length) * smooth(normalized_alpha))
+#                         # self.group_to_shift.shift(LEFT * abs(self.final_list_copy[self.index - 1].pointer_to_next.get_start_and_end()[1] - self.trav_second.node.get_container_left()) * smooth(normalized_alpha))
+#                         end = self.group_to_shift[0].get_container_left()
 
-                        if round(normalized_alpha, 3) == 1:
-                            self.prev_node_pointer_to_next.become(
-                                SinglyDirectedEdge(
-                                    start=self.sll[self.index - 1].get_container_right(),
-                                    end=self.group_to_shift[0].get_container_left()
-                                )
-                            )
-                        # self.final_list_copy.shift(LEFT * self.shift_left_value)
-                        # end = self.final_list_copy[self.index - 2].pointer_to_next.get_start_and_end()[1]
-                    elif self._get_mob_animation_num('shift_sub_list') == self._get_mob_animation_num('center_list'):
+#                         if round(normalized_alpha, 3) == 1:
+#                             self.prev_node_pointer_to_next.become(
+#                                 SinglyDirectedEdge(
+#                                     start=self.sll[self.index - 1].get_container_right(),
+#                                     end=self.group_to_shift[0].get_container_left()
+#                                 )
+#                             )
+#                         # self.final_list_copy.shift(LEFT * self.shift_left_value)
+#                         # end = self.final_list_copy[self.index - 2].pointer_to_next.get_start_and_end()[1]
+#                     elif self._get_mob_animation_num('shift_sub_list') == self._get_mob_animation_num('center_list'):
 
-                        self.group_to_shift.restore()
-                        self.group_to_shift.shift(LEFT * abs(final_end - self.trav_second.node.get_container_left()) * smooth(normalized_alpha))
+#                         self.group_to_shift.restore()
+#                         self.group_to_shift.shift(LEFT * abs(final_end - self.trav_second.node.get_container_left()) * smooth(normalized_alpha))
 
-                        end = self.group_to_shift[0].get_container_left()
+#                         end = self.group_to_shift[0].get_container_left()
 
-                        if round(normalized_alpha, 3) == 1:
-                            self.prev_node_pointer_to_next.become(
-                                SinglyDirectedEdge(
-                                    start=final_start + (LEFT * self.shift_left_value * 1),
-                                    end=final_end
-                                )
-                            )
+#                         if round(normalized_alpha, 3) == 1:
+#                             self.prev_node_pointer_to_next.become(
+#                                 SinglyDirectedEdge(
+#                                     start=final_start + (LEFT * self.shift_left_value * 1),
+#                                     end=final_end
+#                                 )
+#                             )
 
-                    self.prev_node_pointer_to_next.become(
-                        SinglyDirectedEdge.create_curved_pointer(
-                            # start=final_start + (LEFT * self.shift_left_value * smooth(normalized_alpha)),
-                            start=self.sll[self.index - 1].get_container_right(),
-                            end=end,
-                            angle=(1 - smooth(normalized_alpha)) * (1.25 + self.trav_second.node.radius)
-                        )
-                    )
+#                     self.prev_node_pointer_to_next.become(
+#                         SinglyDirectedEdge.create_curved_pointer(
+#                             # start=final_start + (LEFT * self.shift_left_value * smooth(normalized_alpha)),
+#                             start=self.sll[self.index - 1].get_container_right(),
+#                             end=end,
+#                             angle=(1 - smooth(normalized_alpha)) * (1.25 + self.trav_second.node.radius)
+#                         )
+#                     )
 
 
-                    self.trav_first.fade(normalized_alpha)
-                    self.trav_second.fade(normalized_alpha)
+#                     self.trav_first.fade(normalized_alpha)
+#                     self.trav_second.fade(normalized_alpha)
 
-    def clean_up_from_scene(self, scene: Scene = None) -> None:
-        scene.add(self.node)
-        self.node.remove(self.sll)
-        scene.remove(self.trav_first)
-        scene.remove(self.trav_second)
-        # scene.remove(self.trav)
+#     def clean_up_from_scene(self, scene: Scene = None) -> None:
+#         scene.add(self.node)
+#         self.node.remove(self.sll)
+#         scene.remove(self.trav_first)
+#         scene.remove(self.trav_second)
+#         # scene.remove(self.trav)
 
-        super().clean_up_from_scene(scene)
+#         super().clean_up_from_scene(scene)
 
-    def _save_state_prev_node_pointer_to_next(self):
-        if self.prev_node_pointer_to_next is not None:
-            self.prev_node_pointer_to_next.save_state()
+#     def _save_state_prev_node_pointer_to_next(self):
+#         if self.prev_node_pointer_to_next is not None:
+#             self.prev_node_pointer_to_next.save_state()
 
-    def _restore_prev_node_pointer_to_next(self):
-        if self.prev_node_pointer_to_next is not None:
-            self.prev_node_pointer_to_next.restore()
+#     def _restore_prev_node_pointer_to_next(self):
+#         if self.prev_node_pointer_to_next is not None:
+#             self.prev_node_pointer_to_next.restore()
 
 
 class RemoveAt:

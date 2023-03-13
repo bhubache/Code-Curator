@@ -118,7 +118,7 @@ class TestScene(Scene):
         self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
         logger.info(id(self.sll))
         self.play(FadeIn(self.sll))
-        self.play(self.sll.add_first_node_then_pointer_then_trav_then_center(-1))
+        self.play(self.sll.insert_test(2, -1, display_trav=True))
         # self.play(self.sll.insert_all_together(3, -1))
         # self.play(self.sll.insert_test(2, -1))
         # self.play(self.sll.insert_test(2, -1))

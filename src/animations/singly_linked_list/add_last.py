@@ -1,7 +1,7 @@
 from typing import Any
 
 # from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
-from animations.singly_linked_list.base_sll_animation import BaseSLLAnimation
+from .base_sll_packager import BaseSLLPackager
 from data_structures.nodes.singly_linked_list_node import SLLNode
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import RIGHT, Animation, linear, smooth, Scene
@@ -109,7 +109,7 @@ from animations.animation_package import AnimationPackage
 #         raise
 
 
-class AddLast:
+class AddLast(BaseSLLPackager):
     def __init__(self, sll):
         self._sll = sll
         # self._node = None

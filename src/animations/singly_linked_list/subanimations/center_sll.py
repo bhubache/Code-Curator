@@ -7,6 +7,9 @@ from manim import smooth, RIGHT, VGroup
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
+# TODO: Maybe make the sll just a subset of the sll that includes everything not
+#       being moved around by other subanimations in the same group.
+
 class CenterSLL(VisibleSubanimation):
     def __init__(self, sll, restore_sll_at_interpolate: bool = False):
         super().__init__(sll)
