@@ -1,0 +1,13 @@
+,1,ChangeNextPointer,FadeInContainer,FadeInPointer,FadeInTrav,FadeOutContainer,FadeOutPointer,FadeOutTrav,FlattenList,GrowPointer,MoveTrav,1
+CenterSLL,1,1,,,,,,,1,,1,1
+ChangeNextPointer,-,1,,,,,,,1,1,,1
+FadeInContainer,-,-,1,,,1
+FadeInPointer,-,-,-,1,,,1,,,1
+FadeInTrav,-,-,-,-,1,,,1
+FadeOutContainer,-,-,-,-,-,1
+FadeOutPointer,-,-,-,-,-,-,1,,,1
+FadeOutTrav,-,-,-,-,-,-,-,1
+FlattenList,-,-,-,-,-,-,-,-,1,1,1,1
+GrowPointer,-,-,-,-,-,-,-,-,-,1,,1
+MoveTrav,-,-,-,-,-,-,-,-,-,-,1
+ShiftSubList,-,-,-,-,-,-,-,-,-,-,-,1

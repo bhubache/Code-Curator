@@ -9,107 +9,112 @@ from manim import RIGHT, Animation, linear, smooth, Scene
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-class _AddToBack(Animation):
-    def __init__(
-        self,
-        sll,
-        node:      SLLNode,
-        prev_node_pointer_to_next,
-        mob_anims: dict,
-        run_time:  int = 1,
-        rate_func = linear,
-        **kwargs
-    ):
-        run_time = len(mob_anims)
-        super().__init__(
-            sll,
-            run_time=run_time,
-            rate_func=rate_func,
-            **kwargs
-        )
-        self.sll = sll
-        self.node = node
-        self.prev_node_pointer_to_next = prev_node_pointer_to_next
-        print(self.prev_node_pointer_to_next)
-        self.mob_groups = mob_anims
-        self.num_animations = len(self.mob_groups)
-        self.alpha_thresholds = {num: num / self.num_animations for num in self.mob_groups}
-        self.alpha_step_size = 1 / self.num_animations
+# The following imports are for development
+from .subanimations.fade_in_node import FadeInNode
+from .subanimations.fade_in_pointer import FadeInPointer
+from animations.animation_package import AnimationPackage
+
+# class _AddToBack(Animation):
+#     def __init__(
+#         self,
+#         sll,
+#         node:      SLLNode,
+#         prev_node_pointer_to_next,
+#         mob_anims: dict,
+#         run_time:  int = 1,
+#         rate_func = linear,
+#         **kwargs
+#     ):
+#         run_time = len(mob_anims)
+#         super().__init__(
+#             sll,
+#             run_time=run_time,
+#             rate_func=rate_func,
+#             **kwargs
+#         )
+#         self.sll = sll
+#         self.node = node
+#         self.prev_node_pointer_to_next = prev_node_pointer_to_next
+#         print(self.prev_node_pointer_to_next)
+#         self.mob_groups = mob_anims
+#         self.num_animations = len(self.mob_groups)
+#         self.alpha_thresholds = {num: num / self.num_animations for num in self.mob_groups}
+#         self.alpha_step_size = 1 / self.num_animations
         
-    def begin(self) -> None:
-        self.sll.save_state()
-        self.prev_node_pointer_to_next.save_state()
-        self.sll.tail_pointer.save_state()
+#     def begin(self) -> None:
+#         self.sll.save_state()
+#         self.prev_node_pointer_to_next.save_state()
+#         self.sll.tail_pointer.save_state()
 
-        self.original_sll_location = self.sll.get_center()
+#         self.original_sll_location = self.sll.get_center()
 
-        self.node.container.set_opacity(0)
-        self.prev_node_pointer_to_next.set_opacity(0)
-        # self.node.pointer_to_next.set_opacity(0)
-        super().begin()
+#         self.node.container.set_opacity(0)
+#         self.prev_node_pointer_to_next.set_opacity(0)
+#         # self.node.pointer_to_next.set_opacity(0)
+#         super().begin()
 
-    def interpolate_mobject(self, alpha: float) -> None:
-        for animation_num, mob_group in self.mob_groups.items():
-            for mob_name, mob in mob_group.items():
-                normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
+#     def interpolate_mobject(self, alpha: float) -> None:
+#         for animation_num, mob_group in self.mob_groups.items():
+#             for mob_name, mob in mob_group.items():
+#                 normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
 
-                if normalized_alpha <= 0 or normalized_alpha >= 1:
-                    continue
+#                 if normalized_alpha <= 0 or normalized_alpha >= 1:
+#                     continue
 
-                if mob_name == 'container':
-                    mob.set_stroke(opacity=normalized_alpha)
-                    for container_sub in mob.submobjects:
-                        container_sub.set_opacity(normalized_alpha)
-                elif mob_name == 'prev_node_pointer_to_next':
-                    if self._get_mob_animation_num('prev_node_pointer_to_next') == self._get_mob_animation_num('sll'):
-                        curr_start, curr_end = mob.get_start_and_end()
-                        mob.become(SinglyDirectedEdge(start=curr_start, end=curr_end))
-                    else:
-                        mob.restore()
-                        original_start, original_end = mob.get_start_and_end()
-                        new_end = [mob.tip.length, 0, 0] + original_start + ((original_end - original_start - [mob.tip.length, 0, 0]) * [smooth(normalized_alpha), 1, 1])
-                        mob.become(SinglyDirectedEdge(start=original_start, end=new_end))
-                    mob.set_opacity(normalized_alpha)
-                elif mob_name == 'tail_pointer':
-                    mob.restore()
-                    mob.move_immediately_alpha(self.node, self.node, smooth(normalized_alpha))
-                elif mob_name == 'sll':
-                    mob.move_to([self.original_sll_location[0] - (self.original_sll_location[0] * smooth(normalized_alpha)), 0, 0])
+#                 if mob_name == 'container':
+#                     mob.set_stroke(opacity=normalized_alpha)
+#                     for container_sub in mob.submobjects:
+#                         container_sub.set_opacity(normalized_alpha)
+#                 elif mob_name == 'prev_node_pointer_to_next':
+#                     if self._get_mob_animation_num('prev_node_pointer_to_next') == self._get_mob_animation_num('sll'):
+#                         curr_start, curr_end = mob.get_start_and_end()
+#                         mob.become(SinglyDirectedEdge(start=curr_start, end=curr_end))
+#                     else:
+#                         mob.restore()
+#                         original_start, original_end = mob.get_start_and_end()
+#                         new_end = [mob.tip.length, 0, 0] + original_start + ((original_end - original_start - [mob.tip.length, 0, 0]) * [smooth(normalized_alpha), 1, 1])
+#                         mob.become(SinglyDirectedEdge(start=original_start, end=new_end))
+#                     mob.set_opacity(normalized_alpha)
+#                 elif mob_name == 'tail_pointer':
+#                     mob.restore()
+#                     mob.move_immediately_alpha(self.node, self.node, smooth(normalized_alpha))
+#                 elif mob_name == 'sll':
+#                     mob.move_to([self.original_sll_location[0] - (self.original_sll_location[0] * smooth(normalized_alpha)), 0, 0])
 
-    def clean_up_from_scene(self, scene: Scene = None) -> None:
-        scene.add(self.node)
-        self.node.remove(self.sll)
-        super().clean_up_from_scene(scene)
+#     def clean_up_from_scene(self, scene: Scene = None) -> None:
+#         scene.add(self.node)
+#         self.node.remove(self.sll)
+#         super().clean_up_from_scene(scene)
 
-    def _get_normalized_alpha(self, alpha: float, animation_num: int) -> float:
-        start_alpha = self.alpha_thresholds[animation_num] - self.alpha_step_size
-        end_alpha = start_alpha + self.alpha_step_size
+#     def _get_normalized_alpha(self, alpha: float, animation_num: int) -> float:
+#         start_alpha = self.alpha_thresholds[animation_num] - self.alpha_step_size
+#         end_alpha = start_alpha + self.alpha_step_size
 
-        if alpha < start_alpha:
-            return 0
-        elif start_alpha <= alpha <= end_alpha:
-            alpha = (alpha - (self.alpha_step_size * (animation_num - 1))) / self.alpha_step_size
-            if alpha > 1:
-                alpha = 1
-            return alpha
-        elif alpha > end_alpha:
-            return 1
-        else:
-            raise Exception(f'Animation number {animation_num} has alpha {alpha}')
+#         if alpha < start_alpha:
+#             return 0
+#         elif start_alpha <= alpha <= end_alpha:
+#             alpha = (alpha - (self.alpha_step_size * (animation_num - 1))) / self.alpha_step_size
+#             if alpha > 1:
+#                 alpha = 1
+#             return alpha
+#         elif alpha > end_alpha:
+#             return 1
+#         else:
+#             raise Exception(f'Animation number {animation_num} has alpha {alpha}')
         
-    def _get_mob_animation_num(self, mob_name: str) -> int:
-        for animation_num, mob_group in self.mob_groups.items():
-            if mob_name in mob_group:
-                return animation_num
-        raise
+#     def _get_mob_animation_num(self, mob_name: str) -> int:
+#         for animation_num, mob_group in self.mob_groups.items():
+#             if mob_name in mob_group:
+#                 return animation_num
+#         raise
 
 
 class AddLast:
     def __init__(self, sll):
         self._sll = sll
-        self._node = None
-        self._prev_node_pointer_to_next = None
-        self._mob_anims = None
+        # self._node = None
+        # self._prev_node_pointer_to_next = None
+        # self._mob_anims = None
 
     def _add_node_and_animate(fn):
         def inner(self, *args, **kwargs):
@@ -222,25 +227,34 @@ class AddLast:
             }
         }
 
-    ###################
-    # Four animations #
-    ###################
-    @_add_node_and_animate
+    # ###################
+    # # Four animations #
+    # ###################
+    # @_add_node_and_animate
+    # def node_then_pointer_then_trav_then_center(self, data: Any):
+    #     self._mob_anims = {
+    #         1: {
+    #             'container': self._node._container
+    #         },
+    #         2: {
+    #             'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
+    #         },
+    #         3: {
+    #             'tail_pointer': self._sll.tail_pointer,
+    #         },
+    #         4: {
+    #             'sll': self._sll
+    #         }
+    #     }
+
     def node_then_pointer_then_trav_then_center(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container
-            },
-            2: {
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-            },
-            3: {
-                'tail_pointer': self._sll.tail_pointer,
-            },
-            4: {
-                'sll': self._sll
-            }
-        }
+        self._node = self._add_node(data)
+        package = AnimationPackage(self._sll)
+        package.append_successive_animations(
+            FadeInNode(self._node),
+            FadeInPointer(self._node.pointer_to_next)
+        )
+
 
     def _add_node(self, data: Any) -> None:
         node = SLLNode(data)
