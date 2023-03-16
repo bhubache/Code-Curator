@@ -10,7 +10,7 @@ from data_structures.pointers.pointer import Pointer
 from .subanimations.base_subanimation import BaseSubanimation
 from ..animation_package import AnimationPackage
 from ..package_animation import PackageAnimation
-from .subanimations.fade_in_node import FadeInNode
+from .subanimations.fade_in_container import FadeInContainer
 from .subanimations.fade_in_pointer import FadeInPointer
 from .subanimations.grow_pointer import GrowPointer
 from .subanimations.move_trav import MoveTrav
@@ -254,7 +254,7 @@ class Insert(BaseSLLPackager):
         if aligned:
             added_node.next_to(self._sll[index - 1], RIGHT, buff=0)
 
-        self._fade_in_node = FadeInNode(self._sll, added_node)
+        self._fade_in_node = FadeInContainer(self._sll, added_node)
         # FIXME: GrowPointer does a weird movement (though it does end in the correct position)
         self._pointer_animation = self._get_pointer_animation(added_node=added_node, pointer_animation_type=pointer_animation_type)
 

@@ -6,7 +6,7 @@ from typing import Iterable, Any
 from ..nodes.singly_linked_list_node import SLLNode
 from ..pointers.pointer import Pointer
 from ..edges.singly_directed_edge import SinglyDirectedEdge
-from animations.singly_linked_list.subanimations.fade_in_node import FadeInNode
+from animations.singly_linked_list.subanimations.fade_in_container import FadeInContainer
 from animations.singly_linked_list.subanimations.fade_in_pointer import FadeInPointer
 from animations.singly_linked_list.subanimations.grow_pointer import GrowPointer
 from animations.singly_linked_list.subanimations.move_trav import MoveTrav
@@ -24,7 +24,7 @@ logger = CustomLogger.getLogger(__name__)
 
 # The following imports are for development
 from animations.singly_linked_list.subanimations.fade_in_pointer import FadeInPointer
-from animations.singly_linked_list.subanimations.fade_in_node import FadeInNode
+from animations.singly_linked_list.subanimations.fade_in_container import FadeInContainer
 from animations.animation_package import AnimationPackage
 from animations.package_animation import PackageAnimation
 import sys

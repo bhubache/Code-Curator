@@ -5,14 +5,14 @@ from manim import Scene
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-class FadeInNode(VisibleSubanimation):
+class FadeInContainer(VisibleSubanimation):
     def __init__(self, sll, node):
         super().__init__(sll)
         self._node = node
         self._save_states(self._sll, self._node)
 
     def create_successive_counterpart(self):
-        return FadeInNode(self._sll, self._node)
+        return FadeInContainer(self._sll, self._node)
         # return SuccessiveFadeInNode(self._sll, self._node)
     
     def _rebind_restored_states(self):

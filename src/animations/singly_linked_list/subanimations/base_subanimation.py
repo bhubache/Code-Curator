@@ -22,17 +22,18 @@ class BaseSubanimation(ABC):
     def sll_post_subanimation_group(self, sll) -> None:
         self._sll_post_subanimation_group = sll
 
-    def copy(self) -> BaseSubanimation:
-        return copy.deepcopy(self)
+    # def copy(self) -> BaseSubanimation:
+    #     return copy.deepcopy(self)
     
     def begin(self):
-        pass
+        self._sll.restore()
 
+    @abstractmethod
     def interpolate(self, alpha: float):
         pass
 
     def clean_up_from_animation(self):
-        pass
+        self._sll.save_state()
 
     def clean_up_from_scene(self, scene):
         pass

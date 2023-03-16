@@ -2,7 +2,7 @@ from typing import Any
 
 from data_structures.nodes.singly_linked_list_node import SLLNode
 from ..animation_package import AnimationPackage
-from .subanimations.fade_in_node import FadeInNode
+from .subanimations.fade_in_container import FadeInContainer
 from .subanimations.fade_in_pointer import FadeInPointer
 from .subanimations.grow_pointer import GrowPointer
 from .subanimations.move_trav import MoveTrav

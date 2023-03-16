@@ -10,7 +10,7 @@ from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 # The following imports are for development
-from .subanimations.fade_in_node import FadeInNode
+from .subanimations.fade_in_container import FadeInContainer
 from .subanimations.fade_in_pointer import FadeInPointer
 from animations.animation_package import AnimationPackage
 
