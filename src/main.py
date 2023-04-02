@@ -242,7 +242,8 @@ class TestScene(Scene):
             .subsequently_unshrink_pointer()
             .subsequently_curve_pointer()
             .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav()
-            .subsequently_flatten_list().with_center_sll()
+            .subsequently_flatten_list()
+            .subsequently_center_sll()
             .build_animation()
         )
 

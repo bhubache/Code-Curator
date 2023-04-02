@@ -24,13 +24,11 @@ class SubanimationGroup(BaseSubanimation):
         self._subanimations_with_timings = []
         self._run_time = run_time
         self.max_end_time: float = None
-        # self._run_time: float = self._init_run_time(run_time)
 
     def __str__(self) -> str:
         contents = '\n'.join(
             [subanimation._to_str_helper(start_time, end_time, recursion_level=1) for subanimation, start_time, end_time in self._subanimations_with_timings]
         )
-        # contents = '\n  '.join([str(subanimation) for subanimation in self._subanimations])
         return (
             '\n'.join(
                 (
@@ -97,8 +95,7 @@ class SubanimationGroup(BaseSubanimation):
         print(self)
 
     def begin(self):
-        for subanimation in self._subanimations:
-            subanimation.begin()
+        pass
 
     def interpolate(self, alpha: float):
         # NOT_YET_STARTED_ALPHA = 0
@@ -122,12 +119,7 @@ class SubanimationGroup(BaseSubanimation):
             subanimation_run_time: float = end_time - start_time
             sub_alpha: float = 0
 
-            # sub_alpha = np.clip((time - start_time) / subanimation_run_time, NOT_YET_STARTED_ALPHA, ALREADY_FINISHED_ALPHA)
             sub_alpha = clip((time - start_time) / subanimation_run_time)
-
-            # if isinstance(subanimation, MoveTrav):
-            #     print(sub_alpha)
-            # print()
 
             if self._subanimation_ready_to_begin(subanimation, sub_alpha):
                 subanimation.begin()
@@ -138,40 +130,15 @@ class SubanimationGroup(BaseSubanimation):
             if self._subanimation_is_complete(subanimation, sub_alpha):
                 subanimation.clean_up_from_animation()
 
-
     def clean_up_from_animation(self) -> None:
-        for subanimation in self._subanimations:
-            subanimation.clean_up_from_animation()
+        pass
+        # for subanimation in self._subanimations:
+        #     subanimation.clean_up_from_animation()
 
     def clean_up_from_scene(self, scene: Scene):
         for subanimation in self._subanimations:
             subanimation.clean_up_from_scene(scene)
 
-    def _subanimation_ready_to_begin(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
-        if sub_alpha >= 0 and not subanimation._has_started and isinstance(subanimation, LeafSubanimation):
-            subanimation._has_started = True
-            return True
-        return False
-
-    def _subanimation_is_rendering(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
-        if 0 <= sub_alpha <= 1:
-            return True
-        return False
-
-    def _subanimation_is_complete(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
-        if sub_alpha == 1 and self._has_started and isinstance(subanimation, LeafSubanimation):
-            return True
-        return False
-
-
-
-    def _init_run_time(self, run_time: float) -> float:
-        self.max_end_time: float = 0
-        if self._subanimations_with_timings:
-            self.max_end_time = np.max([awt[2] for awt in self._subanimations_with_timings])
-        return self.max_end_time if run_time is None else run_time
-
-    # NOTE: Recursive!
     def _build_subanimations_with_timings(self) -> None:
         if isinstance(self, LeafSubanimation):
             return
@@ -189,6 +156,28 @@ class SubanimationGroup(BaseSubanimation):
             child._build_subanimations_with_timings()
 
         self._run_time = self._init_run_time(self._run_time)
+
+    def _init_run_time(self, run_time: float) -> float:
+        self.max_end_time: float = 0
+        if self._subanimations_with_timings:
+            self.max_end_time = np.max([awt[2] for awt in self._subanimations_with_timings])
+        return self.max_end_time if run_time is None else run_time
+
+    def _subanimation_ready_to_begin(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
+        if sub_alpha >= 0 and not subanimation._has_started and isinstance(subanimation, LeafSubanimation):
+            subanimation._has_started = True
+            return True
+        return False
+
+    def _subanimation_is_rendering(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
+        if 0 <= sub_alpha <= 1:
+            return True
+        return False
+
+    def _subanimation_is_complete(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
+        if sub_alpha == 1 and subanimation._has_started and isinstance(subanimation, LeafSubanimation):
+            return True
+        return False
 
     def flatten(self):
         for subanimation in self._subanimations:
@@ -265,6 +254,5 @@ class SubanimationGroup(BaseSubanimation):
             successive_subanimations += subanimation._create_successive_counterpart()
         return successive_subanimations
 
-    def get_sll(self):
-        return self._subanimations[0]._sll
-
+    # def get_sll(self):
+    #     return self._subanimations[0]._sll

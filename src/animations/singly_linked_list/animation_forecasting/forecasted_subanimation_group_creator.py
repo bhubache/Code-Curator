@@ -9,7 +9,6 @@ class ForecastedSubanimationGroupCreator:
     ) -> None:
         self._animator: data_structure_animator.DataStructureAnimator = animator
         self._subanimation_builder_helpers = subanimation_builder_helpers
-        # self._forecasted_package = self._animator.get_animation_package()
 
     @classmethod
     def create_forecasted_subanimation_group(cls, animator, subanimation_builder_helpers):

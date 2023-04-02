@@ -9,15 +9,9 @@ logger = CustomLogger.getLogger(__name__)
 # NOTE: Put subanimations for SLL at the beginning of a group
 
 class LeafSubanimation(BaseSubanimation):
-    def __init__(self, sll, animates_sll: bool = False):
-        super().__init__(animates_sll=animates_sll)
+    def __init__(self, sll):
+        super().__init__()
         self._sll: singly_linked_list.SinglyLinkedList = sll
-        # self._sll: singly_linked_list.SinglyLinkedList = sll
-        # self._animates_sll: bool = animates_sll
-        # self._unique_id: str = f'{self._sll.__class__.__name__}_{self.__class__.__name__}'
-        # self._final_sll = singly_linked_list.SinglyLinkedList.create_sll(self._sll)
-        # self._sll_post_subanimation_group = None
-        # self._custom_sll_saved_state = self._sll.copy()
 
     def __str__(self) -> str:
         return self.__class__.__name__
@@ -30,9 +24,6 @@ class LeafSubanimation(BaseSubanimation):
 
     def begin(self):
         pass
-
-    def get_num_subanimations(self) -> int:
-        return len(self)
 
     def interpolate(self, alpha: float):
         pass
@@ -49,8 +40,8 @@ class LeafSubanimation(BaseSubanimation):
     def _create_successive_counterpart(self):
         return [self.create_successive_counterpart()]
 
-    def get_sll(self):
-        return self._sll
+    # def get_sll(self):
+    #     return self._sll
 
     def is_successive_group(self) -> bool:
         return True
@@ -58,10 +49,5 @@ class LeafSubanimation(BaseSubanimation):
     def has_one_subanimation(self) -> bool:
         return True
 
-    @property
-    def sll_post_subanimation_group(self):
-        return self._sll_post_subanimation_group
-
-    @sll_post_subanimation_group.setter
-    def sll_post_subanimation_group(self, sll) -> None:
-        self._sll_post_subanimation_group = sll
+    def get_num_subanimations(self) -> int:
+        return 1

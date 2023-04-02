@@ -4,7 +4,6 @@ from .. import data_structure_animator
 from ..subanimations.base_subanimation import BaseSubanimation
 from ...subanimation_group import SubanimationGroup
 from ..subanimations.leaf_subanimation import LeafSubanimation
-# from ...animation_package import AnimationPackage
 from .forecasted_subanimation_group_creator import ForecastedSubanimationGroupCreator
 from .interdependent_subanimation_finder import InterdependentSubanimationFinder
 
@@ -26,7 +25,6 @@ class SLLAnimationForecaster:
         self._forecasted_subanimation_group = ForecastedSubanimationGroupCreator.create_forecasted_subanimation_group(animator_copy, requested_subanimation_builder_helpers)
 
     def forecast_animations(self):
-        # interdependent_subanimations: list[BaseSubanimation] = self._get_interdependent_subanimations()
         self._sub_in_successive_subanimations_where_possible()
         self._assign_forecasted_subanimations()
 
@@ -100,5 +98,5 @@ class SLLAnimationForecaster:
     # def _get_flattened_true_subanimation_group(self) -> list[LeafSubanimation]:
     #     return list(self._true_package.get_subanimation_group().flatten())
 
-    def _get_forecasted_subanimation_group(self) -> SubanimationGroup:
-        return self._forecasted_subanimation_group.get_subanimation_group()
+    # def _get_forecasted_subanimation_group(self) -> SubanimationGroup:
+    #     return self._forecasted_subanimation_group.get_subanimation_group()

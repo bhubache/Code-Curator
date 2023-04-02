@@ -10,7 +10,7 @@ logger = CustomLogger.getLogger(__name__)
 
 class CenterSLL(LeafSubanimation):
     def __init__(self, sll, curr_reference_index: int, post_subanimation_reference_index: int):
-        super().__init__(sll, animates_sll=True)
+        super().__init__(sll)
         self._curr_reference_index: int = curr_reference_index
         self._post_subanimation_reference_index: int = post_subanimation_reference_index
 
