@@ -23,16 +23,6 @@ class DataStructureAnimator(ABC):
         self._requested_subanimation_builder_helpers: list[MethodType] = []
         self._subanimation_group: SubanimationGroup = SubanimationGroup(lag_ratio=1)
 
-    def begin(self) -> None:
-        self._subanimation_group.init_run_time()
-
-    def interpolate_mobject(self, alpha: float) -> None:
-        return self._subanimation_group.interpolate(alpha)
-
-    def clean_up_from_scene(self, scene: Scene):
-        self._subanimation_group.clean_up_from_scene(scene=scene)
-        self.clean_up_mobject()
-
     # TODO: Make abstract
     def clean_up_mobject(self):
         pass

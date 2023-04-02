@@ -1,4 +1,5 @@
 from .singly_linked_list import data_structure_animator
+from .subanimation_group import SubanimationGroup
 from manim import Animation
 
 
@@ -10,15 +11,16 @@ class DataStructureAnimation(Animation):
         super().__init__(sll, run_time=data_structure_animator.get_run_time())
         self._sll = sll
         self._animator = data_structure_animator
+        self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
 
     def begin(self):
-        self._animator.begin()
+        self._subanimation_group.init_run_time()
         super().begin()
 
     def interpolate_mobject(self, alpha):
-        self._animator.interpolate_mobject(alpha)
+        self._subanimation_group.interpolate(alpha)
 
     def clean_up_from_scene(self, scene) -> None:
-        self._animator.clean_up_from_scene(scene)
-        # self._animator.clean_up_mobject()
+        self._subanimation_group.clean_up_from_scene(scene)
+        self._animator.clean_up_mobject()
         return super().clean_up_from_scene(scene)
