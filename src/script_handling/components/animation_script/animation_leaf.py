@@ -160,6 +160,9 @@ class AnimationLeaf(IAnimationScript):
     #     self._animation = animation
     #     return True
 
+    def _unique_id_exists(self, unique_id: str) -> bool:
+        return self._unique_id == unique_id
+
     def get_child(self, unique_id: str) -> IAnimationScript:
         if unique_id != self.unique_id:
             raise RuntimeError(f'This leaf isn\t correct: {self.unique_id} != {unique_id}')

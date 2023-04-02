@@ -70,8 +70,8 @@ def get_scene_classes():
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
     scene_classes.append(problem_analysis_cls)
 
-    code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
-    code_solution_cls = getattr(code_solution_module, 'CodeSolution')
+    # code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
+    # code_solution_cls = getattr(code_solution_module, 'CodeSolution')
     # scene_classes.append(code_solution_cls)
 
     # FIXME: Bad practice returning a tuple with loosely understood ordering
@@ -199,7 +199,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = True
+    test_data_structure = False
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(

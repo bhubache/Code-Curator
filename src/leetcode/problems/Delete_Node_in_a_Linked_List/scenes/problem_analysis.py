@@ -23,14 +23,17 @@ class ProblemAnalysis(BaseProblemAnalysis):
             aligned_animation_scene=aligned_animation_scene
         )
         self.add_overriding_animation(self.explanation_1)
+        # self.add_overriding_animation(self.made_up_name)
+
+        print(aligned_animation_scene)
 
     def explanation_1(self) -> Iterable[Animation]:
         sll = SinglyLinkedList(0, 1)
-        add_node_animation = AnimationGroup(*sll.add_last(2))
 
-        square = Square()
+        return [Wait(), FadeIn(sll), Wait()]
 
-        return [Wait(), FadeIn(square), FadeIn(Circle().move_to([1, 1, 0]))]
+    def made_up_name(self):
+        return [Wait()]
 
     def third_constraint_animation(self):
         title = ProblemText.create_title('Remove the value 2 from the linked list')
