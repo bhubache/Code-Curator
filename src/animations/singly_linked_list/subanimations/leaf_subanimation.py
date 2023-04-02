@@ -6,7 +6,6 @@ from data_structures.singly_linked_list import singly_linked_list
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-# NOTE: Put subanimations for SLL at the beginning of a group
 
 class LeafSubanimation(BaseSubanimation):
     def __init__(self, sll):
@@ -39,9 +38,6 @@ class LeafSubanimation(BaseSubanimation):
 
     def _create_successive_counterpart(self):
         return [self.create_successive_counterpart()]
-
-    # def get_sll(self):
-    #     return self._sll
 
     def is_successive_group(self) -> bool:
         return True

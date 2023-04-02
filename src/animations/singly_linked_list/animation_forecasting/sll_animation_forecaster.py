@@ -70,7 +70,6 @@ class SLLAnimationForecaster:
         if isinstance(true_subanimation, SubanimationGroup):
             for true, forecast in zip(true_subanimation, forecast_subanimation):
                 if isinstance(true, LeafSubanimation):
-                    print(type(true))
                     true.sll_post_subanimation_group = forecast._sll.copy()
 
     # TODO: Check to see if this can be removed

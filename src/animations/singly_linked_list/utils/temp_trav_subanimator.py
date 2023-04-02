@@ -1,6 +1,5 @@
 from typing import Union
 
-from ..subanimations.base_subanimation import BaseSubanimation
 from ...subanimation_group import SubanimationGroup
 from data_structures.pointers.pointer import Pointer
 from data_structures.nodes.singly_linked_list_node import SLLNode
@@ -99,16 +98,6 @@ class TempTravSubanimator:
             ],
             lag_ratio=1
         )
-        # trav_moves: list[BaseSubanimation] = []
-        # for index in range(self._get_first_trav_starting_index() + 1, self._index):
-        #     trav_moves.append(
-        #         MoveTrav(
-        #             sll=self._sll,
-        #             trav=self._first_trav,
-        #             to_node=self._sll[index]
-        #         )
-        #     )
-        # return trav_moves
 
     def _get_second_trav_move_subanimations(self) -> SubanimationGroup:
         if not self._display_second_trav:
@@ -122,17 +111,6 @@ class TempTravSubanimator:
             lag_ratio=1
         )
 
-        # trav_moves: list[BaseSubanimation] = []
-        # for index in range(self._get_second_trav_starting_index() + 1, self._index + 2):
-        #     trav_moves.append(
-        #         MoveTrav(
-        #         sll=self._sll,
-        #         trav=self._second_trav,
-        #         to_node=self._sll[index]
-        #         )
-        #     )
-        # return trav_moves
-
     def _combine_first_and_second_trav_move_subanimations(
         self,
         first_trav_moves: SubanimationGroup,
@@ -143,25 +121,11 @@ class TempTravSubanimator:
         elif not second_trav_moves.contains_subanimations():
             return first_trav_moves
 
-
-        # if len(first_trav_moves) == 0 or len(second_trav_moves) == 0:
-        #     trav_groups: list[list[BaseSubanimation]] = []
-        #     one_trav_moves: list[BaseSubanimation] = second_trav_moves if len(first_trav_moves) == 0 else first_trav_moves
-        #     for trav_move in one_trav_moves:
-        #         trav_groups.append([trav_move])
-
-        #     return trav_groups
-
-        # combined_moves: list[list[BaseSubanimation]] = []
         combined_moves: SubanimationGroup = SubanimationGroup(lag_ratio=1)
         for first, second in zip(first_trav_moves, second_trav_moves):
             combined_moves.add(
                 SubanimationGroup(first, second, lag_ratio=0)
             )
-            # combined_moves.append(
-            #     [first, second]
-            # )
-        # combined_moves.append([second_trav_moves[-1]])
         combined_moves.add(second_trav_moves.get(-1))
         return combined_moves
 
@@ -170,7 +134,6 @@ class TempTravSubanimator:
         subanimations: SubanimationGroup
     ) -> SubanimationGroup:
         trav_fade_in_subanimations: SubanimationGroup = SubanimationGroup(lag_ratio=0)
-        # trav_fade_in_subanimations: list[BaseSubanimation] = []
 
         if self._display_first_trav:
             trav_fade_in_subanimations.add(
@@ -185,35 +148,8 @@ class TempTravSubanimator:
         subanimations.insert(0, trav_fade_in_subanimations)
         return subanimations
 
-        # if self._display_first_trav:
-        #     trav_fade_in_subanimations.append(
-        #         FadeInMobject(sll=self._sll, mobject=self._first_trav, parent_mobject=self._sll)
-        #     )
-
-        # if self._display_second_trav:
-        #     trav_fade_in_subanimations.append(
-        #         FadeInMobject(sll=self._sll, mobject=self._second_trav, parent_mobject=self._sll)
-        #     )
-
-        # subanimations.insert(
-        #     0,
-        #     trav_fade_in_subanimations
-        # )
-        # return subanimations
-
     def has_subanimations(self) -> bool:
         return self._subanimation_group.contains_subanimations()
-        # if len(self._subanimation_group) == 0:
-        #     return False
-
-        # for group in self._subanimation_group:
-        #     if len(group) == 0:
-        #         raise Exception('Subanimation group found to be empty!')
-
-        #     for subanimation in group:
-        #         if not isinstance(subanimation, BaseSubanimation):
-        #             raise Exception(f'{subanimation} is type {type(subanimation)} when it should be {BaseSubanimation}')
-        # return True
 
     def get_subanimation_group(self) -> SubanimationGroup:
         return self._subanimation_group

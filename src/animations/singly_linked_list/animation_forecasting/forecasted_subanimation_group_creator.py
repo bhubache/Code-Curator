@@ -27,11 +27,7 @@ class ForecastedSubanimationGroupCreator:
             builder_helper_func(self._animator)
 
     def _replace_subanimations_with_successive_counterparts(self) -> None:
-        # TODO: Replace with higher level of abstraction
-
-        # TODO: Change name of method called
         self._animator.create_subanimation_group_successive_counterpart()
-        # self._forecasted_package.set_subanimation_group(self._forecasted_package.create_subanimation_group_successive_counterpart())
 
     def _set_default_clean_up_mobject(self) -> None:
         self._animator.clean_up_mobject = lambda : None

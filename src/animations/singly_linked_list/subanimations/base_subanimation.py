@@ -2,8 +2,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import copy
 
-from data_structures.singly_linked_list import singly_linked_list
-
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 

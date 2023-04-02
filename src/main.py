@@ -124,113 +124,6 @@ class TestScene(Scene):
         self.sll = SinglyLinkedList(1, 2, 3, 4, 5, 6)
         self.play(FadeIn(self.sll))
 
-        # from animations.singly_linked_list.subanimations.fade_out_container import FadeOutContainer
-        # from animations.singly_linked_list.subanimations.fade_out_mobject import FadeOutMobject
-        # from animations.singly_linked_list.subanimations.strictly_successive.move_trav import SuccessiveMoveTrav
-        # from animations.package_animation import PackageAnimation
-        # from animations.animation_package import AnimationPackage
-        # from animations.subanimation_group import SubanimationGroup
-
-        # some_group = SubanimationGroup(
-        #     SubanimationGroup(
-        #         SubanimationGroup(
-        #             FadeOutMobject(self.sll, self.sll[0].pointer_to_next, self.sll[0]),
-        #             SubanimationGroup(
-        #                 FadeOutMobject(self.sll, self.sll[0].pointer_to_next, self.sll[0])
-        #             ),
-        #         ),
-        #         SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[1]),
-        #         SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[2]),
-        #         SubanimationGroup(
-        #             SubanimationGroup(
-        #                 SubanimationGroup(
-        #                     SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[2])
-        #                 ),
-        #             ),
-        #         ),
-        #     ),
-        #     SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[3]),
-        #     SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[4]),
-        # )
-
-        # animation_package = AnimationPackage(self.sll)
-        # animation_package.clean_up_mobject = lambda : 0
-        # animation_package._subanimation_group = some_group
-        # self.play(PackageAnimation(self.sll, animation_package))
-
-
-        # nested_subanimation_group = SubanimationGroup(
-        #     SuccessiveMoveTrav(self.sll, self.sll.tail_pointer, self.sll[-2]),
-        #     FadeOutContainer(self.sll, self.sll[-1].container, self.sll[-1]),
-        #     FadeOutMobject(self.sll, self.sll[-2].pointer_to_next, self.sll[-2])
-        # )
-
-        # subanimation_group: SubanimationGroup = SubanimationGroup(
-        #     SuccessiveMoveTrav(self.sll, self.sll.head_pointer, self.sll[1]),
-        #     FadeOutContainer(self.sll, self.sll[0].container, self.sll[0]),
-        #     FadeOutMobject(self.sll, self.sll[0].pointer_to_next, self.sll[0]),
-        #     lag_ratio=0.25,
-        # )
-        # subanimation_group.insert(1, nested_subanimation_group)
-
-        # animation_package: AnimationPackage = AnimationPackage(self.sll)
-        # animation_package.clean_up_mobject = lambda : 0
-        # animation_package._subanimation_group = subanimation_group
-        # self.play(PackageAnimation(self.sll, animation_package))
-
-        # FIXME: animation flatten list WITH center sll doesn't work
-        # self.play(
-        #     self.sll.insert(
-        #         index=3,
-        #         data=-1,
-        #         display_first_trav=False,
-        #         display_second_trav=False,
-        #         trav_position='start'
-        #     )
-        #     .subsequently_fade_in_container()
-        #     .subsequently_fade_in_pointer()
-        #     .subsequently_change_prev_node_pointer()
-        #     # .subsequently_fade_out_first_temp_trav()
-        #     .subsequently_flatten_list().with_center_sll()
-        #     .build_animation()
-        # )
-
-        # for sub in self.sll.submobjects:
-        #     pass
-            # self.play(sub.animate.set_opacity(1))
-            # self.play(sub.animate.set_color(RED))
-            # self.play(sub.animate.set_opacity(0))
-
-        # for node in self.sll:
-        #     self.play(FadeIn(Circle(radius=0.02).move_to(node.get_container_left())))
-        #     self.play(FadeIn(Circle(radius=0.02).move_to(node.get_container_top())))
-        #     self.play(FadeIn(Circle(radius=0.02).move_to(node.get_container_right())))
-        #     self.play(FadeIn(Circle(radius=0.02).move_to(node.get_container_bottom())))
-
-        # from animations.animation_package import AnimationPackage
-        # from animations.package_animation import PackageAnimation
-        # from animations.subanimation_group import SubanimationGroup
-        # from animations.singly_linked_list.subanimations.fade_in_mobject import FadeInMobject
-        # from animations.singly_linked_list.subanimations.strictly_successive.move_trav import SuccessiveMoveTrav
-        # from data_structures.pointers.pointer import Pointer
-        # trav = Pointer(self.sll[0], self.sll, 'trav', direction=UP)
-
-        # some_group = SubanimationGroup(
-        #     SubanimationGroup(
-        #         SubanimationGroup(
-        #             FadeInMobject(self.sll, trav, self.sll),
-        #             lag_ratio=1
-        #         ),
-        #         SuccessiveMoveTrav(self.sll, trav, self.sll[1]),
-        #         SuccessiveMoveTrav(self.sll, trav, self.sll[2]),
-        #         lag_ratio=1
-        #     )
-        # )
-        # animation_package: AnimationPackage = AnimationPackage(self.sll)
-        # animation_package.clean_up_mobject = lambda : 0
-        # animation_package._subanimation_group = some_group
-        # self.play(PackageAnimation(self.sll, animation_package))
-
         self.play(
             self.sll.remove_at(
                 index=4,
@@ -241,9 +134,7 @@ class TestScene(Scene):
             .subsequently_shrink_pointer()
             .subsequently_unshrink_pointer()
             .subsequently_curve_pointer()
-            .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav()
-            .subsequently_flatten_list()
-            .subsequently_center_sll()
+            .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
             .build_animation()
         )
 

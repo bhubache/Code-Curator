@@ -6,15 +6,9 @@ from .singly_linked_list.subanimations.base_subanimation import BaseSubanimation
 from .singly_linked_list.subanimations.leaf_subanimation import LeafSubanimation
 from manim import Scene
 
-# DEVELOPMENT IMPORTS
-from .singly_linked_list.subanimations.move_trav import MoveTrav
-
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-# TODO: Support lag ratio
-
-# Nested structure that will be flattened by package animation
 
 class SubanimationGroup(BaseSubanimation):
     def __init__(self, *subanimations: BaseSubanimation, run_time: float = None, lag_ratio: float = 0) -> None:
@@ -98,9 +92,6 @@ class SubanimationGroup(BaseSubanimation):
         pass
 
     def interpolate(self, alpha: float):
-        # NOT_YET_STARTED_ALPHA = 0
-        # ALREADY_FINISHED_ALPHA = 1
-
         def clip(sub_alpha: float) -> float:
             START_SUB_ALPHA = 0
             END_SUB_ALPHA = 1
@@ -112,8 +103,6 @@ class SubanimationGroup(BaseSubanimation):
             else:
                 return sub_alpha
 
-        NOT_YET_STARTED_ALPHA = -1
-        ALREADY_FINISHED_ALPHA = 2
         time = alpha * self.max_end_time
         for subanimation, start_time, end_time in self._subanimations_with_timings:
             subanimation_run_time: float = end_time - start_time
@@ -132,8 +121,6 @@ class SubanimationGroup(BaseSubanimation):
 
     def clean_up_from_animation(self) -> None:
         pass
-        # for subanimation in self._subanimations:
-        #     subanimation.clean_up_from_animation()
 
     def clean_up_from_scene(self, scene: Scene):
         for subanimation in self._subanimations:
@@ -253,6 +240,3 @@ class SubanimationGroup(BaseSubanimation):
         for subanimation in self._subanimations:
             successive_subanimations += subanimation._create_successive_counterpart()
         return successive_subanimations
-
-    # def get_sll(self):
-    #     return self._subanimations[0]._sll
