@@ -1,16 +1,16 @@
-from ..base_subanimation import BaseSubanimation
+from ..leaf_subanimation import LeafSubanimation
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import smooth
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
-class SuccessiveGrowPointer(BaseSubanimation):
+class SuccessiveGrowPointer(LeafSubanimation):
     def __init__(self, sll, pointer):
         super().__init__(sll)
         self._pointer = pointer
         # self._node = node
-    
+
     def begin(self):
         self._pointer.save_state()
         self._pointer.set_opacity(0)
@@ -36,3 +36,6 @@ class SuccessiveGrowPointer(BaseSubanimation):
         self._sll.add(self._pointer)
         # self._save_sll_state()
         self._sll.save_state()
+
+    def create_successive_counterpart(self) -> LeafSubanimation:
+        return SuccessiveGrowPointer(self._sll, self._pointer)

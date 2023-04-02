@@ -1,284 +1,156 @@
 from typing import Any
 
 # from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
-from .base_sll_packager import BaseSLLPackager
+from .data_structure_animator import BaseSLLPackager
+from .data_structure_animator import assign_subanimations_and_animate
 from data_structures.nodes.singly_linked_list_node import SLLNode
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from manim import RIGHT, Animation, linear, smooth, Scene
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from data_structures.pointers.pointer import Pointer
+from .subanimations.base_subanimation import BaseSubanimation
+from ..animation_package import AnimationPackage
+from ..data_structure_animation import PackageAnimation
+from .subanimations.fade_in_container import FadeInContainer
+from .subanimations.fade_in_mobject import FadeInMobject
+from .subanimations.fade_out_mobject import FadeOutMobject
+# from .subanimations.fade_in_pointer import FadeInPointer
+from .subanimations.grow_pointer import GrowPointer
+from .subanimations.move_trav import MoveTrav
+from .subanimations.center_sll import CenterSLL
+from .subanimations.change_next_pointer import ChangeNextPointer
+from .subanimations.flatten_tail import FlattenTail
+# from .subanimations.fade_in_trav import FadeInTrav
+# from .subanimations.fade_out_trav import FadeOutTrav
+from .subanimations.shift_sub_list import ShiftSubList
+from .subanimations.strictly_successive.shift_sub_list import SuccessiveShiftSubList
+from .subanimations.strictly_successive.center_sll import SuccessiveCenterSLL
+from .subanimations.empty import Empty
+from manim import RIGHT, UP, Animation, linear, smooth, Scene, Circle, VGroup
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 # The following imports are for development
 from .subanimations.fade_in_container import FadeInContainer
-from .subanimations.fade_in_pointer import FadeInPointer
+# from .subanimations.fade_in_pointer import FadeInPointer
 from animations.animation_package import AnimationPackage
-
-# class _AddToBack(Animation):
-#     def __init__(
-#         self,
-#         sll,
-#         node:      SLLNode,
-#         prev_node_pointer_to_next,
-#         mob_anims: dict,
-#         run_time:  int = 1,
-#         rate_func = linear,
-#         **kwargs
-#     ):
-#         run_time = len(mob_anims)
-#         super().__init__(
-#             sll,
-#             run_time=run_time,
-#             rate_func=rate_func,
-#             **kwargs
-#         )
-#         self.sll = sll
-#         self.node = node
-#         self.prev_node_pointer_to_next = prev_node_pointer_to_next
-#         print(self.prev_node_pointer_to_next)
-#         self.mob_groups = mob_anims
-#         self.num_animations = len(self.mob_groups)
-#         self.alpha_thresholds = {num: num / self.num_animations for num in self.mob_groups}
-#         self.alpha_step_size = 1 / self.num_animations
-        
-#     def begin(self) -> None:
-#         self.sll.save_state()
-#         self.prev_node_pointer_to_next.save_state()
-#         self.sll.tail_pointer.save_state()
-
-#         self.original_sll_location = self.sll.get_center()
-
-#         self.node.container.set_opacity(0)
-#         self.prev_node_pointer_to_next.set_opacity(0)
-#         # self.node.pointer_to_next.set_opacity(0)
-#         super().begin()
-
-#     def interpolate_mobject(self, alpha: float) -> None:
-#         for animation_num, mob_group in self.mob_groups.items():
-#             for mob_name, mob in mob_group.items():
-#                 normalized_alpha = self._get_normalized_alpha(alpha, animation_num)
-
-#                 if normalized_alpha <= 0 or normalized_alpha >= 1:
-#                     continue
-
-#                 if mob_name == 'container':
-#                     mob.set_stroke(opacity=normalized_alpha)
-#                     for container_sub in mob.submobjects:
-#                         container_sub.set_opacity(normalized_alpha)
-#                 elif mob_name == 'prev_node_pointer_to_next':
-#                     if self._get_mob_animation_num('prev_node_pointer_to_next') == self._get_mob_animation_num('sll'):
-#                         curr_start, curr_end = mob.get_start_and_end()
-#                         mob.become(SinglyDirectedEdge(start=curr_start, end=curr_end))
-#                     else:
-#                         mob.restore()
-#                         original_start, original_end = mob.get_start_and_end()
-#                         new_end = [mob.tip.length, 0, 0] + original_start + ((original_end - original_start - [mob.tip.length, 0, 0]) * [smooth(normalized_alpha), 1, 1])
-#                         mob.become(SinglyDirectedEdge(start=original_start, end=new_end))
-#                     mob.set_opacity(normalized_alpha)
-#                 elif mob_name == 'tail_pointer':
-#                     mob.restore()
-#                     mob.move_immediately_alpha(self.node, self.node, smooth(normalized_alpha))
-#                 elif mob_name == 'sll':
-#                     mob.move_to([self.original_sll_location[0] - (self.original_sll_location[0] * smooth(normalized_alpha)), 0, 0])
-
-#     def clean_up_from_scene(self, scene: Scene = None) -> None:
-#         scene.add(self.node)
-#         self.node.remove(self.sll)
-#         super().clean_up_from_scene(scene)
-
-#     def _get_normalized_alpha(self, alpha: float, animation_num: int) -> float:
-#         start_alpha = self.alpha_thresholds[animation_num] - self.alpha_step_size
-#         end_alpha = start_alpha + self.alpha_step_size
-
-#         if alpha < start_alpha:
-#             return 0
-#         elif start_alpha <= alpha <= end_alpha:
-#             alpha = (alpha - (self.alpha_step_size * (animation_num - 1))) / self.alpha_step_size
-#             if alpha > 1:
-#                 alpha = 1
-#             return alpha
-#         elif alpha > end_alpha:
-#             return 1
-#         else:
-#             raise Exception(f'Animation number {animation_num} has alpha {alpha}')
-        
-#     def _get_mob_animation_num(self, mob_name: str) -> int:
-#         for animation_num, mob_group in self.mob_groups.items():
-#             if mob_name in mob_group:
-#                 return animation_num
-#         raise
 
 
 class AddLast(BaseSLLPackager):
     def __init__(self, sll):
         self._sll = sll
-        # self._node = None
-        # self._prev_node_pointer_to_next = None
-        # self._mob_anims = None
+        self._trav = Circle().set_opacity(0)
+        self._added_node = None
 
-    def _add_node_and_animate(fn):
-        def inner(self, *args, **kwargs):
-            self._node = self._add_node(*args, **kwargs)
-            fn(self, *args, **kwargs)
-            return self._create_animation()
-        return inner
+        self._fade_in_container = Empty(self._sll)
+        self._pointer_animation = Empty(self._sll)
+        self._move_trav = Empty(self._sll)
+        self._center_sll = Empty(self._sll)
+        self._change_next_pointer = Empty(self._sll)
+        self._flatten_tail = Empty(self._sll)
+        self._fade_out_temp_trav = Empty(self._sll)
+        self._shift_sub_list = Empty(self._sll)
+        self._move_head_trav = Empty(self._sll)
+        self._move_tail_trav = Empty(self._sll)
 
-    #################
-    # One animation #
-    #################
-    @_add_node_and_animate
-    def all_together(self, data: Any) -> Animation:
-        self._mob_anims = {
-            1: {
-                'container': self._node.container,
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-                'tail_pointer': self._sll.tail_pointer,
-                'sll': self._sll
-            }
-        }
+    def _set_kwargs_defaults(self, **kwargs):
+        kwargs.setdefault('display_trav', False)
+        kwargs.setdefault('trav_name', 'trav')
+        kwargs.setdefault('trav_position', 'start')
+        kwargs.setdefault('aligned', False)
+        return kwargs
 
-    ##################
-    # Two animations #
-    ##################
-    @_add_node_and_animate
-    def node_then_everything_else(self, data: Any) -> Animation:
-        self._mob_anims = {
-            1: {
-                'container': self._node._container
-            },
-            2: {
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-                'tail_pointer': self._sll.tail_pointer,
-                'sll': self._sll
-            }
-        }
+    def _assign_subanimations(self, index: int, node: SLLNode, pointer_animation_type: str, display_trav: bool, trav_name: str, trav_position: str, aligned: bool):
+        self._move_tail_trav = MoveTrav(self._sll, self._sll.tail_pointer, node)
+        self._fade_in_container = FadeInContainer(self._sll, node.container)
 
-    @_add_node_and_animate
-    def node_and_pointer_then_everything_else(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container,
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-            },
-            2: {
-                'tail_pointer': self._sll.tail_pointer,
-                'sll': self._sll
-            }
-        }
+        # TODO: Make this standardized
+        node.container.set_opacity(0)
+        self._sll[-2].pointer_to_next.set_opacity(0)
+        # FIXME: GrowPointer does a weird movement (though it does end in the correct position)
+        self._pointer_animation = self._get_pointer_animation(node=self._sll[index - 1], pointer_animation_type=pointer_animation_type)
 
-    @_add_node_and_animate
-    def node_and_pointer_and_trav_then_center(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container,
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-                'tail_pointer': self._sll.tail_pointer
-            },
-            2: {
-                'sll': self._sll
-            }
-        }
+        if aligned:
+            # self._shift_sub_list = ShiftSubList(self._sll, VGroup(*[node for i, node in enumerate(self._sll) if i > index], self._sll.tail_pointer), index)
+            self._center_sll = CenterSLL(self._sll)
+        else:
+            self._center_sll = CenterSLL(self._sll)
+            self._flatten_tail = FlattenTail(self._sll, index, node)
 
-    ####################
-    # Three animations #
-    ####################
-    @_add_node_and_animate
-    def node_then_pointer_then_trav_and_center(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container,
-            },
-            2: {
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-            },
-            3: {
-                'tail_pointer': self._sll.tail_pointer,
-                'sll': self._sll
-            }
-        }
+            # node.container.next_to(self._sll[index + 1].container, DOWN)
+            # node.pointer_to_next.become(SinglyDirectedEdge(start=self._sll[index].get_container_top(), end=self._sll[index + 1].get_container_bottom()))
+            # self._change_next_pointer = ChangeNextPointer(self._sll, self._sll[index - 1].pointer_to_next, node)
 
-    @_add_node_and_animate
-    def node_and_pointer_then_trav_then_center(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container,
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-            },
-            2: {
-                'tail_pointer': self._sll.tail_pointer,
-            },
-            3: {
-                'sll': self._sll
-            }
-        }
+        if display_trav:
+            trav_starting_node, trav_starting_index = (self._sll[0], 0) if trav_position == 'start' else (self._sll[index - 1], index - 1)
+            self._trav = Pointer(trav_starting_node, self._sll, label=trav_name, direction=UP)
+            self._animation_package.prepend_successive_animations(
+                FadeInMobject(self._sll, self._trav),
+                *[
+                    MoveTrav(self._sll, self._trav, self._sll[i])
+                    for i in range(trav_starting_index + 1, len(self._sll) - 1)
+                ]
+            )
+        self._fade_out_temp_trav = FadeOutMobject(self._sll, self._trav, self._sll)
 
-    @_add_node_and_animate
-    def node_then_pointer_and_trav_then_center(self, data: Any):
-        self._mob_anims = {
-            1: {
-                'container': self._node._container
-            },
-            2: {
-                'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-                'tail_pointer': self._sll.tail_pointer,
-            },
-            3: {
-                'sll': self._sll
-            }
-        }
-
-    # ###################
-    # # Four animations #
-    # ###################
-    # @_add_node_and_animate
-    # def node_then_pointer_then_trav_then_center(self, data: Any):
-    #     self._mob_anims = {
-    #         1: {
-    #             'container': self._node._container
-    #         },
-    #         2: {
-    #             'prev_node_pointer_to_next': self._sll._nodes[-2].pointer_to_next,
-    #         },
-    #         3: {
-    #             'tail_pointer': self._sll.tail_pointer,
-    #         },
-    #         4: {
-    #             'sll': self._sll
-    #         }
-    #     }
-
-    def node_then_pointer_then_trav_then_center(self, data: Any):
-        self._node = self._add_node(data)
-        package = AnimationPackage(self._sll)
-        package.append_successive_animations(
-            FadeInNode(self._node),
-            FadeInPointer(self._node.pointer_to_next)
+    @assign_subanimations_and_animate
+    def all_together(self, index: int, data) -> PackageAnimation:
+        self._animation_package.append_concurrent_animations(
+            self._fade_in_container,
+            self._pointer_animation,
+            self._fade_out_temp_trav,
+            self._flatten_tail,
+            self._move_tail_trav,
+            self._center_sll,
         )
 
 
-    def _add_node(self, data: Any) -> None:
-        node = SLLNode(data)
-        node.next_to(self._sll._tail, RIGHT, buff=1)
-        self._sll._tail.set_next(node)
 
-        # node.add(self._sll._tail._pointer_to_next)
-        self._prev_node_pointer_to_next = self._sll._tail.pointer_to_next
-        self._sll._tail.add(self._prev_node_pointer_to_next)
-        node.add(node._container)
-
-        self._sll._nodes.append(node)
-        self._sll.add(node)
-
-        self._sll._tail = node
-        return node
-    
-    def _create_animation(self):
-        if self._node is None or self._mob_anims is None:
-            raise RuntimeError('Make node or mob_anims has not been set yet!')
-        
-        return _AddToBack(
-            sll=self._sll,
-            node=self._node,
-            prev_node_pointer_to_next=self._prev_node_pointer_to_next,
-            mob_anims=self._mob_anims
+    @assign_subanimations_and_animate
+    def add_last_test(
+        self,
+        index: int,
+        data: Any,
+        *,
+        pointer_animation_type: str,
+        display_trav: bool,
+        trav_name: str,
+        trav_position: str,
+        aligned: bool,
+        **kwargs
+    ) -> PackageAnimation:
+        # self._animation_package.append_successive_animations(
+        #     self._fade_in_container,
+        #     self._pointer_animation,
+        #     self._change_next_pointer,
+        #     self._fade_out_temp_trav,
+        #     self._flatten_tail,
+        #     self._center_sll
+        # )
+        self._animation_package.append_successive_animations(
+            self._fade_in_container,
+            self._pointer_animation,
+            # self._shift_sub_list,
+            # self._center_sll
+            # self._pointer_animation,
+            # self._change_next_pointer,
+            # self._flatten_tail,
+            self._fade_out_temp_trav,
+            self._flatten_tail,
+            self._move_tail_trav,
+            self._center_sll,
+            # self._center_sll
         )
+        # self._animation_package.append_successive_animations(
+        #     self._change_next_pointer,
+        #     self._fade_out_temp_trav,
+        # )
+        self._animation_package.append_concurrent_animations(
+        )
+        self._animation_package.append_concurrent_animations(
+        )
+        # self._animation_package.append_concurrent_animations(
+        #     # self._flatten_tail,
+        #     self._center_sll
+        # )

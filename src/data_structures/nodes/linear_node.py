@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from manim import RIGHT, LEFT, Animation, FadeIn, FadeOut
 
 from .node import Node
@@ -31,10 +33,41 @@ class LinearNode(Node):
 
     def set_next(self, node, add_pointer_to_node = True):
         self.next = node
+
+        # Remove the existing pointer (if it exists) from the screen
+        if self._pointer_to_next is not None:
+            self.remove(self._pointer_to_next)
         # self.next_to(node, LEFT, buff=1)
-        self._pointer_to_next = SinglyDirectedEdge(start=self, end=node)
+        if self._pointer_to_next is None:
+            self._pointer_to_next = SinglyDirectedEdge(start=self, end=node)
+        else:
+
+            # TEST!!!
+            if self._diagonal_with_other(node):
+                self._pointer_to_next.become(
+                    SinglyDirectedEdge(
+                    start=self.get_container_right(),
+                    end=node.get_container_left()
+                    )
+                )
+            else:
+                self._pointer_to_next.become(
+                    SinglyDirectedEdge(
+                        start=self,
+                        end=node
+                    )
+                )
+
         self.add(self._pointer_to_next)
         self._pointer_to_next._is_visible = True
+
+        # NOTE: TEST!!!
+        # return self.pointer_to_next
+        return self, self._pointer_to_next
+
+    def _diagonal_with_other(self, other: LinearNode) -> bool:
+        diff = self.get_container_center() - other.get_container_center()
+        return diff[0] != 0.0 and diff[1] != 0.0
 
     def move(self, num_nodes: int) -> Iterable[Animation]:
         animation = self.animate.shift(RIGHT * num_nodes * 2)
@@ -44,7 +77,7 @@ class LinearNode(Node):
     def fade_out_pointer(self) -> None:
         FadeOut(self._pointer_to_next)
         self._pointer_to_next._is_visible = False
-    
+
     def fade_in_pointer(self) -> None:
         FadeIn(self._pointer_to_next)
         self._pointer_to_next._is_visible = True
@@ -69,7 +102,7 @@ class LinearNode(Node):
 
     def get_next_pointer_left(self):
         return self._pointer_to_next.get_left()
-    
+
     @property
     def pointer_to_next(self):
         return self._pointer_to_next

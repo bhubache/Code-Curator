@@ -22,7 +22,7 @@ class Node(VMobject):
         visible_components = []
         if self._container._is_visible:
             visible_components.append(self._container)
-        
+
         return visible_components
 
     def get_container_center(self):

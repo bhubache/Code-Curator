@@ -1,19 +1,18 @@
-from .visible_subanimation import VisibleSubanimation
+from .leaf_subanimation import LeafSubanimation
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from .strictly_successive.change_next_pointer import SuccessiveChangeNextPointer
-from manim import smooth
+from manim import smooth, Mobject
 
-class ChangeNextPointer(VisibleSubanimation):
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
+
+class ChangeNextPointer(LeafSubanimation):
     def __init__(self, sll, pointer, node_to_be_attached):
         super().__init__(sll)
         self._pointer = pointer
         self._node_to_be_attached = node_to_be_attached
 
-    def create_successive_counterpart(self):
-        return SuccessiveChangeNextPointer(self._sll, self._pointer, self._node_to_be_attached)
-
     def begin(self):
-        super().begin()
         self._pointer.save_state()
 
     # NOTE: May have to change start coordinate if SLL is moving
@@ -27,7 +26,9 @@ class ChangeNextPointer(VisibleSubanimation):
             end=final_end
             )
         )
-        super().interpolate(alpha)
 
     def clean_up_from_animation(self):
         self._sll.save_state()
+
+    def create_successive_counterpart(self) -> LeafSubanimation:
+        return SuccessiveChangeNextPointer(self._sll, self._pointer, self._node_to_be_attached)
