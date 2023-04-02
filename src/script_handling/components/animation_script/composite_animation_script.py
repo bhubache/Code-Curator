@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Union, Callable
+import inspect
 
 from manim import Animation
 from .animation_script_interface import IAnimationScript
@@ -49,7 +50,7 @@ class CompositeAnimationScript(IAnimationScript):
         self._parent = new_parent
         for child in self.children:
             child.parent = self
-    
+
     @property
     def text(self):
         raise NotImplementedError()
@@ -138,7 +139,25 @@ class CompositeAnimationScript(IAnimationScript):
         new_composite = CompositeAnimationScript(unique_id=section_name, children=new_leaves)
         self.set_child(unique_id=section_name, new_child=new_composite)
 
+    def _check_that_unique_id_exists(fn):
+        def inner(*args, **kwargs):
+            call_args: dict = inspect.getcallargs(fn, *args, **kwargs)
+            self: CompositeAnimationScript = call_args.get('self')
+            unique_id: str = call_args.get('unique_id')
+            if not self._unique_id_exists(unique_id):
+                raise Exception(f'The name {unique_id} is not present in {self._unique_id}')
+        return inner
 
+    def _unique_id_exists(self, unique_id: str) -> bool:
+        if self._unique_id == unique_id:
+            return True
+
+        for child in self._children:
+            if child._unique_id_exists(unique_id):
+                return True
+        return False
+
+    @_check_that_unique_id_exists
     def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
