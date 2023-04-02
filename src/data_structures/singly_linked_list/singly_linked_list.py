@@ -1,163 +1,242 @@
-from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, Animation, AnimationGroup
+from __future__ import annotations
+import math
 
-from ..nodes.singly_linked_list_node import SLLNode as Node
+from typing import Iterable, Any
+
+from ..nodes.singly_linked_list_node import SLLNode
 from ..pointers.pointer import Pointer
 from ..edges.singly_directed_edge import SinglyDirectedEdge
+from animations.singly_linked_list.subanimations.fade_in_container import FadeInContainer
+# from animations.singly_linked_list.subanimations.fade_in_pointer import FadeInPointer
+from animations.singly_linked_list.subanimations.grow_pointer import GrowPointer
+from animations.singly_linked_list.subanimations.move_trav import MoveTrav
+from animations.singly_linked_list.subanimations.center_sll import CenterSLL
+# from animations.singly_linked_list.add_first import AddFirst
+# from animations.singly_linked_list.add_last import AddLast
+# from animations.singly_linked_list.remove_first import RemoveFirst
+# from animations.singly_linked_list.remove_last import RemoveLast
+# from animations.singly_linked_list.insert import Insert
+from animations.singly_linked_list.remove_at import RemoveAt
+from manim import VMobject, DOWN, LEFT, UP, RIGHT, FadeIn, FadeOut, Animation, AnimationGroup, Succession, UpdateFromAlphaFunc, VGroup
 
-from typing import Iterable
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
 
-import inspect
+# The following imports are for development
+# from animations.singly_linked_list.subanimations.fade_in_pointer import FadeInPointer
+from animations.singly_linked_list.subanimations.fade_in_container import FadeInContainer
+# from animations.animation_package import AnimationPackage
+from animations.data_structure_animation import DataStructureAnimation
+import sys
+
+# TODO: Consider using the builder design pattern rather than including for every possible subanimation combination out of the box
+
 
 def create_sll(data_list):
     return SinglyLinkedList(*data_list)
 
+# TODO: A lot of duplicate code that needs to be removed.
+
 
 class SinglyLinkedList(VMobject):
-    def __init__(self, *elements, shape = None):
+    def __init__(self, *elements: list[Any], shape = None) -> None:
         super().__init__()
+        self._elements = elements
         self._nodes = []
         self._head = None
         self._tail = None
+        self._saved_states = {}
+        # self._animation_package = AnimationPackage(self)
 
-        trav = None
-        for i, elem in enumerate(elements):
-            node = Node(elem)
-            if i == 0:
-                self._head = node
-                trav = self._head
+        if len(elements) == 0:
+            raise AttributeError('Linked List cannot have zero elements')
+
+        for i in range (1, len(elements)):
+            prev = None
+            if i == 1:
+                prev = SLLNode(elements[i - 1])
+                self._head = prev
+                self._nodes.append(prev)
+                self.add(prev)
             else:
-                self._place_node_next_to(node, trav)
-                trav.set_next(node, add_pointer_to_screen=True)
-                if i == len(elements) - 1:
-                    self._tail = node
+                prev = self._nodes[i - 1]
 
-                trav = trav.next
+            curr = SLLNode(elements[i])
 
-            self._nodes.append(node)
-            self.add(node)
+            self._place_node_next_to(curr, prev, RIGHT)
+            prev.set_next(curr)
 
-        self._head_pointer = Pointer(self._head, 'head', DOWN)
-        self._tail_pointer = Pointer(self._tail, 'tail', DOWN)
+            if i == len(elements) - 1:
+                self._tail = curr
 
-        self.add(self._head_pointer)
-        self.add(self._tail_pointer)
+            self._nodes.append(curr)
+            self.add(curr)
+
+        self.head_pointer = Pointer(self._head, self, 'head', DOWN)
+        self.tail_pointer = None
+        if len(elements) == 1:
+            self.tail_pointer = Pointer(self._tail, self, 'tail', UP)
+        elif len(elements) > 1:
+            self.tail_pointer = Pointer(self._tail, self, 'tail', DOWN)
+
+        self.add(self.head_pointer)
+        self.add(self.tail_pointer)
 
         self.move_to([0, 0, 0])
 
-    def append(self, data) -> Iterable[Animation]:
-        return self.add_last(data)
+    def __getitem__(self, index: int) -> SLLNode:
+        return self._nodes[index]
 
-    # NOTE: 1/22/2023
-    # self._nodes.append(node) moved above animation appends to see if self._move_pointer is fixed
-    def add_last(self, data) -> Iterable[Animation]:
-        node = Node(data)
+    def __setitem__(self, index: int, value: SLLNode) -> None:
+        self._nodes[index] = value
+
+    def __iter__(self):
+        return self._nodes.__iter__()
+
+    def __len__(self):
+        return len(self._nodes)
+
+    @staticmethod
+    def create_sll(sll: SinglyLinkedList) -> SinglyLinkedList:
+        return SinglyLinkedList(*[node.data._value for node in sll])
+
+    def insert(
+        self,
+        index: int,
+        data: Any,
+        display_first_trav: bool = False,
+        first_trav_name: str = 'p1',
+        display_second_trav: bool = False,
+        second_trav_name: str = 'p2',
+        trav_position: str = 'start',
+        aligned: bool = False,
+        **kwargs
+    ) -> Insert:
+        return Insert.create_packager(
+            sll=self,
+            index=index,
+            data=data,
+            node=self._add_node(index, data, aligned=aligned),
+            display_first_trav=display_first_trav,
+            first_trav_name=first_trav_name,
+            display_second_trav=display_second_trav,
+            second_trav_name=second_trav_name,
+            trav_position=trav_position,
+            aligned=aligned,
+            sll_calling_method=self.insert
+        )
+
+    def remove_at(
+        self,
+        index: int,
+        display_first_trav: bool = False,
+        first_trav_name: str = 'p1',
+        display_second_trav: bool = False,
+        second_trav_name: str = 'p2',
+        trav_position: str = 'start',
+        aligned: bool = False,
+        **kwargs
+    ) -> RemoveAt:
+        return RemoveAt.create_packager(
+            sll=self,
+            index=index,
+            node=self._remove_node(index),
+            display_first_trav=display_first_trav,
+            first_trav_name=first_trav_name,
+            display_second_trav=display_second_trav,
+            second_trav_name=second_trav_name,
+            trav_position=trav_position,
+            aligned=aligned,
+            sll_calling_method=self.remove_at
+        )
+
+    # NOTE: Maybe also remove node from sll?
+    # NOTE: Can't remove the node from self._nodes yet
+    # TODO: Change node's next attribute!!!!
+    def _remove_node(self, index: int) -> SLLNode:
+        if index < 0:
+            index = len(self) + index
+
+        if index >= len(self):
+            raise IndexError(f'Index {index} out of bounds for length {len(self)}')
+
+        node = self[index]
+        # del self._nodes[index]
+        # del self[index]
+
+        if index == 0:
+            self._head = self[1]
+        if index == len(self) - 1:
+            self._tail = self[-2]
+
+        return node
+
+    # TODO: Change node's next attribute!!!!
+    def _add_node(self, index: int, data: Any, aligned: bool = True) -> SLLNode:
+        if index < 0:
+            index = len(self) + index
+
+        if index > len(self):
+            raise IndexError(f'Index {index} out of bounds for length {len(self)}')
+
+        node = SLLNode(data)
+        self._nodes.insert(index, node)
+        if index == 0:
+            self._head = node
+        if index == len(self):
+            self._tail = node
+
+        # TODO: Adjust all of these because the node is not yet inserted!!!
+        if index == 0:
+            if aligned:
+                # node.next_to(self[1].container, LEFT, buff=(self[1].pointer_to_next.length + (2 * self[1].container.radius)))
+                # node.next_to(self[1].container, LEFT, buff=0)
+                node.align_to(self[1].container, LEFT + DOWN)
+                node.shift(LEFT * ((self[0].radius * 2) + self[1].pointer_to_next.length))
+                node.set_next(self[1])
+            else:
+                raise NotImplementedError('Nonaligned insertion of a node at the front of linked list is not yet supported')
+        elif index < len(self) - 1:
+            if aligned:
+                node.next_to(self[index - 1], RIGHT, buff=0)
+
+                # Visually place the node in the correct spot on the screen
+                # NOTE: Side effect of setting the node's next node 1 too far
+                node.set_next(self[index + 2])
+
+                # Set the node's next node to the correct node
+                node.next = self[index + 1]
+            else:
+                node.next_to(self[index + 1].container, DOWN)
+                node.set_next(self[index + 1])
+        else:
+            node.next_to(self[-2], RIGHT, buff=self[0].pointer_to_next.length)
+            self[-2].set_next(node)
+            self[-2].pointer_to_next.set_opacity(0)
+
+            if not aligned:
+                node.shift(DOWN)
+                self[-2].pointer_to_next.become(SinglyDirectedEdge(start=self[-2].pointer_to_next.start, end=node.get_container_left()))
+
+        if node.pointer_to_next is not None:
+            node.add(node.pointer_to_next)
+        node.add(node.container)
         self.add(node)
-        self._place_node_next_to(node, self._tail)
-        self._tail.set_next(node)
 
-        self._nodes.append(node)
-
-        animations = []
-        animations.append(AnimationGroup(FadeIn(self._tail._pointer_to_next), FadeIn(node)))
-        animations.append(self.animate.move_to([0, 0, 0]))
-        animations.append(self._move_pointer(self._tail_pointer, 1))
-        self._tail = node
-
-        # self._nodes.append(node)
-        return animations
-
-    def prepend(self, data) -> Iterable[Animation]:
-        return self.add_first(data)
-
-    def add_first(self, data) -> Iterable[Animation]:
-        node = Node(data)
-        self.add(node)
-        self._place_node_next_to(node, self._head, LEFT)
-        node.set_next(self._head)
-
-        animations = []
-        animations.append(FadeIn(node))
-        animations.append(self.animate.move_to([0, 0, 0]))
-        animations.append(self._move_pointer(self._head_pointer, -1))
-        self._head = node
-
-        self._nodes.insert(0, node)
-        return animations
-
-    def insert_at_index(self, index: int, data) -> Iterable[Animation]:
-        trav = Pointer(self._head, 'trav', UP)
-
-        animations = []
-        animations.append(AnimationGroup(*(FadeIn(trav), self.animate.move_to([0, 0, 0]))))
-        animations.append(self.animate.move_to([0, 0, 0]))
-
-        trav_shifts = []
-        num_to_shift = index - 1
-        # animations += Succession()
-        # for i in range(num_to_shift):
-        animations += [Succession(*[self._move_pointer(trav, 1) for _ in range(num_to_shift)])]
-            # trav_shifts.append(self._move_pointer(trav, 1))
-            # trav_shifts.append(AnimationGroup(self._move_pointer(trav, 1)))
-        # animations += Succession(*trav_shifts)
-        # animations += trav_shifts
-
-
-        new_node = Node(data)
-        # new_node.next_to(trav, RIGHT, aligned_edge=trav.get_bottom())
-
-        #FIXME: This may get out of bounds
-        # new_node.next_to(self._nodes[num_to_shift + 1], aligned_edge=self._nodes[num_to_shift + 1].get_bottom())
-        new_node.move_to(trav.get_bottom())
-        new_node.move(1)
-        # self._move_pointer(new_node, 1)
-        animations.append(AnimationGroup(FadeIn(new_node)))
-
-        new_node.set_next(self._nodes[index])
-        animations.append(AnimationGroup(FadeIn(new_node._pointer_to_next)))
-
-        trav_node = self._nodes[num_to_shift]
-        # animations.append(AnimationGroup(trav_node._pointer_to_next.animate.put_start_and_end_on(start=trav_node._pointer_to_next.get_left(), end=new_node.get_left())))
-
-        trav_node._pointer_to_next.generate_target()
-        trav_node._pointer_to_next.target = SinglyDirectedEdge(start=trav_node._pointer_to_next.get_left(), end=new_node.get_left())
-        animations.append(AnimationGroup(MoveToTarget(trav_node._pointer_to_next)))
-
-        self._nodes.insert(index, new_node)
-        animations.append(AnimationGroup(*self._flatten()))
-
-        # animations.append(AnimationGroup(MoveToTarget(self)))
-
-
-
-        # Reset trav back to head so the trav shift animations proceed as expected
-        self._move_pointer(trav, -num_to_shift)
-        return animations
-
-    def remove_at_inex(self):
-        pass
-
-    def remove(self):
-        pass
-
-    
+        return node
 
     # FIXME: Hardcoded shift value
     # NOTE: Has the side effect of moving the pointer on the scene without the animation as well
-    def _move_pointer(self, pointer: Pointer, num_nodes: int) -> Iterable[Animation]:
-        return pointer.move(num_nodes, self._nodes[self._index_of_pointer(pointer) + num_nodes])
+    def _move_pointer(self, pointer: Pointer, positioned_node, actual_node) -> Iterable[Animation]:
+        return pointer.move(positioned_node, actual_node)
+        # return pointer.move(num_nodes, self._nodes[self._index_of_pointer(pointer) + num_nodes])
+
+    def _immediately_move_pointer(self, pointer: Pointer, positioned_node, actual_node) -> None:
+        pointer.immediately_move(positioned_node, actual_node)
 
     def _index_of_pointer(self, pointer):
         return self._nodes.index(pointer.node)
 
+    # FIXME: Hard coded buff
     def _place_node_next_to(self, node, other, direction = RIGHT, buff = 1):
         node.next_to(other, direction, buff = buff)
-
-    def _flatten(self):
-        data_list = [node._data for node in self._nodes]
-        flattened_copy = create_sll(data_list)
-        
-        animations = []
-        for self_node, flattened_node in zip(self._nodes, flattened_copy._nodes):
-            animations.append(self_node.animate.move_to(flattened_node))
-        # animations.append(self.animate.move_to([0, 0, 0]))
-        return animations

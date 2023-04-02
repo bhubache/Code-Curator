@@ -14,7 +14,7 @@ from typing import Iterable
 
 # To open the movie after render.
 from manim.utils.file_ops import open_file as open_media_file
-from manim import Scene
+from manim import *
 
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
@@ -73,7 +73,7 @@ def get_scene_classes():
     code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     code_solution_cls = getattr(code_solution_module, 'CodeSolution')
     # scene_classes.append(code_solution_cls)
-    
+
     # FIXME: Bad practice returning a tuple with loosely understood ordering
     return scene_classes, problem_dir
 
@@ -110,13 +110,106 @@ def _get_animation_timing_iterable(aligned_animation_script) -> Iterable[dict]:
         animation_timings_list.append(timing_info)
     return animation_timings_list
 
+class TestScene(Scene):
+    config.disable_caching = True
+    # config.frame_rate = 240
+    # import json
+    # print(type(config))
+    # print(json.dumps(config, indent=4, default=str))
+
+    def construct(self):
+        from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+        from data_structures.nodes.singly_linked_list_node import SLLNode
+        from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+        self.sll = SinglyLinkedList(1, 2, 3, 4, 5, 6)
+        self.play(FadeIn(self.sll))
+
+        self.play(
+            self.sll.remove_at(
+                index=4,
+                display_first_trav=True,
+                display_second_trav=True,
+                trav_position='start'
+            )
+            .subsequently_shrink_pointer()
+            .subsequently_unshrink_pointer()
+            .subsequently_curve_pointer()
+            .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
+            .build_animation()
+        )
+
+        # self.play(self.sll.remove_last_all_together())
+
+        # self.play(self.sll.remove_first_all_together())
+        # self.play(self.sll.remove_at_test(3, show_each_pointer_change=True, display_first_trav=True, display_second_trav=True))
+        # self.play(self.sll.add_first_all_together(-1, pointer_animation_type='fade'))
+        # self.play(self.sll.add_last_test(-1, pointer_animation_type='fade', display_trav=True, trav_position='start'))
+        # self.play(self.sll.insert_at_front_all_together(2, -1, pointer_animation_type='fade'))
+        # self.play(self.sll.insert_test(2, -1, display_trav=True))
+        # self.sll.insert_test(2, -1, display_trav=True)
+
+        # for sub in self.sll.submobjects:
+        #     logger.info(sub)
+        #     self.play(sub.animate.set_opacity(1))
+        #     self.play(FadeOut(sub))
+
+
+        # for node in self.sll:
+        #     self.play(FadeIn(Circle(radius=0.02).next_to(node, RIGHT, buff=0)))
+            # self.play(FadeIn(Circle(radius=0.02).move_to(node.get_right())))
+        # self.play(self.sll.insert_test(1, -1))
+
+        # self.play(FadeIn(Circle(radius=0.02).move_to(self.sll.get_right())))
+        # self.play(FadeIn(Circle(radius=0.02).move_to(self.sll.get_left())))
+        # self.play(FadeIn(Circle(radius=0.02).move_to(self.sll.get_top())))
+        # self.play(FadeIn(Circle(radius=0.02).move_to(self.sll.get_bottom())))
+        # self.play(FadeIn(Circle(radius=0.02).move_to(self.sll.get_center())))
+        # self.play(FadeIn(Circle(radius=0.02, color=BLUE).move_to([0, 0, 0])))
+        # self.play(self.sll.insert_all_together(1, -1))
+
+
+
+        # self.wait()
+        # self.play(self.sll.insert_all_together(1, 70))
+        # self.play(self.sll.insert_all_together(1, 'code'))
+        # self.play(self.sll.insert_test(2, -1))
+        # self.play(self.sll.insert_test(2, -1))
+        # self.play(self.sll.add_first_all_together(-1))
+        # self.play(self.sll.add_first(-1))
+        # self.play(self.sll.add_first(-1))
+        # self.play(self.sll.remove_at(3))
+        # self.play(self.sll.remove_at(2))
+        # self.play(self.sll.remove_first())
+        # self.play(self.sll.insert(3, -1))
+        # self.play(self.sll.add_first(0))
+        # self.play(self.sll.add_first(1000, 1))
+        # self.play(self.sll.add_last(7, 1))
+        # self.play(self.sll.insert(3, 1111))
+        # self.wait(1)
+        # self.play(self.sll.add_last(10, 1))
+        # self.wait(1)
+        # self.play(self.sll.remove_at_index(3))
+        # self.wait(1)
+        # self.play(self.sll.insert(1, 10))
+        # self.wait(1)
+        # self.play(self.sll.remove_at_index(2))
+        # self.wait(1)
+        # self.play(self.sll.insert(2, 10))
+        self.wait()
+
 
 if __name__ == '__main__':
-    scene_classes, problem_dir = get_scene_classes()
-    aligned_animation_script = get_aligned_animation_script(
-        alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
-        script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
-        )
-    create_scenes(scene_classes, problem_dir, aligned_animation_script.get_scenes())
+    test_data_structure = True
+    if not test_data_structure:
+        scene_classes, problem_dir = get_scene_classes()
+        aligned_animation_script = get_aligned_animation_script(
+            alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
+            script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH)
+            )
+        create_scenes(scene_classes, problem_dir, aligned_animation_script.get_scenes())
+    else:
+        test_scene = TestScene()
+        test_scene.render()
+
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)

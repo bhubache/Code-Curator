@@ -1,4 +1,4 @@
-from manim import DOWN, RIGHT, Animation
+from manim import DOWN, RIGHT, LEFT, UP, Animation, RED, YELLOW, AnimationGroup, Create, Circle, FadeOut, Line
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 from data_structures.static_array_parts.values.element import Element
@@ -6,64 +6,78 @@ from data_structures.static_array_parts.values.element import Element
 from typing import Iterable
 import numpy as np
 
+from custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
+
 class Pointer(SinglyDirectedEdge):
-    def my_closure(self, node):
-        def position_updater(self):
-            location = node.get_node_bottom() if self._direction[1] == 1 else node.get_node_top()
-            self.next_to(location, opposite_of_direction(self._direction), buff=0)
-
-            # location = self._node.get_node_bottom() if self._direction[1] == 1 else self._node.get_node_top()
-            # self.next_to(location, opposite_of_direction(self._direction), buff=0)
-        return position_updater
-
-    def __init__(self, node, label = None, direction = DOWN, start = None, end = None, tip_shape = None):
+    def __init__(self, node, sll, label = None, direction = DOWN, start = None, end = None, tip_shape = None):
+        self._sll = sll
         # TODO: More fleshed out implementation for where the pointer starts and ends
-        self._node = node
-        self._node_list = [self._node]
-        self._direction = direction
-        end = end if end is not None else self._node.get_node_bottom()
-        if self._direction[1] == -1:
-            end = self._node.get_node_top()
-            
+        relative_placement = None
+        if end is None:
+            if self.lists_equal(direction, DOWN):
+                relative_placement = node.get_container_top.__func__
+                end = node.get_container_top()
+
+            elif self.lists_equal(direction, UP):
+                relative_placement = node.get_container_bottom.__func__
+                end = node.get_container_bottom()
+            else:
+                raise NotImplementedError()
         start_x = end[0]
-        start_y = end[1] - 1.25
-        if self._direction[1] == -1:
-            start_y = end[1] + 1.25
+        start_y = end[1] - (node.radius * 2)
+        # start_y = end[1] - 1.25
+        if direction[1] == -1:
+            start_y = end[1] + (node.radius * 2)
+            # start_y = end[1] + 1.25
         start_z = end[2]
         start = start if start is not None else [start_x, start_y, start_z]
+        
         super().__init__(start=start, end=end, tip_shape=tip_shape)
+
+        self._node = node
+        self._relative_placement = relative_placement
+        self._direction = direction
+        
         self._label = Element(label)
         
-        self._label.next_to(self, opposite_of_direction(self._direction))
+        self._label.next_to(self, self.opposite_of_direction())
         self.add(self._label)
 
-        # def my_closure(self, node):
-        #     def position_updater(self):
-        #         location = node.get_node_bottom() if self._direction[1] == 1 else node.get_node_top()
-        #         self.next_to(location, opposite_of_direction(self._direction), buff=0)
+    def lists_equal(self, a: list, b: list) -> bool:
+        if len(a) != len(b): return False
 
-        #         # location = self._node.get_node_bottom() if self._direction[1] == 1 else self._node.get_node_top()
-        #         # self.next_to(location, opposite_of_direction(self._direction), buff=0)
-        #     return position_updater
-
-        # self.add_updater(position_updater)
-        self.add_updater(self.my_closure(self._node))
+        for e1, e2 in zip(a, b):
+            if e1 != e2: return False
+        return True
 
     @property
     def node(self):
         return self._node
 
-    def move(self, num_nodes: int, node) -> Iterable[Animation]:
-        # self.suspend_updating()
-        self.remove_updater(self.my_closure(self._node))
-        self._node = node
-        # self.resume_updating()
-        animation = self.animate.shift(RIGHT * num_nodes * 2)
-        self.shift(RIGHT * num_nodes * 2)
-        # self.resume_updating()
-        self.add_updater(self.my_closure(node))
-        return animation
+    def move(self, positioned_node, actual_node) -> Iterable[Animation]:
+        self._node = actual_node
+        logger.info(self._node in self._sll.submobjects)
+        if self._node not in self._sll.submobjects:
+            raise
+        relative_location = self._relative_placement(positioned_node)
+        start = [relative_location[0], relative_location[1] + (self.vertical_length * -self._direction[1]), 0]
+        return AnimationGroup(
+            self.animate.put_start_and_end_on(start, relative_location)
+        )
 
-# FIXME: VERY VERY basic
-def opposite_of_direction(direction):
-    return np.array([direction[0], direction[1] * -1, direction[2]])
+    # TODO: Use vectors to make this generalized to all directions
+    def move_immediately_alpha(self, positioned_node, actual_node, alpha) -> None:
+        self._node = actual_node
+
+        start, end = self.get_start_and_end()
+        line = Line(start=end, end=self._relative_placement(positioned_node))
+        new_end = line.point_from_proportion(alpha)
+        self.put_start_and_end_on(new_end + (self.start - self.end), new_end)
+
+    # FIXME: VERY VERY basic
+    def opposite_of_direction(self):
+        return np.array([self._direction[0], self._direction[1] * -1, self._direction[2]])
+
+    def get_visible_components(self):
+        return [self]
