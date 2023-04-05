@@ -60,7 +60,6 @@ class Pointer(SinglyDirectedEdge):
 
     def move(self, positioned_node, actual_node) -> Iterable[Animation]:
         self._node = actual_node
-        logger.info(self._node in self._sll.submobjects)
         if self._node not in self._sll.submobjects:
             raise
         relative_location = self._relative_placement(positioned_node)
