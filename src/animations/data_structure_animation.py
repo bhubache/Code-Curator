@@ -11,8 +11,9 @@ class DataStructureAnimation(Animation):
     def __init__(self, sll, data_structure_animator) -> None:
         super().__init__(sll, run_time=data_structure_animator.get_run_time())
         self._sll: sll_m.SinglyLinkedList = sll
-        self._animator: ds_animator.DataStructureAnimator = data_structure_animator
-        self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
+        # self._animator: ds_animator.DataStructureAnimator = data_structure_animator
+        # self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
+        self._subanimation_group = data_structure_animator
 
     def begin(self) -> None:
         self._subanimation_group.init_run_time()
@@ -23,5 +24,5 @@ class DataStructureAnimation(Animation):
 
     def clean_up_from_scene(self, scene) -> None:
         self._subanimation_group.clean_up_from_scene(scene)
-        self._animator.clean_up_mobject()
+        # self._animator.clean_up_mobject()
         return super().clean_up_from_scene(scene)
