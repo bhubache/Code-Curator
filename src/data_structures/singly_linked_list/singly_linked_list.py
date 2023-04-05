@@ -12,7 +12,7 @@ from animations.singly_linked_list.subanimations.grow_pointer import GrowPointer
 from animations.singly_linked_list.subanimations.move_trav import MoveTrav
 from animations.singly_linked_list.subanimations.center_sll import CenterSLL
 # from animations.singly_linked_list.add_first import AddFirst
-# from animations.singly_linked_list.add_last import AddLast
+from animations.singly_linked_list.add_last import AddLast
 # from animations.singly_linked_list.remove_first import RemoveFirst
 # from animations.singly_linked_list.remove_last import RemoveLast
 # from animations.singly_linked_list.insert import Insert
@@ -39,35 +39,27 @@ def create_sll(data_list):
 
 
 class SinglyLinkedList(VMobject):
-    def __init__(self, *elements: list[Any], shape = None) -> None:
+    def __init__(self, *elements: Any, shape = None) -> None:
         super().__init__()
         self._elements = elements
         self._nodes = []
         self._head = None
         self._tail = None
-        self._saved_states = {}
-        # self._animation_package = AnimationPackage(self)
 
-        if len(elements) == 0:
+        if len(self._elements) == 0:
             raise AttributeError('Linked List cannot have zero elements')
 
-        for i in range (1, len(elements)):
-            prev = None
-            if i == 1:
-                prev = SLLNode(elements[i - 1])
-                self._head = prev
-                self._nodes.append(prev)
-                self.add(prev)
-            else:
-                prev = self._nodes[i - 1]
-
+        prev = None
+        for i in range (0, len(elements)):
             curr = SLLNode(elements[i])
-
-            self._place_node_next_to(curr, prev, RIGHT)
-            prev.set_next(curr)
-
+            if i == 0:
+                self._head = curr
             if i == len(elements) - 1:
                 self._tail = curr
+            if i >= 1:
+                prev = self._nodes[i - 1]
+                self._place_node_next_to(curr, prev, RIGHT)
+                prev.set_next(curr)
 
             self._nodes.append(curr)
             self.add(curr)
@@ -124,6 +116,27 @@ class SinglyLinkedList(VMobject):
             trav_position=trav_position,
             aligned=aligned,
             sll_calling_method=self.insert
+        )
+
+    def add_last(
+        self,
+        *,
+        data: Any,
+        display_first_trav: bool = False,
+        first_trav_name: str = 'trav',
+        trav_position: str = 'start',
+        aligned: bool = True,
+        **kwargs
+    ) -> AddLast:
+        return AddLast.create_packager(
+            sll=self,
+            index=len(self),
+            node=self._add_node(index=len(self), data=data),
+            display_first_trav=display_first_trav,
+            first_trav_name=first_trav_name,
+            trav_position=trav_position,
+            aligned=aligned,
+            sll_calling_method=self.add_last,
         )
 
     def remove_at(
@@ -210,7 +223,10 @@ class SinglyLinkedList(VMobject):
                 node.next_to(self[index + 1].container, DOWN)
                 node.set_next(self[index + 1])
         else:
-            node.next_to(self[-2], RIGHT, buff=self[0].pointer_to_next.length)
+            if self[0].pointer_to_next is None:
+                node.next_to(self[-2], RIGHT, buff=2 * self[0].radius)
+            else:
+                node.next_to(self[-2], RIGHT, buff=self[0].pointer_to_next.length)
             self[-2].set_next(node)
             self[-2].pointer_to_next.set_opacity(0)
 
