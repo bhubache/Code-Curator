@@ -32,17 +32,20 @@ class Pointer(SinglyDirectedEdge):
             # start_y = end[1] + 1.25
         start_z = end[2]
         start = start if start is not None else [start_x, start_y, start_z]
-        
+
         super().__init__(start=start, end=end, tip_shape=tip_shape)
 
         self._node = node
         self._relative_placement = relative_placement
         self._direction = direction
-        
+
         self._label = Element(label)
-        
+
         self._label.next_to(self, self.opposite_of_direction())
         self.add(self._label)
+
+    def get_label(self) -> Element:
+        return self._label
 
     def lists_equal(self, a: list, b: list) -> bool:
         if len(a) != len(b): return False
@@ -74,6 +77,9 @@ class Pointer(SinglyDirectedEdge):
         line = Line(start=end, end=self._relative_placement(positioned_node))
         new_end = line.point_from_proportion(alpha)
         self.put_start_and_end_on(new_end + (self.start - self.end), new_end)
+
+    def get_opposite_direction(self):
+        return np.array([self._direction[0], self._direction[1] * -1, self._direction[2]])
 
     # FIXME: VERY VERY basic
     def opposite_of_direction(self):

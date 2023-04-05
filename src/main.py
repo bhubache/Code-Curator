@@ -121,22 +121,35 @@ class TestScene(Scene):
         from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
         from data_structures.nodes.singly_linked_list_node import SLLNode
         from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1, 2, 3, 4, 5, 6)
+        self.sll = SinglyLinkedList(1)
         self.play(FadeIn(self.sll))
 
-        self.play(
-            self.sll.remove_at(
-                index=4,
-                display_first_trav=True,
-                display_second_trav=True,
-                trav_position='start'
-            )
-            .subsequently_shrink_pointer()
-            .subsequently_unshrink_pointer()
-            .subsequently_curve_pointer()
-            .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
-            .build_animation()
-        )
+        # self.play(
+        #     self.sll.add_last(
+        #         data=17,
+        #         display_first_trav=False,
+        #         first_trav_name='custom',
+        #         trav_position='start'
+        #     )
+        #     .subsequently_fade_in_container()
+        #     .subsequently_fade_in_pointer()
+        #     .subsequently_move_tail()
+        #     .build_animation()
+        # )
+
+        # self.play(
+        #     self.sll.remove_at(
+        #         index=4,
+        #         display_first_trav=True,
+        #         display_second_trav=True,
+        #         trav_position='start'
+        #     )
+        #     .subsequently_shrink_pointer()
+        #     .subsequently_unshrink_pointer()
+        #     .subsequently_curve_pointer()
+        #     .subsequently_fade_out_container().with_fade_out_pointer().with_fade_out_first_temp_trav().with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
+        #     .build_animation()
+        # )
 
         # self.play(self.sll.remove_last_all_together())
 
@@ -199,7 +212,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = False
+    test_data_structure = True
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(

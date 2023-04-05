@@ -16,7 +16,7 @@ class Node(VMobject):
 
     @property
     def data(self):
-        return self._data
+        return self._data._value
 
     def get_visible_components(self):
         visible_components = []

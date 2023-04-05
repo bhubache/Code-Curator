@@ -15,11 +15,11 @@ class TempTravSubanimator:
         self,
         sll,
         index: int,
-        display_first_trav: bool,
-        first_trav_name: str,
-        display_second_trav: bool,
-        second_trav_name: str,
-        trav_position: str
+        display_first_trav: bool = False,
+        first_trav_name: str = None,
+        display_second_trav: bool = False,
+        second_trav_name: str = None,
+        trav_position: str = 'start'
     ) -> None:
         self._sll = sll
         self._index = index
@@ -39,7 +39,7 @@ class TempTravSubanimator:
             raise Exception('You must also display the first trav to be able to display the second trav')
 
         if not self._display_first_trav:
-            return []
+            return SubanimationGroup()
 
         self._first_trav = self._create_first_trav()
         self._second_trav = self._create_second_trav()

@@ -178,3 +178,11 @@ class DataStructureAnimator:
     @_register_subanimation
     def subsequently_shift_sub_list(self):
         return self.__add_subanimation_successively(self._create_shift_sub_list())
+
+    @_register_subanimation
+    def with_move_tail(self):
+        return self.__add_subanimation_concurrently(self._create_move_tail())
+
+    @_register_subanimation
+    def subsequently_move_tail(self):
+        return self.__add_subanimation_successively(self._create_move_tail())
