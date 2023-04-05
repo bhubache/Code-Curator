@@ -20,10 +20,6 @@ class MoveAndFlipTrav(LeafSubanimation):
         self._start_and_end_diff: np.ndarray = None
         self._trav_label: Element = self._trav.get_label()
 
-    # TODO: This method
-    def create_successive_counterpart(self) -> LeafSubanimation:
-        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
-
     def begin(self):
         self._trav.save_state()
         trav_final_state = Pointer(
@@ -58,3 +54,7 @@ class MoveAndFlipTrav(LeafSubanimation):
     def clean_up_from_animation(self):
         self._sll.add(self._trav)
         super().clean_up_from_animation()
+
+    # TODO: This method
+    def create_successive_counterpart(self) -> LeafSubanimation:
+        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
