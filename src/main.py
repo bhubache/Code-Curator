@@ -121,8 +121,28 @@ class TestScene(Scene):
         from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
         from data_structures.nodes.singly_linked_list_node import SLLNode
         from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1)
+        self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
         self.play(FadeIn(self.sll))
+
+        from animations.data_structure_animation import DataStructureAnimation
+        from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
+        from animations.subanimation_group import SubanimationGroup
+        from animations.singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
+
+        sub_group = SubanimationGroup(
+            MoveAndFlipTrav(
+            sll=self.sll,
+            trav=self.sll.head_pointer,
+            to_node=self.sll[1]
+            )
+        )
+
+        self.play(
+            DataStructureAnimation(
+            sll=self.sll,
+            data_structure_animator=sub_group
+            )
+        )
 
         # self.play(
         #     self.sll.add_last(
