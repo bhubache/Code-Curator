@@ -10,10 +10,12 @@ class Edge(VMobject):
         self,
         start: ndarray = None,
         end: ndarray = None,
+        color: str = DEFAULT_MOBJECT_COLOR,
+        stroke_width: int = DEFAULT_STROKE_WIDTH,
         weight: float = None
     ) -> None:
         super().__init__()
-        self._line: Line = Line(start=start, end=end, color=DEFAULT_MOBJECT_COLOR, stroke_width=DEFAULT_STROKE_WIDTH)
+        self._line: Line = Line(start=start, end=end, color=color, stroke_width=stroke_width)
         self._weight: float = weight
 
         self.add(self._line)
