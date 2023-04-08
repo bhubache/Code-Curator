@@ -3,7 +3,7 @@ from leetcode.problem_text import ProblemText
 import main
 from leetcode.scenes.present_problem.base_present_problem import BasePresentProblem
 
-from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+from data_structures.singly_linked_list import SinglyLinkedList
 
 TITLE = 'Delete Node in a Linked List'
 STATEMENT = 'Write a function to delete a node in a singly linked list. You will not be given access to the head of the list, instead you will be given access to the node to be deleted directly.'

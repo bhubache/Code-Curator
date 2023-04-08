@@ -3,7 +3,7 @@ from typing import Any
 import math
 
 from .data_structure_animator import BaseSLLPackager, assign_subanimations_and_animate
-from data_structures.singly_linked_list import singly_linked_list
+from data_structures import singly_linked_list
 from animations.singly_linked_list.add_first import AddFirst
 from data_structures.nodes.singly_linked_list_node import SLLNode
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
