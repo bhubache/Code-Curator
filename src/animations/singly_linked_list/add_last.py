@@ -1,14 +1,13 @@
 from __future__ import annotations
-from typing import Any
 
 from .data_structure_animator import DataStructureAnimator
+from data_structures import singly_linked_list
 from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from data_structures.pointers.pointer import Pointer
 from .subanimations.leaf_subanimation import LeafSubanimation
 from .utils.temp_trav_subanimator import TempTravSubanimator
+from ..singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
 from ..singly_linked_list.subanimations.move_trav import MoveTrav
 from ..singly_linked_list.subanimations.fade_in_container import FadeInContainer
 from ..singly_linked_list.subanimations.center_sll import CenterSLL
@@ -65,8 +64,6 @@ class AddLast(DataStructureAnimator):
         node: SLLNode,
         display_first_trav: bool,
         first_trav_name: str,
-        # display_second_trav: bool,
-        # second_trav_name: str,
         trav_position: str,
         aligned: bool,
         **kwargs
@@ -103,6 +100,14 @@ class AddLast(DataStructureAnimator):
         self._first_trav = temp_trav_subanimator._first_trav
         # self._second_trav = temp_trav_subanimator._second_trav
 
+    # FIXME: Remove node graphically and shift sub list!!!
+    def _get_sll_to_forecast(self):
+        sll_to_forecast = self._sll.copy()
+        del sll_to_forecast[self._added_node_index]
+        return singly_linked_list.SinglyLinkedList.create_sll(sll_to_forecast)
+
+        # return sll_to_forecast
+
     def clean_up_mobject(self) -> None:
         del self._sll._nodes[self._added_node_index]
 
@@ -123,8 +128,8 @@ class AddLast(DataStructureAnimator):
     def _create_center_sll(self) -> LeafSubanimation:
         return CenterSLL(
             sll=self._sll,
-            curr_reference_index=self._added_node_index + 1,
-            post_subanimation_reference_index=self._removed_node_index
+            curr_reference_index=1,
+            post_subanimation_reference_index=0
         )
 
     def _create_flatten_tail(self) -> LeafSubanimation:
@@ -135,8 +140,17 @@ class AddLast(DataStructureAnimator):
         )
 
     def _create_move_tail(self) -> LeafSubanimation:
-        return MoveTrav(
+        move_trav_cls: LeafSubanimation = None
+        if self._sll_went_from_one_to_two_nodes():
+            move_trav_cls = MoveAndFlipTrav
+        else:
+            move_trav_cls = MoveTrav
+
+        return move_trav_cls(
             sll=self._sll,
             trav=self._sll.tail_pointer,
             to_node=self._added_node
         )
+
+    def _sll_went_from_one_to_two_nodes(self) -> bool:
+        return len(self._sll) == 2

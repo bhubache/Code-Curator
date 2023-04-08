@@ -57,4 +57,4 @@ class MoveAndFlipTrav(LeafSubanimation):
 
     # TODO: This method
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
+        raise NotImplementedError('')

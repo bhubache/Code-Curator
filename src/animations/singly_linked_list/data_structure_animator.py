@@ -31,13 +31,16 @@ class DataStructureAnimator:
         lookahead_forecaster.forecast_animations()
 
     def __create_sll_animation_forecaster(self) -> DataStructureAnimator:
-        sll_copy = self._sll.copy()
+        sll_to_forecast = self._get_sll_to_forecast()
         return SLLAnimationForecaster(
-            sll=sll_copy,
-            animator_copy=self._sll_calling_method.__func__(sll_copy, **self._sub_class_init_kwargs),
+            sll=sll_to_forecast,
+            animator_copy=self._sll_calling_method.__func__(sll_to_forecast, **self._sub_class_init_kwargs),
             requested_subanimation_builder_helpers=self._requested_subanimation_builder_helpers,
             true_subanimation_group=self._subanimation_group
         )
+
+    def _get_sll_to_forecast(self):
+        raise NotImplementedError()
 
     def __add_subanimation_concurrently(self, *subanimations_to_add: BaseSubanimation):
         if self._last_subanimation_group_is_successive():

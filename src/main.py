@@ -118,44 +118,48 @@ class TestScene(Scene):
     # print(json.dumps(config, indent=4, default=str))
 
     def construct(self):
-        from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+        from data_structures.singly_linked_list import SinglyLinkedList
         from data_structures.nodes.singly_linked_list_node import SLLNode
         from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1, 2, 3, 4, 5)
+        self.sll = SinglyLinkedList(1, 2)
         self.play(FadeIn(self.sll))
 
-        from animations.data_structure_animation import DataStructureAnimation
-        from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
-        from animations.subanimation_group import SubanimationGroup
-        from animations.singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
+        # from animations.data_structure_animation import DataStructureAnimation
+        # from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
+        # from animations.subanimation_group import SubanimationGroup
+        # from animations.singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
 
-        sub_group = SubanimationGroup(
-            MoveAndFlipTrav(
-            sll=self.sll,
-            trav=self.sll.head_pointer,
-            to_node=self.sll[1]
-            )
-        )
-
-        self.play(
-            DataStructureAnimation(
-            sll=self.sll,
-            data_structure_animator=sub_group
-            )
-        )
+        # sub_group = SubanimationGroup(
+        #     MoveAndFlipTrav(
+        #     sll=self.sll,
+        #     trav=self.sll.head_pointer,
+        #     to_node=self.sll[1]
+        #     )
+        # )
 
         # self.play(
-        #     self.sll.add_last(
-        #         data=17,
-        #         display_first_trav=False,
-        #         first_trav_name='custom',
-        #         trav_position='start'
+        #     DataStructureAnimation(
+        #     sll=self.sll,
+        #     data_structure_animator=sub_group
         #     )
-        #     .subsequently_fade_in_container()
-        #     .subsequently_fade_in_pointer()
-        #     .subsequently_move_tail()
-        #     .build_animation()
         # )
+
+        self.play(
+            self.sll.add_last(
+                data=17,
+                display_first_trav=False,
+                first_trav_name='custom',
+                trav_position='start'
+            )
+            .subsequently_fade_in_container()
+            .subsequently_fade_in_pointer()
+            .subsequently_move_tail()
+            .with_center_sll()
+            .build_animation()
+        )
+
+        # for sub in self.sll.submobjects:
+        #     sub.set_opacity(1)
 
         # self.play(
         #     self.sll.remove_at(

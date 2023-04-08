@@ -1,5 +1,5 @@
 from ..leaf_subanimation import LeafSubanimation
-from data_structures.singly_linked_list import singly_linked_list
+from data_structures import singly_linked_list
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import smooth, LEFT, Mobject
 

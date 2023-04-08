@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .base_subanimation import BaseSubanimation
-from data_structures.singly_linked_list import singly_linked_list
+from data_structures import singly_linked_list
 
 from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
@@ -30,7 +30,7 @@ class VisibleSubanimation(BaseSubanimation):
     #     VisibleSubanimation.saved_states = {}
 
 
-      
+
     # def begin(self):
     #     self._restore_states()
     #     logger.info(id(self._sll))

@@ -1,7 +1,7 @@
 from manim import *
 from leetcode.scenes.problem_analysis.base_problem_analysis import BaseProblemAnalysis
 from leetcode.problem_text import ProblemText
-from data_structures.singly_linked_list.singly_linked_list import SinglyLinkedList
+from data_structures.singly_linked_list import SinglyLinkedList
 from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from typing import Iterable

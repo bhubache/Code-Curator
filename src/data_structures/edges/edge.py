@@ -1,3 +1,5 @@
+import numpy as np
+
 from manim import Line, VMobject
 
 class Edge(VMobject):
@@ -12,6 +14,14 @@ class Edge(VMobject):
     def get_start_and_end(self):
         return self._line.get_start_and_end()
 
+    @property
+    def start(self) -> np.ndarray:
+        return self.get_start_and_end()[0]
+
+    @property
+    def end(self) -> np.ndarray:
+        return self.get_start_and_end()[1]
+
     # FIXME: This is just for vertical edges
     @property
     def vertical_length(self):
@@ -23,4 +33,4 @@ class Edge(VMobject):
 
     @property
     def length(self):
-        return self.get_length()
+        return self._line.get_length()

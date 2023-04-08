@@ -3,9 +3,9 @@ import math
 
 from typing import Iterable, Any
 
-from ..nodes.singly_linked_list_node import SLLNode
-from ..pointers.pointer import Pointer
-from ..edges.singly_directed_edge import SinglyDirectedEdge
+from .nodes.singly_linked_list_node import SLLNode
+from .pointers.pointer import Pointer
+from .edges.singly_directed_edge import SinglyDirectedEdge
 from animations.singly_linked_list.subanimations.fade_in_container import FadeInContainer
 # from animations.singly_linked_list.subanimations.fade_in_pointer import FadeInPointer
 from animations.singly_linked_list.subanimations.grow_pointer import GrowPointer
@@ -77,10 +77,15 @@ class SinglyLinkedList(VMobject):
         self.move_to([0, 0, 0])
 
     def __getitem__(self, index: int) -> SLLNode:
+        if index >= len(self):
+            raise IndexError(f'Index {index} out of bounds for length {len(self)}')
         return self._nodes[index]
 
     def __setitem__(self, index: int, value: SLLNode) -> None:
         self._nodes[index] = value
+
+    def __delitem__(self, index: int) -> None:
+        del self._nodes[index]
 
     def __iter__(self):
         return self._nodes.__iter__()
@@ -90,7 +95,7 @@ class SinglyLinkedList(VMobject):
 
     @staticmethod
     def create_sll(sll: SinglyLinkedList) -> SinglyLinkedList:
-        return SinglyLinkedList(*[node.data._value for node in sll])
+        return SinglyLinkedList(*[node.data for node in sll])
 
     def insert(
         self,
@@ -185,6 +190,7 @@ class SinglyLinkedList(VMobject):
         return node
 
     # TODO: Change node's next attribute!!!!
+    # FIXME: Adding node to _nodes BEFORE animating is messing up the forecaster
     def _add_node(self, index: int, data: Any, aligned: bool = True) -> SLLNode:
         if index < 0:
             index = len(self) + index
@@ -193,14 +199,14 @@ class SinglyLinkedList(VMobject):
             raise IndexError(f'Index {index} out of bounds for length {len(self)}')
 
         node = SLLNode(data)
-        self._nodes.insert(index, node)
+        # self._nodes.insert(index, node)
         if index == 0:
             self._head = node
         if index == len(self):
             self._tail = node
 
         # TODO: Adjust all of these because the node is not yet inserted!!!
-        if index == 0:
+        if self._adding_to_front(index):
             if aligned:
                 # node.next_to(self[1].container, LEFT, buff=(self[1].pointer_to_next.length + (2 * self[1].container.radius)))
                 # node.next_to(self[1].container, LEFT, buff=0)
@@ -209,7 +215,8 @@ class SinglyLinkedList(VMobject):
                 node.set_next(self[1])
             else:
                 raise NotImplementedError('Nonaligned insertion of a node at the front of linked list is not yet supported')
-        elif index < len(self) - 1:
+        elif self._adding_in_between_head_and_tail(index):
+            # FIXME: Fix index now node isn't inserted before this logic!!!
             if aligned:
                 node.next_to(self[index - 1], RIGHT, buff=0)
 
@@ -222,17 +229,21 @@ class SinglyLinkedList(VMobject):
             else:
                 node.next_to(self[index + 1].container, DOWN)
                 node.set_next(self[index + 1])
-        else:
+        elif self._adding_to_back(index):
             if self[0].pointer_to_next is None:
-                node.next_to(self[-2], RIGHT, buff=2 * self[0].radius)
+                node.next_to(self[-1], RIGHT, buff=2 * self[0].radius)
             else:
-                node.next_to(self[-2], RIGHT, buff=self[0].pointer_to_next.length)
-            self[-2].set_next(node)
-            self[-2].pointer_to_next.set_opacity(0)
+                node.next_to(self[-1], RIGHT, buff=self[0].pointer_to_next.length)
+            self[-1].set_next(node)
+            self[-1].pointer_to_next.set_opacity(0)
 
             if not aligned:
                 node.shift(DOWN)
-                self[-2].pointer_to_next.become(SinglyDirectedEdge(start=self[-2].pointer_to_next.start, end=node.get_container_left()))
+                self[-1].pointer_to_next.become(SinglyDirectedEdge(start=self[-1].pointer_to_next.start, end=node.get_container_left()))
+        else:
+            raise Exception(f'Attempting to add node at index {index} for length {len(self)}')
+
+        self._nodes.insert(index, node)
 
         if node.pointer_to_next is not None:
             node.add(node.pointer_to_next)
@@ -240,6 +251,15 @@ class SinglyLinkedList(VMobject):
         self.add(node)
 
         return node
+
+    def _adding_to_front(self, index: int) -> bool:
+        return index == 0
+
+    def _adding_in_between_head_and_tail(self, index: int) -> bool:
+        return 0 < index < len(self)
+
+    def _adding_to_back(self, index: int) -> bool:
+        return index == len(self)
 
     # FIXME: Hardcoded shift value
     # NOTE: Has the side effect of moving the pointer on the scene without the animation as well
