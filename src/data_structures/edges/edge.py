@@ -1,13 +1,20 @@
 import numpy as np
+from numpy import ndarray
 
+from constants import DEFAULT_STROKE_WIDTH, DEFAULT_MOBJECT_COLOR
 from manim import Line, VMobject
 
+
 class Edge(VMobject):
-    def __init__(self, start = None, end = None, weight = None):
+    def __init__(
+        self,
+        start: ndarray = None,
+        end: ndarray = None,
+        weight: float = None
+    ) -> None:
         super().__init__()
-        self._line: Line = Line(start=start, end=end, color='#DBC9B8', stroke_width=2)
-        # super().__init__(start=start, end=end, color='#DBC9B8', stroke_width=2)
-        self._weight = weight
+        self._line: Line = Line(start=start, end=end, color=DEFAULT_MOBJECT_COLOR, stroke_width=DEFAULT_STROKE_WIDTH)
+        self._weight: float = weight
 
         self.add(self._line)
 
