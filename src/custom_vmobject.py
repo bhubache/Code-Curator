@@ -14,4 +14,4 @@ class CustomVMobject(VMobject):
         for mob in mobjects:
             if not isinstance(mob, NullVMobject):
                 non_null_vmobjects.append(mob)
-        super().add(non_null_vmobjects)
+        super().add(*non_null_vmobjects)
