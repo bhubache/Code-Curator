@@ -2,6 +2,7 @@ import numpy as np
 from numpy import ndarray
 
 from ...constants import DEFAULT_STROKE_WIDTH, DEFAULT_MOBJECT_COLOR
+from colour import Color
 from manim import Line, VMobject
 
 
@@ -10,8 +11,8 @@ class Edge(VMobject):
         self,
         start: ndarray = None,
         end: ndarray = None,
-        color: str = DEFAULT_MOBJECT_COLOR,
-        stroke_width: int = DEFAULT_STROKE_WIDTH,
+        line_color: str | Color = DEFAULT_MOBJECT_COLOR,
+        line_stroke_width: int = DEFAULT_STROKE_WIDTH,
         weight: float = None
     ) -> None:
         super().__init__()
@@ -20,7 +21,7 @@ class Edge(VMobject):
         if end is None:
             end = np.array([1, 0, 0])
 
-        self._line: Line = Line(start=start, end=end, color=color, stroke_width=stroke_width)
+        self._line: Line = Line(start=start, end=end, color=line_color, stroke_width=line_stroke_width)
         self._weight: float = weight
 
         self.add(self._line)
@@ -37,12 +38,12 @@ class Edge(VMobject):
         return self.get_start_and_end()[1]
 
     @property
-    def color(self) -> str:
-        return self._line.color
+    def line(self) -> Line:
+        return self._line
 
-    @color.setter
-    def color(self, new_color: str) -> None:
-        self._line.set_color(new_color)
+    @property
+    def weight(self) -> int:
+        return self._weight
 
     # FIXME: This is just for vertical edges
     @property
