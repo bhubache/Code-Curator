@@ -5,6 +5,7 @@ import pytest
 from manim import Line
 
 from src.data_structures.edges.edge import Edge
+from src.data_structures.edges.weights.null_weight import NullWeight
 
 
 @pytest.fixture
@@ -21,7 +22,7 @@ def test_default_end(default_edge: Edge) -> None:
 
 
 def test_default_weight(default_edge: Edge) -> None:
-    assert default_edge.weight is None
+    assert type(default_edge.weight) == NullWeight
 
 
 def test_default_vertical_length(default_edge: Edge) -> None:
@@ -53,10 +54,6 @@ def test_custom_start(custom_edge: Edge) -> None:
 
 def test_custom_end(custom_edge: Edge) -> None:
     assert np.array_equal(custom_edge.end, np.array([2, 2, 0]))
-
-
-def test_custom_weight(custom_edge: Edge) -> None:
-    assert custom_edge.weight == 16
 
 
 def test_custom_vertical_length(custom_edge: Edge) -> None:

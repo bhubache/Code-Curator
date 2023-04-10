@@ -9,7 +9,7 @@ class CustomVMobject(VMobject):
     def __init__(self) -> None:
         super().__init__()
 
-    def add(self, *mobjects: VMobject):
+    def add(self, *mobjects: VMobject) -> None:
         non_null_vmobjects: list[VMobject] = []
         for mob in mobjects:
             if not isinstance(mob, NullVMobject):
