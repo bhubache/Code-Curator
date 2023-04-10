@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from manim import VMobject
-
-from src.null_vmobject import NullVMobject
+from null_vmobject import NullVMobject
 
 
 class CustomVMobject(VMobject):

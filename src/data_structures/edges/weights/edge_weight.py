@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from colour import Color
+from constants import DEFAULT_ELEMENT_FONT_SIZE
+from constants import DEFAULT_MOBJECT_COLOR
+from custom_vmobject import CustomVMobject
 
-from ....constants import DEFAULT_ELEMENT_FONT_SIZE
-from ....constants import DEFAULT_MOBJECT_COLOR
-from ....custom_vmobject import CustomVMobject
 from ...element import Element
 from .weight import Weight
 

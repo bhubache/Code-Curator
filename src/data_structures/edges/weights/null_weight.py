@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from null_vmobject import NullVMobject
+
 from .weight import Weight
-from src.null_vmobject import NullVMobject
 
 
 class NullWeight(NullVMobject, Weight):
