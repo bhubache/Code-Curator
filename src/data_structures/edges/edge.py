@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from colour import Color
+from custom_vmobject import CustomVMobject
 from manim import Line
 from numpy import ndarray
 
@@ -10,7 +11,6 @@ from ...constants import DEFAULT_STROKE_WIDTH
 from .weights.edge_weight import EdgeWeight
 from .weights.null_weight import NullWeight
 from .weights.weight import Weight
-from src.custom_vmobject import CustomVMobject
 
 DEFAULT_START: ndarray = np.array([-1, 0, 0])
 DEFAULT_END: ndarray = np.array([1, 0, 0])
