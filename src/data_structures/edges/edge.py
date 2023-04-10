@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import numpy as np
 from colour import Color
-from custom_vmobject import CustomVMobject
 from manim import Line
 from numpy import ndarray
 
 from ...constants import DEFAULT_MOBJECT_COLOR
 from ...constants import DEFAULT_STROKE_WIDTH
-from ..null_weight import NullWeight
-from ..weight import Weight
+from .weights.edge_weight import EdgeWeight
+from .weights.null_weight import NullWeight
+from .weights.weight import Weight
+from src.custom_vmobject import CustomVMobject
 
 DEFAULT_START: ndarray = np.array([-1, 0, 0])
 DEFAULT_END: ndarray = np.array([1, 0, 0])
@@ -36,21 +37,17 @@ class Edge(CustomVMobject):
             start=finalized_start, end=finalized_end, color=line_color, stroke_width=line_stroke_width,
         )
 
-        finalized_weight: Weight = (
-            weight if type(weight) == Weight else
-            Weight(
+        if isinstance(weight, float):
+            finalized_weight: Weight = EdgeWeight(
                 value=weight, color=self.color,
             )
-        )
+        else:
+            finalized_weight = weight
+
         self._weight: Weight = finalized_weight
 
-        self.__add_submobjects()
-
-    def __add_submobjects(self) -> None:
         self.add(self._line)
-
-        if self._weight is not None:
-            self.add(self._weight)
+        self.add(self._weight)
 
     def get_start_and_end(self) -> tuple[ndarray, ndarray]:
         return self._line.get_start_and_end()
