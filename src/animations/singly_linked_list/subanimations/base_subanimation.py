@@ -1,15 +1,18 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-import copy
 
-from custom_logging.custom_logger import CustomLogger
+import copy
+from abc import ABC
+from abc import abstractmethod
+
+from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 
 class BaseSubanimation(ABC):
-    def __init__(self, run_time: float = 1):
+    def __init__(self, run_time: float = 1) -> None:
         self._run_time: float = run_time
         self._sll_post_subanimation_group = None
+        self._lag_ratio: float = 0
 
         self._visited: bool = False
         self._has_started: bool = False
@@ -46,6 +49,9 @@ class BaseSubanimation(ABC):
     def _build_subanimations_with_timings_helper(self):
         pass
 
+    def add(self, subanimation: BaseSubanimation) -> None:
+        raise Exception('Can\'t add subanimation to BaseSubanimation')
+
     @property
     def sll_post_subanimation_group(self):
         return self._sll_post_subanimation_group
@@ -53,3 +59,11 @@ class BaseSubanimation(ABC):
     @sll_post_subanimation_group.setter
     def sll_post_subanimation_group(self, sll) -> None:
         self._sll_post_subanimation_group = sll
+
+    @property
+    def lag_ratio(self) -> float:
+        return 0
+
+    @lag_ratio.setter
+    def lag_ratio(self, new_lag_ratio: float) -> None:
+        self._lag_ratio = new_lag_ratio

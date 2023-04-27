@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import difflib
-from typing import Union
 
 from .custom_code import CustomCode
+
 
 class CodeDiff:
     def __init__(self, source_obj: CustomCode, destination_obj: CustomCode) -> None:
@@ -54,7 +56,7 @@ class CodeDiff:
     def get_destination_line_index(self, line_index: int) -> int:
         return self._get_destination_line_attr(line_index=line_index, attr='index')
 
-    def _get_destination_line_attr(self, line_index: int, attr: str) -> Union[str, int]:
+    def _get_destination_line_attr(self, line_index: int, attr: str) -> str | int:
         line_exclude_count = 0
         for i, line in enumerate(self):
             if self.line_not_present_in_either_code(line) or self.line_unique_to_src_code(line):
@@ -74,7 +76,7 @@ class CodeDiff:
     def get_source_line_index(self, line_index: int) -> int:
         return self._get_source_line_attr(line_index=line_index, attr='index')
 
-    def _get_source_line_attr(self, line_index: int, attr: str) -> Union[str, int]:
+    def _get_source_line_attr(self, line_index: int, attr: str) -> str | int:
         line_exclude_count = 0
         for i, line in enumerate(self):
             if self.line_not_present_in_either_code(line) or self.line_unique_to_dst_code(line):
@@ -123,12 +125,18 @@ class CodeDiff:
         return difflib.SequenceMatcher(None, seq_one, seq_two).ratio()
 
     def _create_diff(self) -> list[str]:
-        diff = list(difflib.ndiff(self.source.code_string.splitlines(), self.destination.code_string.splitlines()))
+        diff = list(
+            difflib.ndiff(
+                self.source.code_string.splitlines(),
+                self.destination.code_string.splitlines(),
+            ),
+        )
 
         # Remove lines that are not present in either code
         cleaned_diff = []
         for line in diff:
-            if self.line_not_present_in_either_code(line): continue
+            if self.line_not_present_in_either_code(line):
+                continue
 
             cleaned_diff.append(line)
         return cleaned_diff

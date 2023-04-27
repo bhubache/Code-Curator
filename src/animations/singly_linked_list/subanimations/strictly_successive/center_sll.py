@@ -1,10 +1,12 @@
-from ..leaf_subanimation import LeafSubanimation
-from data_structures import singly_linked_list
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from manim import smooth, RIGHT, UP, Mobject, Circle, Line
+from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
+from manim import Line
+from manim import smooth
+
+from ..leaf_subanimation import LeafSubanimation
+from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
+
 
 class SuccessiveCenterSLL(LeafSubanimation):
     def __init__(self, sll):

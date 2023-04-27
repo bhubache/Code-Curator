@@ -1,30 +1,38 @@
-import numpy as np
+from __future__ import annotations
 
-from .. import data_structure_animator
-from ..subanimations.base_subanimation import BaseSubanimation
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
 from ...subanimation_group import SubanimationGroup
+from ..subanimations.base_subanimation import BaseSubanimation
 from ..subanimations.leaf_subanimation import LeafSubanimation
 from .forecasted_subanimation_group_creator import ForecastedSubanimationGroupCreator
 from .interdependent_subanimation_finder import InterdependentSubanimationFinder
-
-from custom_logging.custom_logger import CustomLogger
+from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from ..data_structure_animator import DataStructureAnimator
+
 # TODO: Separate creation of successive package and assigning of forecasted mobjects into their own classes
+
 
 class SLLAnimationForecaster:
     def __init__(
         self,
-        sll,
-        animator_copy,
-        requested_subanimation_builder_helpers,
-        true_subanimation_group
+        sll: SinglyLinkedList,
+        animator_copy: DataStructureAnimator,
+        requested_subanimation_builder_helpers: list[Callable],
+        true_subanimation_group: SubanimationGroup,
     ) -> None:
-        self._sll = sll
-        self._true_subanimation_group = true_subanimation_group
-        self._forecasted_subanimation_group = ForecastedSubanimationGroupCreator.create_forecasted_subanimation_group(animator_copy, requested_subanimation_builder_helpers)
+        self._sll: SinglyLinkedList = sll
+        self._true_subanimation_group: SubanimationGroup = true_subanimation_group
+        self._forecasted_subanimation_group = ForecastedSubanimationGroupCreator.create_forecasted_subanimation_group(
+            animator_copy, requested_subanimation_builder_helpers,
+        )
 
-    def forecast_animations(self):
+    def forecast_animations(self) -> None:
         self._sub_in_successive_subanimations_where_possible()
         self._assign_forecasted_subanimations()
 
@@ -32,7 +40,9 @@ class SLLAnimationForecaster:
         # self._move_sll_subanimations_to_beginning_of_group()
 
     def _get_interdependent_subanimations(self) -> LeafSubanimation:
-        interdependent_subanimation_finder = InterdependentSubanimationFinder(subanimation_group=self._true_subanimation_group)
+        interdependent_subanimation_finder = InterdependentSubanimationFinder(
+            subanimation_group=self._true_subanimation_group,
+        )
         return interdependent_subanimation_finder.get_interdependent_subanimations()
 
     def _no_interdependent_subanimations(self, interdepenent_subanimations: list[LeafSubanimation]) -> bool:
@@ -41,20 +51,37 @@ class SLLAnimationForecaster:
     def _sub_in_successive_subanimations_where_possible(self) -> None:
         interdependent_subanimations = self._get_interdependent_subanimations()
         for group in self._true_subanimation_group:
-            self._sub_in_successive_subanimations_where_possible_helper(group, interdependent_subanimations)
+            self._sub_in_successive_subanimations_where_possible_helper(
+                group, interdependent_subanimations,
+            )
 
-    def _sub_in_successive_subanimations_where_possible_helper(self, group: SubanimationGroup, interdependent_subanimations: list[LeafSubanimation]):
+    def _sub_in_successive_subanimations_where_possible_helper(
+        self,
+        group: SubanimationGroup,
+        interdependent_subanimations: list[LeafSubanimation],
+    ) -> None:
         for i, subanimation in enumerate(group):
             if subanimation not in interdependent_subanimations and isinstance(subanimation, LeafSubanimation):
                 group.set(i, subanimation.create_successive_counterpart())
 
     def _assign_forecasted_subanimations(self) -> None:
-        for true_subanimation, forecast_subanimation in zip(self._true_subanimation_group, self._forecasted_subanimation_group):
-            self._assign_forecasted_subanimations_helper(true_subanimation=true_subanimation, forecast_subanimation=forecast_subanimation)
+        for true_subanimation, forecast_subanimation in zip(
+            self._true_subanimation_group,
+            self._forecasted_subanimation_group,
+        ):
+            self._assign_forecasted_subanimations_helper(
+                true_subanimation=true_subanimation, forecast_subanimation=forecast_subanimation,
+            )
 
-    def _assign_forecasted_subanimations_helper(self, true_subanimation, forecast_subanimation) -> None:
-        assert isinstance(true_subanimation, SubanimationGroup) and isinstance(forecast_subanimation, SubanimationGroup) \
-        or isinstance(true_subanimation, LeafSubanimation) and isinstance(forecast_subanimation, LeafSubanimation), 'Hierarchy doesn\'t match'
+    def _assign_forecasted_subanimations_helper(
+        self,
+        true_subanimation: BaseSubanimation,
+        forecast_subanimation: BaseSubanimation,
+    ) -> None:
+        assert isinstance(true_subanimation, SubanimationGroup) \
+            and isinstance(forecast_subanimation, SubanimationGroup) \
+            or isinstance(true_subanimation, LeafSubanimation) \
+            and isinstance(forecast_subanimation, LeafSubanimation), 'Hierarchy doesn\'t match'
 
         if isinstance(true_subanimation, LeafSubanimation):
             forecast_subanimation.begin()
@@ -65,7 +92,9 @@ class SLLAnimationForecaster:
             return
 
         for true, forecast in zip(true_subanimation, forecast_subanimation):
-            self._assign_forecasted_subanimations_helper(true_subanimation=true, forecast_subanimation=forecast)
+            self._assign_forecasted_subanimations_helper(
+                true_subanimation=true, forecast_subanimation=forecast,
+            )
 
         if isinstance(true_subanimation, SubanimationGroup):
             for true, forecast in zip(true_subanimation, forecast_subanimation):

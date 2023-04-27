@@ -15,7 +15,7 @@ repos:
     rev: 6.0.0
     hooks:
     -   id: flake8
-        additional_dependencies: [flake8-typing-imports==1.14.0]
+        language_version: python3.10.11
         args: [--max-line-length=120]
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.6.0
@@ -25,12 +25,12 @@ repos:
     rev: v2.6.0
     hooks:
     -   id: reorder-python-imports
-        args: [--py37-plus, --add-import, 'from __future__ import annotations']
+        args: [--py39-plus, --add-import, 'from __future__ import annotations']
 -   repo: https://github.com/asottile/pyupgrade
     rev: v2.31.0
     hooks:
     -   id: pyupgrade
-        args: [--py37-plus]
+        args: [--py39-plus]
 -   repo: https://github.com/asottile/add-trailing-comma
     rev: v2.2.1
     hooks:
@@ -40,9 +40,26 @@ repos:
     rev: v1.20.0
     hooks:
     -   id: setup-cfg-fmt
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+-   repo: https://github.com/PyCQA/autoflake
+    rev: v2.1.1
     hooks:
-    -   id: mypy
-        args: [--disallow-untyped-defs, --ignore-missing-imports]
-        additional_dependencies: [types-all]
+    -   id: autoflake
+        args: [--in-place, --remove-all-unused-imports]
+# -   repo: https://github.com/pre-commit/mirrors-mypy
+#     rev: v1.2.0
+#     hooks:
+#     -   id: mypy
+#         args: [--ignore-missing-imports, --disallow-untyped-defs, --disallow-any-generics]
+#         # args: [
+#         #     --check-untyped-defs,
+#         #     --disallow-any-generics,
+#         #     --disallow-incomplete-defs,
+#         #     --disallow-untyped-defs,
+#         #     --no-implicit-optional,
+#         #     --ignore-missing-imports
+#         # ]
+#         additional_dependencies: [types-all]
+-   repo: https://github.com/rstcheck/rstcheck
+    rev: v6.1.2
+    hooks:
+    -   id: rstcheck

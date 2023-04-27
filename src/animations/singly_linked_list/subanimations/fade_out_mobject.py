@@ -1,8 +1,11 @@
-from .leaf_subanimation import LeafSubanimation
-from manim import Scene, Mobject
+from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
+from manim import Mobject
+
+from .leaf_subanimation import LeafSubanimation
+from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
+
 
 class FadeOutMobject(LeafSubanimation):
     def __init__(self, sll, mobject: Mobject, parent_mobject: Mobject):

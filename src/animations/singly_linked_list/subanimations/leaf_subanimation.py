@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from .base_subanimation import BaseSubanimation
-from data_structures import singly_linked_list
+from typing import TYPE_CHECKING
 
-from custom_logging.custom_logger import CustomLogger
+from .base_subanimation import BaseSubanimation
+from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from src.data_structures.singly_linked_list import SinglyLinkedList
 
 
 class LeafSubanimation(BaseSubanimation):
     def __init__(self, sll):
         super().__init__()
-        self._sll: singly_linked_list.SinglyLinkedList = sll
+        self._sll: SinglyLinkedList = sll
 
     def __str__(self) -> str:
         return self.__class__.__name__

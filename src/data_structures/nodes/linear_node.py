@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-from manim import RIGHT, LEFT, Animation, FadeIn, FadeOut
+from collections.abc import Iterable
 
-from .node import Node
+from manim import Animation
+from manim import RIGHT
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
+from .node import Node
+from src.custom_vmobject import CustomVMobject
 
-from typing import Iterable
 
 class LinearNode(Node):
-    def __init__(self, shape, data):
-        super().__init__(shape, data)
+    def __init__(self, data: float | str, shape: CustomVMobject):
+        super().__init__(data, shape)
         self._next = None
         self._pointer_to_next = None
-        # self._pointer_to_next._is_visible = False
 
     @property
     def next(self):
@@ -23,15 +24,7 @@ class LinearNode(Node):
     def next(self, node):
         self._next = node
 
-    def get_visible_components(self):
-        visible_components = super().get_visible_components()
-        if self._pointer_to_next is not None \
-        and self._pointer_to_next._is_visible:
-            visible_components.append(self._pointer_to_next)
-
-        return visible_components
-
-    def set_next(self, node, add_pointer_to_node = True):
+    def set_next(self, node: LinearNode):
         self.next = node
 
         # Remove the existing pointer (if it exists) from the screen
@@ -46,20 +39,19 @@ class LinearNode(Node):
             if self._diagonal_with_other(node):
                 self._pointer_to_next.become(
                     SinglyDirectedEdge(
-                    start=self.get_container_right(),
-                    end=node.get_container_left()
-                    )
+                        start=self.get_container_right(),
+                        end=node.get_container_left(),
+                    ),
                 )
             else:
                 self._pointer_to_next.become(
                     SinglyDirectedEdge(
                         start=self,
-                        end=node
-                    )
+                        end=node,
+                    ),
                 )
 
         self.add(self._pointer_to_next)
-        self._pointer_to_next._is_visible = True
 
         # NOTE: TEST!!!
         # return self.pointer_to_next
@@ -73,23 +65,6 @@ class LinearNode(Node):
         animation = self.animate.shift(RIGHT * num_nodes * 2)
         self.shift(RIGHT * num_nodes * 2)
         return animation
-
-    def fade_out_pointer(self) -> None:
-        FadeOut(self._pointer_to_next)
-        self._pointer_to_next._is_visible = False
-
-    def fade_in_pointer(self) -> None:
-        FadeIn(self._pointer_to_next)
-        self._pointer_to_next._is_visible = True
-
-    def animate_fade_out_pointer(self) -> Animation:
-        self._pointer_to_next._is_visible = False
-        return FadeOut(self._pointer_to_next)
-
-    def animate_fade_in_pointer(self) -> Animation:
-        self.add(self._pointer_to_next)
-        self._pointer_to_next._is_visible = True
-        return FadeIn(self._pointer_to_next)
 
     def get_next_pointer_top(self):
         return self._pointer_to_next.get_top()
