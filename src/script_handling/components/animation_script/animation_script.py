@@ -1,7 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Iterable
+from __future__ import annotations
 
-class IAnimationScript(ABC):
+from abc import ABC
+from abc import abstractmethod
+from collections.abc import Iterable
+
+
+class AnimationScript(ABC):
     @property
     @abstractmethod
     def unique_id(self) -> str:

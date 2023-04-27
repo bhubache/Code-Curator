@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
 from colour import Color
-from custom_vmobject import CustomVMobject
 from manim import Line
 from numpy import ndarray
 
@@ -11,6 +12,7 @@ from ...constants import DEFAULT_STROKE_WIDTH
 from .weights.edge_weight import EdgeWeight
 from .weights.null_weight import NullWeight
 from .weights.weight import Weight
+from src.custom_vmobject import CustomVMobject
 
 DEFAULT_START: ndarray = np.array([-1, 0, 0])
 DEFAULT_END: ndarray = np.array([1, 0, 0])
@@ -24,15 +26,15 @@ class Edge(CustomVMobject):
 
     def __init__(
         self,
-        start: ndarray | list | None = None,
-        end: ndarray | list | None = None,
+        start: Sequence[float] | None = None,
+        end: Sequence[float] | None = None,
         weight: float | Weight = NullWeight(),
         line_color: str | Color = DEFAULT_MOBJECT_COLOR,
         line_stroke_width: int = DEFAULT_STROKE_WIDTH,
     ) -> None:
         super().__init__()
-        finalized_start: ndarray | list = start if start is not None else DEFAULT_START
-        finalized_end: ndarray | list = end if end is not None else DEFAULT_END
+        finalized_start: Sequence[float] = start if start is not None else DEFAULT_START
+        finalized_end: Sequence[float] = end if end is not None else DEFAULT_END
         self._line: Line = Line(
             start=finalized_start, end=finalized_end, color=line_color, stroke_width=line_stroke_width,
         )

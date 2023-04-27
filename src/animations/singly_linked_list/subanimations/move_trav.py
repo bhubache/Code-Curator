@@ -1,32 +1,45 @@
-from .leaf_subanimation import LeafSubanimation
-from data_structures import singly_linked_list
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from .strictly_successive.move_trav import SuccessiveMoveTrav
-from manim import smooth, LEFT, BLUE
+from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
+from typing import TYPE_CHECKING
+
+from manim import smooth
+
+from .leaf_subanimation import LeafSubanimation
+from .strictly_successive.move_trav import SuccessiveMoveTrav
+from src.custom_logging.custom_logger import CustomLogger
+from src.data_structures.nodes.singly_linked_list_node import SLLNode
+from src.data_structures.pointers.pointer import Pointer
+# from src.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 logger = CustomLogger.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from src.data_structures.singly_linked_list import SinglyLinkedList
+
+
 class MoveTrav(LeafSubanimation):
-    def __init__(self, sll, trav, to_node):
+    def __init__(self, sll: SinglyLinkedList, trav: Pointer, to_node: SLLNode) -> None:
         super().__init__(sll)
-        self._trav = trav
-        self._to_node = to_node
+        self._trav: Pointer = trav
+        self._to_node: SLLNode = to_node
 
     def create_successive_counterpart(self) -> LeafSubanimation:
         return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
 
-    def begin(self):
+    def begin(self) -> None:
         self._trav.save_state()
 
-    def interpolate(self, alpha: float):
+    def interpolate(self, alpha: float) -> None:
         self._trav.restore()
-        # self._trav.move_immediately_alpha(self.sll_post_subanimation_group[self._sll._nodes.index(self._to_node)], self._to_node, smooth(alpha))
-        self._trav.move_immediately_alpha(self.finished_subanimation._to_node, self._to_node, smooth(alpha))
+        # self._trav.move_immediately_alpha(
+        # self.sll_post_subanimation_group[self._sll._nodes.index(self._to_node)], self._to_node, smooth(alpha)
+        # )
+        self._trav.move_immediately_alpha(
+            self.finished_subanimation._to_node, self._to_node, smooth(alpha),
+        )
 
-    def clean_up_from_animation(self):
+    def clean_up_from_animation(self) -> None:
         self._sll.become(
-            self.sll_post_subanimation_group
+            self.sll_post_subanimation_group,
         )
         self._sll.add(self._trav)
         super().clean_up_from_animation()

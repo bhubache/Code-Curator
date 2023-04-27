@@ -1,61 +1,42 @@
-from manim import VMobject, FadeOut, FadeIn, Animation
+from __future__ import annotations
 
-class Node(VMobject):
-    def __init__(self, shape, data):
+from collections.abc import Sequence
+
+from src.custom_vmobject import CustomVMobject
+from src.data_structures.static_array_parts.values.element import Element
+
+
+class Node(CustomVMobject):
+    def __init__(self, data: float | str, shape: CustomVMobject):
         super().__init__(color='#DBC9B8')
-        self.is_visible = True
-        self._radius = 0.5
-        self._stroke_width = 2
-        self._shape = shape
-        self._data = data
-        self._container = self._shape(radius=self._radius, stroke_width=self._stroke_width, color=self.color)
-        self._container._is_visible = True
+        self._radius: float = 0.5
+        self._stroke_width: int = 2
+        self._shape: CustomVMobject = shape
+        self._data: Element = Element(data)
+        self._container = self._shape(
+            radius=self._radius, stroke_width=self._stroke_width, color=self.color,
+        )
         self._container.add(self._data)
         self.add(self._container)
-        # self.add(self._data)
 
     @property
     def data(self):
         return self._data._value
 
-    def get_visible_components(self):
-        visible_components = []
-        if self._container._is_visible:
-            visible_components.append(self._container)
-
-        return visible_components
-
-    def get_container_center(self):
+    def get_container_center(self) -> Sequence[float]:
         return self._container.get_center()
 
-    def get_container_top(self):
+    def get_container_top(self) -> Sequence[float]:
         return self._container.get_top()
 
-    def get_container_right(self):
+    def get_container_right(self) -> Sequence[float]:
         return self._container.get_right()
 
-    def get_container_bottom(self):
+    def get_container_bottom(self) -> Sequence[float]:
         return self._container.get_bottom()
 
-    def get_container_left(self):
+    def get_container_left(self) -> Sequence[float]:
         return self._container.get_left()
-
-    def animate_fade_out_container(self) -> Animation:
-        self._container._is_visible = False
-        return FadeOut(self._container)
-
-    def animate_fade_in_container(self) -> Animation:
-        self.add(self._container)
-        self._container._is_visible = True
-        return FadeIn(self._container)
-
-    def fade_out_container(self) -> None:
-        self._container._is_visible = False
-        FadeOut(self._container)
-
-    def fade_in_container(self) -> None:
-        self._container._is_visible = True
-        FadeIn(self._container)
 
     @property
     def container(self):

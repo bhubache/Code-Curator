@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import json
-from typing import Union
+from collections.abc import Iterable
 
 from .aligned_word import AlignedWord
 
+
 class AlignedScript:
-    def __init__(self, text_data: Union[dict[int, str], dict[int, AlignedWord]]):
-        self._words: dict[AlignedWord] = self._strs_to_words(text_data) if not self._dict_contains_aligned_words(text_data) else text_data
+    def __init__(self, text_data: dict[int, str] | dict[int, AlignedWord]):
+        self._words: dict[AlignedWord] = self._strs_to_words(
+            text_data,
+        ) if not self._dict_contains_aligned_words(text_data) else text_data
 
     def __str__(self) -> str:
         return '\n'.join(f'{word_num} -> {word}' for word_num, word in self._words.items())
@@ -67,14 +69,16 @@ class AlignedScript:
     def get_occurrences(self, text: str) -> Iterable[AlignedWord]:
         pass
 
-    def _dict_contains_aligned_words(self, d: dict) -> boolean:
+    def _dict_contains_aligned_words(self, d: dict) -> bool:
         for value in d.values():
-            if isinstance(value, AlignedWord): return True
+            if isinstance(value, AlignedWord):
+                return True
         return False
 
     def _strs_to_words(self, all_text_data: dict) -> dict[AlignedWord]:
         all_words_data = {}
         for word_num, text_data in all_text_data.items():
-            if not isinstance(word_num, int): continue
+            if not isinstance(word_num, int):
+                continue
             all_words_data[word_num] = AlignedWord(text_data)
         return all_words_data

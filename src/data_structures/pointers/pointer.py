@@ -1,16 +1,24 @@
-from manim import DOWN, RIGHT, LEFT, UP, Animation, RED, YELLOW, AnimationGroup, Create, Circle, FadeOut, Line
+from __future__ import annotations
+
+from collections.abc import Iterable
+
+import numpy as np
+from manim import Animation
+from manim import AnimationGroup
+from manim import DOWN
+from manim import Line
+from manim import UP
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
-from data_structures.static_array_parts.values.element import Element
-
-from typing import Iterable
-import numpy as np
-
-from custom_logging.custom_logger import CustomLogger
+from ..nodes.node import Node
+from .base_pointer import BasePointer
+from src.custom_logging.custom_logger import CustomLogger
+from src.data_structures.static_array_parts.values.element import Element
 logger = CustomLogger.getLogger(__name__)
 
-class Pointer(SinglyDirectedEdge):
-    def __init__(self, node, sll, label = None, direction = DOWN, start = None, end = None, tip_shape = None):
+
+class Pointer(SinglyDirectedEdge, BasePointer):
+    def __init__(self, node: Node, sll, label=None, direction=DOWN, start=None, end=None, tip_shape=None):
         self._sll = sll
         # TODO: More fleshed out implementation for where the pointer starts and ends
         relative_placement = None
@@ -48,10 +56,12 @@ class Pointer(SinglyDirectedEdge):
         return self._label
 
     def lists_equal(self, a: list, b: list) -> bool:
-        if len(a) != len(b): return False
+        if len(a) != len(b):
+            return False
 
         for e1, e2 in zip(a, b):
-            if e1 != e2: return False
+            if e1 != e2:
+                return False
         return True
 
     @property
@@ -63,9 +73,12 @@ class Pointer(SinglyDirectedEdge):
         if self._node not in self._sll.submobjects:
             raise
         relative_location = self._relative_placement(positioned_node)
-        start = [relative_location[0], relative_location[1] + (self.vertical_length * -self._direction[1]), 0]
+        start = [
+            relative_location[0], relative_location[1] +
+            (self.vertical_length * -self._direction[1]), 0,
+        ]
         return AnimationGroup(
-            self.animate.put_start_and_end_on(start, relative_location)
+            self.animate.put_start_and_end_on(start, relative_location),
         )
 
     # TODO: Use vectors to make this generalized to all directions
@@ -83,6 +96,3 @@ class Pointer(SinglyDirectedEdge):
     # FIXME: VERY VERY basic
     def opposite_of_direction(self):
         return np.array([self._direction[0], self._direction[1] * -1, self._direction[2]])
-
-    def get_visible_components(self):
-        return [self]
