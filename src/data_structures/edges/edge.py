@@ -29,14 +29,14 @@ class Edge(CustomVMobject):
         start: Sequence[float] | None = None,
         end: Sequence[float] | None = None,
         weight: float | Weight = NullWeight(),
-        line_color: str | Color = DEFAULT_MOBJECT_COLOR,
+        color: str | Color = DEFAULT_MOBJECT_COLOR,
         line_stroke_width: int = DEFAULT_STROKE_WIDTH,
     ) -> None:
         super().__init__()
         finalized_start: Sequence[float] = start if start is not None else DEFAULT_START
         finalized_end: Sequence[float] = end if end is not None else DEFAULT_END
         self._line: Line = Line(
-            start=finalized_start, end=finalized_end, color=line_color, stroke_width=line_stroke_width,
+            start=finalized_start, end=finalized_end, color=color, stroke_width=line_stroke_width,
         )
 
         if isinstance(weight, float):
@@ -53,6 +53,12 @@ class Edge(CustomVMobject):
 
     def get_start_and_end(self) -> tuple[ndarray, ndarray]:
         return self._line.get_start_and_end()
+
+    def get_color(self) -> Color:
+        return self._line.color
+
+    def get_stroke_width(self) -> int:
+        return self._line.stroke_width
 
     @property
     def line(self) -> Line:
