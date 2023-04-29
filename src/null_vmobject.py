@@ -14,3 +14,9 @@ class NullVMobject(VMobject):
 
     def __getattr__(self, attr: Any) -> None:
         return None
+
+    def __eq__(self, other: NullVMobject) -> bool:
+        if isinstance(other, NullVMobject):
+            return True
+        else:
+            return False
