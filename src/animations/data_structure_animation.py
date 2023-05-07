@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from animations.singly_linked_list import data_structure_animator as ds_animator
+from custom_logging.custom_logger import CustomLogger
+from data_structures import singly_linked_list as sll_m
 from manim import Animation
 
 from .subanimation_group import SubanimationGroup
-from src.animations.singly_linked_list import data_structure_animator as ds_animator
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures import singly_linked_list as sll_m
 logger = CustomLogger.getLogger(__name__)
 
 

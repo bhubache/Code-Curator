@@ -6,15 +6,16 @@ from types import MethodType
 from typing import Any
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+
 from ..data_structure_animation import DataStructureAnimation
 from ..subanimation_group import SubanimationGroup
 from .animation_forecasting.sll_animation_forecaster import SLLAnimationForecaster
 from .subanimations.base_subanimation import BaseSubanimation
-from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
 
 
 class DataStructureAnimator:

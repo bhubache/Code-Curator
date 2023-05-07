@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from custom_logging.custom_logger import CustomLogger
 from manim import Animation
 from manim import Wait
 
 from ...tag import Tag
 from ..alignment_script.alignments.aligned_script import AlignedScript
 from .animation_script import AnimationScript
-from src.custom_logging.custom_logger import CustomLogger
 # from script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
 # from script_handling.tag import Tag
 logger = CustomLogger.getLogger(__name__)

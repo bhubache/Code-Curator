@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
+
 from .leaf_subanimation import LeafSubanimation
-from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 

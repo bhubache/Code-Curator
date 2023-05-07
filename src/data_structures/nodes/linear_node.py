@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+from custom_vmobject import CustomVMobject
 from manim import Animation
 from manim import RIGHT
 
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 from .node import Node
-from src.custom_vmobject import CustomVMobject
 
 
 class LinearNode(Node):

@@ -2,19 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.pointers.null_pointer import NullPointer
+from data_structures.pointers.pointer import Pointer
 from manim import UP
 
 from ...subanimation_group import SubanimationGroup
 from ..subanimations.fade_in_mobject import FadeInMobject
 from ..subanimations.move_trav import MoveTrav
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.nodes.singly_linked_list_node import SLLNode
-from src.data_structures.pointers.null_pointer import NullPointer
-from src.data_structures.pointers.pointer import Pointer
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
 
 
 class TempTravSubanimator:

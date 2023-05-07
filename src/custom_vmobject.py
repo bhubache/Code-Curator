@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
 from manim import VMobject
 from manim.constants import DEFAULT_STROKE_WIDTH
-
-from src.custom_logging.custom_logger import CustomLogger
-from src.null_vmobject import NullVMobject
+from null_vmobject import NullVMobject
 logger = CustomLogger.getLogger(__name__)
 
 

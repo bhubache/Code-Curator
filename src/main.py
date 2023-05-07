@@ -6,17 +6,16 @@ import os
 from collections.abc import Sequence
 from types import ModuleType
 
+from base_scene import BaseScene
 from manim import config
 from manim import FadeIn
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-
-from src.base_scene import BaseScene
-from src.script_handling.aligned_animation_script import AlignedAnimationScript
-from src.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from src.script_handling.components.animation_script.animation_script import AnimationScript
-from src.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
+from script_handling.aligned_animation_script import AlignedAnimationScript
+from script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
+from script_handling.components.animation_script.animation_script import AnimationScript
+from script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 # import time
 # from manim.utils.file_ops import open_file as open_media_file
 
@@ -156,7 +155,7 @@ class TestScene(Scene):
     # print(json.dumps(config, indent=4, default=str))
 
     def construct(self) -> None:
-        from src.data_structures.singly_linked_list import SinglyLinkedList
+        from data_structures.singly_linked_list import SinglyLinkedList
         # from data_structures.nodes.singly_linked_list_node import SLLNode
         # from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
         self.sll = SinglyLinkedList(1, 2)

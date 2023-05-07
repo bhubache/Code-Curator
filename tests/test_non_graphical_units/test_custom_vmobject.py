@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import pytest
+from custom_vmobject import CustomVMobject
 from manim import Circle
 from manim import Line
 from manim import Square
-
-from src.custom_vmobject import CustomVMobject
-from src.null_vmobject import NullVMobject
+from null_vmobject import NullVMobject
 
 
 @pytest.fixture

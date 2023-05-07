@@ -8,8 +8,8 @@ from manim.constants import DEFAULT_STROKE_WIDTH
 
 class manim_property:
     """A lot of mobjects I've made use composition rather than inheritance. :class:`~base_scene.BaseScene`
-    One example is :class:`Edge`, which is a :class:`custom_vmobject.CustomVMobject` composed
-    of a :class:`Line` and a :class:`Weight`. I ran into an issue when exposing
+    One example is :class:`~data_structures.edges.edge.Edge`, which is a :class:`~custom_vmobject.CustomVMobject`
+    composed of a :class:`Line` and a :class:`Weight`. I ran into an issue when exposing
     some attributes as part of the public API. ``stroke_width`` for instance, was
     originally written as follows:
 

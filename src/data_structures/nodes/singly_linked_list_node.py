@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
+from custom_vmobject import CustomVMobject
 from manim import Circle
 
 from .linear_node import LinearNode
-from src.custom_logging.custom_logger import CustomLogger
-from src.custom_vmobject import CustomVMobject
 logger = CustomLogger.getLogger(__name__)
 
 

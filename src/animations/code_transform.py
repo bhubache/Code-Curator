@@ -1,9 +1,17 @@
-import difflib
-from pprint import pprint
+from __future__ import annotations
 
-from manim import Mobject, Code, Animation, FadeIn, FadeOut, AnimationGroup, VGroup, DOWN, LEFT, Transform, Square
+import difflib
 from code.code_diff import CodeDiff
 
+from manim import Animation
+from manim import AnimationGroup
+from manim import DOWN
+from manim import FadeIn
+from manim import FadeOut
+from manim import LEFT
+from manim import Mobject
+from manim import Square
+from manim import Transform
 
 
 class CodeTransform:
@@ -12,9 +20,9 @@ class CodeTransform:
         mobject:                              Mobject,
         target_mobject:                       Mobject,
         path_arc:                             float = 0,
-        replace_mobject_with_target_in_scene: bool  = False,
+        replace_mobject_with_target_in_scene: bool = False,
         run_time:                             float = 1,
-        **kwargs
+        **kwargs,
     ):
         # super().__init__(mobject, run_time=run_time, rate_func=rate_func, **kwargs)
         self._src_code_obj = mobject
@@ -40,18 +48,18 @@ class CodeTransform:
                     if not self.diff.line_unique_to_src_code(self.diff[line_index]):
                         break
 
-                    curr_similarity_score = self.diff.get_sequence_similarity(line, self.diff[line_index])
+                    curr_similarity_score = self.diff.get_sequence_similarity(
+                        line, self.diff[line_index],
+                    )
                     if curr_similarity_score > highest_similarity_score:
                         highest_similarity_score = curr_similarity_score
                         other_line_change_index = line_index
-                
+
                 if highest_similarity_score > 0.65:
                     temp = self.diff[i]
                     for swapping_index in range(i, other_line_change_index):
                         self.diff[swapping_index] = self.diff[swapping_index + 1]
                     self.diff[other_line_change_index] = temp
-
-
 
     @property
     def src_code_obj(self):
@@ -87,15 +95,34 @@ class CodeTransform:
         if self.src_code_obj.has_highlighter():
             if self.src_code_obj.highlighter.curr_line_num not in self.src_to_dst_map:
                 # Line with highlighter gets removed
-                highlighter_animation = FadeOut(src.src_code_obj.highlighter)
+                # FIXME: Did this come up from some auto rename???
+                raise Exception(
+                    'Please check the commented out line below this because it is really wrong',
+                )
+                # highlighter_animation = FadeOut(src_code_obj.highlighter)
             else:
-                dst_line_obj = self.dst_code_obj.get_line_at(self.src_to_dst_map[self.src_code_obj.highlighter.curr_line_num])
+                dst_line_obj = self.dst_code_obj.get_line_at(
+                    self.src_to_dst_map[self.src_code_obj.highlighter.curr_line_num],
+                )
                 highlighter_animation = self.src_code_obj.highlighter.animate. \
                     stretch_to_fit_width(dst_line_obj.width). \
                     align_to(dst_line_obj, DOWN + LEFT)
-            self.src_code_obj.highlighter.curr_line_num = self.src_to_dst_map[self.src_code_obj.highlighter.curr_line_num]
+            self.src_code_obj.highlighter.curr_line_num = self.src_to_dst_map[
+                self.src_code_obj.highlighter.curr_line_num
+            ]
 
-        return AnimationGroup(AnimationGroup(*matching_line_animations, *removed_line_animations, *changed_line_animations, highlighter_animation), AnimationGroup(*added_line_animations), lag_ratio=0.5)
+        return AnimationGroup(
+            AnimationGroup(
+                *matching_line_animations,
+                *removed_line_animations,
+                *changed_line_animations,
+                highlighter_animation,
+            ),
+            AnimationGroup(
+                *added_line_animations,
+            ),
+            lag_ratio=0.5,
+        )
 
     def _get_matching_line_animations(self) -> list[Animation]:
         animations = []
@@ -104,9 +131,13 @@ class CodeTransform:
                 self._lines_checked[i] = True
                 src_line = self.diff.get_source_line(line_index=i)
                 dst_line = self.diff.get_destination_line(line_index=i)
-                
+
                 # Add line indices to map for highlighter transformation
-                self.src_to_dst_map[self.diff.get_source_line_index(i)] = self.diff.get_destination_line_index(i)
+                self.src_to_dst_map[
+                    self.diff.get_source_line_index(
+                        i,
+                    )
+                ] = self.diff.get_destination_line_index(i)
                 animations.append(src_line.animate.align_to(dst_line, DOWN))
         return animations
 
@@ -118,54 +149,79 @@ class CodeTransform:
                 if not self.line_connects_back_to_src(i):
                     if not self._lines_checked[i]:
                         self._lines_checked[i] = True
-                        animations.append(FadeIn(self.diff.get_destination_line(line_index=i)))
+                        animations.append(
+                            FadeIn(self.diff.get_destination_line(line_index=i)),
+                        )
 
                         # Add line indices to map for highlighter transformation
-                        self.src_to_dst_map[self.diff.get_source_line_index(i)] = self.diff.get_destination_line_index(i)
+                        self.src_to_dst_map[
+                            self.diff.get_source_line_index(
+                                i,
+                            )
+                        ] = self.diff.get_destination_line_index(i)
                 else:
-                    unique_to_src_index = self.src_index_connecting_new_lines(line_index=i)
+                    unique_to_src_index = self.src_index_connecting_new_lines(
+                        line_index=i,
+                    )
                     unique_to_src_line = self.diff[unique_to_src_index]
 
                     other_changed_line_index = -1
                     highest_similarity_score = 0
 
                     index = unique_to_src_index + 1
-                    while(index < len(self.diff) and self.diff.line_unique_to_dst_code(self.diff[index])):
-                        similarity_score = self.diff.get_sequence_similarity(unique_to_src_line, self.diff[index])
+                    while index < len(self.diff) and self.diff.line_unique_to_dst_code(self.diff[index]):
+                        similarity_score = self.diff.get_sequence_similarity(
+                            unique_to_src_line, self.diff[index],
+                        )
 
                         if similarity_score > highest_similarity_score:
                             highest_similarity_score = similarity_score
                             other_changed_line_index = index
-                        
+
                         index += 1
 
                     self._changed_lines[unique_to_src_index] = other_changed_line_index
-                    self._SRC_TO_DST_CHANGED_INDICES[unique_to_src_index] = self.diff.get_destination_line_index(other_changed_line_index)
+                    self._SRC_TO_DST_CHANGED_INDICES[unique_to_src_index] = self.diff.get_destination_line_index(
+                        other_changed_line_index,
+                    )
 
                     index = unique_to_src_index + 1
-                    while(index < len(self.diff) and self.diff.line_unique_to_dst_code(self.diff[index])):
+                    while index < len(self.diff) and self.diff.line_unique_to_dst_code(self.diff[index]):
                         if index == other_changed_line_index:
                             index += 1
                             continue
 
                         if not self._lines_checked[index]:
                             self._lines_checked[index] = True
-                            animations.append(FadeIn(self.diff.get_destination_line(line_index=index)))
+                            animations.append(
+                                FadeIn(
+                                    self.diff.get_destination_line(
+                                        line_index=index,
+                                    ),
+                                ),
+                            )
 
                             # Add line indices to map for highlighter transformation
-                            self.src_to_dst_map[self.diff.get_source_line_index(i)] = self.diff.get_destination_line_index(i)
+                            self.src_to_dst_map[
+                                self.diff.get_source_line_index(
+                                    i,
+                                )
+                            ] = self.diff.get_destination_line_index(i)
                         index += 1
         return animations
 
     def src_index_connecting_new_lines(self, line_index: int) -> int:
         for i in range(line_index, -1, -1):
-            if self.diff.line_unique_to_src_code(self.diff[i]): return i
+            if self.diff.line_unique_to_src_code(self.diff[i]):
+                return i
         return -1
 
     def line_connects_back_to_src(self, line_index: int) -> bool:
         for i in range(line_index, -1, -1):
-            if self.diff.line_common_to_both_codes(self.diff[i]): return False
-            if self.diff.line_unique_to_src_code(self.diff[i]): return True
+            if self.diff.line_common_to_both_codes(self.diff[i]):
+                return False
+            if self.diff.line_unique_to_src_code(self.diff[i]):
+                return True
         return False
 
     def _get_removed_line_animations(self) -> list[Animation]:
@@ -175,10 +231,16 @@ class CodeTransform:
                 if i == len(self.diff) - 1 or not self.diff.line_unique_to_dst_code(self.diff[i + 1]):
                     if not self._lines_checked[i]:
                         self._lines_checked[i] = True
-                        animations.append(FadeOut(self.diff.get_source_line(line_index=i)))
+                        animations.append(
+                            FadeOut(self.diff.get_source_line(line_index=i)),
+                        )
 
                         # Add line indices to map for highlighter transformation
-                        self.src_to_dst_map[self.diff.get_source_line_index(i)] = self.diff.get_destination_line_index(i)
+                        self.src_to_dst_map[
+                            self.diff.get_source_line_index(
+                                i,
+                            )
+                        ] = self.diff.get_destination_line_index(i)
         return animations
 
     def _get_changed_line_animations(self) -> list[Animation]:
@@ -212,60 +274,64 @@ class CodeTransform:
                 if self.diff.word_contains_added_char(word) or self.diff.word_contains_removed_char(word):
                     total_word_changes += 1
 
-
             num_changed = 0
-            prev_src_end_index = 0
-            prev_dst_end_index = 0
+            # prev_src_end_index = 0
+            # prev_dst_end_index = 0
             for word_index, word in enumerate(diff_words):
                 # Find a token that has been changed
                 if self.diff.word_contains_added_char(word) or self.diff.word_contains_removed_char(word):
-                    src_start_index, src_end_index = self._get_src_word_bounds(src_index, word_index, diff_words)
-                    dst_start_index, dst_end_index = self._get_dst_word_bounds(src_index, word_index, diff_words)
+                    src_start_index, src_end_index = self._get_src_word_bounds(
+                        src_index, word_index, diff_words,
+                    )
+                    dst_start_index, dst_end_index = self._get_dst_word_bounds(
+                        src_index, word_index, diff_words,
+                    )
 
                     src_line_index = self.diff.get_source_line_index(src_index)
-                    dst_line_index = self.diff.get_destination_line_index(dst_index)
+                    dst_line_index = self.diff.get_destination_line_index(
+                        dst_index,
+                    )
 
                     animations.append(
                         Transform(
-                            self.src_code_obj[2][src_line_index][src_start_index : src_end_index],
-                            self.dst_code_obj[2][dst_line_index][dst_start_index : dst_end_index]    
-                        )
+                            self.src_code_obj[2][src_line_index][src_start_index: src_end_index],
+                            self.dst_code_obj[2][dst_line_index][dst_start_index: dst_end_index],
+                        ),
                     )
 
                     animations.append(
-                        self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(self.dst_code_obj[2][dst_line_index][dst_end_index:], LEFT+DOWN)
+                        self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(
+                            self.dst_code_obj[2][dst_line_index][dst_end_index:], LEFT+DOWN,
+                        ),
                     )
                     # animations.append(
-                    #     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(self.dst_code_obj[2][dst_line_index][dst_end_index:], DOWN)
+                    #     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(
+                    # self.dst_code_obj[2][dst_line_index][dst_end_index:], DOWN)
                     # )
-                    
+
                     if num_changed == 0:
                         animations.append(
-                            self.src_code_obj[2][src_line_index][:src_start_index].animate.align_to(self.dst_code_obj[2][dst_line_index][:dst_start_index], DOWN)
+                            self.src_code_obj[2][src_line_index][:src_start_index].animate.align_to(
+                                self.dst_code_obj[2][dst_line_index][:dst_start_index], DOWN,
+                            ),
                         )
                     else:
                         if num_changed == total_word_changes - 1:
                             pass
                             # animations.append(
-                            #     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(self.dst_code_obj[2][dst_line_index][dst_end_index:], DOWN)
+                            #     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(
+                            # self.dst_code_obj[2][dst_line_index][dst_end_index:], DOWN)
                             # )
-                        
+
                         # animations.append(
-                        #     self.src_code_obj[2][src_line_index][prev_src_end_index : src_start_index].animate.align_to(self.dst_code_obj[2][dst_line_index][prev_dst_end_index : dst_start_index], DOWN)
+                        #  self.src_code_obj[2][src_line_index][prev_src_end_index : src_start_index].animate.align_to(
+                        # self.dst_code_obj[2][dst_line_index][prev_dst_end_index : dst_start_index], DOWN)
                         # )
 
-                    prev_src_end_index = src_end_index
-                    prev_dst_end_index = dst_end_index
-                    
+                    # prev_src_end_index = src_end_index
+                    # prev_dst_end_index = dst_end_index
+
                     num_changed += 1
-
-
-
-
-
-
-
-            
 
         # for line_index, line in enumerate(self.diff):
         #     # The last line of a diff can't be a changed line from source
@@ -275,7 +341,8 @@ class CodeTransform:
         #     # Technically, this also captures a the scenario where a line was removed and the
         #     # following line was added but I think we can treat them the same as the animation
         #     # being the same isn't a big deal (I think)
-        #     if self.diff.line_unique_to_src_code(line) and self.diff.line_unique_to_dst_code(self.diff[line_index + 1]):
+        #     if self.diff.line_unique_to_src_code(line) and self.diff.line_unique_to_dst_code(
+        # self.diff[line_index + 1]):
         #         # Remove the '- ' or '+ ' from the lines
         #         cleaned_src_line = line[2:]
         #         cleaned_dst_line = self.diff[line_index + 1][2:]
@@ -313,21 +380,32 @@ class CodeTransform:
         #                 animations.append(
         #                     Transform(
         #                         self.src_code_obj[2][src_line_index][src_start_index : src_end_index],
-        #                         self.dst_code_obj[2][dst_line_index][dst_start_index : dst_end_index]    
+        #                         self.dst_code_obj[2][dst_line_index][dst_start_index : dst_end_index]
         #                     )
         #                 )
 
         #                 animations.append(
-        #                     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(self.dst_code_obj[2][dst_line_index][dst_end_index:], LEFT)
+        #                     self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(
+        #                          self.dst_code_obj[2][dst_line_index][dst_end_index:], LEFT)
         #                 )
         return animations
 
-    def _get_word_bounds(self, diff_line_index: int, diff_word_index: int, diff_words: list[str], type_: str) -> tuple[int, int]:
-        code_line_obj = None
-        if type_ == 'src':
-            code_line_obj = self.diff.get_source_line(line_index=diff_line_index)
-        else:
-            code_line_obj = self.diff.get_destination_line(line_index=diff_line_index)
+    def _get_word_bounds(
+        self,
+        diff_line_index: int,
+        diff_word_index: int,
+        diff_words: list[str],
+        type_: str,
+    ) -> tuple[int, int]:
+        # code_line_obj = None
+        # if type_ == 'src':
+        #     code_line_obj = self.diff.get_source_line(
+        #         line_index=diff_line_index,
+        #     )
+        # else:
+        #     code_line_obj = self.diff.get_destination_line(
+        #         line_index=diff_line_index,
+        #     )
 
         start_index = 0
         char_to_ignore = None
@@ -344,23 +422,51 @@ class CodeTransform:
             if diff_word.endswith('   '):
                 diff_word = diff_word.replace('   ', '  ?')
 
-
             cleaned_word = ''.join(diff_word.split())
-            cleaned_word_full = ''.join([char for i, char in enumerate(cleaned_word) if char != '-' and char != '+' and ((i != 0 and cleaned_word[i - 1] != char_to_ignore) or (i == 0 and cleaned_word[i] != char_to_ignore))])
+            cleaned_word_full = ''.join([
+                char for i, char in enumerate(cleaned_word) if char != '-' and char != '+' and (
+                    (i != 0 and cleaned_word[i - 1] != char_to_ignore) or (
+                        i == 0 and cleaned_word[i] != char_to_ignore
+                    )
+                )
+            ])
 
             start_index += len(cleaned_word_full)
 
         joined_word = ''.join(diff_words[diff_word_index].split())
         joined_word = joined_word.replace('--', '-?-')
         joined_word = joined_word.replace('++', '+?+')
-        original_word = ''.join([char for i, char in enumerate(joined_word) if char != '-' and char != '+' and (i != 0 and joined_word[i - 1] != char_to_ignore)])
-        
+        original_word = ''.join([
+            char for i, char in enumerate(
+                joined_word,
+            ) if char != '-' and char != '+' and (i != 0 and joined_word[i - 1] != char_to_ignore)
+        ])
+
         # Exclusive
         end_index = start_index + len(original_word)
         return start_index, end_index
 
-    def _get_dst_word_bounds(self, diff_line_index: int, diff_word_index: int, diff_words: list[str]) -> tuple[int, int]:
-        return self._get_word_bounds(diff_line_index=diff_line_index, diff_word_index=diff_word_index, diff_words=diff_words, type_='dst')
+    def _get_dst_word_bounds(
+        self,
+        diff_line_index: int,
+        diff_word_index: int,
+        diff_words: list[str],
+    ) -> tuple[int, int]:
+        return self._get_word_bounds(
+            diff_line_index=diff_line_index,
+            diff_word_index=diff_word_index,
+            diff_words=diff_words, type_='dst',
+        )
 
-    def _get_src_word_bounds(self, diff_line_index: int, diff_word_index: int, diff_words: list[str]) -> tuple[int, int]:
-        return self._get_word_bounds(diff_line_index=diff_line_index, diff_word_index=diff_word_index, diff_words=diff_words, type_='src')
+    def _get_src_word_bounds(
+        self,
+        diff_line_index: int,
+        diff_word_index: int,
+        diff_words: list[str],
+    ) -> tuple[int, int]:
+        return self._get_word_bounds(
+            diff_line_index=diff_line_index,
+            diff_word_index=diff_word_index,
+            diff_words=diff_words,
+            type_='src',
+        )
