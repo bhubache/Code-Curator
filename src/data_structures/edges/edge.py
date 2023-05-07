@@ -7,21 +7,42 @@ from colour import Color
 from manim import Line
 from numpy import ndarray
 
-from ...constants import DEFAULT_MOBJECT_COLOR
-from ...constants import DEFAULT_STROKE_WIDTH
 from .weights.edge_weight import EdgeWeight
 from .weights.null_weight import NullWeight
 from .weights.weight import Weight
+from src.constants import DEFAULT_MOBJECT_COLOR
+from src.constants import DEFAULT_STROKE_WIDTH
 from src.custom_vmobject import CustomVMobject
+from src.manim_property import manim_property
+# from ...constants import DEFAULT_MOBJECT_COLOR
+# from ...constants import DEFAULT_STROKE_WIDTH
+
+# from custom_vmobject import CustomVMobject
+# from automatic_delegation.delegate_to import delegate_to
+# from manim_property import manim_property
 
 DEFAULT_START: ndarray = np.array([-1, 0, 0])
 DEFAULT_END: ndarray = np.array([1, 0, 0])
 
 
+# @delegate_to(Line, to='_line')
 class Edge(CustomVMobject):
-    """A connection between two :class:`Node`.
+    r"""A connection between two :class:`~data_structures.nodes.node.Node`.
 
-    A :class:`VMobject` composed of :class:`Line` and :class:`Weight`.
+    A :class:`~custom_vmobject.CustomVMobject`
+    composed of :class:`~manim.manim.mobject.geometry.Line` and :class:`~data_structures.edges.weights.weight.Weight`.
+
+    Parameters
+    ----------
+    start
+        The start coordinate.
+    end
+        The end coordinate.
+    weight
+        The associated weight.
+    color
+        The Edge's color.
+    line_stroke_width: stroke width of the Edge's line.
     """
 
     def __init__(
@@ -51,14 +72,20 @@ class Edge(CustomVMobject):
         self.add(self._line)
         self.add(self._weight)
 
-    def get_start_and_end(self) -> tuple[ndarray, ndarray]:
+    def get_start_and_end(self) -> tuple[Sequence[float], Sequence[float]]:
         return self._line.get_start_and_end()
 
-    def get_color(self) -> Color:
+    @manim_property
+    def color(self) -> Color:
         return self._line.color
 
-    def get_stroke_width(self) -> int:
+    @manim_property
+    def stroke_width(self) -> int:
         return self._line.stroke_width
+
+    @stroke_width.setter
+    def stroke_width(self, new_stroke_width: int) -> None:
+        self._line.stroke_width = new_stroke_width
 
     @property
     def line(self) -> Line:
@@ -69,11 +96,11 @@ class Edge(CustomVMobject):
         return self._weight
 
     @property
-    def start(self) -> ndarray:
+    def start(self) -> Sequence[float]:
         return self.get_start_and_end()[0]
 
     @property
-    def end(self) -> ndarray:
+    def end(self) -> Sequence[float]:
         return self.get_start_and_end()[1]
 
     @property

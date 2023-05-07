@@ -17,6 +17,16 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class BaseScene(ABC, Scene):
+    """Test docstring
+
+    :param ABC: _description_
+    :type ABC: _type_
+    :param Scene: _description_
+    :type Scene: _type_
+    :raises RuntimeError: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     config.background_color = '#000E15'
 
     def __init__(self, problem_dir: str, aligned_animation_scene: CompositeAnimationScript) -> None:
