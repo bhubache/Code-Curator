@@ -6,6 +6,7 @@ from typing import Any
 
 
 class Weight(ABC):
+    """A weight for a traversal across and edge in a graph"""
     @property
     @abstractmethod
     def value(self) -> Any:

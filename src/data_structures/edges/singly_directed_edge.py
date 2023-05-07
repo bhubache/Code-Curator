@@ -22,20 +22,18 @@ class SinglyDirectedEdge(CustomVMobject):
         weight: float | Weight = NullWeight(),
         tip_shape: VMobject | None = None,
     ) -> None:
+        super().__init__()
         self._edge: Edge = Edge(
             start=start,
             end=end,
             weight=weight,
         )
-        self._add_tip(tip_shape=tip_shape, tip_length=0.2, tip_width=0.2)
-        self.add(self._edge)
-
-    def _add_tip(self, tip_shape: VMobject, tip_length: float, tip_width: float) -> None:
         self._edge.line.add_tip(
             tip_shape=tip_shape,
-            tip_length=tip_length,
-            tip_width=tip_width,
+            tip_length=0.2,
+            tip_width=0.2,
         )
+        self.add(self._edge)
 
     def create_curved_pointer(start: Sequence[float], end: Sequence[float], **kwargs) -> CurvedArrow:
         singly_directed_edge = SinglyDirectedEdge(0, 1)
@@ -49,3 +47,18 @@ class SinglyDirectedEdge(CustomVMobject):
         curved_pointer.set_stroke_width(singly_directed_edge.stroke_width)
 
         return curved_pointer
+
+    @property
+    def length(self) -> float:
+        return self._edge.length
+
+    def get_start_and_end(self) -> tuple[Sequence[float], Sequence[float]]:
+        return self._edge.get_start_and_end()
+
+    @property
+    def start(self) -> Sequence[float]:
+        return self.get_start_and_end()[0]
+
+    @property
+    def end(self) -> Sequence[float]:
+        return self.get_start_and_end()[1]

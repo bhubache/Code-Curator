@@ -5,4 +5,4 @@ from src.null_vmobject import NullVMobject
 
 
 class NullPointer(NullVMobject, BasePointer):
-    pass
+    """A null pointer"""
