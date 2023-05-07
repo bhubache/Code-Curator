@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 import numpy as np
+from custom_logging.custom_logger import CustomLogger
+from data_structures.static_array_parts.values.element import Element
 from manim import Animation
 from manim import AnimationGroup
 from manim import DOWN
@@ -12,8 +14,6 @@ from manim import UP
 from ..edges.singly_directed_edge import SinglyDirectedEdge
 from ..nodes.node import Node
 from .base_pointer import BasePointer
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.static_array_parts.values.element import Element
 logger = CustomLogger.getLogger(__name__)
 
 

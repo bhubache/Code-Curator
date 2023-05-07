@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.pointers.pointer import Pointer
 from manim import Line
 from manim import smooth
 
 from .leaf_subanimation import LeafSubanimation
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from src.data_structures.nodes.singly_linked_list_node import SLLNode
-from src.data_structures.pointers.pointer import Pointer
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
 
 
 class UnshrinkPointer(LeafSubanimation):

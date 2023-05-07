@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+from data_structures.edges.edge import Edge
 from manim import Animation
 from manim import Scene
 from manim.utils.testing.frames_comparison import frames_comparison
-
-from src.data_structures.edges.edge import Edge
 
 __module_test__ = 'edges'
 

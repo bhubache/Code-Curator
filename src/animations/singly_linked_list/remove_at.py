@@ -3,6 +3,10 @@ from __future__ import annotations
 from typing import Any
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.pointers.pointer import Pointer
 from manim import VGroup
 
 from .data_structure_animator import _register_subanimation
@@ -17,14 +21,10 @@ from .subanimations.flatten_list_for_remove import FlattenListForRemove
 from .subanimations.shrink_pointer import ShrinkPointer
 from .subanimations.unshrink_pointer import UnshrinkPointer
 from .utils.temp_trav_subanimator import TempTravSubanimator
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from src.data_structures.nodes.singly_linked_list_node import SLLNode
-from src.data_structures.pointers.pointer import Pointer
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
 
 
 class RemoveAt(DataStructureAnimator):

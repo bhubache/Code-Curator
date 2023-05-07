@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from custom_logging.custom_logger import CustomLogger
+from custom_vmobject import CustomVMobject
+from data_structures.edges.weights.null_weight import NullWeight
+from data_structures.edges.weights.weight import Weight
 from manim import CurvedArrow
 from manim import VMobject
 
 from .edge import Edge
-from src.custom_logging.custom_logger import CustomLogger
-from src.custom_vmobject import CustomVMobject
-from src.data_structures.edges.weights.null_weight import NullWeight
-from src.data_structures.edges.weights.weight import Weight
 
 logger = CustomLogger.getLogger(__name__)
 

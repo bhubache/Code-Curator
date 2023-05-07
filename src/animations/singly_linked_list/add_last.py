@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import Any
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures import singly_linked_list
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from data_structures.pointers.pointer import Pointer
+
 from ..singly_linked_list.subanimations.center_sll import CenterSLL
 from ..singly_linked_list.subanimations.fade_in_container import FadeInContainer
 from ..singly_linked_list.subanimations.fade_in_mobject import FadeInMobject
@@ -13,14 +18,10 @@ from .data_structure_animator import _register_subanimation
 from .data_structure_animator import DataStructureAnimator
 from .subanimations.leaf_subanimation import LeafSubanimation
 from .utils.temp_trav_subanimator import TempTravSubanimator
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures import singly_linked_list
-from src.data_structures.nodes.singly_linked_list_node import SLLNode
-from src.data_structures.pointers.pointer import Pointer
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
 
 
 class AddLast(DataStructureAnimator):

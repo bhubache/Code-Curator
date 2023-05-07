@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import pytest
-
-from src.custom_vmobject import CustomVMobject
-from src.null_vmobject import NullVMobject
+from custom_vmobject import CustomVMobject
+from null_vmobject import NullVMobject
 
 
 @pytest.fixture

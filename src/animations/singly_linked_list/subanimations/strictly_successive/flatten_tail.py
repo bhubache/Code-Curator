@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from data_structures.nodes.singly_linked_list_node import SLLNode
 from manim import smooth
 from manim import VGroup
 
 from ..leaf_subanimation import LeafSubanimation
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from src.data_structures.nodes.singly_linked_list_node import SLLNode
 logger = CustomLogger.getLogger(__name__)
 
 

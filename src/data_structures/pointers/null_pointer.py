@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from null_vmobject import NullVMobject
+
 from .base_pointer import BasePointer
-from src.null_vmobject import NullVMobject
 
 
 class NullPointer(NullVMobject, BasePointer):

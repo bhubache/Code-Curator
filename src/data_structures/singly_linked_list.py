@@ -5,20 +5,20 @@ from collections.abc import Iterator
 from collections.abc import Sequence
 from typing import Any
 
+from animations.singly_linked_list.add_last import AddLast
+from animations.singly_linked_list.remove_at import RemoveAt
+from custom_logging.custom_logger import CustomLogger
+from custom_vmobject import CustomVMobject
 from manim import Animation
 from manim import DOWN
 from manim import LEFT
 from manim import RIGHT
 from manim import UP
+from null_vmobject import NullVMobject
 
 from .edges.singly_directed_edge import SinglyDirectedEdge
 from .nodes.singly_linked_list_node import SLLNode
 from .pointers.pointer import Pointer
-from src.animations.singly_linked_list.add_last import AddLast
-from src.animations.singly_linked_list.remove_at import RemoveAt
-from src.custom_logging.custom_logger import CustomLogger
-from src.custom_vmobject import CustomVMobject
-from src.null_vmobject import NullVMobject
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Consider using the builder design pattern rather than

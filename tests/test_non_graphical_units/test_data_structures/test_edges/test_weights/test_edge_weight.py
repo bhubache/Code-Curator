@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import pytest
 from colour import Color
-
-from src.constants import DEFAULT_ELEMENT_FONT_SIZE
-from src.constants import DEFAULT_MOBJECT_COLOR
-from src.data_structures.edges.weights.edge_weight import EdgeWeight
-from src.data_structures.edges.weights.weight import Weight
+from constants import DEFAULT_ELEMENT_FONT_SIZE
+from constants import DEFAULT_MOBJECT_COLOR
+from data_structures.edges.weights.edge_weight import EdgeWeight
+from data_structures.edges.weights.weight import Weight
 
 FIVE_INT: int = 5
 FIVE_FLOAT: float = 5.0

@@ -3,12 +3,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from colour import Color
+from constants import DEFAULT_MOBJECT_COLOR
+from constants import DEFAULT_STROKE_WIDTH
+from data_structures.edges.edge import Edge
+from data_structures.edges.weights.null_weight import NullWeight
 from manim import Line
-
-from src.constants import DEFAULT_MOBJECT_COLOR
-from src.constants import DEFAULT_STROKE_WIDTH
-from src.data_structures.edges.edge import Edge
-from src.data_structures.edges.weights.null_weight import NullWeight
 
 
 @pytest.fixture

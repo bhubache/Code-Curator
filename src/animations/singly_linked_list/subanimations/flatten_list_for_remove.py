@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
+from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import LEFT
 from manim import Line
 from manim import smooth
@@ -7,8 +9,6 @@ from manim import VGroup
 
 from .leaf_subanimation import LeafSubanimation
 from .strictly_successive.flatten_list_for_remove import SuccessiveFlattenListForRemove
-from src.custom_logging.custom_logger import CustomLogger
-from src.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 logger = CustomLogger.getLogger(__name__)
 
 

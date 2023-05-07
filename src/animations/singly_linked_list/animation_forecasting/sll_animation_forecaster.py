@@ -3,16 +3,17 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from custom_logging.custom_logger import CustomLogger
+
 from ...subanimation_group import SubanimationGroup
 from ..subanimations.base_subanimation import BaseSubanimation
 from ..subanimations.leaf_subanimation import LeafSubanimation
 from .forecasted_subanimation_group_creator import ForecastedSubanimationGroupCreator
 from .interdependent_subanimation_finder import InterdependentSubanimationFinder
-from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.data_structures.singly_linked_list import SinglyLinkedList
+    from data_structures.singly_linked_list import SinglyLinkedList
     from ..data_structure_animator import DataStructureAnimator
 
 # TODO: Separate creation of successive package and assigning of forecasted mobjects into their own classes

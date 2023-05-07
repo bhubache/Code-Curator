@@ -4,16 +4,16 @@ from collections.abc import Sequence
 
 import numpy as np
 from colour import Color
+from constants import DEFAULT_MOBJECT_COLOR
+from constants import DEFAULT_STROKE_WIDTH
+from custom_vmobject import CustomVMobject
 from manim import Line
+from manim_property import manim_property
 from numpy import ndarray
 
 from .weights.edge_weight import EdgeWeight
 from .weights.null_weight import NullWeight
 from .weights.weight import Weight
-from src.constants import DEFAULT_MOBJECT_COLOR
-from src.constants import DEFAULT_STROKE_WIDTH
-from src.custom_vmobject import CustomVMobject
-from src.manim_property import manim_property
 # from ...constants import DEFAULT_MOBJECT_COLOR
 # from ...constants import DEFAULT_STROKE_WIDTH
 

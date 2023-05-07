@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from custom_logging.custom_logger import CustomLogger
 from manim import LEFT
 from manim import RIGHT
 from manim import smooth
 
 from .leaf_subanimation import LeafSubanimation
 from .strictly_successive.center_sll import SuccessiveCenterSLL
-from src.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 
