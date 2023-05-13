@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.cells.index\_cell module
+Index_cell
 ==============================================================
 
 .. automodule:: data_structures.static_array_parts.cells.index_cell

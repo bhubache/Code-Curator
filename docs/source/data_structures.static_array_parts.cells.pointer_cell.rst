@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.cells.pointer\_cell module
+Pointer_cell
 ================================================================
 
 .. automodule:: data_structures.static_array_parts.cells.pointer_cell

@@ -3,46 +3,42 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import numpy as np
+from automatic_delegation.delegate_to import delegate_to
 from colour import Color
 from constants import DEFAULT_MOBJECT_COLOR
 from constants import DEFAULT_STROKE_WIDTH
 from custom_vmobject import CustomVMobject
 from manim import Line
-from manim_property import manim_property
 from numpy import ndarray
 
 from .weights.edge_weight import EdgeWeight
 from .weights.null_weight import NullWeight
 from .weights.weight import Weight
-# from ...constants import DEFAULT_MOBJECT_COLOR
-# from ...constants import DEFAULT_STROKE_WIDTH
-
-# from custom_vmobject import CustomVMobject
-# from automatic_delegation.delegate_to import delegate_to
-# from manim_property import manim_property
 
 DEFAULT_START: ndarray = np.array([-1, 0, 0])
 DEFAULT_END: ndarray = np.array([1, 0, 0])
 
 
-# @delegate_to(Line, to='_line')
+@delegate_to(
+    Line,
+    to='_line',
+    manim_property_include={
+        'color',
+        'stroke_width',
+    },
+)
 class Edge(CustomVMobject):
     r"""A connection between two :class:`~data_structures.nodes.node.Node`.
 
     A :class:`~custom_vmobject.CustomVMobject`
     composed of :class:`~manim.manim.mobject.geometry.Line` and :class:`~data_structures.edges.weights.weight.Weight`.
 
-    Parameters
-    ----------
-    start
-        The start coordinate.
-    end
-        The end coordinate.
-    weight
-        The associated weight.
-    color
-        The Edge's color.
-    line_stroke_width: stroke width of the Edge's line.
+    Args:
+        start: The start coordinate.
+        end: The end coordinate.
+        weight: The associated weight.
+        color: The Edge's color.
+        line_stroke_width: stroke width of the Edge's line.
     """
 
     def __init__(
@@ -74,18 +70,6 @@ class Edge(CustomVMobject):
 
     def get_start_and_end(self) -> tuple[Sequence[float], Sequence[float]]:
         return self._line.get_start_and_end()
-
-    @manim_property
-    def color(self) -> Color:
-        return self._line.color
-
-    @manim_property
-    def stroke_width(self) -> int:
-        return self._line.stroke_width
-
-    @stroke_width.setter
-    def stroke_width(self, new_stroke_width: int) -> None:
-        self._line.stroke_width = new_stroke_width
 
     @property
     def line(self) -> Line:

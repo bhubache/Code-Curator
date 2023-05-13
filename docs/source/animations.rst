@@ -1,4 +1,4 @@
-animations package
+Animations
 ==================
 
 Subpackages

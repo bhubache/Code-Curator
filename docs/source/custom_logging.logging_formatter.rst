@@ -1,4 +1,4 @@
-custom\_logging.logging\_formatter module
+Logging_formatter
 =========================================
 
 .. automodule:: custom_logging.logging_formatter

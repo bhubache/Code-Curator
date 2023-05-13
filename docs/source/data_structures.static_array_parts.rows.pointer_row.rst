@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.rows.pointer\_row module
+Pointer_row
 ==============================================================
 
 .. automodule:: data_structures.static_array_parts.rows.pointer_row

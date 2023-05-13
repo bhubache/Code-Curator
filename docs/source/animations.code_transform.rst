@@ -1,4 +1,4 @@
-animations.code\_transform module
+Code_transform
 =================================
 
 .. automodule:: animations.code_transform

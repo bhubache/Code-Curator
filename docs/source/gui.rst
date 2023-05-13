@@ -1,4 +1,4 @@
-gui package
+Gui
 ===========
 
 Submodules

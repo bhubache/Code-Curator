@@ -1,4 +1,4 @@
-custom\_logging.custom\_logger module
+Custom_logger
 =====================================
 
 .. automodule:: custom_logging.custom_logger

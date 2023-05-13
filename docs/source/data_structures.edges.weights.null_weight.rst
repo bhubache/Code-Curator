@@ -1,4 +1,4 @@
-data\_structures.edges.weights.null\_weight module
+Null_weight
 ==================================================
 
 .. automodule:: data_structures.edges.weights.null_weight

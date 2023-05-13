@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.strictly\_successive.grow\_pointer module
+Grow_pointer
 =======================================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.strictly_successive.grow_pointer

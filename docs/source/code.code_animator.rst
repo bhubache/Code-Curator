@@ -1,4 +1,4 @@
-code.code\_animator module
+Code_animator
 ==========================
 
 .. automodule:: code.code_animator

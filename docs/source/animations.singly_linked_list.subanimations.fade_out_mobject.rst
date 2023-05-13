@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.fade\_out\_mobject module
+Fade_out_mobject
 =======================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.fade_out_mobject

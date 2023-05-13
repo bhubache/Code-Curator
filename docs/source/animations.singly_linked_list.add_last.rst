@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.add\_last module
+Add_last
 ================================================
 
 .. automodule:: animations.singly_linked_list.add_last

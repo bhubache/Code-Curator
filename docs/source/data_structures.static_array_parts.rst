@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts package
+Static_array_parts
 =============================================
 
 Subpackages

@@ -1,4 +1,4 @@
-automatic\_delegation.delegated\_attribute module
+Delegated_attribute
 =================================================
 
 .. automodule:: automatic_delegation.delegated_attribute

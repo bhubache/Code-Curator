@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.strictly\_successive package
+Strictly_successive
 ==========================================================================
 
 Submodules

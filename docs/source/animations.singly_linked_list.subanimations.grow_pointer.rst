@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.grow\_pointer module
+Grow_pointer
 ==================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.grow_pointer

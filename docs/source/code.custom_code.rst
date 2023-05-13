@@ -1,4 +1,4 @@
-code.custom\_code module
+Custom_code
 ========================
 
 .. automodule:: code.custom_code

@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.center\_sll module
+Center_sll
 ================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.center_sll

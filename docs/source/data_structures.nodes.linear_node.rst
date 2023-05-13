@@ -1,4 +1,4 @@
-data\_structures.nodes.linear\_node module
+Linear_node
 ==========================================
 
 .. automodule:: data_structures.nodes.linear_node

@@ -1,4 +1,4 @@
-code.code\_highlighter module
+Code_highlighter
 =============================
 
 .. automodule:: code.code_highlighter

@@ -1,4 +1,4 @@
-base\_scene module
+Base_scene
 ==================
 
 .. automodule:: base_scene

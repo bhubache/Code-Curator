@@ -1,4 +1,4 @@
-leetcode.problems.Delete\_Node\_in\_a\_Linked\_List package
+Delete_node_in_a_linked_list
 ===========================================================
 
 Subpackages

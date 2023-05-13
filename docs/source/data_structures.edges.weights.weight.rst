@@ -1,4 +1,4 @@
-data\_structures.edges.weights.weight module
+Weight
 ============================================
 
 .. automodule:: data_structures.edges.weights.weight

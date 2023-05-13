@@ -1,4 +1,4 @@
-code.code\_diff module
+Code_diff
 ======================
 
 .. automodule:: code.code_diff

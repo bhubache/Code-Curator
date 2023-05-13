@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.insert module
+Insert
 =============================================
 
 .. automodule:: animations.singly_linked_list.insert

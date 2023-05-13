@@ -1,4 +1,4 @@
-leetcode.problems.Delete\_Node\_in\_a\_Linked\_List.scenes package
+Scenes
 ==================================================================
 
 Submodules

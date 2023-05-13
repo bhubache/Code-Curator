@@ -1,4 +1,4 @@
-leetcode package
+Leetcode
 ================
 
 Subpackages

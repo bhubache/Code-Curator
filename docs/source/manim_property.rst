@@ -1,4 +1,4 @@
-manim\_property module
+Manim_property
 ======================
 
 .. automodule:: manim_property

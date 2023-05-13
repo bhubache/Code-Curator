@@ -1,4 +1,4 @@
-gui.video\_mapper module
+Video_mapper
 ========================
 
 .. automodule:: gui.video_mapper

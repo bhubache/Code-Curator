@@ -1,41 +1,71 @@
 from __future__ import annotations
 
+from types import FunctionType
+
+from manim_property import manim_property
+
 from .delegated_attribute import DelegatedAttribute
 from .simple_property import SimpleProperty
 
 
-def delegate_to(delegate_cls, to='delegate', include=frozenset(), ignore=frozenset()):
-    if not isinstance(include, set):
-        include = set(include)
+def delegate_to(
+    delegate_cls: type,
+    to: str = 'delegate',
+    manim_property_include: set = frozenset(),
+    normal_include: set = frozenset(),
+    ignore: set = frozenset(),
+) -> FunctionType:
+    """A decorator for a class that delegates method calls to objects it composes.
+
+    Args:
+        delegate_cls: The class being delegated to (the class being composed).
+        to: Name of the member variable used to hold the instance of ``delegate_cls``. Defaults to 'delegate'.
+        manim_property_include: The properties to delegate to that are also used by manim. Defaults to frozenset().
+        normal_include: The properties to delegate to. Defaults to frozenset().
+        ignore: The properties to not delegate to. Defaults to frozenset().
+
+    Returns:
+        The inner function of the decorator
+    """
+    if not isinstance(manim_property_include, set):
+        manim_property_include = set(manim_property_include)
+    if not isinstance(normal_include, set):
+        normal_include = set(normal_include)
     if not isinstance(ignore, set):
         ignore = set(ignore)
-    delegates_attrs = set(delegate_cls.__dict__.keys())
-    attributes = include | delegates_attrs - ignore
+    # delegates_attrs = set(delegate_cls.__dict__.keys())
+    # normal_attributes = normal_include | delegates_attrs - ignore
+    normal_attributes = normal_include - ignore
+    manim_property_attributes = manim_property_include - ignore
 
-    def decorator(cls):
+    def inner(cls):
+        """Delegate desired attributes to ``delegate_cls``."""
         _store_delegate_in_property(cls)
         _add_delegating_methods(cls)
-        # def inner(*args, **kwargs):
-        #     _store_delegate_in_property(cls)
-        #     _add_delegating_methods(cls)
-        #     print(args)
-        #     print(kwargs)
-        #     print(type(cls))
-        #     print(type(cls()))
-        # return cls(*args, **kwargs)
         return cls
 
     def _store_delegate_in_property(cls):
+        """
+        Before ``delegate_cls`` is instantiated, assign a ``SimpleProperty``
+        to the variable name held by ``to`` as a class attribute of ``delegate_cls``.
+        """
         setattr(cls, to, SimpleProperty())
 
     def _add_delegating_methods(cls):
-        # Don't delegate attributes already implemented by ``cls``
-        attrs_not_implemented_by_delegator = attributes - \
+        """Delegate attributes to ``delegate_cls``, accounting for those that are manim properties"""
+        normal_attrs_not_implemented_by_delegator = normal_attributes - \
             set(cls.__dict__.keys())
-        print(attrs_not_implemented_by_delegator)
-        for attr in attrs_not_implemented_by_delegator:
+        for attr in normal_attrs_not_implemented_by_delegator:
             setattr(cls, attr, DelegatedAttribute(to, attr))
 
-        # return cls
+        manim_attrs_not_implemented_by_delegator = manim_property_attributes - \
+            set(cls.__dict__.keys())
+        for attr in manim_attrs_not_implemented_by_delegator:
+            delegated_attr = DelegatedAttribute(to, attr)
+            attr_manim_property = manim_property(
+                delegated_attr.__get__, delegated_attr.__set__, delegated_attr.__delete__,
+            )
+            attr_manim_property.__set_name__(cls, attr)
+            setattr(cls, attr, attr_manim_property)
 
-    return decorator
+    return inner

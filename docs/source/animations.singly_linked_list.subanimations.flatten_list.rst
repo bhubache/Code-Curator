@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.flatten\_list module
+Flatten_list
 ==================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.flatten_list

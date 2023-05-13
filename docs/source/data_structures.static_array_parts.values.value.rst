@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.values.value module
+Value
 =========================================================
 
 .. automodule:: data_structures.static_array_parts.values.value

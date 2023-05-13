@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.base\_subanimation module
+Base_subanimation
 =======================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.base_subanimation

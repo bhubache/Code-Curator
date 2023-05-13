@@ -1,4 +1,4 @@
-automatic\_delegation.delegate\_to module
+Delegate_to
 =========================================
 
 .. automodule:: automatic_delegation.delegate_to

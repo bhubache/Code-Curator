@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.curve\_pointer module
+Curve_pointer
 ===================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.curve_pointer

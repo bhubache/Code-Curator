@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.unshrink\_pointer module
+Unshrink_pointer
 ======================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.unshrink_pointer

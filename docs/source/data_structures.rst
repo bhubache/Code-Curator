@@ -1,4 +1,4 @@
-data\_structures package
+Data_structures
 ========================
 
 Subpackages

@@ -1,4 +1,4 @@
-data\_structures.pointers.null\_pointer module
+Null_pointer
 ==============================================
 
 .. automodule:: data_structures.pointers.null_pointer
