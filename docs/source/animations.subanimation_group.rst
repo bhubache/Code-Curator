@@ -1,4 +1,4 @@
-animations.subanimation\_group module
+Subanimation_group
 =====================================
 
 .. automodule:: animations.subanimation_group

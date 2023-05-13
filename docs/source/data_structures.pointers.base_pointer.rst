@@ -1,4 +1,4 @@
-data\_structures.pointers.base\_pointer module
+Base_pointer
 ==============================================
 
 .. automodule:: data_structures.pointers.base_pointer

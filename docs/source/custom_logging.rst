@@ -1,4 +1,4 @@
-custom\_logging package
+Custom_logging
 =======================
 
 Submodules

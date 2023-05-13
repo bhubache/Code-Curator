@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.utils package
+Utils
 =============================================
 
 Submodules

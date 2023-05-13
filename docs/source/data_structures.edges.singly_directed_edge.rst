@@ -1,4 +1,4 @@
-data\_structures.edges.singly\_directed\_edge module
+Singly_directed_edge
 ====================================================
 
 .. automodule:: data_structures.edges.singly_directed_edge

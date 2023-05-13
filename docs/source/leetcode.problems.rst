@@ -1,4 +1,4 @@
-leetcode.problems package
+Problems
 =========================
 
 Subpackages

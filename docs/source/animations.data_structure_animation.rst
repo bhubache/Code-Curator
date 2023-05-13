@@ -1,4 +1,4 @@
-animations.data\_structure\_animation module
+Data_structure_animation
 ============================================
 
 .. automodule:: animations.data_structure_animation

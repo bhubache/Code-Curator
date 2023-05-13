@@ -1,4 +1,4 @@
-data\_structures.edges.weights package
+Weights
 ======================================
 
 Submodules

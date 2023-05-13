@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.leaf\_subanimation module
+Leaf_subanimation
 =======================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.leaf_subanimation

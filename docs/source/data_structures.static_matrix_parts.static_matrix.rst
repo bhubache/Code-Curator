@@ -1,4 +1,4 @@
-data\_structures.static\_matrix\_parts.static\_matrix module
+Static_matrix
 ============================================================
 
 .. automodule:: data_structures.static_matrix_parts.static_matrix

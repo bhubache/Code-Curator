@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.add\_first module
+Add_first
 =================================================
 
 .. automodule:: animations.singly_linked_list.add_first

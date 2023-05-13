@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.data\_structure\_animator module
+Data_structure_animator
 ================================================================
 
 .. automodule:: animations.singly_linked_list.data_structure_animator

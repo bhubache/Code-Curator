@@ -1,4 +1,4 @@
-gui.video\_selection module
+Video_selection
 ===========================
 
 .. automodule:: gui.video_selection

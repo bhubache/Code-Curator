@@ -1,4 +1,4 @@
-data\_structures.element module
+Element
 ===============================
 
 .. automodule:: data_structures.element

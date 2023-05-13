@@ -1,4 +1,4 @@
-data\_structures.nodes.node module
+Node
 ==================================
 
 .. automodule:: data_structures.nodes.node

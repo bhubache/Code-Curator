@@ -1,4 +1,4 @@
-data\_structures.pointers.pointer module
+Pointer
 ========================================
 
 .. automodule:: data_structures.pointers.pointer

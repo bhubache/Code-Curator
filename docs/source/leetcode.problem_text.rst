@@ -1,4 +1,4 @@
-leetcode.problem\_text module
+Problem_text
 =============================
 
 .. automodule:: leetcode.problem_text

@@ -1,16 +1,25 @@
 from __future__ import annotations
 
-from manim.constants import DEFAULT_STROKE_WIDTH
+from constants import DEFAULT_MOBJECT_COLOR
+from constants import DEFAULT_STROKE_WIDTH
+
+from src.custom_logging.custom_logger import CustomLogger
+logger = CustomLogger.getLogger(__name__)
 
 # TODO: Take in default value!
 # TODO: Once all attributes are set, don't ignore ``AttributeError``
+
+_DEFAULT_PROPERTY_MAP = {
+    'color': DEFAULT_MOBJECT_COLOR,
+    'stroke_width': DEFAULT_STROKE_WIDTH,
+}
 
 
 class manim_property:
     """A lot of mobjects I've made use composition rather than inheritance. :class:`~base_scene.BaseScene`
     One example is :class:`~data_structures.edges.edge.Edge`, which is a :class:`~custom_vmobject.CustomVMobject`
-    composed of a :class:`Line` and a :class:`Weight`. I ran into an issue when exposing
-    some attributes as part of the public API. ``stroke_width`` for instance, was
+    composed of a :class:`Line` and a :class:`~data_structures.edges.weights.weight.Weight`. I ran into an issue
+    when exposing some attributes as part of the public API. ``stroke_width`` for instance, was
     originally written as follows:
 
     .. code-block:: python
@@ -46,10 +55,16 @@ class manim_property:
             doc = fget.__doc__
         self.__doc__ = doc
         self._name = ''
-        self._attr_should_exist: bool = False
+
+        # TODO:
+        # Put this on the obj, BE CAREFUL WHEN DOING THIS SO IT IS NOT OVERWRITTEN
+        # I think there has to one for every manim property on the obj!
+        # self._attr_should_exist: bool = False
+        self._attr_existence_check_name: str = ''
 
     def __set_name__(self, owner, name):
         self._name = name
+        self._attr_existence_check_name = f'_{self._name}_should_exist'
 
     def __get__(self, obj, objtype=None):
         if obj is None:
@@ -60,14 +75,16 @@ class manim_property:
         try:
             value = self.fget(obj)
         except AttributeError:
-            if self._attr_should_exist:
-                raise AttributeError(
-                    f'{obj} should have attribute {self._name} but doesn\'t',
-                )
+            try:
+                getattr(obj, self._attr_existence_check_name)
+            except AttributeError:
+                return _DEFAULT_PROPERTY_MAP[self._name]
             else:
-                return DEFAULT_STROKE_WIDTH
+                raise AttributeError(
+                    f'Attempting to get: {obj} should have attribute {self._name} but doesn\'t',
+                )
         else:
-            self._attr_should_exist = True
+            setattr(obj, self._attr_existence_check_name, True)
             return value
 
     def __set__(self, obj, value):
@@ -77,14 +94,14 @@ class manim_property:
         try:
             self.fset(obj, value)
         except AttributeError:
-            if self._attr_should_exist:
-                raise AttributeError(
-                    f'{obj} should have attribute {self._name} but doesn\'t',
-                )
-            else:
+            try:
+                getattr(obj, self._attr_existence_check_name)
+            except AttributeError:
                 pass
-        else:
-            self._attr_should_exist = True
+            else:
+                raise AttributeError(
+                    f'Attempting to set: {obj} should have attribute {self._name} but doesn\'t',
+                )
 
     def __delete__(self, obj):
         if self.fdel is None:

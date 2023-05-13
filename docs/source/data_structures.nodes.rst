@@ -1,4 +1,4 @@
-data\_structures.nodes package
+Nodes
 ==============================
 
 Submodules

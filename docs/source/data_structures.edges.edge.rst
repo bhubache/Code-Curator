@@ -1,4 +1,4 @@
-data\_structures.edges.edge module
+Edge
 ==================================
 
 .. automodule:: data_structures.edges.edge

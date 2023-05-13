@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.remove\_last module
+Remove_last
 ===================================================
 
 .. automodule:: animations.singly_linked_list.remove_last

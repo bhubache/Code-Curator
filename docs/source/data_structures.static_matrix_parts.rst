@@ -1,4 +1,4 @@
-data\_structures.static\_matrix\_parts package
+Static_matrix_parts
 ==============================================
 
 Submodules

@@ -1,4 +1,4 @@
-data\_structures.pointers package
+Pointers
 =================================
 
 Submodules

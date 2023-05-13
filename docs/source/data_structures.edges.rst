@@ -1,4 +1,4 @@
-data\_structures.edges package
+Edges
 ==============================
 
 Subpackages

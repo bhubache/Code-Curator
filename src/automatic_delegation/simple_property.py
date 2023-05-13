@@ -2,6 +2,8 @@ from __future__ import annotations
 
 
 class SimpleProperty:
+    """A simple property."""
+
     def __init__(self):
         pass
 

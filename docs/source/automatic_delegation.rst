@@ -1,4 +1,4 @@
-automatic\_delegation package
+Automatic_delegation
 =============================
 
 Submodules

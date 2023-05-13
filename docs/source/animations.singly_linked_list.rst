@@ -1,4 +1,4 @@
-animations.singly\_linked\_list package
+Singly_linked_list
 =======================================
 
 Subpackages

@@ -1,4 +1,4 @@
-automatic\_delegation.simple\_property module
+Simple_property
 =============================================
 
 .. automodule:: automatic_delegation.simple_property

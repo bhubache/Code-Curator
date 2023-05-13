@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.subanimations.fade\_out\_container module
+Fade_out_container
 =========================================================================
 
 .. automodule:: animations.singly_linked_list.subanimations.fade_out_container

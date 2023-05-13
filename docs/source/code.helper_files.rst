@@ -1,4 +1,4 @@
-code.helper\_files package
+Helper_files
 ==========================
 
 Module contents

@@ -1,4 +1,4 @@
-custom\_vmobject module
+Custom_vmobject
 =======================
 
 .. automodule:: custom_vmobject

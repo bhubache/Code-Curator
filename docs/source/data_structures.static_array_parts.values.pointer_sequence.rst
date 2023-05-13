@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.values.pointer\_sequence module
+Pointer_sequence
 =====================================================================
 
 .. automodule:: data_structures.static_array_parts.values.pointer_sequence

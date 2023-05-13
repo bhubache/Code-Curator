@@ -1,4 +1,4 @@
-data\_structures.static\_array\_parts.cells package
+Cells
 ===================================================
 
 Submodules

@@ -1,4 +1,4 @@
-leetcode.problems.Delete\_Node\_in\_a\_Linked\_List.scenes.present\_problem module
+Present_problem
 ==================================================================================
 
 .. automodule:: leetcode.problems.Delete_Node_in_a_Linked_List.scenes.present_problem

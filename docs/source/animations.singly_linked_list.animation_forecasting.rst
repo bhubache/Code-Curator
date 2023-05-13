@@ -1,4 +1,4 @@
-animations.singly\_linked\_list.animation\_forecasting package
+Animation_forecasting
 ==============================================================
 
 Submodules

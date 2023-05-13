@@ -1,4 +1,4 @@
-data\_structures.nodes.singly\_linked\_list\_node module
+Singly_linked_list_node
 ========================================================
 
 .. automodule:: data_structures.nodes.singly_linked_list_node
