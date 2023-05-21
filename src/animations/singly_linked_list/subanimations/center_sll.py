@@ -53,6 +53,9 @@ class CenterSLL(LeafSubanimation):
         )
 
     def clean_up_from_animation(self):
+        # self._sll.become(
+        #     self.sll_post_subanimation_group,
+        # )
         super().clean_up_from_animation()
 
     def create_successive_counterpart(self) -> LeafSubanimation:
