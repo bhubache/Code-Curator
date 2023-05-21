@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from constants import DEFAULT_MOBJECT_COLOR
 from constants import DEFAULT_STROKE_WIDTH
-
-from src.custom_logging.custom_logger import CustomLogger
+from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Take in default value!

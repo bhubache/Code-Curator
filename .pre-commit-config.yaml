@@ -15,7 +15,7 @@ repos:
     rev: 6.0.0
     hooks:
     -   id: flake8
-        language_version: python3.10.11
+        language_version: python3.10.6
         args: [--max-line-length=120]
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.6.0
