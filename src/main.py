@@ -196,6 +196,11 @@ class TestScene(Scene):
         )
 
         # for sub in self.sll.submobjects:
+        #     self.play(sub.animate.set_color('#FF0000'))
+        #     self.play(sub.animate.set_opacity(0))
+        #     self.play(sub.animate.set_opacity(1))
+
+        # for sub in self.sll.submobjects:
         #     sub.set_opacity(1)
 
         # self.play(

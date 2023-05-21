@@ -88,8 +88,6 @@ class SLLAnimationForecaster:
             forecast_subanimation.begin()
             forecast_subanimation.interpolate(1)
             forecast_subanimation.clean_up_from_animation()
-
-            true_subanimation.finished_subanimation = forecast_subanimation.copy()
             return
 
         for true, forecast in zip(true_subanimation, forecast_subanimation):
@@ -101,6 +99,7 @@ class SLLAnimationForecaster:
             for true, forecast in zip(true_subanimation, forecast_subanimation):
                 if isinstance(true, LeafSubanimation):
                     true.sll_post_subanimation_group = forecast._sll.copy()
+                    true.finished_subanimation = forecast.copy()
 
     # TODO: Check to see if this can be removed
     # def _move_sll_subanimations_to_beginning_of_group(self):

@@ -30,16 +30,10 @@ class MoveTrav(LeafSubanimation):
 
     def interpolate(self, alpha: float) -> None:
         self._trav.restore()
-        # self._trav.move_immediately_alpha(
-        # self.sll_post_subanimation_group[self._sll._nodes.index(self._to_node)], self._to_node, smooth(alpha)
-        # )
         self._trav.move_immediately_alpha(
             self.finished_subanimation._to_node, self._to_node, smooth(alpha),
         )
 
     def clean_up_from_animation(self) -> None:
-        self._sll.become(
-            self.sll_post_subanimation_group,
-        )
         self._sll.add(self._trav)
         super().clean_up_from_animation()
