@@ -76,8 +76,6 @@ def get_scene_classes() -> tuple[list[type], str]:
     present_problem_module: ModuleType = importlib.import_module(
         CONCRETE_PRESENT_PROBLEM_PATH,
     )
-    if present_problem_module.__file__ is None:
-        raise Exception(f'File for {present_problem_module} is null')
     present_problem_cls = getattr(
         present_problem_module, 'PresentProblem',
     )
