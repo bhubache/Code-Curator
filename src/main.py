@@ -126,6 +126,9 @@ def create_scenes(
     problem_dir: str,
     aligned_animation_scene_scripts: Sequence[AnimationScript],
 ) -> None:
+    logger.info(scene_classes)
+    logger.info(problem_dir)
+    logger.info(aligned_animation_scene_scripts)
     scene = create_class(
         scene_classes, aligned_animation_scene_scripts,
     )(problem_dir)
