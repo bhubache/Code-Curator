@@ -71,7 +71,7 @@ class TempTravSubanimator:
             self._sll,
             label=self._first_trav_name,
             direction=UP,
-        )
+        ).make_temp()
 
     def _get_first_trav_starting_node(self) -> SLLNode:
         return self._sll[0] if self._trav_position == 'start' else self._sll[self._index - 1]
@@ -85,7 +85,7 @@ class TempTravSubanimator:
             self._sll,
             label=self._second_trav_name,
             direction=UP,
-        )
+        ).make_temp()
 
     def _get_second_trav_starting_node(self) -> SLLNode:
         return self._sll[self._get_second_trav_starting_index()]

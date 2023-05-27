@@ -3,7 +3,9 @@ from __future__ import annotations
 import importlib
 import logging
 import os
+import subprocess
 from collections.abc import Sequence
+from pathlib import Path
 from types import ModuleType
 
 from base_scene import BaseScene
@@ -28,8 +30,10 @@ logger = logging.getLogger(__name__)
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
-ALIGNED_SCRIPT_PATH = r'generated_files\aligned_script.txt'
-ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
+ALIGNED_SCRIPT_PATH = os.path.join('generated_files', 'aligned_script.txt')
+# ALIGNED_SCRIPT_PATH = r'generated_files\aligned_script.txt'
+ANIMATION_SCRIPT_PATH = os.path.join('required_files', 'animation_script.txt')
+# ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
@@ -42,7 +46,10 @@ def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Seq
 
         def __init__(self, problem_dir: str) -> None:
             super().__init__()
-            self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
+            self._video_dir = os.path.join(
+                '~', 'ManimCS', 'Code-Curator', 'media', 'videos', '1080p60',
+            )
+            # self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
             self._scene_instances = []
             for cls, scene_script in zip(scene_classes, aligned_animation_scene_scripts):
                 scene_inst = cls(problem_dir, scene_script)
@@ -74,14 +81,15 @@ def get_scene_classes() -> tuple[list[type], str]:
     present_problem_cls = getattr(
         present_problem_module, 'PresentProblem',
     )
-    problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
+    problem_dir = Path(present_problem_module.__file__).parents[1]
+    # problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
     scene_classes.append(present_problem_cls)
 
-    problem_analysis_module = importlib.import_module(
-        CONCRETE_PROBLEM_ANALYSIS_PATH,
-    )
-    problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
-    scene_classes.append(problem_analysis_cls)
+    # problem_analysis_module = importlib.import_module(
+    #     CONCRETE_PROBLEM_ANALYSIS_PATH,
+    # )
+    # problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
+    # scene_classes.append(problem_analysis_cls)
 
     # code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     # code_solution_cls = getattr(code_solution_module, 'CodeSolution')
@@ -125,7 +133,7 @@ def create_scenes(
     )(problem_dir)
     scene.render()
 
-    concatenate_scenes(scene._video_dir, len(scene_classes))
+    # concatenate_scenes(scene._video_dir, len(scene_classes))
 
 
 def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
@@ -137,7 +145,12 @@ def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
     if os.path.exists(new_file_path):
         os.remove(new_file_path)
 
-    os.rename(old_file_path, new_file_path)
+    # os.chmod(old_file_path, 775)
+    # os.chmod(new_file_path, 775)
+
+    # os.rename(old_file_path, new_file_path)
+    subprocess.getoutput(f'mv {old_file_path} {new_file_path}')
+    subprocess.getoutput(f'chmod 777 {new_file_path}')
 
 
 # def _get_animation_timing_iterable(aligned_animation_script: AlignedAnimationScript) -> Iterable[dict]:
@@ -184,14 +197,14 @@ class TestScene(Scene):
         self.play(
             self.sll.add_last(
                 data=17,
-                display_first_trav=False,
+                display_first_trav=True,
                 first_trav_name='custom',
                 trav_position='start',
             )
             .subsequently_fade_in_container()
             .subsequently_fade_in_pointer()
             .subsequently_move_tail()
-            .with_center_sll()
+            .subsequently_center_sll()
             .build_animation(),
         )
 
@@ -284,7 +297,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = True
+    test_data_structure = False
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(
