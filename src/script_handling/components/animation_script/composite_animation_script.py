@@ -158,6 +158,8 @@ class CompositeAnimationScript(AnimationScript):
                 raise Exception(
                     f'The name {unique_id} is not present in {self._unique_id}',
                 )
+            output = fn(*args, **kwargs)
+            return output
         return inner
 
     def _unique_id_exists(self, unique_id: str) -> bool:
@@ -169,7 +171,7 @@ class CompositeAnimationScript(AnimationScript):
                 return True
         return False
 
-    @_check_that_unique_id_exists
+    # @_check_that_unique_id_exists
     def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:

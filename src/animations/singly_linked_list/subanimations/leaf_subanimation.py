@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class LeafSubanimation(BaseSubanimation):
     def __init__(self, sll: SinglyLinkedList):
+        self._sll: SinglyLinkedList = sll
         super().__init__()
 
     def __str__(self) -> str:
