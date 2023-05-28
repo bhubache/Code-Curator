@@ -173,6 +173,9 @@ class AnimationLeaf(AnimationScript):
         self.is_overriding_end = is_overriding_end
         self.animation = animation
         self.func = func
+        logger.info('!!!!!!!!!!!!!!!!!!!!!1')
+        logger.info(self.unique_id)
+        logger.info(self.animation)
         return True
 
     # # TODO: Ideally, member variables are initialized in __init__

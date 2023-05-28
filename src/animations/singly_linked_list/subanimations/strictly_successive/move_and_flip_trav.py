@@ -13,15 +13,14 @@ from manim import Line
 from manim import smooth
 from numpy import ndarray
 
-from .leaf_subanimation import LeafSubanimation
-from .strictly_successive.move_and_flip_trav import SuccessiveMoveAndFlipTrav
+from ..leaf_subanimation import LeafSubanimation
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
     from data_structures.singly_linked_list import SinglyLinkedList
 
 
-class MoveAndFlipTrav(LeafSubanimation):
+class SuccessiveMoveAndFlipTrav(LeafSubanimation):
     def __init__(self, sll: SinglyLinkedList, trav: Pointer, to_node: SLLNode):
         super().__init__(sll)
         self._trav: Pointer = trav
@@ -78,4 +77,4 @@ class MoveAndFlipTrav(LeafSubanimation):
 
     # TODO: This method
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return SuccessiveMoveAndFlipTrav(self._sll, self._trav, self._to_node)
+        raise NotImplementedError('')

@@ -80,14 +80,13 @@ def get_scene_classes() -> tuple[list[type], str]:
         present_problem_module, 'PresentProblem',
     )
     problem_dir = Path(present_problem_module.__file__).parents[1]
-    # problem_dir = '\\'.join(present_problem_module.__file__.split('\\')[:-2])
     scene_classes.append(present_problem_cls)
 
-    # problem_analysis_module = importlib.import_module(
-    #     CONCRETE_PROBLEM_ANALYSIS_PATH,
-    # )
-    # problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
-    # scene_classes.append(problem_analysis_cls)
+    problem_analysis_module = importlib.import_module(
+        CONCRETE_PROBLEM_ANALYSIS_PATH,
+    )
+    problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
+    scene_classes.append(problem_analysis_cls)
 
     # code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     # code_solution_cls = getattr(code_solution_module, 'CodeSolution')
@@ -126,9 +125,6 @@ def create_scenes(
     problem_dir: str,
     aligned_animation_scene_scripts: Sequence[AnimationScript],
 ) -> None:
-    logger.info(scene_classes)
-    logger.info(problem_dir)
-    logger.info(aligned_animation_scene_scripts)
     scene = create_class(
         scene_classes, aligned_animation_scene_scripts,
     )(problem_dir)
@@ -172,7 +168,7 @@ class TestScene(Scene):
         from data_structures.singly_linked_list import SinglyLinkedList
         # from data_structures.nodes.singly_linked_list_node import SLLNode
         # from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1, 2)
+        self.sll = SinglyLinkedList(1)
         self.play(FadeIn(self.sll))
 
         # from animations.data_structure_animation import DataStructureAnimation
@@ -198,14 +194,11 @@ class TestScene(Scene):
         self.play(
             self.sll.add_last(
                 data=17,
-                display_first_trav=True,
-                first_trav_name='custom',
-                trav_position='start',
             )
             .subsequently_fade_in_container()
-            .subsequently_fade_in_pointer()
-            .subsequently_move_tail()
-            .subsequently_center_sll()
+            .with_fade_in_pointer()
+            .with_move_tail()
+            .with_center_sll()
             .build_animation(),
         )
 
@@ -298,7 +291,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = False
+    test_data_structure = True
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(

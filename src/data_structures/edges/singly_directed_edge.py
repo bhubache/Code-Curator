@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from automatic_delegation.delegate_to import delegate_to
 from custom_logging.custom_logger import CustomLogger
 from custom_vmobject import CustomVMobject
 from data_structures.edges.weights.null_weight import NullWeight
@@ -14,6 +15,13 @@ from .edge import Edge
 logger = CustomLogger.getLogger(__name__)
 
 
+@delegate_to(
+    Edge,
+    to='_edge',
+    manim_property_include={
+        'vertical_length',
+    },
+)
 class SinglyDirectedEdge(CustomVMobject):
     def __init__(
         self,
