@@ -27,3 +27,9 @@ class DataStructureAnimation(Animation):
         self._subanimation_group.clean_up_from_scene(scene)
         self._animator.clean_up_mobject()
         return super().clean_up_from_scene(scene)
+    
+    def add_animation(self, index: int, animation) -> None:
+        self._subanimation_group.insert(index, animation)
+
+    def remove_animation(self, index: int) -> None:
+        self._subanimation_group.remove(self._subanimation_group.get(index))

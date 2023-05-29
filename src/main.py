@@ -1,3 +1,10 @@
+"""
+TODO:
+- Fix the timing when adding subanimations! Timing doesn't change
+- Fix the timing when removing subanimations! Timing doesn't change
+- A simpler way of adding and removing subanimations!
+"""
+
 from __future__ import annotations
 
 import importlib
@@ -12,8 +19,13 @@ from base_scene import BaseScene
 from manim import config
 from manim import FadeIn
 from manim import Scene
+from manim import Circle
+from manim import Square
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from animations.subanimation_group import SubanimationGroup
+from animations.singly_linked_list.subanimations.fade_in_mobject import FadeInMobject
+from animations.singly_linked_list.subanimations.fade_out_mobject import FadeOutMobject
 from script_handling.aligned_animation_script import AlignedAnimationScript
 from script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
 from script_handling.components.animation_script.animation_script import AnimationScript
@@ -89,9 +101,9 @@ def get_scene_classes() -> tuple[list[type], str]:
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
     scene_classes.append(problem_analysis_cls)
 
-    # code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
-    # code_solution_cls = getattr(code_solution_module, 'CodeSolution')
-    # scene_classes.append(code_solution_cls)
+    code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
+    code_solution_cls = getattr(code_solution_module, 'CodeSolution')
+    scene_classes.append(code_solution_cls)
 
     # FIXME: Bad practice returning a tuple with loosely understood ordering
     return scene_classes, problem_dir
@@ -159,7 +171,7 @@ def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
 
 
 class TestScene(Scene):
-    config.disable_caching = False
+    config.disable_caching = True
     # config.frame_rate = 240
     # import json
     # print(type(config))
@@ -169,7 +181,7 @@ class TestScene(Scene):
         from data_structures.singly_linked_list import SinglyLinkedList
         # from data_structures.nodes.singly_linked_list_node import SLLNode
         # from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1)
+        self.sll = SinglyLinkedList(7, 5, 2, 8, 9)
         self.play(FadeIn(self.sll))
 
         # from animations.data_structure_animation import DataStructureAnimation
@@ -192,16 +204,77 @@ class TestScene(Scene):
         #     )
         # )
 
-        self.play(
-            self.sll.add_last(
-                data=17,
+        remove_at_animation = (
+            self.sll.remove_at(
+                index=2,
+                display_first_trav=True,
+                display_second_trav=False,
+                trav_position='end',
+                first_trav_name='trav',
             )
-            .with_fade_in_container()
-            .with_fade_in_pointer()
-            .with_move_tail()
-            .with_center_sll()
-            .build_animation(),
+            .subsequently_shrink_pointer()
+            .subsequently_unshrink_pointer()
+            .subsequently_curve_pointer()
+            .subsequently_fade_out_container()
+            .with_fade_out_pointer()
+            .with_fade_out_first_temp_trav()
+            .with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
+            .build_animation()
         )
+        c = Circle()
+        remove_at_animation.add_animation(0, FadeInMobject(self.sll, c, None))
+        self.play(remove_at_animation)
+
+        # self.play(
+        #     self.sll.remove_at(
+        #         index=2,
+        #         display_first_trav=True,
+        #         display_second_trav=False,
+        #         trav_position='start',
+        #         first_trav_name='trav',
+        #     )
+        #     .subsequently_shrink_pointer()
+        #     .subsequently_unshrink_pointer()
+        #     .subsequently_curve_pointer()
+        #     .subsequently_fade_out_container()
+        #     .with_fade_out_pointer()
+        #     .with_fade_out_first_temp_trav()
+        #     .with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
+        #     .build_animation()
+        # )
+
+        # add_last_animation = (
+        #     self.sll.add_last(
+        #         data=17,
+        #     )
+        #     .with_fade_in_container()
+        #     .subsequently_fade_in_pointer()
+        #     .subsequently_move_tail()
+        #     .subsequently_center_sll()
+        #     .build_animation()
+        # )
+        # c = Circle()
+        # s = Square()
+        # sub_anim = SubanimationGroup(
+        #     FadeInMobject(self.sll, c, None),
+        #     FadeInMobject(self.sll, s, None),
+        #     FadeOutMobject(self.sll, s, self.sll),
+        #     FadeOutMobject(self.sll, c, self.sll),
+        #     lag_ratio=1,
+        # )
+        # add_last_animation.remove_animation(3)
+        # add_last_animation.remove_animation(2)
+        # # add_last_animation.add_animation(2, sub_anim)
+        # # add_last_animation.add_animation(2, FadeInMobject(self.sll, c, None))
+        # # add_last_animation.add_animation(4, FadeOutMobject(self.sll, c, self.sll))
+
+        # self.play(
+        #     add_last_animation
+        # )
+
+        # self.play(
+        #     self.sll.animate.move_to([-2, 1, 0])
+        # )
 
         # for sub in self.sll.submobjects:
         #     self.play(sub.animate.set_color('#FF0000'))

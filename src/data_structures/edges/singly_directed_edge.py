@@ -20,6 +20,8 @@ logger = CustomLogger.getLogger(__name__)
     to='_edge',
     manim_property_include={
         'vertical_length',
+        'tip',
+        'stroke_width',
     },
 )
 class SinglyDirectedEdge(CustomVMobject):
