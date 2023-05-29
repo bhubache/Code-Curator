@@ -1,13 +1,26 @@
-from manim import *
+from __future__ import annotations
+
+from manim import FadeIn
+from manim import UP
+from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from .base_scene import BaseScene
 from .problem_setup.problem_text import ProblemText
 
+
 class BaseKeyPoints(BaseScene):
     # config.background_color = '#000E15'
 
-    def __init__(self, problem_dir):
+    def __init__(
+        self,
+        points: list[str],
+        insights: list[str],
+        problem_dir: str,
+        aligned_animation_scene: CompositeAnimationScript,
+    ) -> None:
         BaseScene.__init__(self, problem_dir=problem_dir)
+        self._points: list[str] = points
+        self._insights: list[str] = insights
 
     def setup(self):
         super().setup()
