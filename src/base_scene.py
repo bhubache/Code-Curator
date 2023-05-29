@@ -75,7 +75,7 @@ class BaseScene(ABC, Scene):
                 obj()
             else:
                 raise RuntimeError(
-                    f'Unexpected type {type(obj)} when running animations',
+                    f'Unexpected type {type(obj)} when running animations: {obj}',
                 )
 
     def tear_down(self) -> None:

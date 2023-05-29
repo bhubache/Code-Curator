@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from collections import Sequence
+
 from custom_logging.custom_logger import CustomLogger
+from manim import DOWN
 from manim import LEFT
 from manim import RIGHT
 from manim import smooth
+from manim import UP
 
 from .leaf_subanimation import LeafSubanimation
 from .strictly_successive.center_sll import SuccessiveCenterSLL
@@ -21,15 +25,15 @@ class CenterSLL(LeafSubanimation):
         logger.info(self._sll_post_subanimation_group.get_left())
         self._original_left = self._sll.get_left()
         self._begin_center = self._sll.get_center()
-        self._shift_distance = self._sll_post_subanimation_group.get_left() - \
+        self._horizontal_shift_distance = self._sll_post_subanimation_group.get_left() - \
             self._sll.get_left()
 
-        logger.info(self._shift_distance)
+        logger.info(self._horizontal_shift_distance)
 
         # self._sll.add(Circle(radius=0.02).move_to(self._sll.get_left()).set_color(BLUE))
         # self._sll.add(Circle(radius=0.02).move_to(self._sll_post_subanimation_group.get_left()))
 
-        self._shift_direction = None
+        self._horizontal_shift_direction = None
 
         self._curr_left_x = self._sll[self._curr_reference_index].get_left()[0]
         self._post_subanimation_left_x = self._sll_post_subanimation_group[
@@ -37,19 +41,30 @@ class CenterSLL(LeafSubanimation):
         ].get_left()[0]
 
         if self._curr_left_x < self._post_subanimation_left_x:
-            self._shift_direction = LEFT
+            self._horizontal_shift_direction = LEFT
         elif self._curr_left_x > self._post_subanimation_left_x:
-            self._shift_direction = RIGHT
+            self._horizontal_shift_direction = RIGHT
         else:
-            self._shift_direction = [0, 0, 0]
+            self._horizontal_shift_direction = [0, 0, 0]
 
-        # self._shift_distance = self._get_corrected_shift_distance()
+        self._original_top = self._sll.get_top()
+        self._vertical_shift_vector: Sequence[float] = self._sll_post_subanimation_group.get_top(
+        ) - self._sll.get_top()
+        self._vertical_shift_direction: Sequence[float] = UP if self._vertical_shift_vector[1] < 0 else DOWN
+
+        # self._horizontal_shift_distance = self._get_corrected_shift_distance()
 
     def interpolate(self, alpha: float):
         self._sll.align_to(self._original_left, LEFT)
         self._sll.shift(
-            self._shift_direction *
-            self._shift_distance * smooth(alpha),
+            self._horizontal_shift_direction *
+            self._horizontal_shift_distance * smooth(alpha),
+        )
+
+        self._sll.align_to(self._original_top, UP)
+        self._sll.shift(
+            self._vertical_shift_direction *
+            self._vertical_shift_vector * smooth(alpha),
         )
 
     def clean_up_from_animation(self):
@@ -63,13 +78,13 @@ class CenterSLL(LeafSubanimation):
 
     # def _get_corrected_shift_distance(self) -> np.ndarray:
     #     sll_copy = self._sll.copy()
-    #     sll_copy.shift(self._shift_direction * self._shift_distance * 1)
+    #     sll_copy.shift(self._horizontal_shift_direction * self._horizontal_shift_distance * 1)
 
     #     origin = [0, 0, 0]
 
     #     corrected_shift_distance = origin
     #     if not self._positions_equal(sll_copy.get_center(), origin):
-    #         corrected_shift_distance = self._shift_distance - (sll_copy.get_center() - origin)
+    #         corrected_shift_distance = self._horizontal_shift_distance - (sll_copy.get_center() - origin)
     #     return corrected_shift_distance
 
     # def _positions_equal(self, pos_one: np.ndarray, pos_two: np.ndarray) -> bool:

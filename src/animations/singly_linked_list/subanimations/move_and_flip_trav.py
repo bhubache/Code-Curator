@@ -33,8 +33,10 @@ class MoveAndFlipTrav(LeafSubanimation):
     def begin(self) -> None:
         self._trav.save_state()
         trav_final_state = Pointer(
-            node=self._to_node,
-            sll=self._sll,
+            # node=self._to_node,
+            # sll=self._sll,
+            node=self.finished_subanimation._to_node,
+            sll=self.finished_subanimation._sll,
             label=self._trav.get_label(),
             direction=self._trav.get_opposite_direction(),
         )

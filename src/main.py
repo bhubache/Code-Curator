@@ -51,10 +51,11 @@ def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Seq
             )
             # self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
             self._scene_instances = []
-            for cls, scene_script in zip(scene_classes, aligned_animation_scene_scripts):
-                scene_inst = cls(problem_dir, scene_script)
-                scene_inst.video_dir = self._video_dir
-                self._scene_instances.append(scene_inst)
+            for i, (cls, scene_script) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
+                if i > 0:
+                    scene_inst = cls(problem_dir, scene_script)
+                    scene_inst.video_dir = self._video_dir
+                    self._scene_instances.append(scene_inst)
 
         def setup(self) -> None:
             pass
@@ -76,10 +77,10 @@ def get_scene_classes() -> tuple[list[type], str]:
     present_problem_module: ModuleType = importlib.import_module(
         CONCRETE_PRESENT_PROBLEM_PATH,
     )
+    problem_dir = Path(present_problem_module.__file__).parents[1]
     present_problem_cls = getattr(
         present_problem_module, 'PresentProblem',
     )
-    problem_dir = Path(present_problem_module.__file__).parents[1]
     scene_classes.append(present_problem_cls)
 
     problem_analysis_module = importlib.import_module(
@@ -158,7 +159,7 @@ def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
 
 
 class TestScene(Scene):
-    config.disable_caching = True
+    config.disable_caching = False
     # config.frame_rate = 240
     # import json
     # print(type(config))
@@ -195,7 +196,7 @@ class TestScene(Scene):
             self.sll.add_last(
                 data=17,
             )
-            .subsequently_fade_in_container()
+            .with_fade_in_container()
             .with_fade_in_pointer()
             .with_move_tail()
             .with_center_sll()
@@ -291,7 +292,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = True
+    test_data_structure = False
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(
