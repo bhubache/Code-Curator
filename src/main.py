@@ -23,6 +23,7 @@ from manim import Circle
 from manim import Square
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from leetcode.problems.Delete_Node_in_a_Linked_List.scenes.code_solution import CodeSolution
 from animations.subanimation_group import SubanimationGroup
 from animations.singly_linked_list.subanimations.fade_in_mobject import FadeInMobject
 from animations.singly_linked_list.subanimations.fade_out_mobject import FadeOutMobject
@@ -64,7 +65,7 @@ def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Seq
             # self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
             self._scene_instances = []
             for i, (cls, scene_script) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
-                if i > 0:
+                if i > 1:
                     scene_inst = cls(problem_dir, scene_script)
                     scene_inst.video_dir = self._video_dir
                     self._scene_instances.append(scene_inst)
@@ -181,8 +182,8 @@ class TestScene(Scene):
         from data_structures.singly_linked_list import SinglyLinkedList
         # from data_structures.nodes.singly_linked_list_node import SLLNode
         # from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(7, 5, 2, 8, 9)
-        self.play(FadeIn(self.sll))
+        # self.sll = SinglyLinkedList(7, 5, 2, 8, 9)
+        # self.play(FadeIn(self.sll))
 
         # from animations.data_structure_animation import DataStructureAnimation
         # from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
@@ -204,26 +205,29 @@ class TestScene(Scene):
         #     )
         # )
 
-        remove_at_animation = (
-            self.sll.remove_at(
-                index=2,
-                display_first_trav=True,
-                display_second_trav=False,
-                trav_position='end',
-                first_trav_name='trav',
-            )
-            .subsequently_shrink_pointer()
-            .subsequently_unshrink_pointer()
-            .subsequently_curve_pointer()
-            .subsequently_fade_out_container()
-            .with_fade_out_pointer()
-            .with_fade_out_first_temp_trav()
-            .with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
-            .build_animation()
-        )
-        c = Circle()
-        remove_at_animation.add_animation(0, FadeInMobject(self.sll, c, None))
-        self.play(remove_at_animation)
+        code_solution = CodeSolution(None, None)
+        code_solution.construct()
+
+        # remove_at_animation = (
+        #     self.sll.remove_at(
+        #         index=2,
+        #         display_first_trav=True,
+        #         display_second_trav=False,
+        #         trav_position='end',
+        #         first_trav_name='trav',
+        #     )
+        #     .subsequently_shrink_pointer()
+        #     .subsequently_unshrink_pointer()
+        #     .subsequently_curve_pointer()
+        #     .subsequently_fade_out_container()
+        #     .with_fade_out_pointer()
+        #     .with_fade_out_first_temp_trav()
+        #     .with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
+        #     .build_animation()
+        # )
+        # c = Circle()
+        # remove_at_animation.add_animation(0, FadeInMobject(self.sll, c, None))
+        # self.play(remove_at_animation)
 
         # self.play(
         #     self.sll.remove_at(
@@ -365,7 +369,7 @@ class TestScene(Scene):
 
 
 if __name__ == '__main__':
-    test_data_structure = False
+    test_data_structure = True
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
         aligned_animation_script = get_aligned_animation_script(

@@ -34,7 +34,9 @@ class CodeHighlighter(Rectangle):
         self._code = code
         self._curr_line_num = 0
         self.set_opacity(0.5)
-        self.align_to(self.code[2][0], LEFT + UP)
+        self.align_to(self.code[2][self._curr_line_num], DOWN)
+        self.align_to(self.code[2][self._curr_line_num], LEFT)
+        # self.align_to(self.code[2][self._curr_line_num], LEFT + UP)
 
     def move_to_token(self, token: str, occurrence: int = 1):
         '''
@@ -42,7 +44,18 @@ class CodeHighlighter(Rectangle):
         highlighter to cover
         '''
         code_token_obj = self.code.get_token_at_line(token=token, line_num=self.curr_line_num, occurrence=occurrence)
-        return AnimationGroup(AnimationGroup(self.animate.become(CodeHighlighter(code=self.code, width=code_token_obj.width)).align_to(code_token_obj, LEFT + DOWN)))
+        down_alignment_token = code_token_obj.copy()
+        return AnimationGroup(
+            AnimationGroup(
+                self.animate.become(
+                    CodeHighlighter(
+                        code=self.code, width=code_token_obj.width)
+                    ).align_to(self.code.get_line_at(self.curr_line_num), DOWN).align_to(code_token_obj, LEFT)
+            )
+            # AnimationGroup(
+            #     self.animate.become(CodeHighlighter(code=self.code, width=code_token_obj.width)).align_to(code_token_obj, LEFT + DOWN)
+            # )
+        )
 
 
     def move(self, num_lines: int) -> None:

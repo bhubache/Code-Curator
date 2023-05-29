@@ -1,7 +1,9 @@
+import os
+
 from manim import config, Scene, Code, FadeIn, FadeOut, LEFT, UP, Animation, FadeIn, YELLOW, Rectangle
 
 from code.custom_code import CustomCode
-from my_animations.code_transform import CodeTransform
+from animations.code_transform import CodeTransform
 
 # from .base_scene import BaseScene
 
@@ -9,8 +11,10 @@ class BaseCodeScene(Scene):
     config.background_color = '#000E15'
     def __init__(self, problem_dir: str, aligned_animation_scene) -> None:
         super().__init__()
-        self._code_src = CustomCode(file_name=r'C:\Users\brand\Documents\ManimCS\src\leetcode\problems\Delete_Node_in_a_Linked_List\required_files\src.java', background_color=config.background_color)
-        self._code_dst = CustomCode(file_name=r'C:\Users\brand\Documents\ManimCS\src\leetcode\problems\Delete_Node_in_a_Linked_List\required_files\dst.java', background_color=config.background_color)
+        source_file: str = os.path.join(os.getcwd(), 'src', 'leetcode', 'problems', 'Delete_Node_in_a_Linked_List', 'required_files', 'src.java')
+        destination_file: str = os.path.join(os.getcwd(), 'src', 'leetcode', 'problems', 'Delete_Node_in_a_Linked_List', 'required_files', 'dst.java')
+        self._code_src = CustomCode(file_name=source_file, background_color=config.background_color)
+        self._code_dst = CustomCode(file_name=destination_file, background_color=config.background_color)
         self._align_codes(self.code_src, self.code_dst)
 
     @property
