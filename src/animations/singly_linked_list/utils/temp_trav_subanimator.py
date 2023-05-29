@@ -74,7 +74,13 @@ class TempTravSubanimator:
         ).make_temp()
 
     def _get_first_trav_starting_node(self) -> SLLNode:
-        return self._sll[0] if self._trav_position == 'start' else self._sll[self._index - 1]
+        if self._trav_position == 'start':
+            return self._sll[0]
+        elif self._trav_position == 'end':
+            return self._sll[self._index - 1]
+        else:
+            return self._sll[self._trav_position]
+        # return self._sll[0] if self._trav_position == 'start' else self._sll[self._index - 1]
 
     def _create_second_trav(self) -> Pointer:
         if not self._display_second_trav:
