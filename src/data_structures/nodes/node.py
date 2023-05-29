@@ -19,6 +19,9 @@ class Node(CustomVMobject):
         self._container.add(self._data)
         self.add(self._container)
 
+    def data_equals(self, value) -> bool:
+        return self._data._value == value
+
     @property
     def data(self):
         return self._data._value

@@ -86,8 +86,11 @@ class DataStructureAnimator:
         return self._subanimation_group.sub_in_successive_counterparts()
 
     def _last_subanimation_group_is_successive(self) -> bool:
-        last_subanimation = self._subanimation_group.get(-1)
-        return last_subanimation.lag_ratio == 1
+        try:
+            last_subanimation = self._subanimation_group.get(-1)
+            return last_subanimation.lag_ratio == 1
+        except IndexError:
+            return False
 
     def _prepend_subanimation(self, subanimation: BaseSubanimation) -> None:
         self._subanimation_group.insert(0, subanimation)

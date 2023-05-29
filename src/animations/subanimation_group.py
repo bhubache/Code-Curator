@@ -222,7 +222,15 @@ class SubanimationGroup(BaseSubanimation):
             self._subanimations.append(sub)
 
     def get(self, index: int) -> BaseSubanimation:
-        return self._subanimations[index]
+        try:
+            return self._subanimations[index]
+        except IndexError:
+            if len(self._subanimations) == 0 and (index == 0 or index == -1):
+                self._subanimations.append(SubanimationGroup())
+                return self._subanimations[index]
+            raise IndexError(
+                f'Index {index} out of bounds for length {len(self._subanimations)})',
+            )
 
     def set(self, index: int, subanimation: BaseSubanimation) -> None:
         self._subanimations[index] = subanimation

@@ -34,5 +34,25 @@ to be deleted is
 not
 
 the tail, there must be at least 2 nodes in the linked list! I can’t find a similar justification for the upper bound on the number of nodes, 1000 seems arbitrary.
-<</Constraints_Analysis>>
 
+<explanation_2>
+The second constraint places limits on a node's value. The typical reason for constraining the size of integers in a problem is potential underflow and overflow. But, because there's no arithmetic in this problem, this isn't an issue.
+
+<explanation_2_fade_in>
+So,
+
+this isn't a pertinent constraint and it can be disregarded.
+
+<explanation_3>
+The third constraint seems weird. Why does it matter that every node be unique? The short answer is, I don\'t think it does.
+If we were given the value to be deleted, and not all
+values in the linked list were unique,
+then there would be ambiguity about which node to delete.
+
+However, we are given
+
+<explanation_3_fade_in>
+the
+
+node to be deleted, and so, like the prior constraint, this can be disregarded.
+<</Constraints_Analysis>>
