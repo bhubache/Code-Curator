@@ -3,6 +3,7 @@ from __future__ import annotations
 from constants import DEFAULT_MOBJECT_COLOR
 from constants import DEFAULT_STROKE_WIDTH
 from custom_logging.custom_logger import CustomLogger
+from manim import ArrowTriangleTip
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Take in default value!
@@ -11,6 +12,7 @@ logger = CustomLogger.getLogger(__name__)
 _DEFAULT_PROPERTY_MAP = {
     'color': DEFAULT_MOBJECT_COLOR,
     'stroke_width': DEFAULT_STROKE_WIDTH,
+    'tip': ArrowTriangleTip(length=0.2, width=0.2),
 }
 
 
