@@ -26,7 +26,7 @@ class TempTravSubanimator:
         first_trav_name: str = 'p1',
         display_second_trav: bool = False,
         second_trav_name: str = 'p2',
-        trav_position: str = 'start',
+        trav_position: str | int = 'start',
     ) -> None:
         self._sll = sll
         self._index = index
@@ -34,7 +34,7 @@ class TempTravSubanimator:
         self._first_trav_name: str = first_trav_name
         self._display_second_trav: bool = display_second_trav
         self._second_trav_name: str = second_trav_name
-        self._trav_position: str = trav_position
+        self._trav_position: str | int = trav_position
         self._first_trav: Pointer = NullPointer()
         self._second_trav: Pointer = NullPointer()
 
@@ -74,7 +74,12 @@ class TempTravSubanimator:
         ).make_temp()
 
     def _get_first_trav_starting_node(self) -> SLLNode:
-        return self._sll[0] if self._trav_position == 'start' else self._sll[self._index - 1]
+        if self._trav_position == 'start':
+            return self._sll[0]
+        elif self._trav_position == 'end':
+            return self._sll[self._index - 1]
+        else:
+            return self._sll[self._trav_position]
 
     def _create_second_trav(self) -> Pointer:
         if not self._display_second_trav:
