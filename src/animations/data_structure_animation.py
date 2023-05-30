@@ -17,6 +17,8 @@ class DataStructureAnimation(Animation):
         self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
 
     def begin(self) -> None:
+        self.run_time = self._animator.get_run_time()
+        self._subanimation_group = self._animator.get_subanimation_group()
         self._subanimation_group.init_run_time()
         super().begin()
 

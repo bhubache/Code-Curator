@@ -74,44 +74,44 @@ class BaseCodeScene(Scene):
         self.play(FadeIn(self.code_src))
         self.play(FadeIn(self.create_highlighter()))
 
-        self.play(self.code_src.move_highlighter_to_token('Solution', 1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('Solution', 1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('class', 1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('class', 1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('lass Sol', 1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('lass Sol', 1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter(2))
-        self.wait()
+        # self.play(self.code_src.move_highlighter(2))
+        # self.wait()
+
+        self.play(self.code_transform())
+
+        self.play(self.code_src.move_highlighter_to_token(token='node', occurrence=2, num_lines=5))
+        self.play(self.code_src.move_highlighter_to_token(token='node.next', occurrence=2, num_lines=0))
+        self.play(self.code_src.move_highlighter_to_token(token='node.next.next', occurrence=1, num_lines=0))
 
         # self.play(self.code_src.move_highlighter(3))
         # self.wait()
 
-        self.play(self.code_transform())
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('node', 1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter(3))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('node.next', 2))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('node', 1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter(-1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('node.next', 2))
-        self.wait()
+        # self.play(self.code_src.move_highlighter(1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter(-1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('node.next', 2))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter(1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('val', occurrence=1, num_lines=-1))
+        # self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('node.next', 2))
-        self.wait()
-
-        self.play(self.code_src.move_highlighter_to_token('val', occurrence=1, num_lines=-1))
-        self.wait()
-
-        self.play(self.code_src.move_highlighter_to_token('=', occurrence=1))
-        self.wait()
+        # self.play(self.code_src.move_highlighter_to_token('=', occurrence=1))
+        # self.wait()

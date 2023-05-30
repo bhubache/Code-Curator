@@ -203,7 +203,10 @@ class SubanimationGroup(BaseSubanimation):
         return False
 
     def _subanimation_is_complete(self, subanimation: BaseSubanimation, sub_alpha: float) -> bool:
+        # if subanimation.__class__.__name__ == 'UnshrinkPointer' and isinstance(subanimation, LeafSubanimation):
+        #     print(sub_alpha)
         if sub_alpha == 1 and subanimation._has_started and isinstance(subanimation, LeafSubanimation):
+            print(f'{subanimation.__class__.__name__}!!!!!!')
             return True
         return False
 
