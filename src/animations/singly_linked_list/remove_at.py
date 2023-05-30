@@ -195,6 +195,10 @@ class RemoveAt(DataStructureAnimator):
     def clean_up_mobject(self) -> None:
         del self._sll._nodes[self._removed_node_index]
 
+    def _get_sll_to_forecast(self) -> SinglyLinkedList:
+        sll_to_forecast = self._sll.copy()
+        return sll_to_forecast
+
     def _create_fade_out_container(self) -> BaseSubanimation:
         return FadeOutContainer(
             sll=self._sll,
