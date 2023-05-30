@@ -25,6 +25,14 @@ class Node(CustomVMobject):
     @property
     def data(self):
         return self._data._value
+    
+    @property
+    def mobj_data(self):
+        return self._data
+    
+    @mobj_data.setter
+    def mobj_data(self, new_data) -> None:
+        self._data = new_data
 
     def get_container_center(self) -> Sequence[float]:
         return self._container.get_center()
