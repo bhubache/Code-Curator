@@ -1,9 +1,10 @@
 """
 TODO:
-- Fix the timing when adding subanimations! Timing doesn't change
-- Fix the timing when removing subanimations! Timing doesn't change
 - A simpler way of adding and removing subanimations!
-- Adding multiple subanimations after a sll animation has been made seems to prevent ``clean_up_from_animation`` from being called for some subanimations
+- Consider using JSON for the animation script!
+
+NOTE:
+- Be wary of the first if block of ``:meth:add_animation`` in CompositeAnimationScript
 """
 
 from __future__ import annotations
@@ -231,7 +232,7 @@ class TestScene(Scene):
 
         remove_at_animation = (
             self.sll.remove_at(
-                index=2,
+                index=3,
                 display_first_trav=True,
                 display_second_trav=False,
                 trav_position=2,
@@ -246,8 +247,8 @@ class TestScene(Scene):
             .with_fade_out_second_temp_trav().with_flatten_list().with_center_sll()
             .build_animation()
         )
-        remove_at_animation.add_animation(0, ChangeNodeData(self.sll, self.sll[2], 0))
-        remove_at_animation.add_animation(1, CopyDataOver(self.sll, self.sll[3], self.sll[2]))
+        remove_at_animation.add_animation(1, ChangeNodeData(self.sll, self.sll[2], 0))
+        remove_at_animation.add_animation(2, CopyDataOver(self.sll, self.sll[3], self.sll[2]))
 
         self.play(remove_at_animation)
 

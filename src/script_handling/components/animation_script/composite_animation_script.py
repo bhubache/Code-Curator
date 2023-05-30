@@ -171,16 +171,18 @@ class CompositeAnimationScript(AnimationScript):
                 return True
         return False
 
+    # NOTE: It looks like the animation arg isn't used
     # @_check_that_unique_id_exists
     def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
             for child in self.children:
                 child.add_animation(
-                    unique_id, func, func()[
-                        0
-                    ], is_overriding_animation,
+                    unique_id, func, func(), is_overriding_animation,
                 )
+                # child.add_animation(
+                #     unique_id, func, func()[0], is_overriding_animation,
+                # )
         else:
             animations = func()
             assert len(self.children) == len(animations)
