@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 from colour import Color
+from constants import DEFAULT_ELEMENT_FONT_SIZE
+from constants import DEFAULT_MOBJECT_COLOR
 from manim import Tex
 
 
@@ -10,8 +12,8 @@ class Element(Tex):
     def __init__(
         self,
         value: Any,
-        color: str | Color,
-        font_size: int,
+        color: str | Color = DEFAULT_MOBJECT_COLOR,
+        font_size: int = DEFAULT_ELEMENT_FONT_SIZE,
     ) -> None:
         super().__init__(value, color=color, font_size=font_size)
         self._value: Any = value
