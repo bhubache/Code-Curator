@@ -1,16 +1,36 @@
-from manim import config, Scene, Code, FadeIn, FadeOut, LEFT, UP, Animation, FadeIn, YELLOW, Rectangle
+from __future__ import annotations
 
+import os
 from code.custom_code import CustomCode
+
+from manim import config
+from manim import FadeIn
+from manim import LEFT
+from manim import Scene
+from manim import UP
 from my_animations.code_transform import CodeTransform
 
 # from .base_scene import BaseScene
 
+
 class BaseCodeScene(Scene):
     config.background_color = '#000E15'
+
     def __init__(self, problem_dir: str, aligned_animation_scene) -> None:
         super().__init__()
-        self._code_src = CustomCode(file_name=r'C:\Users\brand\Documents\ManimCS\src\leetcode\problems\Delete_Node_in_a_Linked_List\required_files\src.java', background_color=config.background_color)
-        self._code_dst = CustomCode(file_name=r'C:\Users\brand\Documents\ManimCS\src\leetcode\problems\Delete_Node_in_a_Linked_List\required_files\dst.java', background_color=config.background_color)
+        base_file_path: str = os.path.join(
+            os.getcwd(), 'src', 'leetcode', 'problems', problem_dir, 'required_files',
+        )
+
+        source_file_path: str = os.path.join(base_file_path, 'src.java')
+        destination_file_path: str = os.path.join(base_file_path, 'dst.java')
+
+        self._code_src = CustomCode(
+            file_name=source_file_path, background_color=config.background_color,
+        )
+        self._code_dst = CustomCode(
+            file_name=destination_file_path, background_color=config.background_color,
+        )
         self._align_codes(self.code_src, self.code_dst)
 
     @property
@@ -38,9 +58,10 @@ class BaseCodeScene(Scene):
         self.code_src, self.code_dst = self.code_dst, self.code_src
         return animation
 
-
     def _align_codes(self, code_src: CustomCode, code_dst: CustomCode):
-        most_vertical_code, most_width_code = self._get_aligning_codes(self.code_src, self.code_dst)
+        most_vertical_code, most_width_code = self._get_aligning_codes(
+            self.code_src, self.code_dst,
+        )
 
         self.code_src.align_to(most_vertical_code, UP)
         self.code_dst.align_to(most_vertical_code, UP)
@@ -61,7 +82,6 @@ class BaseCodeScene(Scene):
                 most_width_code = code
 
         return most_vertical_code, most_width_code
-
 
     def setup(self):
         pass
@@ -106,7 +126,11 @@ class BaseCodeScene(Scene):
         self.play(self.code_src.move_highlighter_to_token('node.next', 2))
         self.wait()
 
-        self.play(self.code_src.move_highlighter_to_token('val', occurrence=1, num_lines=-1))
+        self.play(
+            self.code_src.move_highlighter_to_token(
+                'val', occurrence=1, num_lines=-1,
+            ),
+        )
         self.wait()
 
         self.play(self.code_src.move_highlighter_to_token('=', occurrence=1))
