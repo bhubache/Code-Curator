@@ -3,11 +3,11 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import numpy as np
-from automatic_delegation.delegate_to import delegate_to
+from code_curator.automatic_delegation.delegate_to import delegate_to
 from colour import Color
-from constants import DEFAULT_MOBJECT_COLOR
-from constants import DEFAULT_STROKE_WIDTH
-from custom_vmobject import CustomVMobject
+from code_curator.constants import DEFAULT_MOBJECT_COLOR
+from code_curator.constants import DEFAULT_STROKE_WIDTH
+from code_curator.custom_vmobject import CustomVMobject
 from manim import Line
 from numpy import ndarray
 

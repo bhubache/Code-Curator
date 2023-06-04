@@ -2,7 +2,7 @@ from typing import Any
 
 from .data_structure_animator import BaseSLLPackager
 from .data_structure_animator import assign_subanimations_and_animate
-from data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
 from ..animation_package import AnimationPackage
 from .subanimations.fade_in_container import FadeInContainer
 # from .subanimations.fade_in_pointer import FadeInPointer
@@ -13,7 +13,7 @@ from .subanimations.empty import Empty
 from ..data_structure_animation import PackageAnimation
 from manim import LEFT, Animation, linear, smooth, Scene
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Allow specifying the time that each animation should take within this class animation

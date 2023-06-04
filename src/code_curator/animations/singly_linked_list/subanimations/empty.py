@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 
 from .leaf_subanimation import LeafSubanimation
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from data_structures.singly_linked_list import SinglyLinkedList
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
 class Empty(LeafSubanimation):

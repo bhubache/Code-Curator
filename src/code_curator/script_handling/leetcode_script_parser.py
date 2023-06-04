@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 
 from .animation_script_parser import AnimationScriptParser
 from .components.animation_script.animation_leaf import AnimationLeaf

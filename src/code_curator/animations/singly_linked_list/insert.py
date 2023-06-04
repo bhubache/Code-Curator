@@ -3,11 +3,11 @@ from typing import Any
 import math
 
 from .data_structure_animator import BaseSLLPackager, assign_subanimations_and_animate
-from data_structures import singly_linked_list
-from animations.singly_linked_list.add_first import AddFirst
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from data_structures.pointers.pointer import Pointer
+from code_curator.data_structures import singly_linked_list
+from code_curator.animations.singly_linked_list.add_first import AddFirst
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from code_curator.data_structures.pointers.pointer import Pointer
 from .subanimations.base_subanimation import BaseSubanimation
 from ..animation_package import AnimationPackage
 from ..data_structure_animation import PackageAnimation
@@ -29,7 +29,7 @@ from .subanimations.empty import Empty
 from .utils.temp_trav_subanimator import TempTravSubanimator
 from manim import Animation, linear, smooth, Scene, LEFT, UP, DOWN, RIGHT, VGroup, Circle
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 

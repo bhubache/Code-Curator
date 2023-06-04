@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 from colour import Color
-from constants import DEFAULT_ELEMENT_FONT_SIZE
-from constants import DEFAULT_MOBJECT_COLOR
+from code_curator.constants import DEFAULT_ELEMENT_FONT_SIZE
+from code_curator.constants import DEFAULT_MOBJECT_COLOR
 from manim import Tex
 
 

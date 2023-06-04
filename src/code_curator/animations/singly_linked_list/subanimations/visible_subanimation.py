@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from .base_subanimation import BaseSubanimation
-from data_structures import singly_linked_list
+from code_curator.data_structures import singly_linked_list
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 class VisibleSubanimation(BaseSubanimation):

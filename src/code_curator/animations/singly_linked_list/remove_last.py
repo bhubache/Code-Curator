@@ -8,7 +8,7 @@ from .subanimations.fade_out_mobject import FadeOutMobject
 from .subanimations.move_trav import MoveTrav
 from .subanimations.center_sll import CenterSLL
 from ..data_structure_animation import PackageAnimation
-from data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
 from manim import Animation, linear, smooth, Scene, RIGHT
 
 

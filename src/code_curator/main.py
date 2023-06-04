@@ -8,16 +8,16 @@ from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
 
-from base_scene import BaseScene
+from code_curator.base_scene import BaseScene
 from manim import config
 from manim import FadeIn
 from manim import Scene
-from moviepy.editor import concatenate_videoclips
-from moviepy.editor import VideoFileClip
-from script_handling.aligned_animation_script import AlignedAnimationScript
-from script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from script_handling.components.animation_script.animation_script import AnimationScript
-from script_handling.simple_script_parser_factory import SimpleScriptParserFactory
+# from moviepy.editor import concatenate_videoclips
+# from moviepy.editor import VideoFileClip
+from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
+from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
+from code_curator.script_handling.components.animation_script.animation_script import AnimationScript
+from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 # import time
 # from manim.utils.file_ops import open_file as open_media_file
 
@@ -35,9 +35,9 @@ ALIGNED_SCRIPT_PATH = os.path.join('generated_files', 'aligned_script.txt')
 ANIMATION_SCRIPT_PATH = os.path.join('required_files', 'animation_script.txt')
 # ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
 
-CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
-CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
-CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
+CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
+CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
+CONCRETE_CODE_SOLUTION_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
 
 def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Sequence[AnimationScript]) -> type:
@@ -166,16 +166,16 @@ class TestScene(Scene):
     # print(json.dumps(config, indent=4, default=str))
 
     def construct(self) -> None:
-        from data_structures.singly_linked_list import SinglyLinkedList
-        # from data_structures.nodes.singly_linked_list_node import SLLNode
-        # from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+        from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+        # from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+        # from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
         self.sll = SinglyLinkedList(1)
         self.play(FadeIn(self.sll))
 
-        # from animations.data_structure_animation import DataStructureAnimation
-        # from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
-        # from animations.subanimation_group import SubanimationGroup
-        # from animations.singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
+        # from code_curator.animations.data_structure_animation import DataStructureAnimation
+        # from code_curator.animations.singly_linked_list.data_structure_animator import DataStructureAnimator
+        # from code_curator.animations.subanimation_group import SubanimationGroup
+        # from code_curator.animations.singly_linked_list.subanimations.move_and_flip_trav import MoveAndFlipTrav
 
         # sub_group = SubanimationGroup(
         #     MoveAndFlipTrav(
@@ -291,7 +291,7 @@ class TestScene(Scene):
         self.wait()
 
 
-if __name__ == '__main__':
+def main() -> None:
     test_data_structure = False
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
@@ -308,3 +308,7 @@ if __name__ == '__main__':
         test_scene.render()
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)
+
+
+if __name__ == '__main__':
+    main()

@@ -5,6 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "Code-Curator"
 version = "0.0.1"
+dependencies = [
+    "manim >= 0.17.3",
+]
 
 [tool.flake8]
 max-line-length = 120

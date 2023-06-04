@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
-from custom_vmobject import CustomVMobject
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.custom_vmobject import CustomVMobject
 from manim import Circle
 
 from .linear_node import LinearNode

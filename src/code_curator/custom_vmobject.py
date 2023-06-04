@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import VMobject
 from manim.constants import DEFAULT_STROKE_WIDTH
-from null_vmobject import NullVMobject
+from code_curator.null_vmobject import NullVMobject
 logger = CustomLogger.getLogger(__name__)
 
 

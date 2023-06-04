@@ -1,4 +1,4 @@
-from leetcode.scenes.code.base_code_scene import BaseCodeScene
+from code_curator.leetcode.scenes.code.base_code_scene import BaseCodeScene
 
 class CodeSolution(BaseCodeScene):
     def __init__(self, problem_dir: str, aligned_animation_scene) -> None:
