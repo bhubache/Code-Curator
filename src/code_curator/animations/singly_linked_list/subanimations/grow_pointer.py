@@ -1,9 +1,9 @@
 from .leaf_subanimation import LeafSubanimation
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from .strictly_successive.grow_pointer import SuccessiveGrowPointer
 from manim import smooth
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 class GrowPointer(LeafSubanimation):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from types import FunctionType
 
-from manim_property import manim_property
+from code_curator.manim_property import manim_property
 
 from .delegated_attribute import DelegatedAttribute
 from .simple_property import SimpleProperty

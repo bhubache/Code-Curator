@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from null_vmobject import NullVMobject
+from code_curator.null_vmobject import NullVMobject
 
 from .weight import Weight
 

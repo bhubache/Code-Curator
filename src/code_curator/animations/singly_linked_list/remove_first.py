@@ -8,8 +8,8 @@ from .subanimations.fade_out_mobject import FadeOutMobject
 from .subanimations.move_trav import MoveTrav
 from .subanimations.center_sll import CenterSLL
 from ..data_structure_animation import PackageAnimation
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import Animation, linear, smooth, Scene, LEFT
 
 # class _RemoveFirst(Animation):

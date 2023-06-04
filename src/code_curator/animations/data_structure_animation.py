@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from animations.singly_linked_list.subanimations.base_subanimation import BaseSubanimation
-from custom_logging.custom_logger import CustomLogger
+from code_curator.animations.singly_linked_list.subanimations.base_subanimation import BaseSubanimation
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Animation
 
 if TYPE_CHECKING:
-    from data_structures.singly_linked_list import SinglyLinkedList
-    from animations.singly_linked_list.data_structure_animator import DataStructureAnimator
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+    from code_curator.animations.singly_linked_list.data_structure_animator import DataStructureAnimator
 
 from .subanimation_group import SubanimationGroup
 logger = CustomLogger.getLogger(__name__)

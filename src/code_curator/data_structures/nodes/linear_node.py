@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from custom_vmobject import CustomVMobject
+from code_curator.custom_vmobject import CustomVMobject
 from manim import Animation
 from manim import RIGHT
 

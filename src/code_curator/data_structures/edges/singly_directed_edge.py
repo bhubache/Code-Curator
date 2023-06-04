@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from automatic_delegation.delegate_to import delegate_to
-from custom_logging.custom_logger import CustomLogger
-from custom_vmobject import CustomVMobject
-from data_structures.edges.weights.null_weight import NullWeight
-from data_structures.edges.weights.weight import Weight
+from code_curator.automatic_delegation.delegate_to import delegate_to
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.custom_vmobject import CustomVMobject
+from code_curator.data_structures.edges.weights.null_weight import NullWeight
+from code_curator.data_structures.edges.weights.weight import Weight
 from manim import CurvedArrow
 from manim import VMobject
 

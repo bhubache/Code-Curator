@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from code.custom_code import CustomCode
+from code_curator.code.custom_code import CustomCode
 
 from manim import config
 from manim import FadeIn

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import smooth
 
 from ..leaf_subanimation import LeafSubanimation

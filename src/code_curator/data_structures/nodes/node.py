@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from custom_vmobject import CustomVMobject
-from data_structures.static_array_parts.values.element import Element
+from code_curator.custom_vmobject import CustomVMobject
+from code_curator.data_structures.static_array_parts.values.element import Element
 
 
 class Node(CustomVMobject):

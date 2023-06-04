@@ -3,9 +3,9 @@ from __future__ import annotations
 import inspect
 from collections.abc import Callable
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Animation
-from script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
+from code_curator.script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
 
 from .animation_leaf import AnimationLeaf
 from .animation_script import AnimationScript

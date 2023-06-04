@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import LEFT
 from manim import Line
 from manim import smooth

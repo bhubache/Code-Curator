@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 import numpy as np
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Scene
 
 from .singly_linked_list.subanimations.base_subanimation import BaseSubanimation

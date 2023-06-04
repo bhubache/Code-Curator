@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from constants import DEFAULT_MOBJECT_COLOR
-from constants import DEFAULT_STROKE_WIDTH
-from custom_logging.custom_logger import CustomLogger
+from code_curator.constants import DEFAULT_MOBJECT_COLOR
+from code_curator.constants import DEFAULT_STROKE_WIDTH
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import ArrowTriangleTip
 logger = CustomLogger.getLogger(__name__)
 

@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 import numpy as np
-from custom_logging.custom_logger import CustomLogger
-from data_structures.static_array_parts.values.element import Element
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.data_structures.static_array_parts.values.element import Element
 from manim import Animation
 from manim import AnimationGroup
 from manim import DOWN
