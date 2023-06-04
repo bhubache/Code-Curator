@@ -9,15 +9,15 @@ from pathlib import Path
 from types import ModuleType
 
 from code_curator.base_scene import BaseScene
+from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
+from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
+from code_curator.script_handling.components.animation_script.animation_script import AnimationScript
+from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 from manim import config
 from manim import FadeIn
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
-from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from code_curator.script_handling.components.animation_script.animation_script import AnimationScript
-from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 # import time
 # from manim.utils.file_ops import open_file as open_media_file
 
@@ -35,9 +35,9 @@ ALIGNED_SCRIPT_PATH = os.path.join('generated_files', 'aligned_script.txt')
 ANIMATION_SCRIPT_PATH = os.path.join('required_files', 'animation_script.txt')
 # ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
 
-CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
-CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
-CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
+CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
+CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
+CONCRETE_CODE_SOLUTION_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
 
 def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Sequence[AnimationScript]) -> type:
