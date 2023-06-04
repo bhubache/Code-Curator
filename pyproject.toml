@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Code-Curator"
+version = "0.0.1"
+
+[tool.flake8]
+max-line-length = 120
+pyproject-flake8 = "6.0.0"
+flake8-2020 = "1.8.0"
+flake8-dunder-all = "0.3.0"
+flake8-encodings = "0.5.0"
+flake8-requirements = "1.7.8"
+flake8-secure-coding-standard = "1.4.0"
+flake8-slots = "0.1.5"
+
+[project.scripts]
+curate = "code_curator.main:main"
+
