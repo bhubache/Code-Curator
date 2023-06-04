@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import pdb
+
+import shutil
 import importlib
 import logging
 import os
@@ -8,6 +11,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
 
+from code_curator.base_scene import BaseScene
 from base_scene import BaseScene
 from manim import config
 from manim import FadeIn
@@ -24,9 +28,11 @@ from script_handling.simple_script_parser_factory import SimpleScriptParserFacto
 
 # To open the movie after render.
 
-
+shutil.__name__
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+some_really_really_realllyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy = 'slkjdflsdjflsdjflsdjfsldjldjkflsdjfslfkjsdlfksjdljsdlkfjsdlfsdfjsldfjsldfjsldfj'
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
@@ -39,8 +45,19 @@ CONCRETE_PRESENT_PROBLEM_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.presen
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
 CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
+breakpoint()
 
-def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Sequence[AnimationScript]) -> type:
+def is_user_banned(user: User) -> str:
+    return 'is_banned' if user.id in BANNED_USERS else 'not_banned'
+
+def func(arg1: str) -> int:
+    return pas
+
+
+a: str = func(5)
+
+
+def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Sequence[AnimationScript], some_other_paramter: float) -> type:
     class MyScene(Scene):
         # config.disable_caching = True
 
@@ -291,7 +308,7 @@ class TestScene(Scene):
         self.wait()
 
 
-if __name__ == '__main__':
+def main() -> None:
     test_data_structure = False
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
@@ -308,3 +325,7 @@ if __name__ == '__main__':
         test_scene.render()
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)
+
+
+if __name__ == '__main__':
+    main()
