@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-import pdb
-
-import shutil
 import importlib
 import logging
 import os
+import shutil
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
 
-from code_curator.base_scene import BaseScene
 from base_scene import BaseScene
+from code_curator.base_scene import BaseScene
 from manim import config
 from manim import FadeIn
 from manim import Scene
@@ -47,8 +45,10 @@ CONCRETE_CODE_SOLUTION_PATH = f'leetcode.problems.{PROBLEM_NAME}.scenes.code_sol
 
 breakpoint()
 
+
 def is_user_banned(user: User) -> str:
     return 'is_banned' if user.id in BANNED_USERS else 'not_banned'
+
 
 def func(arg1: str) -> int:
     return pas

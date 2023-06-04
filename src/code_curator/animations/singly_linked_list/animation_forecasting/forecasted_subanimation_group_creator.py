@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from .. import data_structure_animator
 from ...subanimation_group import SubanimationGroup
+
 
 class ForecastedSubanimationGroupCreator:
     def __init__(
@@ -12,7 +15,9 @@ class ForecastedSubanimationGroupCreator:
 
     @classmethod
     def create_forecasted_subanimation_group(cls, animator, subanimation_builder_helpers):
-        forecasted_package_creator = ForecastedSubanimationGroupCreator(animator=animator, subanimation_builder_helpers=subanimation_builder_helpers)
+        forecasted_package_creator = ForecastedSubanimationGroupCreator(
+            animator=animator, subanimation_builder_helpers=subanimation_builder_helpers,
+        )
         return forecasted_package_creator._create_successive_subanimations()
 
     def _create_successive_subanimations(self) -> SubanimationGroup:
@@ -30,4 +35,4 @@ class ForecastedSubanimationGroupCreator:
         self._animator.create_subanimation_group_successive_counterpart()
 
     def _set_default_clean_up_mobject(self) -> None:
-        self._animator.clean_up_mobject = lambda : None
+        self._animator.clean_up_mobject = lambda: None

@@ -1,19 +1,16 @@
-from typing import Any
+from __future__ import annotations
 
-from .data_structure_animator import BaseSLLPackager
-from .data_structure_animator import assign_subanimations_and_animate
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from ..animation_package import AnimationPackage
-from .subanimations.fade_in_container import FadeInContainer
-# from .subanimations.fade_in_pointer import FadeInPointer
-from .subanimations.grow_pointer import GrowPointer
-from .subanimations.move_trav import MoveTrav
-from .subanimations.center_sll import CenterSLL
-from .subanimations.empty import Empty
-from ..data_structure_animation import PackageAnimation
-from manim import LEFT, Animation, linear, smooth, Scene
 
 from custom_logging.custom_logger import CustomLogger
+from data_structures.nodes.singly_linked_list_node import SLLNode
+
+from .data_structure_animator import assign_subanimations_and_animate
+from .data_structure_animator import BaseSLLPackager
+from .subanimations.center_sll import CenterSLL
+from .subanimations.empty import Empty
+from .subanimations.fade_in_container import FadeInContainer
+from .subanimations.move_trav import MoveTrav
+# from .subanimations.fade_in_pointer import FadeInPointer
 logger = CustomLogger.getLogger(__name__)
 
 # TODO: Allow specifying the time that each animation should take within this class animation
@@ -26,6 +23,7 @@ class AddFirst(BaseSLLPackager):
     '''
     Handles the internal manipulation and animation of adding a node to the front of a linked list.
     '''
+
     def __init__(self, sll):
         self._sll = sll
 
@@ -42,7 +40,9 @@ class AddFirst(BaseSLLPackager):
         node.container.set_opacity(0)
         node.pointer_to_next.set_opacity(0)
         self._fade_in_container = FadeInContainer(self._sll, node.container)
-        self._pointer_animation = self._get_pointer_animation(node, pointer_animation_type)
+        self._pointer_animation = self._get_pointer_animation(
+            node, pointer_animation_type,
+        )
         self._move_trav = MoveTrav(self._sll, self._sll.head_pointer, node)
         self._center_sll = CenterSLL(self._sll)
 
@@ -67,7 +67,7 @@ class AddFirst(BaseSLLPackager):
             self._fade_in_container,
             self._pointer_animation,
             self._move_trav,
-            self._center_sll
+            self._center_sll,
         )
 
     ##################
@@ -76,23 +76,23 @@ class AddFirst(BaseSLLPackager):
     @assign_subanimations_and_animate
     def node_then_rest(self, *args, **kwargs):
         self.append_concurrent_animations(
-            self._fade_in_container
+            self._fade_in_container,
         )
         self.append_concurrent_animations(
             self._pointer_animation,
             self._move_trav,
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
     def node_and_pointer_then_rest(self, *args, **kwargs):
         self.append_concurrent_animations(
             self._fade_in_container,
-            self._pointer_animation
+            self._pointer_animation,
         )
         self.append_concurrent_animations(
             self._move_trav,
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
@@ -103,7 +103,7 @@ class AddFirst(BaseSLLPackager):
             self._move_trav,
         )
         self.append_concurrent_animations(
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
@@ -114,18 +114,18 @@ class AddFirst(BaseSLLPackager):
         )
         self.append_concurrent_animations(
             self._pointer_animation,
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
     def node_and_center_then_rest(self, *args, **kwargs):
         self.append_concurrent_animations(
             self._fade_in_container,
-            self._center_sll
+            self._center_sll,
         )
         self.append_concurrent_animations(
             self._pointer_animation,
-            self._move_trav
+            self._move_trav,
         )
 
     ####################
@@ -139,7 +139,7 @@ class AddFirst(BaseSLLPackager):
         )
         self.append_concurrent_animations(
             self._move_trav,
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
@@ -150,14 +150,14 @@ class AddFirst(BaseSLLPackager):
         )
         self.append_concurrent_animations(
             self._pointer_animation,
-            self._center_sll
+            self._center_sll,
         )
 
     @assign_subanimations_and_animate
     def node_then_center_then_rest(self, *args, **kwargs):
         self.append_successive_animations(
             self._fade_in_container,
-            self._center_sll
+            self._center_sll,
         )
         self.append_concurrent_animations(
             self._move_trav,
@@ -220,6 +220,5 @@ class AddFirst(BaseSLLPackager):
             self._move_trav,
             self._pointer_animation,
         )
-
 
     # TODO: Finish the remaining animations

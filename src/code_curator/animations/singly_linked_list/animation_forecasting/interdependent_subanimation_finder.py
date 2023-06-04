@@ -1,11 +1,14 @@
-from pathlib import Path
+from __future__ import annotations
+
 import os
+from pathlib import Path
 
 import pandas as pd
 
-from ..subanimations.base_subanimation import BaseSubanimation
 from ...subanimation_group import SubanimationGroup
+from ..subanimations.base_subanimation import BaseSubanimation
 from ..subanimations.leaf_subanimation import LeafSubanimation
+
 
 class InterdependentSubanimationFinder:
     def __init__(self, subanimation_group: SubanimationGroup):
@@ -23,13 +26,18 @@ class InterdependentSubanimationFinder:
             for i, _ in enumerate(flattened_group):
                 for j, _ in enumerate(flattened_group):
 
-                    if i == j: continue
+                    if i == j:
+                        continue
 
                     if self._subanimation_pair_is_interdependent(flattened_group[i], flattened_group[j]):
                         if flattened_group[i] not in interdepenent_subanimations:
-                            interdepenent_subanimations.append(flattened_group[i])
+                            interdepenent_subanimations.append(
+                                flattened_group[i],
+                            )
                         if flattened_group[j] not in interdepenent_subanimations:
-                            interdepenent_subanimations.append(flattened_group[j])
+                            interdepenent_subanimations.append(
+                                flattened_group[j],
+                            )
         return interdepenent_subanimations
 
     def _subanimation_pair_is_interdependent(self, first_sub: BaseSubanimation, second_sub: BaseSubanimation) -> bool:
@@ -48,6 +56,8 @@ class InterdependentSubanimationFinder:
         first_order_interdependency = df_subanimation_orth.at[first_sub_name, second_sub_name]
         second_order_interdependency = df_subanimation_orth.at[second_sub_name, first_sub_name]
 
-        order_interdependencies_to_check = [first_order_interdependency, second_order_interdependency]
+        order_interdependencies_to_check = [
+            first_order_interdependency, second_order_interdependency,
+        ]
 
         return 'yes' in order_interdependencies_to_check

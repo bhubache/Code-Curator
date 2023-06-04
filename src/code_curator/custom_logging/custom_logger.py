@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import logging
 
 from .logging_formatter import CustomFormatter
+
 
 class CustomLogger:
     # FIXME: Possible fix this?

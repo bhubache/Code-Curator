@@ -1,16 +1,18 @@
-from manim import VMobject, Animation, LEFT, DOWN
+from __future__ import annotations
 
-from static_array_parts.rows.row_factory import RowFactory
-from static_array_parts.rows.index_row import IndexRowBuilder
-from static_array_parts.rows.element_row import ElementRowBuilder
-from static_array_parts.rows.pointer_row import PointerRowBuilder
+from collections.abc import Iterable
 
-from static_array_parts.values.pointer import Pointer
-
+from manim import Animation
+from manim import DOWN
+from manim import LEFT
+from manim import VMobject
 from static_array_parts.cells.cell import Cell
+from static_array_parts.rows.element_row import ElementRowBuilder
+from static_array_parts.rows.index_row import IndexRowBuilder
+from static_array_parts.rows.pointer_row import PointerRowBuilder
 from static_array_parts.rows.row import Row
-
-from typing import Iterable
+from static_array_parts.rows.row_factory import RowFactory
+from static_array_parts.values.pointer import Pointer
 
 '''
     TODO:
@@ -22,6 +24,7 @@ from typing import Iterable
     - Understand properties so code is more pythonic
     - Decide (with good reason) when primitives should be converted to their Value type
 '''
+
 
 def validate_arguments(fn):
     '''
@@ -43,10 +46,12 @@ def validate_arguments(fn):
         return result
     return inner
 
+
 class StaticArray(VMobject):
     """
     Animation and internal logic for a static array
     """
+
     def __init__(self, length):
         super().__init__()
         self._length = length
@@ -61,7 +66,6 @@ class StaticArray(VMobject):
     #     if isinstance(other, type(self)):
     #         return self.__key() == other.__key()
     #     return NotImplemented
-
 
     @validate_arguments
     def add_pointer_to_front(self, index: int, name: str, arg_pointer: Pointer = None) -> Iterable[Animation]:
@@ -99,8 +103,8 @@ class StaticArray(VMobject):
     def compare(self, i: int, j: int) -> Iterable[Animation]:
         return self.elements.compare(i, j)
 
-
     # NOTE: Extends too far reaching into pointer row
+
     def contains_pointer_name(self, name):
         return self.pointers._contains_pointer_name(name)
 
@@ -117,7 +121,8 @@ class StaticArrayBuilder:
     """
     Builder for a static array
     """
-    def __init__(self, length = 5, descriptors = False, underflow = False, overflow = False):
+
+    def __init__(self, length=5, descriptors=False, underflow=False, overflow=False):
         self._instance = StaticArray(length)
         self._has_descriptors = descriptors
         self._underflow = underflow
@@ -138,30 +143,36 @@ class StaticArrayBuilder:
     #     Add representation row to animation
     #     '''
 
-    def add_indices(self) -> 'StaticArrayBuilder':
+    def add_indices(self) -> StaticArrayBuilder:
         '''
         Add indices row to animation
         '''
-        self._instance.indices = self.row_factory.create('indices', **self.config)
+        self._instance.indices = self.row_factory.create(
+            'indices', **self.config,
+        )
         if self._has_descriptors:
             self._instance.index_desc = self.create_index_desc_cell()
         return self
 
-    def add_elements(self) -> 'StaticArrayBuilder':
+    def add_elements(self) -> StaticArrayBuilder:
         '''
         Add elements row to animation
         '''
-        self._instance.elements = self.row_factory.create('elements', **self.config)
+        self._instance.elements = self.row_factory.create(
+            'elements', **self.config,
+        )
         if self._has_descriptors:
             self._instance.element_desc = self.create_element_desc_cell()
         return self
 
-    def add_pointers(self, stroke_width=1) -> 'StaticArrayBuilder':
+    def add_pointers(self, stroke_width=1) -> StaticArrayBuilder:
         '''
         Add pointers row to animation
         '''
         self.config['stroke_width'] = stroke_width
-        self._instance.pointers = self.row_factory.create('pointers', **self.config)
+        self._instance.pointers = self.row_factory.create(
+            'pointers', **self.config,
+        )
         if self._has_descriptors:
             self._instance.pointer_desc = self.create_pointer_desc_cell()
         return self
@@ -175,28 +186,38 @@ class StaticArrayBuilder:
             rows_in_scene.append(self._instance.indices)
             self._instance.add(self._instance.indices)
             if self._has_descriptors:
-                self.place_desc_cell(self._instance.index_desc, self._instance.indices)
+                self.place_desc_cell(
+                    self._instance.index_desc, self._instance.indices,
+                )
         if hasattr(self._instance, 'elements'):
             if len(rows_in_scene) > 0:
-                self._instance.elements.next_to(rows_in_scene[-1], DOWN, buff=0)
+                self._instance.elements.next_to(
+                    rows_in_scene[-1], DOWN, buff=0,
+                )
             rows_in_scene.append(self._instance.elements)
             self._instance.add(self._instance.elements)
             if self._has_descriptors:
-                self.place_desc_cell(self._instance.element_desc, self._instance.elements)
+                self.place_desc_cell(
+                    self._instance.element_desc, self._instance.elements,
+                )
         if hasattr(self._instance, 'pointers'):
             if len(rows_in_scene) > 0:
-                self._instance.pointers.next_to(rows_in_scene[-1], DOWN, buff=-0.25)
+                self._instance.pointers.next_to(
+                    rows_in_scene[-1], DOWN, buff=-0.25,
+                )
                 # self._instance.pointers.next_to(rows_in_scene[-1], DOWN, buff=0)
             rows_in_scene.append(self._instance.pointers)
             self._instance.add(self._instance.pointers)
             if self._has_descriptors:
-                self.place_desc_cell(self._instance.pointer_desc, self._instance.pointers)
+                self.place_desc_cell(
+                    self._instance.pointer_desc, self._instance.pointers,
+                )
 
         self._instance.move_to([0, 0, 0])
         return self._instance
 
     def create_index_desc_cell(self) -> Cell:
-        index_desc = Cell('indices', height = 0.5)
+        index_desc = Cell('indices', height=0.5)
         return index_desc
 
     def create_element_desc_cell(self) -> Cell:
@@ -204,11 +225,9 @@ class StaticArrayBuilder:
         return element_desc
 
     def create_pointer_desc_cell(self) -> Cell:
-        pointer_desc = Cell('pointers', height = 0.5)
+        pointer_desc = Cell('pointers', height=0.5)
         return pointer_desc
 
     def place_desc_cell(self, desc_cell: Cell, row: Row):
         desc_cell.next_to(row, LEFT, buff=0)
         self._instance.add(desc_cell)
-
-

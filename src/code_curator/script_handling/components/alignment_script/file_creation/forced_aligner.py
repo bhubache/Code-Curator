@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import os
-import docx
-from pynput import mouse
-from pynput.mouse import Controller as mouse_ctrl
-from pynput import keyboard
-from pynput.keyboard import Controller as key_ctrl
-from pynput.keyboard import Key
-
 import shutil
-
 import time
 
+import docx
 from fix_timings_file import AlignmentFileFixer
+from pynput import mouse
+from pynput.keyboard import Controller as key_ctrl
+from pynput.keyboard import Key
+from pynput.mouse import Controller as mouse_ctrl
+
 
 class ForcedAligner:
     def __init__(self, title):
@@ -32,12 +32,12 @@ class ForcedAligner:
 
     def create_comma_separated_list_script(self):
         script_exact = None
-        with open(os.path.join(self.problem_dir, 'script_exact.txt'), 'r') as in_file:
-            with open(os.path.join(self.problem_dir, 'script_comma_separated_list.txt',), 'w') as out_file:
+        with open(os.path.join(self.problem_dir, 'script_exact.txt')) as in_file:
+            with open(os.path.join(self.problem_dir, 'script_comma_separated_list.txt'), 'w') as out_file:
                 script_minus_commas = in_file.read().replace(',', '')
                 out_file.write(','.join(script_minus_commas.split()))
-                
-        with open(os.path.join(self.problem_dir, 'script_comma_separated_list.txt',), 'r') as read_file:
+
+        with open(os.path.join(self.problem_dir, 'script_comma_separated_list.txt')) as read_file:
             doc = docx.Document()
             doc.add_paragraph(read_file.read())
             doc.save(os.path.join(self.problem_dir, 'aligner_file.docx'))
@@ -93,7 +93,7 @@ class ForcedAligner:
             if i != 15 and i != 26:
                 self.mouse.click(mouse.Button.left, 1)
                 time.sleep(0.5)
-            
+
             # Enter in file path for audio
             if i == 4:
                 for char in self.aligner_path:
@@ -117,8 +117,13 @@ class ForcedAligner:
         to_parsings_path = os.path.join(self.problem_dir, 'parsings.txt')
         for filename in os.listdir(self.parsings_dir):
             if filename.endswith('.txt'):
-                
-                shutil.copy2(os.path.join(self.parsings_dir, filename), to_parsings_path)
+
+                shutil.copy2(
+                    os.path.join(
+                        self.parsings_dir,
+                        filename,
+                    ), to_parsings_path,
+                )
 
             # Remove all files from aneas parsings directory
             # so the next time a parsing is created, we can grab
@@ -126,26 +131,30 @@ class ForcedAligner:
             # any others
             os.remove(os.path.join(self.parsings_dir, filename))
 
-
         self.timings_dir = r'C:\Users\brand\OneDrive\Documents\App Builder\Reading Apps\Timings\org.branhub.textaligner'
         to_timings_path = os.path.join(self.problem_dir, 'timings.txt')
         for filename in os.listdir(self.timings_dir):
             if filename.endswith('.txt'):
-                shutil.copy2(os.path.join(self.timings_dir, filename), to_timings_path)
-            
+                shutil.copy2(
+                    os.path.join(
+                    self.timings_dir, filename,
+                    ), to_timings_path,
+                )
+
             # Remove all files from aneas timings directory
             # so the next time a timing is created, we can grab
             # the singular text file without having to worry about
             # any others
             os.remove(os.path.join(self.timings_dir, filename))
 
-        alignment_fixer = AlignmentFileFixer(parsings_path=to_parsings_path, timings_path=to_timings_path)
+        alignment_fixer = AlignmentFileFixer(
+            parsings_path=to_parsings_path, timings_path=to_timings_path,
+        )
         alignment_fixer.run()
 
     def on_click(self, x, y, button, pressed):
         if button == mouse.Button.left and pressed:
             print(self.mouse.position)
-
 
 
 # ForcedAligner()

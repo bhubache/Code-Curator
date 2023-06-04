@@ -1,7 +1,9 @@
-from manim import *
+from __future__ import annotations
 
-from .cell import Cell
+
 from ..values.index import Index
+from .cell import Cell
+
 
 class IndexCell(Cell):
     def __init__(self, value):

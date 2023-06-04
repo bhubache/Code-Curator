@@ -1,22 +1,27 @@
-import json
-from typing import Iterable
+from __future__ import annotations
 
-from manim import *
+
 from base_scene import BaseScene
-from leetcode.problem_text import ProblemText
-
 from custom_logging.custom_logger import CustomLogger
+from leetcode.problem_text import ProblemText
+from manim import *
 logger = CustomLogger.getLogger(__name__)
+
 
 class BaseProblemAnalysis(BaseScene):
     def __init__(self, constraints, explanations, problem_dir, aligned_animation_scene):
-        BaseScene.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
+        BaseScene.__init__(
+            self, problem_dir=problem_dir,
+            aligned_animation_scene=aligned_animation_scene,
+        )
         self._constraints_list = constraints
         self._explanations = explanations
         self._problem_dir = problem_dir
         self._aligned_animation_scene = aligned_animation_scene
         self._title = ProblemText.create_title('Constraints Analysis')
-        self._constraints_analysis_table = ProblemText.create_constraints_table(self._constraints_list, self._explanations)
+        self._constraints_analysis_table = ProblemText.create_constraints_table(
+            self._constraints_list, self._explanations,
+        )
         self._animation_spec = self.create_animation_spec()
 
         self.add_base_animations()
@@ -33,27 +38,34 @@ class BaseProblemAnalysis(BaseScene):
     def create_animation_spec(self):
         spec = {
             'intro': self.animate_analysis_setup(),
-            **self._init_constraints_animations()
-            }
+            **self._init_constraints_animations(),
+        }
         return spec
 
     # NOTE: Strange behavior where super class add_overriding_animation method was being called in super class, but this one here was being invoked instead
     def add_overriding_animation(self, method):
-        self._aligned_animation_scene.add_animation(unique_id=method.__name__, func=method, animation=method(), is_overriding_animation=True)
+        self._aligned_animation_scene.add_animation(
+            unique_id=method.__name__, func=method, animation=method(), is_overriding_animation=True,
+        )
         # if not self._aligned_animation_scene.add_animation(unique_id=method.__name__, func=method, animation=method(), is_overriding_animation=True):
         #     raise RuntimeError(f'Unable to find {method.__name__}')
 
     def _init_constraints_animations(self):
         constraints_dict = {}
         for index in range(1, len(self._explanations) + 1):
-            if index == 0: continue
-            constraints_dict[f'explanation_{index}_fade_in'] = self._present_single_problem_explanation(index=index)
+            if index == 0:
+                continue
+            constraints_dict[f'explanation_{index}_fade_in'] = self._present_single_problem_explanation(
+                index=index,
+            )
         return constraints_dict
 
     # NOTE: I've monkey patched a run_time attribute to this AnimationBuilder
     def _present_single_problem_explanation(self, index):
         def inner():
-            opacity_fade_in_animation = self._get_constraint_explanations()[index].animate.set_opacity(1)
+            opacity_fade_in_animation = self._get_constraint_explanations()[
+                index
+            ].animate.set_opacity(1)
             opacity_fade_in_animation.run_time = 1
             return [opacity_fade_in_animation]
         return inner

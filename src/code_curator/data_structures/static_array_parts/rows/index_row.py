@@ -1,12 +1,15 @@
-from manim import *
+from __future__ import annotations
 
-from ..rows.row import Row
+
 from ..cells.index_cell import IndexCell
+from ..rows.row import Row
+
 
 class IndexRow(Row):
     """
     Animation and internal logic for a row of indices
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._init_cells(self._create_init_values())
@@ -19,7 +22,8 @@ class IndexRow(Row):
         values = []
         for val in self._range_list:
             values.append(IndexCell(val))
-        if self._overflow: values[-1] = IndexCell('length')
+        if self._overflow:
+            values[-1] = IndexCell('length')
         return values
 
 
@@ -27,6 +31,7 @@ class IndexRowBuilder:
     """
     Builder for a row of indices
     """
+
     def __init__(self):
         self._instance = None
 

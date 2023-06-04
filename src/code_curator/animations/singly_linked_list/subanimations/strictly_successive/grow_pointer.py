@@ -1,9 +1,12 @@
-from ..leaf_subanimation import LeafSubanimation
+from __future__ import annotations
+
+from custom_logging.custom_logger import CustomLogger
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 from manim import smooth
 
-from custom_logging.custom_logger import CustomLogger
+from ..leaf_subanimation import LeafSubanimation
 logger = CustomLogger.getLogger(__name__)
+
 
 class SuccessiveGrowPointer(LeafSubanimation):
     def __init__(self, sll, pointer):
@@ -20,12 +23,16 @@ class SuccessiveGrowPointer(LeafSubanimation):
         self._pointer.restore()
 
         original_start, original_end = self._pointer.get_start_and_end()
-        new_end = [self._pointer.tip.length, 0, 0] + curr_start + ((original_end - original_start - [self._pointer.tip.length, 0, 0]) * [smooth(alpha), 1, 1])
+        new_end = [self._pointer.tip.length, 0, 0] + curr_start + \
+            ((
+                original_end - original_start -
+                [self._pointer.tip.length, 0, 0]
+            ) * [smooth(alpha), 1, 1])
         self._pointer.become(
             SinglyDirectedEdge(
                 start=curr_start,
-                end=new_end
-            )
+                end=new_end,
+            ),
         )
         self._pointer.set_opacity(alpha)
         # self._save_sll_state()

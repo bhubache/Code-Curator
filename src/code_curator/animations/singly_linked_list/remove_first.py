@@ -1,16 +1,16 @@
-from typing import Any
+from __future__ import annotations
 
-from .data_structure_animator import BaseSLLPackager
+
+from data_structures.nodes.singly_linked_list_node import SLLNode
+
+from ..data_structure_animation import PackageAnimation
 from .data_structure_animator import assign_subanimations_and_animate
+from .data_structure_animator import BaseSLLPackager
+from .subanimations.center_sll import CenterSLL
 from .subanimations.empty import Empty
 from .subanimations.fade_out_container import FadeOutContainer
 from .subanimations.fade_out_mobject import FadeOutMobject
 from .subanimations.move_trav import MoveTrav
-from .subanimations.center_sll import CenterSLL
-from ..data_structure_animation import PackageAnimation
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from manim import Animation, linear, smooth, Scene, LEFT
 
 # class _RemoveFirst(Animation):
 #     def __init__(
@@ -121,11 +121,19 @@ class RemoveFirst(BaseSLLPackager):
 
     def _assign_subanimations(self, index: int, node: SLLNode):
         # self._fade_in_container = FadeInContainer(self._sll, node.container)
-        self._fade_out_container = FadeOutContainer(self._sll, node.container, node)
-        self._fade_out_pointer = FadeOutMobject(self._sll, node.pointer_to_next, node)
+        self._fade_out_container = FadeOutContainer(
+            self._sll, node.container, node,
+        )
+        self._fade_out_pointer = FadeOutMobject(
+            self._sll, node.pointer_to_next, node,
+        )
         # self._pointer_animation = self._get_pointer_animation(node, pointer_animation_type)
-        self._move_trav = MoveTrav(self._sll, self._sll.head_pointer, self._sll._head)
-        self._center_sll = CenterSLL(self._sll, curr_reference_index=0, post_subanimation_reference_index=1)
+        self._move_trav = MoveTrav(
+            self._sll, self._sll.head_pointer, self._sll._head,
+        )
+        self._center_sll = CenterSLL(
+            self._sll, curr_reference_index=0, post_subanimation_reference_index=1,
+        )
 
     @assign_subanimations_and_animate
     def all_together(self, *args, **kwargs) -> PackageAnimation:

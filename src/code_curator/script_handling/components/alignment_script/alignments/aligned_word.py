@@ -1,4 +1,6 @@
-import json
+from __future__ import annotations
+
+
 
 class AlignedWord:
     def __init__(self, word_info: dict):

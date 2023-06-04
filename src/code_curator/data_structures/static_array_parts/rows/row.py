@@ -1,14 +1,18 @@
+from __future__ import annotations
+
+from collections.abc import Iterable
+
 from manim import *
 
 from ..cells.cell import Cell
 from ..values.value import Value
 
-from typing import Iterable
 
 class Row(VMobject):
     """
     Base class for all row types
     """
+
     def __init__(self, length, underflow, overflow, **_ignored):
         super().__init__()
         self._cells = {}
@@ -16,7 +20,11 @@ class Row(VMobject):
         self._underflow = underflow
         self._overflow = overflow
         self._display_length = self._length + int(underflow) + int(overflow)
-        self._range_list = [i for i in range((0 - int(underflow)), self._length + int(overflow))]
+        self._range_list = [
+            i for i in range(
+            (0 - int(underflow)), self._length + int(overflow),
+            )
+        ]
 
     def __getitem__(self, index: int) -> Cell:
         return self._cells[index]

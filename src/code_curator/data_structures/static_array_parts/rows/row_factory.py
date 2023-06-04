@@ -1,7 +1,9 @@
+from __future__ import annotations
 class RowFactory:
     """
     Factory abstracts creation details of rows
     """
+
     def __init__(self):
         self._builders = {}
 

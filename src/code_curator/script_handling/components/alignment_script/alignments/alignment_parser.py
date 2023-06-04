@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .aligned_script import AlignedScript
 
 # TODO:
@@ -7,6 +9,7 @@ from .aligned_script import AlignedScript
 # TODO:
 # Make an 'interface' of sorts using an ABC for a parser?
 
+
 class AlignmentParser:
     def __init__(self, file_path: str):
         self._file_path: str = file_path
@@ -14,12 +17,12 @@ class AlignmentParser:
 
     def parse(self) -> AlignedScript:
         word_alignments = None
-        with open(self._file_path, 'r', encoding='UTF-8') as alignment_file:
+        with open(self._file_path, encoding='UTF-8') as alignment_file:
             word_alignments = alignment_file.read().splitlines()
 
         first_word_start = float(word_alignments[0].split()[0])
         last_word_end = float(word_alignments[-1].split()[1])
-        self._info['duration'] = round(last_word_end - first_word_start , 2)
+        self._info['duration'] = round(last_word_end - first_word_start, 2)
 
         for i, line in enumerate(word_alignments):
             word_number = i + 1

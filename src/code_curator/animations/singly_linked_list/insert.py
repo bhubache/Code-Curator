@@ -1,35 +1,25 @@
 from __future__ import annotations
-from typing import Any
-import math
 
-from .data_structure_animator import BaseSLLPackager, assign_subanimations_and_animate
-from data_structures import singly_linked_list
-from animations.singly_linked_list.add_first import AddFirst
-from data_structures.nodes.singly_linked_list_node import SLLNode
+
+from custom_logging.custom_logger import CustomLogger
 from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from data_structures.pointers.pointer import Pointer
+from data_structures.nodes.singly_linked_list_node import SLLNode
+from manim import VGroup
+
+from .data_structure_animator import BaseSLLPackager
 from .subanimations.base_subanimation import BaseSubanimation
-from ..animation_package import AnimationPackage
-from ..data_structure_animation import PackageAnimation
+from .subanimations.center_sll import CenterSLL
+from .subanimations.change_next_pointer import ChangeNextPointer
+from .subanimations.empty import Empty
 from .subanimations.fade_in_container import FadeInContainer
 from .subanimations.fade_in_mobject import FadeInMobject
 from .subanimations.fade_out_mobject import FadeOutMobject
-# from .subanimations.fade_in_pointer import FadeInPointer
-from .subanimations.grow_pointer import GrowPointer
-from .subanimations.move_trav import MoveTrav
-from .subanimations.center_sll import CenterSLL
-from .subanimations.change_next_pointer import ChangeNextPointer
 from .subanimations.flatten_list import FlattenList
+from .subanimations.shift_sub_list import ShiftSubList
+from .utils.temp_trav_subanimator import TempTravSubanimator
+# from .subanimations.fade_in_pointer import FadeInPointer
 # from .subanimations.fade_in_trav import FadeInTrav
 # from .subanimations.fade_out_trav import FadeOutTrav
-from .subanimations.shift_sub_list import ShiftSubList
-from .subanimations.strictly_successive.shift_sub_list import SuccessiveShiftSubList
-from .subanimations.strictly_successive.center_sll import SuccessiveCenterSLL
-from .subanimations.empty import Empty
-from .utils.temp_trav_subanimator import TempTravSubanimator
-from manim import Animation, linear, smooth, Scene, LEFT, UP, DOWN, RIGHT, VGroup, Circle
-
-from custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 
@@ -45,7 +35,7 @@ class Insert(BaseSLLPackager):
         second_trav_name: str,
         trav_position: str,
         aligned: bool,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(
             sll=sll,
@@ -57,7 +47,7 @@ class Insert(BaseSLLPackager):
             second_trav_name=second_trav_name,
             trav_position=trav_position,
             aligned=aligned,
-            **kwargs
+            **kwargs,
         )
         self._inserted_node_index: int = index
         self._inserted_node: SLLNode = node
@@ -68,7 +58,9 @@ class Insert(BaseSLLPackager):
         self._trav_position: str = trav_position
         self._aligned: bool = aligned
 
-        self._prev_node_pointer: SinglyDirectedEdge = self._sll[self._inserted_node_index - 1].pointer_to_next
+        self._prev_node_pointer: SinglyDirectedEdge = self._sll[
+            self._inserted_node_index - 1
+        ].pointer_to_next
 
         self._build_animation()
 
@@ -99,7 +91,7 @@ class Insert(BaseSLLPackager):
         second_trav_name: str,
         trav_position: str,
         aligned: bool,
-        **kwargs
+        **kwargs,
     ) -> Insert:
         return Insert(
             sll=sll,
@@ -111,7 +103,7 @@ class Insert(BaseSLLPackager):
             second_trav_name=second_trav_name,
             trav_position=trav_position,
             aligned=aligned,
-            **kwargs
+            **kwargs,
         )
 
     # TODO: Give a more descriptive name
@@ -126,10 +118,12 @@ class Insert(BaseSLLPackager):
             first_trav_name=self._first_trav_name,
             display_second_trav=self._display_second_trav,
             second_trav_name=self._second_trav_name,
-            trav_position=self._trav_position
+            trav_position=self._trav_position,
         )
         if temp_trav_subanimator.has_subanimations():
-            self._prepend_subanimation_groups(temp_trav_subanimator.get_subanimation_groups())
+            self._prepend_subanimation_groups(
+                temp_trav_subanimator.get_subanimation_groups(),
+            )
 
         # TODO: Find a better place and/or higher level of abstraction
         self._first_trav = temp_trav_subanimator._first_trav
@@ -144,42 +138,48 @@ class Insert(BaseSLLPackager):
         return FadeInContainer(
             sll=self._sll,
             container=self._inserted_node.container,
-            node=self._inserted_node
+            node=self._inserted_node,
         )
 
     def _create_fade_in_pointer(self) -> BaseSubanimation:
         return FadeInMobject(
             sll=self._sll,
             mobject=self._inserted_node.pointer_to_next,
-            parent_mobject=self._inserted_node
+            parent_mobject=self._inserted_node,
         )
 
     def _create_change_prev_node_pointer(self) -> BaseSubanimation:
         return ChangeNextPointer(
             sll=self._sll,
             pointer=self._prev_node_pointer,
-            node_to_be_attached=self._inserted_node
+            node_to_be_attached=self._inserted_node,
         )
 
     def _create_shift_sub_list(self) -> BaseSubanimation:
         return ShiftSubList(
             sll=self._sll,
-            sub_list_to_shift=VGroup(*[node for i, node in enumerate(self._sll) if i > self._inserted_node_index], self._sll.tail_pointer),
-            index=self._inserted_node_index
+            sub_list_to_shift=VGroup(
+                *[
+                    node for i, node in enumerate(
+                    self._sll,
+                    ) if i > self._inserted_node_index
+                ], self._sll.tail_pointer,
+            ),
+            index=self._inserted_node_index,
         )
 
     def _create_flatten_list(self) -> BaseSubanimation:
         return FlattenList(
             sll=self._sll,
             index=self._inserted_node_index,
-            added_node=self._inserted_node
+            added_node=self._inserted_node,
         )
 
     def _create_center_sll(self) -> BaseSubanimation:
         return CenterSLL(
             self._sll,
             curr_reference_index=self._inserted_node_index,
-            post_subanimation_reference_index=self._inserted_node_index - 1
+            post_subanimation_reference_index=self._inserted_node_index - 1,
         )
 
     # TODO: Remove duplicate code RemoveAt
@@ -190,7 +190,7 @@ class Insert(BaseSLLPackager):
         return FadeOutMobject(
             sll=self._sll,
             mobject=self._first_trav,
-            parent_mobject=self._sll
+            parent_mobject=self._sll,
         )
 
     # def _assign_subanimations(self, index: int, node: SLLNode, pointer_animation_type: str, display_trav: bool, trav_name: str, trav_position: str, aligned: bool):

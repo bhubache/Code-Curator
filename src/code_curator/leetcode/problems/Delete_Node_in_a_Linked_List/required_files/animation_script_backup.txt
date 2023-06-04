@@ -35,4 +35,3 @@ not
 
 the tail, there must be at least 2 nodes in the linked list! I can’t find a similar justification for the upper bound on the number of nodes, 1000 seems arbitrary.
 <</Constraints_Analysis>>
-

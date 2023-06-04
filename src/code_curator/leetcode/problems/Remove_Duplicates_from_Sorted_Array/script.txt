@@ -34,4 +34,4 @@ Lastly, if there are k unique elements, they should <FadeIn>be placed at the</Fa
 
 Ok, now that we've analyzed the constraints and identified the key points, let's look at an example and try to devise an algorithm.
 
-Look at the following input and output array. Because the values following the kth unique element are ignored in the output array, there are technically an infinite number of solutions, hence the question marks. 
+Look at the following input and output array. Because the values following the kth unique element are ignored in the output array, there are technically an infinite number of solutions, hence the question marks.

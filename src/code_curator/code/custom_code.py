@@ -1,24 +1,30 @@
-import re
-import difflib
-import os
+from __future__ import annotations
 
-from manim import Code, BLACK, RED, YELLOW, BLUE, ORANGE, PURPLE, Rectangle, LEFT, UP, DOWN, AnimationGroup
+import os
+import re
+
+from manim import AnimationGroup
+from manim import BLACK
+from manim import Code
+from manim import YELLOW
 
 from .code_highlighter import CodeHighlighter
 
+
 class CustomCode(Code):
     def __init__(
-        self,
-        file_name: str,
-        tab_width = 4,
-        font='Monospace',
-        font_size = 24,
-        background_stroke_width: float = 0,
-        background_color = BLACK,
-        insert_line_no: bool = False,
-        style: str = 'nord',
-        language: str = 'java',
-        **kwargs):
+            self,
+            file_name: str,
+            tab_width=4,
+            font='Monospace',
+            font_size=24,
+            background_stroke_width: float = 0,
+            background_color=BLACK,
+            insert_line_no: bool = False,
+            style: str = 'nord',
+            language: str = 'java',
+            **kwargs,
+    ):
         self._make_blank_lines_not_empty(file_name)
 
         super().__init__(
@@ -30,7 +36,7 @@ class CustomCode(Code):
             insert_line_no=insert_line_no,
             style=style,
             language=language,
-            **kwargs
+            **kwargs,
         )
         self._set_background_color(background_color)
         self._highlighter = None
@@ -59,20 +65,24 @@ class CustomCode(Code):
                 for i in range(occurrence - 1):
                     token_start_index = line.find(token, token_start_index + 1)
 
-                match = re.search(pattern=token, string=line[token_start_index:])
+                match = re.search(
+                    pattern=token, string=line[token_start_index:],
+                )
 
                 if match is None:
-                    raise RuntimeError(f'Unable to find occurrence {occurrence} of token {token} in line {line}')
-                
+                    raise RuntimeError(
+                        f'Unable to find occurrence {occurrence} of token {token} in line {line}',
+                    )
+
                 start_index = token_start_index
                 end_index = match.end() + token_start_index
                 break
-        return self.get_line_at(line_num)[start_index : end_index]
+        return self.get_line_at(line_num)[start_index: end_index]
 
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
 
-    def create_highlighter(self, color = YELLOW):
+    def create_highlighter(self, color=YELLOW):
         self.highlighter = CodeHighlighter(self)
         return self.highlighter
 
@@ -81,12 +91,14 @@ class CustomCode(Code):
 
     def move_highlighter_to_token(self, token: str, occurrence: int, num_lines: int = 0):
         line_move_animation = self.move_highlighter(num_lines=num_lines)
-        token_move_animation = self.highlighter.move_to_token(token, occurrence=occurrence)
+        token_move_animation = self.highlighter.move_to_token(
+            token, occurrence=occurrence,
+        )
         return AnimationGroup(line_move_animation, token_move_animation)
 
     def _make_blank_lines_not_empty(self, file_path: str) -> None:
         contents = None
-        with open(file_path, 'r') as read_file:
+        with open(file_path) as read_file:
             contents = read_file.read()
 
         content_lines = contents.splitlines()
@@ -95,7 +107,6 @@ class CustomCode(Code):
                 content_lines[i] = ' '
 
         no_blank_lines_contents = '\n'.join(content_lines)
-        
 
         with open(file_path, 'w') as write_file:
             write_file.write(no_blank_lines_contents)
@@ -112,7 +123,6 @@ class CustomCode(Code):
             if line.width > max_width:
                 max_width = line.width
         return max_width
-
 
     def has_more_height(self, other):
         return self.height >= other.height

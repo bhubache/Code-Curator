@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from manim import *
 
-from .cell import Cell
 from ..values.element import Element
+from .cell import Cell
+
 
 class ElementCell(Cell):
     def __init__(self, value, index):
@@ -62,4 +65,3 @@ class ElementCell(Cell):
     # __hash__ for Value to be dependent on the actual primitive value
     def get_primitive_value(self):
         return self._value._value
-

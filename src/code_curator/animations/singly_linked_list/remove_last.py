@@ -1,15 +1,16 @@
-from typing import Any
+from __future__ import annotations
 
-from .data_structure_animator import BaseSLLPackager
+
+from data_structures.nodes.singly_linked_list_node import SLLNode
+
+from ..data_structure_animation import PackageAnimation
 from .data_structure_animator import assign_subanimations_and_animate
+from .data_structure_animator import BaseSLLPackager
+from .subanimations.center_sll import CenterSLL
 from .subanimations.empty import Empty
 from .subanimations.fade_out_container import FadeOutContainer
 from .subanimations.fade_out_mobject import FadeOutMobject
 from .subanimations.move_trav import MoveTrav
-from .subanimations.center_sll import CenterSLL
-from ..data_structure_animation import PackageAnimation
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from manim import Animation, linear, smooth, Scene, RIGHT
 
 
 class RemoveLast(BaseSLLPackager):
@@ -25,10 +26,20 @@ class RemoveLast(BaseSLLPackager):
         return kwargs
 
     def _assign_subanimations(self, index: int, node: SLLNode):
-        self._fade_out_container = FadeOutContainer(self._sll, node.container, node)
-        self._fade_out_pointer = FadeOutMobject(self._sll, self._sll[index - 1].pointer_to_next, self._sll[index - 1])
-        self._move_trav = MoveTrav(self._sll, self._sll.tail_pointer, self._sll._tail)
-        self._center_sll = CenterSLL(self._sll, curr_reference_index=len(self._sll) - 1, post_subanimation_reference_index=len(self._sll) - 2)
+        self._fade_out_container = FadeOutContainer(
+            self._sll, node.container, node,
+        )
+        self._fade_out_pointer = FadeOutMobject(
+            self._sll, self._sll[index - 1].pointer_to_next, self._sll[index - 1],
+        )
+        self._move_trav = MoveTrav(
+            self._sll, self._sll.tail_pointer, self._sll._tail,
+        )
+        self._center_sll = CenterSLL(
+            self._sll, curr_reference_index=len(
+            self._sll,
+            ) - 1, post_subanimation_reference_index=len(self._sll) - 2,
+        )
 
     @assign_subanimations_and_animate
     def all_together(self, *args, **kwargs) -> PackageAnimation:

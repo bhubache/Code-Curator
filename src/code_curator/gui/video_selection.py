@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import tkinter as tk
-from video_mapper import video_map
 from forced_aligner import ForcedAligner
+from video_mapper import video_map
 
 DROP_DOWN_WIDTH = 50
 
@@ -13,6 +15,7 @@ TITLE_DROP_Y = TYPE_DROP_Y
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
+
 
 class App:
     def __init__(self):
@@ -52,11 +55,13 @@ class App:
             self.title_entry.delete(0, tk.END)
             self.title_entry.config(fg='black')
 
-        self.title_entry = tk.Entry(self.root,
-                                    width=100,
-                                    font=('Arial', 16),
-                                    validate='all',
-                                    validatecommand=(self.validate_title, '%P'))
+        self.title_entry = tk.Entry(
+            self.root,
+            width=100,
+            font=('Arial', 16),
+            validate='all',
+            validatecommand=(self.validate_title, '%P'),
+        )
         self.title_entry.insert(0, 'Create a title')
         self.title_entry.config(fg='grey')
         self.title_entry.pack()
@@ -72,27 +77,34 @@ class App:
         self.video_type_menu = tk.StringVar()
         self.video_type_menu.set('Select video topic')
 
-        options = set([video_map[key]['type'] for key in video_map])
+        options = {video_map[key]['type'] for key in video_map}
 
-        self.type_drop_down = tk.OptionMenu(self.root,
-                                            self.video_type_menu,
-                                            *options,
-                                            command=self.type_selected)
+        self.type_drop_down = tk.OptionMenu(
+            self.root,
+            self.video_type_menu,
+            *options,
+            command=self.type_selected,
+        )
         self.type_drop_down.configure(width=DROP_DOWN_WIDTH)
         self.type_drop_down.place(x=TYPE_DROP_X, y=TYPE_DROP_Y)
 
     def type_selected(self, selected_type):
-        options = set([video_map[video]['title'] for video in video_map if video_map[video]['type'] == selected_type])
+        options = {
+            video_map[video]['title']
+            for video in video_map if video_map[video]['type'] == selected_type
+        }
         self.create_video_title_drop_down(options)
 
     def create_video_title_drop_down(self, options=['']):
         self.video_title_menu = tk.StringVar()
         self.video_title_menu.set('Select a Video')
 
-        self.title_drop_down = tk.OptionMenu(self.root,
-                                             self.video_title_menu,
-                                             *options,
-                                             command=self.title_selected)
+        self.title_drop_down = tk.OptionMenu(
+            self.root,
+            self.video_title_menu,
+            *options,
+            command=self.title_selected,
+        )
         self.title_drop_down.configure(width=DROP_DOWN_WIDTH)
         self.title_drop_down.place(x=TITLE_DROP_X, y=TITLE_DROP_Y)
 
@@ -100,16 +112,29 @@ class App:
         self.selected_title = selected_title
 
     def create_outline_button(self):
-        self.outline_button = tk.Button(self.root, text='Create outline', font=('Arial', 18), width=30, command=self.create_outline)
-        self.outline_button.place(x=SCREEN_WIDTH // 2 - 250, y=SCREEN_HEIGHT // 2)
+        self.outline_button = tk.Button(
+            self.root, text='Create outline', font=(
+            'Arial', 18,
+            ), width=30, command=self.create_outline,
+        )
+        self.outline_button.place(
+            x=SCREEN_WIDTH // 2 - 250, y=SCREEN_HEIGHT // 2,
+        )
 
     def create_outline(self):
         forced_aligner = ForcedAligner(title=self.selected_title)
         forced_aligner.run()
 
     def create_video_button(self):
-        self.video_button = tk.Button(self.root, text='Create video', font=('Arial', 18), width=30, command=self.create_video)
-        self.video_button.place(x=SCREEN_WIDTH // 2 - 250, y=SCREEN_HEIGHT // 2 + 100)
+        self.video_button = tk.Button(
+            self.root, text='Create video', font=(
+            'Arial', 18,
+            ), width=30, command=self.create_video,
+        )
+        self.video_button.place(
+            x=SCREEN_WIDTH // 2 -
+            250, y=SCREEN_HEIGHT // 2 + 100,
+        )
 
     def create_video(self):
         pass
