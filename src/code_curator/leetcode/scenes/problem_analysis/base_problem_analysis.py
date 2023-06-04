@@ -2,10 +2,10 @@ import json
 from typing import Iterable
 
 from manim import *
-from base_scene import BaseScene
-from leetcode.problem_text import ProblemText
+from code_curator.base_scene import BaseScene
+from code_curator.leetcode.problem_text import ProblemText
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 class BaseProblemAnalysis(BaseScene):

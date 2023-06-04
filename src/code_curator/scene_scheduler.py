@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from custom_logging.custom_logger import CustomLogger
-from script_handling.components.animation_script.animation_leaf import AnimationLeaf
-from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
+from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 logger = CustomLogger.getLogger(__name__)
 
 

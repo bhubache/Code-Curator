@@ -1,13 +1,13 @@
 import numpy as np
 
 from .leaf_subanimation import LeafSubanimation
-from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.pointers.pointer import Pointer
+from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.pointers.pointer import Pointer
 from .strictly_successive.shift_sub_list import SuccessiveShiftSubList
 from manim import VGroup, smooth, LEFT, DOWN, RIGHT, Circle, Mobject, Line
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 class ShiftSubList(LeafSubanimation):

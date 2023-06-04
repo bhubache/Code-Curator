@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import difflib
-from code.code_diff import CodeDiff
+from code_curator.code.code_diff import CodeDiff
 
 from manim import Animation
 from manim import AnimationGroup

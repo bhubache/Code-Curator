@@ -4,7 +4,7 @@ import copy
 from abc import ABC
 from abc import abstractmethod
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 

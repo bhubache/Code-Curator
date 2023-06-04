@@ -4,10 +4,10 @@ import math
 from typing import TYPE_CHECKING
 
 import numpy as np
-from custom_logging.custom_logger import CustomLogger
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.pointers.pointer import Pointer
-from data_structures.static_array_parts.values.element import Element
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.pointers.pointer import Pointer
+from code_curator.data_structures.static_array_parts.values.element import Element
 from manim import Dot
 from manim import Line
 from manim import smooth
@@ -18,7 +18,7 @@ from .strictly_successive.move_and_flip_trav import SuccessiveMoveAndFlipTrav
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from data_structures.singly_linked_list import SinglyLinkedList
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
 class MoveAndFlipTrav(LeafSubanimation):

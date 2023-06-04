@@ -4,14 +4,14 @@ from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
 
-from custom_logging.custom_logger import CustomLogger
+from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import config
 from manim import FadeIn
 from manim import FadeOut
 from manim import Scene
-from scene_scheduler import SceneScheduler
-from script_handling.components.animation_script.animation_leaf import AnimationLeaf
-from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from code_curator.scene_scheduler import SceneScheduler
+from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
+from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 logger = CustomLogger.getLogger(__name__)
 
 

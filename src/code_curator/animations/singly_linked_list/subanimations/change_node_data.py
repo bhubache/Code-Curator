@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_logging.custom_logger import CustomLogger
-from data_structures.element import Element
-from data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.data_structures.element import Element
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
 from manim import smooth
 from manim import Transform
 
@@ -12,7 +12,7 @@ from .leaf_subanimation import LeafSubanimation
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from data_structures.singly_linked_list import SinglyLinkedList
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
 class ChangeNodeData(LeafSubanimation):

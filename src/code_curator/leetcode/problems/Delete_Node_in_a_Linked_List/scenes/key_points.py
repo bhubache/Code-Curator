@@ -3,10 +3,10 @@ from __future__ import annotations
 from collections.abc import Iterable
 from collections.abc import Sequence
 
-from data_structures.pointers.simple_pointer import SimplePointer
-from data_structures.singly_linked_list import SinglyLinkedList
-from leetcode.problem_text import ProblemText
-from leetcode.scenes.key_points.base_key_points import BaseKeyPoints
+from code_curator.data_structures.pointers.simple_pointer import SimplePointer
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+from code_curator.leetcode.problem_text import ProblemText
+from code_curator.leetcode.scenes.key_points.base_key_points import BaseKeyPoints
 from manim import Animation
 from manim import AnimationGroup
 from manim import FadeIn
@@ -14,7 +14,7 @@ from manim import Line
 from manim import UP
 from manim import Wait
 from manim import Write
-from script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 
 POINTS: list[str] = [

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_logging.custom_logger import CustomLogger
-from data_structures.nodes.singly_linked_list_node import SLLNode
-from data_structures.pointers.pointer import Pointer
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
+from code_curator.data_structures.pointers.pointer import Pointer
 from manim import smooth
 
 from .leaf_subanimation import LeafSubanimation
 from .strictly_successive.move_trav import SuccessiveMoveTrav
-# from data_structures.edges.singly_directed_edge import SinglyDirectedEdge
+# from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from data_structures.singly_linked_list import SinglyLinkedList
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
 class MoveTrav(LeafSubanimation):
