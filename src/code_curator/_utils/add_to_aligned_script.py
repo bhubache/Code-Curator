@@ -1,20 +1,30 @@
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 
 PROBLEM_DIR: str = 'Delete_Node_in_a_Linked_List'
 TEXT_TO_ADD: str = (
-    '''The third constraint seems weird. Why does it matter that every node be unique? The short answer is, I don\'t
-    think it does. If we were given the value to be deleted, and not al values in the linked list were unique, then
-    there would be ambiguity about which node to delete. However, we are given the node to be deleted, and so, like
-    the prior constraint, this can be disregarded.'''
+    '''and not all values in the linked list were unique, then there would be ambiguity about which node to delete. however, we are given the node to be deleted, and so, like the prior constraint, this can be disregarded.'''
 )
 
-aligned_script_path: str = os.path.join(
-    os.getcwd(
-    ), 'leetcode', 'problems', PROBLEM_DIR, 'generated_files', 'aligned_script.txt',
+print(__file__)
+
+BASE_PATH = Path(__file__).parents[1]
+
+aligned_script_path = Path(
+    BASE_PATH,
+    'leetcode',
+    'problems',
+    PROBLEM_DIR,
+    'generated_files',
+    'aligned_script.txt',
 )
+
+# aligned_script_path: str = os.path.join(
+#     os.getcwd(
+#     ), 'leetcode', 'problems', PROBLEM_DIR, 'generated_files', 'aligned_script.txt',
+# )
 
 content_lines: list[str] = []
 

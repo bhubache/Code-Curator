@@ -50,7 +50,6 @@ class BasePresentProblem(BaseScene):
             problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
         )
-        # BaseScene.__init__(self, problem_dir=problem_dir, aligned_animation_scene=aligned_animation_scene)
         self._title = ProblemText.create_title(title)
         self._statement_header = ProblemText.create_header(statement_header)
         self._statement = ProblemText.create_statement(statement)
@@ -63,14 +62,13 @@ class BasePresentProblem(BaseScene):
         self.add_base_animations()
 
     def create_animation_spec(self) -> dict:
-        spec = {
+        return {
             'title': self.present_problem_title(self.aligned_animation_scene.get_child('title')),
             'statement_header': self.present_problem_statement_header(),
             'statement': self.present_problem_statement(),
             'constraints_header': self.present_problem_constraints_header(),
             'constraints': self._init_constraints_animations(),
         }
-        return spec
 
     def setup(self):
         super().setup()

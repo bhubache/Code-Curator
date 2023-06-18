@@ -1,28 +1,36 @@
+"""Starting point for the creation of a video.
+
+You can either create a video using custom scenes or test some animation code!
+"""
+
 from __future__ import annotations
+
+__all__: Sequence[str] = []
 
 import importlib
 import logging
 import os
 import subprocess
-from collections.abc import Sequence
 from pathlib import Path
-from types import ModuleType
+from typing import TYPE_CHECKING
 
-from code_curator.base_scene import BaseScene
-from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
-from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from code_curator.script_handling.components.animation_script.animation_script import AnimationScript
-from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 from manim import config
 from manim import FadeIn
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
-# import time
+
+from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
+from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
+from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 # from manim.utils.file_ops import open_file as open_media_file
 
 
-# To open the movie after render.
+if TYPE_CHECKING:
+    from code_curator.script_handling.components.animation_script.animation_script import AnimationScript
+    from code_curator.base_scene import BaseScene
+    from types import ModuleType
+    from collections.abc import Sequence
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -30,62 +38,74 @@ logger = logging.getLogger(__name__)
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
-ALIGNED_SCRIPT_PATH = os.path.join('generated_files', 'aligned_script.txt')
-# ALIGNED_SCRIPT_PATH = r'generated_files\aligned_script.txt'
-ANIMATION_SCRIPT_PATH = os.path.join('required_files', 'animation_script.txt')
-# ANIMATION_SCRIPT_PATH = r'required_files\animation_script.txt'
+ALIGNED_SCRIPT_PATH = Path('generated_files', 'aligned_script.txt')
+ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
 CONCRETE_CODE_SOLUTION_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
 
-def create_class(scene_classes: list[type], aligned_animation_scene_scripts: Sequence[AnimationScript]) -> type:
+def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts: Sequence[AnimationScript]) -> type:
+    """Create class that will ultimately render the entire video.
+
+    Args:
+        scene_classes: A sequence of scene classes for the video.
+        aligned_animation_scene_scripts: The animation scripts that correspond to each scene class.
+
+    Returns:
+        MyScene - See top.
+    """
     class MyScene(Scene):
-        # config.disable_caching = True
+        """Class that will ultimately render the video.
+
+        Attributes:
+            _video_dir: Path to the directory containing the created scenes.
+            _scene_instances: The Scene objects to create each scene video.
+            config: Manim config for MyScene.
+        """
+
+        config.disable_caching = True
 
         def __init__(self, problem_dir: str) -> None:
+            """Construct MyScene.
+
+            Args:
+                problem_dir: Path to the directory containing all information
+                    regarding the leetcode problem for the video.
+            """
             super().__init__()
-            self._video_dir = os.path.join(
-                '~', 'ManimCS', 'Code-Curator', 'media', 'videos', '1080p60',
-            )
-            # self._video_dir = r'C:\Users\brand\Documents\ManimCS\media\videos\1080p60'
+            self._video_dir = Path.home().joinpath('ManimCS', 'Code-Curator', 'media', 'videos', '1080p60')
             self._scene_instances = []
             for i, (cls, scene_script) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
-                if i > 0:
+                if i >= 0:
                     scene_inst = cls(problem_dir, scene_script)
                     scene_inst.video_dir = self._video_dir
                     self._scene_instances.append(scene_inst)
 
-        def setup(self) -> None:
-            pass
-
         def construct(self) -> None:
+            """Create the scenes."""
             for i, scene_inst in enumerate(self._scene_instances):
                 # Only calling render seems to get the video to save
                 scene_inst.render()
-                _give_scene_ordered_name(scene_inst, i)
-
-        def tear_down(self) -> None:
-            pass
+                # _give_scene_ordered_name(scene_inst, i)
 
     return MyScene
 
 
-def get_scene_classes() -> tuple[list[type], str]:
-    scene_classes = []
+def get_scene_classes() -> tuple[list[type], Path]:
+    scene_classes: list[type] = []
     present_problem_module: ModuleType = importlib.import_module(
         CONCRETE_PRESENT_PROBLEM_PATH,
     )
+    if present_problem_module.__file__ is None:
+        raise TypeError(f'file for {present_problem_module} is None.')
+
     problem_dir = Path(present_problem_module.__file__).parents[1]
-    present_problem_cls = getattr(
-        present_problem_module, 'PresentProblem',
-    )
+    present_problem_cls = getattr(present_problem_module, 'PresentProblem')
     scene_classes.append(present_problem_cls)
 
-    problem_analysis_module = importlib.import_module(
-        CONCRETE_PROBLEM_ANALYSIS_PATH,
-    )
+    problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
     scene_classes.append(problem_analysis_cls)
 
@@ -115,15 +135,15 @@ def get_aligned_animation_script(alignment_path: str, script_path: str) -> Align
     animation_script = script_parser_factory.create_script_parser(
         'leetcode',
     ).parse()
-    aligned_animation_script = AlignedAnimationScript(
-        aligned_script=aligned_script, animation_script=animation_script,
+    return AlignedAnimationScript(
+        aligned_script=aligned_script,
+        animation_script=animation_script,
     )
-    return aligned_animation_script
 
 
 def create_scenes(
     scene_classes: list[type],
-    problem_dir: str,
+    problem_dir: Path,
     aligned_animation_scene_scripts: Sequence[AnimationScript],
 ) -> None:
     scene = create_class(
@@ -135,35 +155,23 @@ def create_scenes(
 
 
 def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
-    old_file_path = os.path.join(
-        scene_instance.video_dir, f'{scene_instance.__class__.__name__}.mp4',
+    old_file_path = Path(
+        scene_instance.video_dir,
+        f'{type(scene_instance).__name__}.mp4',
     )
-    new_file_path = os.path.join(scene_instance.video_dir, f'{index}.mp4')
+    new_file_path = Path(
+        scene_instance.video_dir,
+        f'{index}.mp4',
+    )
 
-    if os.path.exists(new_file_path):
-        os.remove(new_file_path)
+    new_file_path.unlink()
 
-    # os.chmod(old_file_path, 775)
-    # os.chmod(new_file_path, 775)
-
-    # os.rename(old_file_path, new_file_path)
     subprocess.getoutput(f'mv {old_file_path} {new_file_path}')
     subprocess.getoutput(f'chmod 777 {new_file_path}')
 
 
-# def _get_animation_timing_iterable(aligned_animation_script: AlignedAnimationScript) -> Iterable[dict]:
-#     animation_timings_list = []
-#     for timing_info in aligned_animation_script.get_animation_timings().values():
-#         animation_timings_list.append(timing_info)
-#     return animation_timings_list
-
-
 class TestScene(Scene):
-    config.disable_caching = False
-    # config.frame_rate = 240
-    # import json
-    # print(type(config))
-    # print(json.dumps(config, indent=4, default=str))
+    config.disable_caching = True
 
     def construct(self) -> None:
         from code_curator.data_structures.singly_linked_list import SinglyLinkedList
