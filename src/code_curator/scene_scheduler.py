@@ -8,12 +8,11 @@ logger = CustomLogger.getLogger(__name__)
 
 class SceneScheduler:
     def __init__(self):
-        self._override_start_time = 1
-        self._override_end_time = 0.5
+        self._override_start_time = 0.5
+        self._override_end_time = 0.25
 
     def schedule(self, aligned_animation_scene: CompositeAnimationScript):
-        flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable(
-        )
+        flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
 
         # Give spare time from Wait animations to other animations
         for i in range(len(flattened) - 1):
