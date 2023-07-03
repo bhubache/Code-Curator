@@ -12,9 +12,9 @@ if TYPE_CHECKING:
 
 
 class LeafSubanimation(BaseSubanimation):
-    def __init__(self, sll: SinglyLinkedList):
+    def __init__(self, sll: SinglyLinkedList, run_time: int = 1):
         self._sll: SinglyLinkedList = sll
-        super().__init__()
+        super().__init__(run_time=run_time)
 
     def __str__(self) -> str:
         return self.__class__.__name__
