@@ -5,6 +5,9 @@ from code_curator.script_handling.components.animation_script.animation_leaf imp
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 logger = CustomLogger.getLogger(__name__)
 
+# DEVELOPMENT IMPORTS
+from .animations.data_structure_animation import DataStructureAnimation
+
 
 class SceneScheduler:
     def __init__(self):
@@ -13,6 +16,14 @@ class SceneScheduler:
 
     def schedule(self, aligned_animation_scene: CompositeAnimationScript):
         flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
+
+        for leaf in flattened:
+            if isinstance(leaf.animation, DataStructureAnimation):
+                print(leaf)
+                print(leaf.animation)
+                print(leaf.audio_duration)
+                print(leaf.animation_run_time)
+                # raise
 
         # Give spare time from Wait animations to other animations
         for i in range(len(flattened) - 1):

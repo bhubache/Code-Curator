@@ -188,18 +188,12 @@ class CompositeAnimationScript(AnimationScript):
             self.is_overriding_animation = True
 
             for i, (child, animation) in enumerate(zip(self.children, animations)):
-                logger.info(animation)
                 # if isinstance(animation, Callable):
                 #     func = animation
                 #     animation = animation()
                 is_overriding_start = i == 0
                 is_overriding_end = i == len(self.children) - 1
 
-                logger.info(i)
-                logger.info(animation)
-                logger.info(f'is overriding start: {is_overriding_start}')
-                logger.info(f'is overriding end: {is_overriding_end}')
-                logger.info('')
                 if i > 0:
                     # We only want the real function to be called once so we let the first leaf have it
                     def func(): return 0

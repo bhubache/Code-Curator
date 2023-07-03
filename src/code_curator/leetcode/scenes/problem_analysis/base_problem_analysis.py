@@ -31,11 +31,10 @@ class BaseProblemAnalysis(BaseScene):
         super().tear_down()
 
     def create_animation_spec(self):
-        spec = {
+        return {
             'intro': self.animate_analysis_setup(),
-            **self._init_constraints_animations()
-            }
-        return spec
+            **self._init_constraints_animations(),
+        }
 
     # NOTE: Strange behavior where super class add_overriding_animation method was being called in super class, but this one here was being invoked instead
     def add_overriding_animation(self, method):

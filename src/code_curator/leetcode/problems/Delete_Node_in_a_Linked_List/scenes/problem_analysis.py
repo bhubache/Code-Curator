@@ -18,6 +18,9 @@ from code_curator.script_handling.components.animation_script.composite_animatio
 
 from .present_problem import CONSTRAINTS
 
+# DEV IMPORTS
+from manim import Circle
+
 EXPLANATIONS = []
 EXPLANATIONS.append('Node is in the list and is not the tail node')
 EXPLANATIONS.append('Not pertinent')
@@ -51,6 +54,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
             .with_center_sll()
             .build_animation(),
             Wait(),
+            # FadeIn(Circle()),
         ]
 
     def explanation_2(self) -> Sequence[Animation]:
