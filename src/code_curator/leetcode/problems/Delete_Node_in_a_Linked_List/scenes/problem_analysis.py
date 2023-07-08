@@ -19,7 +19,8 @@ from code_curator.script_handling.components.animation_script.composite_animatio
 from .present_problem import CONSTRAINTS
 
 # DEV IMPORTS
-from manim import Circle
+from code_curator.animations.subanimations.wait import WaitSubanimation
+from code_curator.animations.data_structure_animation import DataStructureAnimation
 
 EXPLANATIONS = []
 EXPLANATIONS.append('Node is in the list and is not the tail node')
@@ -43,8 +44,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
     def explanation_1(self) -> Iterable[Animation]:
         sll = SinglyLinkedList(0)
 
-        return [
-            FadeIn(sll),
+        data_structure_animation: DataStructureAnimation = (
             sll.add_last(
                 data=1,
             )
@@ -52,7 +52,13 @@ class ProblemAnalysis(BaseProblemAnalysis):
             .with_fade_in_pointer()
             .with_move_tail()
             .with_center_sll()
-            .build_animation(),
+            .build_animation()
+        )
+        data_structure_animation.insert_subanimation(1, WaitSubanimation(3))
+
+        return [
+            FadeIn(sll),
+            data_structure_animation,
             Wait(),
             # FadeIn(Circle()),
         ]

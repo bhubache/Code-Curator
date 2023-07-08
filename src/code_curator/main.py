@@ -78,7 +78,7 @@ def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts:
             self._video_dir = Path.home().joinpath('ManimCS', 'Code-Curator', 'media', 'videos', '1080p60')
             self._scene_instances = []
             for i, (cls, scene_script) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
-                if i >= 0:
+                if i > 0:
                     scene_inst = cls(problem_dir, scene_script)
                     scene_inst.video_dir = self._video_dir
                     self._scene_instances.append(scene_inst)
