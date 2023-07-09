@@ -70,8 +70,11 @@ class BaseScene(ABC, Scene):
         for obj in self._animations:
             if isinstance(obj, AnimationLeaf):
                 obj.func()
+                print(obj.animation)
+                print(obj.animation.run_time)
                 self.play(obj.animation)
             elif callable(obj):
+                print(obj)
                 obj()
             else:
                 raise RuntimeError(

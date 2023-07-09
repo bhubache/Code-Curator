@@ -51,6 +51,11 @@ class SceneScheduler:
                 )
                 in_overriding_animation_group = False
             elif in_overriding_animation_group:
+                # NOTE: We're not appending animations within (excluding start) to rolled_up_animations! Is this bad???
+                if leaf not in leaf.parent.children:
+                    logger.critical(f'{leaf.unique_id} not in parents children. Adding it')
+                    insertion_index = leaf.parent.children.index(flattened[i - 1]) + 1
+                    leaf.parent.children.insert(insertion_index, leaf)
                 continue
             elif leaf.is_overriding_start:
                 logger.critical('leaf is overriding start')
@@ -58,6 +63,9 @@ class SceneScheduler:
                 self.handle_override_start(
                     flattened[i], flattened[i - 1], flattened[i].parent,
                 )
+                # NOTE: I'm thinking including the parent in rolled_up_animations is what may cause the WAIT_PADDINGs to not be
+                # included after each animation of explanation_1. I think this because the WAIT_PADDINGs are only included in
+                # the flattened iterable but not the leaf parent itself!!!
                 rolled_up_animations.append(leaf.parent)
                 in_overriding_animation_group = True
             else:
@@ -79,9 +87,18 @@ class SceneScheduler:
         start_parent.override_start_time = self._override_start_time
 
     # TODO: Change sucky method name
+    # TODO: hopefully end_leaf is a wait animation. If it is, don't worry about taking time from the next_leaf,
+    # just remove the time from the end_leaf directly.
     def handle_override_end(self, end_leaf, next_leaf, end_parent):
-        if not next_leaf.has_time_to_spare(self._override_end_time * 2):
-            raise Exception('No time to give overriding animation end')
+        if end_leaf.is_wait_animation:
+            if not end_leaf.has_time_to_spare(self._override_end_time * 2):
+                raise Exception('No time to give overriding animation end for WAIT')
+            
+            end_leaf.remove_time(self._override_end_time * 2)
+            end_parent.override_end_time = self._override_end_time
+        else:
+            if not next_leaf.has_time_to_spare(self._override_end_time * 2):
+                raise Exception('No time to give overriding animation end')
 
-        next_leaf.remove_time(self._override_end_time * 2)
-        end_parent.override_end_time = self._override_end_time
+            next_leaf.remove_time(self._override_end_time * 2)
+            end_parent.override_end_time = self._override_end_time

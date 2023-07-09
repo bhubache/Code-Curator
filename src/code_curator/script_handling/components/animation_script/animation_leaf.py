@@ -158,6 +158,10 @@ class AnimationLeaf(AnimationScript):
         # Default animation to Wait
         self.animation = Wait(self._audio_duration)
 
+    # NOTE: Possible candidate for adding implicit Wait animations for overriding animations (like explanation_1)
+    # [Wait(), FadeIn(self.sll), DataStructureAnimation]
+    # Wait has a run_time of 1 but an audio duration of 3.58, that 2.58 seconds needs to be filled. It might
+    # get filled by scene scheduler though, I'll have to check.
     def add_animation(
         self,
         unique_id: str,
@@ -205,6 +209,8 @@ class AnimationLeaf(AnimationScript):
             return self
         return None
 
+    # NOTE: Confusing to me in this moment to have extra animations added in this method.
+    # Can this be done in a more reasonable place?
     def get_flattened_iterable(self) -> list:
         # Separate explicit animation from the extra wait time!
         logger.info(self.unique_id)
@@ -214,7 +220,10 @@ class AnimationLeaf(AnimationScript):
             logger.info(self.is_wait_animation)
             logger.info(self.animation_run_time)
             logger.info(self.audio_duration)
+
+        # TODO: Wait animations should also be padded right???
         if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
+            # TODO: Look into making unique_id f'{self.unique_id}_WAIT_PADDING'
             wait_padding_explicit_animation_leaf = AnimationLeaf(
                 unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[],
             )
@@ -225,8 +234,18 @@ class AnimationLeaf(AnimationScript):
             )
             wait_padding_explicit_animation_leaf.audio_duration = \
                 wait_padding_explicit_animation_leaf.animation_run_time
+            
+            wait_padding_explicit_animation_leaf.parent = self.parent
 
             self.audio_duration = self.animation_run_time
+
+
+            # TODO: Change self.is_overriding_end to False and wait_padding_explicit_animation_leaf.is_overriding_end to True
+            if self.is_overriding_end:
+                self.is_overriding_end = False
+                wait_padding_explicit_animation_leaf.is_overriding_end = True
+
+            # TODO: Is this correct? Is end actually shortening because we're taking time and putting it in WAIT_PADDING?
             self.end += self.animation_run_time
             return [self, wait_padding_explicit_animation_leaf]
         return [self]
@@ -250,5 +269,6 @@ class AnimationLeaf(AnimationScript):
         self.animation_run_time -= time
         self.audio_duration -= time
 
+    # TODO: Do I need to add time to self.animation_run_time as well??
     def give_time(self, time: float):
         self.audio_duration += time

@@ -25,15 +25,15 @@ Ok, now that we’ve been introduced to the problem, let’s try to understand t
 
 <explanation_1>
 Because the node to be deleted is in the list, we know there must be at
-least one node. And, when there’s only one node in a list, that node is both the
-head and the tail. But, because the node
+least one node. And, when there’s only one node in a list, that node is both the head and the tail. But, because the node to be deleted is not the tail,
+there must be at least 2 nodes in the linked list!
 
-to be deleted is
+I can't find a similar 
 
 <explanation_1_fade_in>
-not
+justification
 
-the tail, there must be at least 2 nodes in the linked list! I can’t find a similar justification for the upper bound on the number of nodes, 1000 seems arbitrary.
+for the upper bound on the number of nodes, 1000 seems arbitrary.
 
 <explanation_2>
 The second constraint places limits on a node's value. The typical reason for constraining the size of integers in a problem is potential underflow and overflow. But, because there's no arithmetic in this problem, this isn't an issue.

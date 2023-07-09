@@ -11,6 +11,7 @@ import importlib
 import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -19,6 +20,10 @@ from manim import FadeIn
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+
+sys.path.insert(0, os.path.join('/', 'Users', 'brandonhubacher', 'ManimCS', 'Code-Curator', 'src'))
+from pprint import pprint
+pprint(sys.path)
 
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
 from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser

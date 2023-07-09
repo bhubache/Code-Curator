@@ -171,17 +171,21 @@ class CompositeAnimationScript(AnimationScript):
                 return True
         return False
 
+    # TODO: Seemingly A LOT of time wasted in this method.
     # @_check_that_unique_id_exists
     def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
             for child in self.children:
+                # TODO: Once the animation has been successfully added, we need to stop iteration.
                 child.add_animation(
+                    # TODO: Change func() to animation
                     unique_id, func, func()[
                         0
                     ], is_overriding_animation,
                 )
         else:
+            # TODO: Change func() to animation
             animations = func()
             assert len(self.children) == len(animations)
 
