@@ -44,10 +44,12 @@ logger = logging.getLogger(__name__)
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
 ALIGNED_SCRIPT_PATH = Path('generated_files', 'aligned_script.txt')
-ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
+# ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
+ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
+CONCRETE_KEY_POINTS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.key_points'
 CONCRETE_CODE_SOLUTION_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.code_solution'
 
 
@@ -82,8 +84,14 @@ def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts:
             super().__init__()
             self._video_dir = Path.home().joinpath('ManimCS', 'Code-Curator', 'media', 'videos', '1080p60')
             self._scene_instances = []
-            for i, (cls, scene_script) in enumerate(zip(scene_classes, aligned_animation_scene_scripts)):
-                if i > 0:
+            for i, (cls, scene_script) in enumerate(zip(scene_classes[2:], aligned_animation_scene_scripts)):
+                if i == 0:
+                    print('!!!!!!!!!!!!!!!!!!!!!!')
+                    print('!!!!!!!!!!!!!!!!!!!!!!')
+                    print('!!!!!!!!!!!!!!!!!!!!!!')
+                    print('!!!!!!!!!!!!!!!!!!!!!!')
+                    print('!!!!!!!!!!!!!!!!!!!!!!')
+                    print('!!!!!!!!!!!!!!!!!!!!!!ß')
                     scene_inst = cls(problem_dir, scene_script)
                     scene_inst.video_dir = self._video_dir
                     self._scene_instances.append(scene_inst)
@@ -113,6 +121,10 @@ def get_scene_classes() -> tuple[list[type], Path]:
     problem_analysis_module = importlib.import_module(CONCRETE_PROBLEM_ANALYSIS_PATH)
     problem_analysis_cls = getattr(problem_analysis_module, 'ProblemAnalysis')
     scene_classes.append(problem_analysis_cls)
+
+    key_points_module = importlib.import_module(CONCRETE_KEY_POINTS_PATH)
+    key_points_cls = getattr(key_points_module, 'KeyPoints')
+    scene_classes.append(key_points_cls)
 
     # code_solution_module = importlib.import_module(CONCRETE_CODE_SOLUTION_PATH)
     # code_solution_cls = getattr(code_solution_module, 'CodeSolution')
