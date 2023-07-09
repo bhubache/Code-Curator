@@ -178,15 +178,27 @@ class CompositeAnimationScript(AnimationScript):
         if self.unique_id != unique_id:
             for child in self.children:
                 # TODO: Once the animation has been successfully added, we need to stop iteration.
-                child.add_animation(
-                    # TODO: Change func() to animation
-                    unique_id, func, func()[
-                        0
-                    ], is_overriding_animation,
-                )
+                try:
+                    child.add_animation(
+                        # TODO: Change func() to animation
+                        unique_id, func, animation[
+                            0
+                        ], is_overriding_animation,
+                    )
+                except TypeError:
+                    child.add_animation(
+                        # TODO: Change func() to animation
+                        unique_id, func, func()[
+                            0
+                        ], is_overriding_animation,
+                    )
         else:
             # TODO: Change func() to animation
-            animations = func()
+            animations = animation
+            try:
+                len(animations)
+            except TypeError:
+                animations = func()
             assert len(self.children) == len(animations)
 
             self.is_overriding_animation = True

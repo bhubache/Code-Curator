@@ -46,8 +46,7 @@ this isn't a pertinent constraint and it can be disregarded.
 <explanation_3>
 The third constraint seems weird. Why does it matter that every node be unique? The short answer is, I don\'t think it does.
 If we were given the value to be deleted, and not all
-values in the linked list were unique,
-then there would be ambiguity about which node to delete.
+values in the linked list were unique, then there would be ambiguity about which node to delete.
 
 However, we are given
 

@@ -39,7 +39,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
         )
         # breakpoint()
         self.add_overriding_animation(self.explanation_1)
-        # self.add_overriding_animation(self.explanation_3)
+        self.add_overriding_animation(self.explanation_3)
         # self.add_overriding_animation(self.explanation_2)
 
     def explanation_1(self) -> Iterable[Animation]:
@@ -96,8 +96,9 @@ class ProblemAnalysis(BaseProblemAnalysis):
         return [
             FadeIn(title),
             FadeIn(sll),
-            FadeIn(question_mark),
+            # FadeIn(question_mark),
             AnimationGroup(
+                FadeIn(question_mark),
                 *[Write(arrow) for arrow in pointers],
             ),
         ]
