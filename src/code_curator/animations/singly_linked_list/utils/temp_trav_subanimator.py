@@ -48,7 +48,7 @@ class TempTravSubanimator:
             )
 
         if not self._display_first_trav:
-            return SubanimationGroup()
+            return SubanimationGroup(parent=None)
 
         self._first_trav = self._create_first_trav()
         self._second_trav = self._create_second_trav()
@@ -120,7 +120,7 @@ class TempTravSubanimator:
 
     def _get_second_trav_move_subanimations(self) -> SubanimationGroup:
         if not self._display_second_trav:
-            return SubanimationGroup(lag_ratio=1)
+            return SubanimationGroup(lag_ratio=1, parent=None)
 
         return SubanimationGroup(
             *[
@@ -157,6 +157,8 @@ class TempTravSubanimator:
     ) -> SubanimationGroup:
         trav_fade_in_subanimations: SubanimationGroup = SubanimationGroup(
             lag_ratio=0,
+            unique_id='fade_in_temp_trav',
+            parent=subanimations,
         )
 
         if self._display_first_trav:

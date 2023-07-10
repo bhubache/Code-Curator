@@ -3,8 +3,8 @@
 Delete Node in a Linked list. Ok, so the problem is as follows.
 
 <key_point_1>
-Write a function to delete a node in a singly linked list. You will not be given access to the head of the list,
-instead you will be given access to the node to be deleted directly. The constraints are listed below. The number of nodes in the given list is in the range 2 to 100 inclusive
+Write a function to delete a node in a singly linked list.
+You will not be given access to the head of the list, instead you will be given access to the node to be deleted directly. The constraints are listed below. The number of nodes in the given list is in the range 2 to 100 inclusive
 The node’s value is greater than or equal to negative 100 and less than or equal to positive 100
 
 <key_point_1_fade_in>

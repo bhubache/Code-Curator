@@ -45,7 +45,9 @@ PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
 ALIGNED_SCRIPT_PATH = Path('generated_files', 'aligned_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
-ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
+# ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
+ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script_yaml.yaml')
+# ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_basic_script_yaml.yaml')
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'

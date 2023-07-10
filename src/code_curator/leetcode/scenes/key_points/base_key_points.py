@@ -28,6 +28,10 @@ class BaseKeyPoints(BaseScene):
         self._key_points_table = ProblemText.create_key_points_table(self._points, self._insights)
         self._animation_spec = self.create_animation_spec()
         self.add_base_animations()
+
+    # def __getattr__(self, attr_name):
+    #     print(self.aligned_animation_scene.unique_id)
+    #     return getattr(self.aligned_animation_scene, attr_name)
     
     def create_animation_spec(self):
         return {

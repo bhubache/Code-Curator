@@ -16,6 +16,8 @@ from manim import Wait
 from manim import Write
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
+from animations.subanimations.wait import WaitSubanimation
+
 
 POINTS: list[str] = [
     'The node to be deleted is not the tail',
@@ -43,15 +45,15 @@ class KeyPoints(BaseKeyPoints):
     def key_point_1(self) -> Iterable[Animation]:
         sll = SinglyLinkedList(0, 1, 2, 3, 4)
 
-        return [
-            FadeIn(sll),
+        data_structure_animation = (
             sll.remove_at(
                 index=2,
                 display_first_trav=True,
                 display_second_trav=True,
             )
-            .subsequently_shrink_pointer()
-            .subsequently_unshrink_pointer()
+            # .subsequently_shrink_pointer()
+            # .subsequently_unshrink_pointer()
+            # .subsequently_curve_pointer()
             .subsequently_curve_pointer()
             .subsequently_fade_out_container()
                 .with_fade_out_pointer()
@@ -59,7 +61,7 @@ class KeyPoints(BaseKeyPoints):
                 .with_fade_out_first_temp_trav()
                 .with_fade_out_second_temp_trav()
                 .with_center_sll()
-            .build_animation(),
+            .build_animation()
             # sll.add_last(
             #     data=1,
             # )
@@ -68,6 +70,12 @@ class KeyPoints(BaseKeyPoints):
             # .with_move_tail()
             # .with_center_sll()
             # .build_animation(),
+        )
+        data_structure_animation.insert_subanimation(1, WaitSubanimation(3))
+
+        return [
+            FadeIn(sll),
+            data_structure_animation,
             Wait(),
         ]
 

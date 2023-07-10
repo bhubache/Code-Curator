@@ -37,6 +37,7 @@ class DataStructureAnimator:
         ] = []
         self._subanimation_group: SubanimationGroup = SubanimationGroup(
             lag_ratio=1,
+            parent=None,
         )
 
     # TODO: Make abstract
@@ -93,6 +94,7 @@ class DataStructureAnimator:
             return False
 
     def _prepend_subanimation(self, subanimation: BaseSubanimation) -> None:
+        subanimation.parent = self._subanimation_group
         self._subanimation_group.insert(0, subanimation)
 
     def get_subanimation_group(self) -> SubanimationGroup:

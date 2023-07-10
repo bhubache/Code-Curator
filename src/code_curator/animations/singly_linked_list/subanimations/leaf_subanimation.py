@@ -51,3 +51,8 @@ class LeafSubanimation(BaseSubanimation):
 
     def get_num_subanimations(self) -> int:
         return 1
+    
+    def set_timing(self, _, run_time: float) -> bool:
+        print(f'Setting {self.__class__.__name__} run_time to {run_time}')
+        self._run_time = run_time
+        return True

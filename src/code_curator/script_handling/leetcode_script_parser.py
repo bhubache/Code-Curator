@@ -27,6 +27,9 @@ class LeetcodeScriptParser(AnimationScriptParser):
                 scene_name, scene_text,
             )
 
+        import json
+        print(json.dumps(animation_parsed_map, indent=4, default=str))
+
         composite_animation_script = self._create_composite_animation_script(
             animation_parsed_map,
         )
@@ -112,5 +115,7 @@ class LeetcodeScriptParser(AnimationScriptParser):
 
         # Recurively adds parents (this uses @property)
         script_composite.parent = None
+
+        print(script_composite)
 
         return script_composite
