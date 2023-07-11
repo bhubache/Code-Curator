@@ -3,12 +3,13 @@ KeyPoints:
   key_point_1:
     0: Write a function to delete a node in a singly linked list.,
     1:
-      fade_in_temp_trav: You will not be given access to the head of the list instead you will
-      move_first_temp_trav_n: be given
-      move_second_temp_trav_n: access to the node
-      curve_pointer: to be deleted directly. The constraints
-      fade_out_container: are listed below.
-      flatten_list: The number of nodes in the given list  is in the range 2 to 100 inclusive.
-    2: The node’s value is greater than or equal to negative 100 and less than or equal to positive 100,
-  key_point_1_fade_in: The
-  _IMPLICIT_WAIT_1: The value of each node in the list is unique And the node to be deleted is in the list and is not a tail node
+      fade_in_temp_trav: Here, we have a linked list with pointers p1 and p2, with p1 situated at the head, and p2 at the heads next node.
+      move_first_temp_trav_n: We advance both pointers until p1 reaches the node before the node to be removed.
+      move_second_temp_trav_n: Then, move p2 one more node so that p1 and p2 sandwich the node to be removed.
+      wave_pointer: Now, take p1s next pointer
+      curve_pointer: and set it equal to p2.
+      fade_out_container: We have now effectively removed the node from the linked list.
+      flatten_list: Return everything to normal.
+    2: is in the list and is not
+  key_point_1_fade_in: a
+  _IMPLICIT_WAIT_1: tail node ok now that we've

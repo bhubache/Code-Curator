@@ -47,9 +47,9 @@ class DataStructureAnimation(Animation):
 
 
         # TEST
-        self.run_time = self._animator.get_run_time()
-        self._subanimation_group = self._animator.get_subanimation_group()
-        self._subanimation_group.init_run_time()
+        # self.run_time = self._animator.get_run_time()
+        # self._subanimation_group = self._animator.get_subanimation_group()
+        # self._subanimation_group.init_run_time()
 
     def begin(self) -> None:
         """Set up the animation."""
@@ -103,7 +103,7 @@ class DataStructureAnimation(Animation):
             run_time=run_time,
         )
         if not success:
-            raise RuntimeError(f'Unable to find subanimation {subanimation_identifier}')
+            raise LookupError(f'Unable to find subanimation {subanimation_identifier}')
 
     def pad_with_wait(self, subanimation_identifier: str, run_time: float) -> None:
         success = self._subanimation_group.pad_with_wait(
@@ -111,5 +111,5 @@ class DataStructureAnimation(Animation):
             run_time=run_time,
         )
         if not success:
-            raise RuntimeError(f'Unable to find subanimation {subanimation_identifier}')
+            raise LookupError(f'Unable to find subanimation {subanimation_identifier}')
         print(self._subanimation_group)

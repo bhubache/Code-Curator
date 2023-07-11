@@ -45,8 +45,16 @@ class InterdependentSubanimationFinder:
             index_col=0,
         )
 
-        first_order_interdependency = df_subanimation_orth.at[first_sub_name, second_sub_name]
-        second_order_interdependency = df_subanimation_orth.at[second_sub_name, first_sub_name]
+        # TODO: This is a workaround because WaitSubanimation is not in the interdependency csv and it's too difficult to add on
+        # mac without the extension for viewing csv
+        try:
+            first_order_interdependency = df_subanimation_orth.at[first_sub_name, second_sub_name]
+            second_order_interdependency = df_subanimation_orth.at[second_sub_name, first_sub_name]
+        except KeyError as exc:
+            if exc.args[0] != 'WaitSubanimation':
+                raise
+            else:
+                return False
 
         order_interdependencies_to_check = [first_order_interdependency, second_order_interdependency]
 

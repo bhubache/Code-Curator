@@ -123,6 +123,4 @@ class LeetcodeYAMLParser(AnimationScriptParser):
         # Recurively adds parents (this uses @property)
         script_composite.parent = None
 
-        print(script_composite)
-
         return script_composite

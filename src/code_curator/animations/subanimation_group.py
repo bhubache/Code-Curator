@@ -21,14 +21,14 @@ class SubanimationGroup(BaseSubanimation):
         unique_id: str = '',
         parent: BaseSubanimation = None,
     ) -> None:
-        super().__init__()
+        super().__init__(run_time=run_time)
         self._subanimations: list[BaseSubanimation] = [
             sub for sub in subanimations
         ]
         self._lag_ratio: float = lag_ratio
         self._subanimations_with_timings: list[tuple[BaseSubanimation, float, float]] = [
         ]
-        self._run_time: float = run_time
+        # self._run_time: float = run_time
         self.unique_id = unique_id
         self.parent = parent
         self.max_end_time: float = 0
@@ -46,7 +46,7 @@ class SubanimationGroup(BaseSubanimation):
             '\n'.join(
                 (
                     # f'[lag_ratio: {self._lag_ratio}',
-                    f'lag_ratio: {self._lag_ratio}, 0-{self.get_run_time()}, max_end_time: {self.max_end_time}',
+                    f'lag_ratio: {self._lag_ratio}, 0-{self.get_run_time()}, max_end_time: {self.max_end_time} {self.unique_id}',
                     '[',
                     f'{contents}',
                     ']',
@@ -101,6 +101,7 @@ class SubanimationGroup(BaseSubanimation):
             f'lag_ratio: {self._lag_ratio}, '
             f'{start_time}-{end_time}: '
             f'max_end_time: {self.max_end_time}'
+            f'{self.unique_id}'
         )
         return (
             '\n'.join(
@@ -318,14 +319,26 @@ class SubanimationGroup(BaseSubanimation):
     def pad_with_wait(self, identifier: str, run_time: float) -> bool:
         if self.unique_id != identifier:
             for child in self._subanimations:
-                success = child.pad_with_wait(identifier, run_time)
-                if success:
-                    return True
-                else:
+                try:
+                    success = child.pad_with_wait(identifier, run_time)
+                except AttributeError:
+                    print(f'{identifier} != {child.unique_id}')
+                    print(child.unique_id)
+                    print(child.parent)
+                    print(type(child))
+                    print()
                     continue
+                else:
+                    if success:
+                        return True
+                    else:
+                        continue
         else:
             insert_index: int = self.parent._subanimations.index(self) + 1
             self.parent.insert(insert_index, WaitSubanimation(run_time - self.get_run_time()))
             return True
         return False
+    
+    def is_wait_padding(self) -> bool:
+        return len(self) == 1 and isinstance(self[0], WaitSubanimation)
         

@@ -43,6 +43,11 @@ class KeyPoints(BaseKeyPoints):
         self.add_overriding_animation(self.key_point_1)
 
     def key_point_1(self) -> Iterable[Animation]:
+        # NOTE:
+        # The timing_info attributes are somewhat magical. The portions correspond to
+        # the subsection in the animation_script.yaml and the integer at the end corresponds
+        # to the index that the data_structure_animation is in the returned list.
+        # fade_in_temp_trav and 1
         sll = SinglyLinkedList(0, 1, 2, 3, 4)
 
         data_structure_animation = (
@@ -50,14 +55,17 @@ class KeyPoints(BaseKeyPoints):
                 index=2,
                 display_first_trav=True,
                 display_second_trav=True,
+                fade_in_temp_trav_timing_info=self.fade_in_temp_trav_1,
+                move_first_temp_trav_timing_info=self.move_first_temp_trav_n_1,
+                move_second_temp_trav_timing_info=self.move_second_temp_trav_n_1,
             )
             # .subsequently_shrink_pointer()
             # .subsequently_unshrink_pointer()
             # .subsequently_curve_pointer()
-            .subsequently_curve_pointer()
-            .subsequently_fade_out_container()
+            .subsequently_curve_pointer(timing_info=self.curve_pointer_1)
+            .subsequently_fade_out_container(timing_info=self.fade_out_container_1)
                 .with_fade_out_pointer()
-            .subsequently_flatten_list()
+            .subsequently_flatten_list(timing_info=self.flatten_list_1)
                 .with_fade_out_first_temp_trav()
                 .with_fade_out_second_temp_trav()
                 .with_center_sll()
@@ -71,7 +79,7 @@ class KeyPoints(BaseKeyPoints):
             # .with_center_sll()
             # .build_animation(),
         )
-        data_structure_animation.insert_subanimation(1, WaitSubanimation(3))
+        # data_structure_animation.insert_subanimation(-1, WaitSubanimation(3))
 
         return [
             FadeIn(sll),

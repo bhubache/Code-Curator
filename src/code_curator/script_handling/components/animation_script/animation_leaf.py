@@ -14,8 +14,6 @@ from .animation_script import AnimationScript
 # from code_curator.script_handling.tag import Tag
 logger = CustomLogger.getLogger(__name__)
 
-SUBANIMATION_TIMINGS_NAME = '_subanimation_timings'
-
 
 class AnimationLeaf(AnimationScript):
     def __init__(self, unique_id, text: str, is_wait_animation: bool, tags: list[Tag] = None):
@@ -32,6 +30,7 @@ class AnimationLeaf(AnimationScript):
         self._is_overriding_animation = False
         self._tags = tags
         self._func = lambda: 0
+        self.SUBANIMATION_TIMINGS_NAME = '_subanimation_timings'
 
     def __str__(self) -> str:
         formatted_info: str = (
@@ -160,7 +159,7 @@ class AnimationLeaf(AnimationScript):
     # NOTE: Start of the magic to give subanimation timings to Scenes
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         if isinstance(self._text, Mapping):
-            setattr(self, SUBANIMATION_TIMINGS_NAME, {})
+            setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
             for subsection_name, text in self._text.items():
                 subsection_start = aligned_script.get_word_start(start)
                 subsection_end = aligned_script.get_word_end(start + len(text.split()))
@@ -170,7 +169,8 @@ class AnimationLeaf(AnimationScript):
                     start,
                     start + len(text.split()),
                 )
-                getattr(self, SUBANIMATION_TIMINGS_NAME)[subsection_name] = subsection_audio_duration
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = {}
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name]['run_time'] = subsection_audio_duration
                 # setattr(self, f'{subsection_name}', subsection_audio_duration)
                 start = start + len(text.split()) + 1
                 logger.info(f'{subsection_name} duration: {subsection_audio_duration}')
@@ -249,13 +249,32 @@ class AnimationLeaf(AnimationScript):
             logger.info(self.audio_duration)
 
         if isinstance(self._text, Mapping):
-            print(self.unique_id)
-            print(type(self.animation))
-            for subsection_name, audio_duration in getattr(self, SUBANIMATION_TIMINGS_NAME).items():
+        #     print(self.unique_id)
+        #     print(type(self.animation))
+            # for subsection_name, audio_duration in getattr(self, SUBANIMATION_TIMINGS_NAME).items():
                 # self.animation.set_timing(subsection_name, 10)
-                # self.animation.pad_with_wait(subsection_name, 10)
+                # if subsection_name == 'move_first_temp_n':
+                #     name_prefix = '_'.join(subsection_name.split('_')[:-1])
+                #     LIKELY_MAX_NUM_NODES: int = 100
+                #     RUN_TIME: float = pass
+                #     try:
+                #         for i in range(LIKELY_MAX_NUM_NODES):
+                #             self.animation.pad_with_wait(f'name_prefix_{i}')
+                #         else:
+                #             raise RuntimeError('You have actually made a temp trav traverse 100 nodes... goodness gracious')
+                #     except LookupError:
+                #         pass
+                # if subsection_name == 'move_first_temp_trav_n' or subsection_name == 'move_second_temp_trav_n':
+                #     continue
+
+                # # TODO: Fix absolutely horrendous workaround for a strange bug. All unique_ids for SubanimationGroups a prefixed with `1`.
+                # try:
+                #     self.animation.pad_with_wait(subsection_name, audio_duration)
+                # except LookupError:
+                #     self.animation.pad_with_wait(f'1{subsection_name}', audio_duration)
                 # self.animation.set_timing(subsection_name, audio_duration)
-                break
+                # break
+                # pass
             self.audio_duration = self.animation_run_time
         else:
             # TODO: Wait animations should also be padded right???

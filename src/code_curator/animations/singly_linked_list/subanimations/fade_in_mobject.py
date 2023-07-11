@@ -10,8 +10,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class FadeInMobject(LeafSubanimation):
-    def __init__(self, sll, mobject: Mobject, parent_mobject: Mobject) -> None:
-        super().__init__(sll)
+    def __init__(self, sll, mobject: Mobject, parent_mobject: Mobject, run_time: float = 1) -> None:
+        super().__init__(sll, run_time=run_time)
         self._mobject: Mobject = mobject
         self._parent_mobject: Mobject = parent_mobject
         self._mobject.set_opacity(0)
