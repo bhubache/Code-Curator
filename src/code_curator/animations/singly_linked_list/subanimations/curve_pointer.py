@@ -23,8 +23,9 @@ class CurvePointer(LeafSubanimation):
         pointer: Pointer,
         start_node: SLLNode,
         new_end_node: SLLNode,
+        run_time: float = 1,
     ) -> None:
-        super().__init__(sll)
+        super().__init__(sll, run_time=run_time)
         self._pointer: Pointer = pointer
         self._start_node: SLLNode = start_node
         self._new_end_node: SLLNode = new_end_node

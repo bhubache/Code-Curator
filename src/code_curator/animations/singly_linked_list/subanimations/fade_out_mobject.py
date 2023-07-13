@@ -8,8 +8,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class FadeOutMobject(LeafSubanimation):
-    def __init__(self, sll, mobject: Mobject, parent_mobject: Mobject):
-        super().__init__(sll)
+    def __init__(self, sll, mobject: Mobject, parent_mobject: Mobject, run_time: float = 1):
+        super().__init__(sll, run_time=run_time)
         self._mobject: Mobject = mobject
         self._parent_mobject: Mobject = parent_mobject
 
@@ -26,4 +26,4 @@ class FadeOutMobject(LeafSubanimation):
         super().clean_up_from_animation()
 
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return FadeOutMobject(self._sll, self._mobject, self._parent_mobject)
+        return FadeOutMobject(self._sll, self._mobject, self._parent_mobject, run_time=self._run_time)

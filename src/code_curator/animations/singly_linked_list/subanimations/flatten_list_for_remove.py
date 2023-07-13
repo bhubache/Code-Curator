@@ -13,8 +13,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class FlattenListForRemove(LeafSubanimation):
-    def __init__(self, sll, start_node, end_node, pointer_to_straighten: SinglyDirectedEdge, sub_list_to_shift: VGroup):
-        super().__init__(sll)
+    def __init__(self, sll, start_node, end_node, pointer_to_straighten: SinglyDirectedEdge, sub_list_to_shift: VGroup, run_time: float = 1):
+        super().__init__(sll, run_time=run_time)
         self._start_node = start_node
         self._end_node = end_node
         self._pointer_to_straighten = pointer_to_straighten

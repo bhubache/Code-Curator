@@ -96,7 +96,9 @@ class SceneScheduler:
     def handle_override_end(self, end_leaf, next_leaf, end_parent):
         if end_leaf.is_wait_animation:
             if not end_leaf.has_time_to_spare(self._override_end_time * 2):
-                raise Exception('No time to give overriding animation end for WAIT')
+                logger.critical(f'Ignoring inability to give time to overriding animation end for WAIT!')
+                pass
+                # raise Exception('No time to give overriding animation end for WAIT')
             
             end_leaf.remove_time(self._override_end_time * 2)
             end_parent.override_end_time = self._override_end_time

@@ -14,6 +14,8 @@ from .animation_script import AnimationScript
 # from code_curator.script_handling.tag import Tag
 logger = CustomLogger.getLogger(__name__)
 
+from .subanimation_time_keeper import SubanimationTimeKeeper
+
 
 class AnimationLeaf(AnimationScript):
     def __init__(self, unique_id, text: str, is_wait_animation: bool, tags: list[Tag] = None):
@@ -160,21 +162,31 @@ class AnimationLeaf(AnimationScript):
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         if isinstance(self._text, Mapping):
             setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
+            subanimation_time_accumulation: float = 0.0
             for subsection_name, text in self._text.items():
-                subsection_start = aligned_script.get_word_start(start)
-                subsection_end = aligned_script.get_word_end(start + len(text.split()))
-                logger.info(f'{subsection_name} start: {subsection_start}')
-                logger.info(f'{subsection_name} end: {subsection_end}')
-                subsection_audio_duration = aligned_script.get_word_duration_from_to(
-                    start,
-                    start + len(text.split()),
+                # subsection_start = aligned_script.get_word_start(start)
+
+                # TODO: This might be getting one word too far (maybe start + len(text.split()) - 1)
+                # subsection_end = aligned_script.get_word_end(start + len(text.split()))
+                subanimation_time_keeper = SubanimationTimeKeeper(
+                    text=text,
+                    words=[aligned_script.get_word(word_index) for word_index in range(start, start + len(text.split()))],
+                    time_until_start=subanimation_time_accumulation
+                    # word_timings=[aligned_script.get_word_duration(word_index) for word_index in range(start, start + len(text.split()))],
                 )
-                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = {}
-                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name]['run_time'] = subsection_audio_duration
+                subanimation_time_accumulation += subanimation_time_keeper.total_run_time
+                # logger.info(f'{subsection_name} start: {subsection_start}')
+                # logger.info(f'{subsection_name} end: {subsection_end}')
+                # subsection_audio_duration = aligned_script.get_word_duration_from_to(
+                #     start,
+                #     start + len(text.split()),
+                # )
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = subanimation_time_keeper
+                # getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name]['run_time'] = subsection_audio_duration
                 # setattr(self, f'{subsection_name}', subsection_audio_duration)
-                start = start + len(text.split()) + 1
-                logger.info(f'{subsection_name} duration: {subsection_audio_duration}')
-                logger.info(f'new start: {start}')
+                start = start + len(text.split())
+                # logger.info(f'{subsection_name} duration: {subsection_audio_duration}')
+                # logger.info(f'new start: {start}')
         else:
             self.start = aligned_script.get_word_start(start)
             self.end = aligned_script.get_word_end(end)
@@ -185,10 +197,6 @@ class AnimationLeaf(AnimationScript):
         # Default animation to Wait
         self.animation = Wait(self._audio_duration)
 
-    # NOTE: Possible candidate for adding implicit Wait animations for overriding animations (like explanation_1)
-    # [Wait(), FadeIn(self.sll), DataStructureAnimation]
-    # Wait has a run_time of 1 but an audio duration of 3.58, that 2.58 seconds needs to be filled. It might
-    # get filled by scene scheduler though, I'll have to check.
     def add_animation(
         self,
         unique_id: str,

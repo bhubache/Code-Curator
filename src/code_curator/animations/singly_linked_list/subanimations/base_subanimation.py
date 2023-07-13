@@ -7,6 +7,8 @@ from abc import abstractmethod
 from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
+# TODO: Make sure to pass in run_time to all subanimations AND THEIR SUCCESSIVE COUNTERPARTS!!!
+
 
 class BaseSubanimation(ABC):
     def __init__(self, run_time: float = 1) -> None:

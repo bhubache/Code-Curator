@@ -14,9 +14,16 @@ from manim import Line
 from manim import UP
 from manim import Wait
 from manim import Write
+from manim import Circle
+from manim import Square
+from manim import Rectangle
+from manim import RED
+from manim import Transform
+from manim import FadeOut
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from animations.subanimations.wait import WaitSubanimation
+from animations.parallel_animation import ParallelAnimation
 
 
 POINTS: list[str] = [
@@ -49,7 +56,6 @@ class KeyPoints(BaseKeyPoints):
         # to the index that the data_structure_animation is in the returned list.
         # fade_in_temp_trav and 1
         sll = SinglyLinkedList(0, 1, 2, 3, 4)
-
         data_structure_animation = (
             sll.remove_at(
                 index=2,
@@ -62,6 +68,7 @@ class KeyPoints(BaseKeyPoints):
             # .subsequently_shrink_pointer()
             # .subsequently_unshrink_pointer()
             # .subsequently_curve_pointer()
+            .subsequently_wave_pointer(timing_info=self.wave_pointer_1)
             .subsequently_curve_pointer(timing_info=self.curve_pointer_1)
             .subsequently_fade_out_container(timing_info=self.fade_out_container_1)
                 .with_fade_out_pointer()
@@ -70,6 +77,7 @@ class KeyPoints(BaseKeyPoints):
                 .with_fade_out_second_temp_trav()
                 .with_center_sll()
             .build_animation()
+
             # sll.add_last(
             #     data=1,
             # )
@@ -81,9 +89,34 @@ class KeyPoints(BaseKeyPoints):
         )
         # data_structure_animation.insert_subanimation(-1, WaitSubanimation(3))
 
+        # TODO: Replace FadeIn(Circle) with code animation aligned with audio
+        # 1. Find lag_ratio for AnimationGroup for when code animation should start
+        # 2. Determine how long code animation should last
+        c = Circle()
         return [
             FadeIn(sll),
-            data_structure_animation,
+            AnimationGroup(
+                ParallelAnimation(
+                    'take p1s next pointer and',
+                    'set it equal',
+                    'to p2.',
+                    'We have',
+                    time_keepers=(
+                        self.wave_pointer_1,
+                        self.curve_pointer_1,
+                        self.fade_out_container_1,
+                    ),
+                    animations=[
+                        FadeIn(c),
+                        FadeIn(s := Square()),
+                        FadeIn(r := Rectangle()),
+                        FadeOut(c, s, r),
+                        # c.animate.move_to([1, 1, 0]),
+                        # c.animate.move_to([0, 0, 0]),
+                    ],
+                ).build(),
+                data_structure_animation,
+            ),
             Wait(),
         ]
 

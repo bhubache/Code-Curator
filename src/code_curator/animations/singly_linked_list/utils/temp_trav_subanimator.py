@@ -17,6 +17,8 @@ logger = CustomLogger.getLogger(__name__)
 if TYPE_CHECKING:
     from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
+DEFAULT_RUN_TIME: float = 1.0
+
 
 class TempTravSubanimator:
     def __init__(
@@ -180,7 +182,9 @@ class TempTravSubanimator:
         self,
         subanimations: SubanimationGroup,
     ) -> SubanimationGroup:
-        run_time = self._fade_in_temp_trav_timing_info['run_time']
+        fade_in_run_time = min(self._fade_in_temp_trav_timing_info['run_time'], DEFAULT_RUN_TIME)
+        self._fade_in_temp_trav_timing_info['run_time'] -= fade_in_run_time
+
         trav_fade_in_subanimations: SubanimationGroup = SubanimationGroup(
             lag_ratio=0,
             unique_id='fade_in_temp_trav',
@@ -190,20 +194,25 @@ class TempTravSubanimator:
         if self._display_first_trav:
             trav_fade_in_subanimations.add(
                 FadeInMobject(
-                    sll=self._sll, mobject=self._first_trav,
+                    sll=self._sll,
+                    mobject=self._first_trav,
                     parent_mobject=self._sll,
+                    run_time=fade_in_run_time,
                 ),
             )
 
         if self._display_second_trav:
             trav_fade_in_subanimations.add(
                 FadeInMobject(
-                    sll=self._sll, mobject=self._second_trav, parent_mobject=self._sll,
+                    sll=self._sll,
+                    mobject=self._second_trav,
+                    parent_mobject=self._sll,
+                    run_time=fade_in_run_time,
                 ),
             )
 
         subanimations.insert(0, trav_fade_in_subanimations)
-        subanimations.insert(1, WaitSubanimation(sll=self._sll, run_time=run_time))
+        subanimations.insert(1, WaitSubanimation(sll=self._sll, run_time=self._fade_in_temp_trav_timing_info['run_time']))
         return subanimations
 
     def has_subanimations(self) -> bool:

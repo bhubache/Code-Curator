@@ -55,7 +55,6 @@ class DataStructureAnimation(Animation):
         """Set up the animation."""
         self.run_time = self._animator.get_run_time()
         self._subanimation_group = self._animator.get_subanimation_group()
-        # breakpoint()
         self._subanimation_group.init_run_time()
         super().begin()
     

@@ -7,8 +7,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class FadeOutContainer(LeafSubanimation):
-    def __init__(self, sll, container, node) -> None:
-        super().__init__(sll)
+    def __init__(self, sll, container, node, run_time: float = 1) -> None:
+        super().__init__(sll, run_time=run_time)
         self._container = container
         self._node = node
 

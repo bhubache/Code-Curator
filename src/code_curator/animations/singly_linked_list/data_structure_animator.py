@@ -41,6 +41,7 @@ class DataStructureAnimator:
             lag_ratio=1,
             parent=None,
         )
+        self.DEFAULT_RUN_TIME: float = 1.0
 
     # TODO: Make abstract
     def clean_up_mobject(self) -> None:
@@ -70,14 +71,13 @@ class DataStructureAnimator:
         raise NotImplementedError()
     
     def _get_last_non_wait_padding_subanimation_group(self) -> SubanimationGroup:
-        # breakpoint()
         for subanimation in reversed(self._subanimation_group._subanimations):
             if subanimation.is_wait_padding():
                 continue
             return subanimation
         raise LookupError(f'Unable to find last non wait padding subanimation group in {self._subanimation_group}')
 
-    def _add_subanimation_concurrently(self, *subanimations_to_add: BaseSubanimation, run_time: float = 1) -> DataStructureAnimator:
+    def _add_subanimation_concurrently(self, *subanimations_to_add: BaseSubanimation, timing_info: dict | None = None) -> DataStructureAnimator:
         # Get last SubanimationGroup that's not just WaitSubanimation
         # NOTE: We're going to assume that if the previous SubanimationGroup is WaitSubanimation, then one before that isn't
         # because all sequential WaitSubanimations should be consolidated
@@ -91,13 +91,17 @@ class DataStructureAnimator:
         # subanimation_group_id = '_'.join(inspect.stack()[1].function.split('_')[1:]).strip()
         if len(subanimations_to_add) > 1:
             raise ValueError("I don't think more than one subanimation should be allowed here?")
+        
+        # breakpoint()
 
         # for subanimation in subanimations_to_add:
         #     self._subanimation_group.get(-1).add(subanimation)
         for subanimation in subanimations_to_add:
+            subanimation._run_time = last_non_wait_padding_subanimation_group.get_run_time()
             last_non_wait_padding_subanimation_group.add(subanimation)
             # if not self._subanimation_group.unique_id:
             #     self._subanimation_group.unique_id = subanimation_group_id
+
         return self
 
     def _add_subanimation_successively(self, *subanimations_to_add: BaseSubanimation, timing_info: dict | None = None) -> DataStructureAnimator:
@@ -164,4 +168,14 @@ def _register_subanimation(builder_helper_func):
             builder_helper_func,
         )
         return builder_helper_func(self, *args, **kwargs)
+    return inner
+
+def _determine_timing(fn):
+    def inner(self, *args, **kwargs):
+        timing_info = kwargs['timing_info']
+        run_time: float = min(timing_info['run_time'], self.DEFAULT_RUN_TIME)
+        timing_info['run_time'] -= run_time
+        kwargs['timing_info'] = timing_info
+        result = fn(self, *args, run_time=run_time, **kwargs)
+        return result
     return inner
