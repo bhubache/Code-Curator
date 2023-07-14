@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Callable
+from collections.abc import Sequence
 
 from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Animation
@@ -97,7 +98,7 @@ class CompositeAnimationScript(AnimationScript):
                 self._children[i] = new_child
                 return True
         return False
-
+    # TODO: Raise LookupError if comonent can't be found
     def get_component(self, unique_id: str) -> AnimationScript:
         if self.unique_id == unique_id:
             return self
@@ -108,6 +109,7 @@ class CompositeAnimationScript(AnimationScript):
                 return comp
         return None
 
+    # TODO: I believe there's some wasted time recalculating this recursively every time
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         for child in self.children:
             child.apply_alignments(
@@ -170,17 +172,48 @@ class CompositeAnimationScript(AnimationScript):
             if child._unique_id_exists(unique_id):
                 return True
         return False
+    
+    def add_animation(
+        self,
+        unique_id: str,
+        func: Callable,
+        animation: Animation | Sequence[Animation],
+        is_overriding_animation: bool,
+    ) -> bool:
+        if self.unique_id == unique_id:
+            if isinstance(animation, Sequence):
+                pass
+            else:
+                raise NotImplementedError()
+        else:
+            for child in self.children:
+                # child could be a composite or a leaf
+                try:
+                    child.add_animation(
+                        unique_id=unique_id,
+                        func=func,
+                        animation=animation,
+                        is_overriding_animation=is_overriding_animation,
+                    )
+                except TypeError:
+                    child.add_animation(
+                        unique_id=unique_id,
+                        func=func,
+                        animation=animation,
+                        is_overriding_start=False,
+                        is_overriding_end=False,
+                    )
 
     # TODO: Seemingly A LOT of time wasted in this method.
     # @_check_that_unique_id_exists
-    def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
+    def add_animation_v1(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
             for child in self.children:
                 # TODO: Once the animation has been successfully added, we need to stop iteration.
                 try:
                     child.add_animation(
-                        # TODO: Change func() to animation
+                        # TODO: Change func() to animation TODO: Should we only be taking the first element of animation????
                         unique_id, func, animation[
                             0
                         ], is_overriding_animation,
@@ -192,13 +225,19 @@ class CompositeAnimationScript(AnimationScript):
                             0
                         ], is_overriding_animation,
                     )
+                # child.add_animation(
+                #     unique_id,
+                #     func,
+                #     animation,
+                #     is_overriding_animation,
+                # )
         else:
             # TODO: Change func() to animation
             animations = animation
             try:
                 len(animations)
             except TypeError:
-                animations = func()
+                animations = func() # TODO: THIS GOES THROUGH ALL OF KEY_POINT_1 AGAIN SO SLOOOWWWW!!!
             assert len(self.children) == len(animations)
 
             self.is_overriding_animation = True

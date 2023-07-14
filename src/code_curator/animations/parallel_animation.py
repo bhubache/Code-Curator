@@ -30,11 +30,17 @@ class ParallelAnimation(Animation):
 
         self.finalized_animations = self._build()
 
+    def __str__(self) -> str:
+        raise NotImplementedError()
+
     def build(self):
-        return AnimationGroup(
+        # breakpoint()
+        animation_group = AnimationGroup(
             *self.finalized_animations,
             lag_ratio=1,
         )
+        # animation_group.is_overriding_animation = True
+        return animation_group
 
     def _build(self):
         animations = []
@@ -67,6 +73,8 @@ class ParallelAnimation(Animation):
 
         while latest_exhausted_time_keeper < (len(self.time_keepers) - 2):
             for string_alignment in self.string_alignments:
+                # if string_alignment == 'to p2.':
+                #     breakpoint()
                 partition = self.time_keepers[latest_exhausted_time_keeper + 1].partition(string_alignment)
                 while True:
                     overflow_sequence: list[str] = []
@@ -101,6 +109,10 @@ class ParallelAnimation(Animation):
 
                         if bool(partition[1]) and bool(partition[2]) and partition[1] in self.time_keepers[latest_exhausted_time_keeper + 1].text:
                             self._remove_words(time_keeper_index=latest_exhausted_time_keeper + 1, tokens=partition[1].split())
+                        elif bool(partition[1]) and partition[1] in self.time_keepers[latest_exhausted_time_keeper + 1].text:
+                            self._remove_words(time_keeper_index=latest_exhausted_time_keeper + 1, tokens=partition[1].split())
+                            latest_exhausted_time_keeper += 1
+
 
                         break
                     else:

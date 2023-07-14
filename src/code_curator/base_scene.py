@@ -9,6 +9,8 @@ from manim import config
 from manim import FadeIn
 from manim import FadeOut
 from manim import Scene
+from manim import Circle
+from manim import RED
 from code_curator.scene_scheduler import SceneScheduler
 from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript

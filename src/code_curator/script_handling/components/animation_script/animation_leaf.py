@@ -285,7 +285,7 @@ class AnimationLeaf(AnimationScript):
                 # pass
             self.audio_duration = self.animation_run_time
         else:
-            # TODO: Wait animations should also be padded right???
+            # TODO: Normal Wait animations should also be padded right???
             if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
                 # TODO: Look into making unique_id f'{self.unique_id}_WAIT_PADDING'
                 wait_padding_explicit_animation_leaf = AnimationLeaf(

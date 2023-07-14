@@ -70,7 +70,7 @@ class SubanimationTimeKeeper:
         """Return [start, stop) of ``sequence``."""
         if self.text.count(sequence) > 1 and occurrence is None:
             raise ValueError(
-                f'There is more than one occurrence of ``sequence`` {sequence} in {self.text}, yet an occurrence has not been specified. Please provide one.'
+                f'There is more than one occurrence of ``sequence`` ``{sequence}`` in ``{self.text}``, yet an occurrence has not been specified. Please provide one.'
             )
         elif occurrence is None:
             occurrence = 1

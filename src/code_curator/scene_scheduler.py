@@ -17,10 +17,6 @@ class SceneScheduler:
     def schedule(self, aligned_animation_scene: CompositeAnimationScript):
         flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
 
-        logger.critical('!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        for elem in flattened:
-            print(elem)
-
         for leaf in flattened:
             if isinstance(leaf.animation, DataStructureAnimation):
                 print(leaf)

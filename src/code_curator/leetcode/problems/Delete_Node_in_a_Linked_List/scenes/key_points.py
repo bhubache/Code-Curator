@@ -20,6 +20,7 @@ from manim import Rectangle
 from manim import RED
 from manim import Transform
 from manim import FadeOut
+from manim import Tex
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from animations.subanimations.wait import WaitSubanimation
@@ -93,6 +94,8 @@ class KeyPoints(BaseKeyPoints):
         # 1. Find lag_ratio for AnimationGroup for when code animation should start
         # 2. Determine how long code animation should last
         c = Circle()
+        s = Square()
+        r = Rectangle()
         return [
             FadeIn(sll),
             AnimationGroup(
@@ -100,19 +103,18 @@ class KeyPoints(BaseKeyPoints):
                     'take p1s next pointer and',
                     'set it equal',
                     'to p2.',
-                    'We have',
+                    # 'We have',
                     time_keepers=(
                         self.wave_pointer_1,
                         self.curve_pointer_1,
-                        self.fade_out_container_1,
+                        # self.fade_out_container_1,
                     ),
                     animations=[
                         FadeIn(c),
-                        FadeIn(s := Square()),
-                        FadeIn(r := Rectangle()),
-                        FadeOut(c, s, r),
-                        # c.animate.move_to([1, 1, 0]),
-                        # c.animate.move_to([0, 0, 0]),
+                        FadeIn(s),
+                        FadeIn(r),
+                        # FadeIn(Tex('hi')),
+                        # FadeOut(c, s, r),
                     ],
                 ).build(),
                 data_structure_animation,

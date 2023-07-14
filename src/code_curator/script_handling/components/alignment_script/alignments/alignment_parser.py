@@ -29,5 +29,4 @@ class AlignmentParser:
             self._info[word_number]['start'] = float(line_parts[0])
             self._info[word_number]['end'] = float(line_parts[1])
             self._info[word_number]['text'] = line_parts[2]
-
         return AlignedScript(self._info)

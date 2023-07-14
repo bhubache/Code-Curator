@@ -193,11 +193,14 @@ class TestScene(Scene):
     config.disable_caching = True
 
     def construct(self) -> None:
+        pass
+
+
         from code_curator.data_structures.singly_linked_list import SinglyLinkedList
         # from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
         # from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1)
-        self.play(FadeIn(self.sll))
+        # self.sll = SinglyLinkedList(1)
+        # self.play(FadeIn(self.sll))
 
         # from code_curator.animations.data_structure_animation import DataStructureAnimation
         # from code_curator.animations.singly_linked_list.data_structure_animator import DataStructureAnimator
@@ -219,16 +222,16 @@ class TestScene(Scene):
         #     )
         # )
 
-        self.play(
-            self.sll.add_last(
-                data=17,
-            )
-            .with_fade_in_container()
-            .with_fade_in_pointer()
-            .with_move_tail()
-            .with_center_sll()
-            .build_animation(),
-        )
+        # self.play(
+        #     self.sll.add_last(
+        #         data=17,
+        #     )
+        #     .with_fade_in_container()
+        #     .with_fade_in_pointer()
+        #     .with_move_tail()
+        #     .with_center_sll()
+        #     .build_animation(),
+        # )
 
         # for sub in self.sll.submobjects:
         #     self.play(sub.animate.set_color('#FF0000'))
