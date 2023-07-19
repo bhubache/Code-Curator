@@ -176,13 +176,26 @@ class CompositeAnimationScript(AnimationScript):
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
             for child in self.children:
-                child.add_animation(
-                    unique_id, func, func()[
-                        0
-                    ], is_overriding_animation,
-                )
+                try:
+                    child.add_animation(
+                        unique_id, func, func()[
+                            0
+                        ], is_overriding_animation,
+                    )
+                except TypeError:
+                    child.add_animation(
+                        unique_id,
+                        func,
+                        func()[0],
+                        is_overriding_animation,
+                    )
         else:
-            animations = func()
+            animations = animation
+            try:
+                len(animations)
+            except TypeError:
+                animations = func()
+
             assert len(self.children) == len(animations)
 
             self.is_overriding_animation = True
