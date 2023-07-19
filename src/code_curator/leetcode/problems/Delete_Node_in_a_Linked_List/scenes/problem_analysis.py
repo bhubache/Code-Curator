@@ -93,8 +93,9 @@ class ProblemAnalysis(BaseProblemAnalysis):
         return [
             FadeIn(title),
             FadeIn(sll),
-            FadeIn(question_mark),
+            # FadeIn(question_mark),
             AnimationGroup(
+                FadeIn(question_mark),
                 *[Write(arrow) for arrow in pointers],
             ),
         ]
