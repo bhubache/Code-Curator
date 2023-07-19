@@ -35,7 +35,7 @@ class SceneScheduler:
 
                 if not next_leaf.has_time_to_spare(run_time_curr_needs):
                     raise Exception(
-                        f'The next leaf does not have time to spare: {run_time_curr_needs}',
+                        f'The next leaf {next_leaf.unique_id} does not have time to spare: {run_time_curr_needs}'
                     )
 
                 next_leaf.give_spare_time_to(curr_leaf, run_time_curr_needs)
