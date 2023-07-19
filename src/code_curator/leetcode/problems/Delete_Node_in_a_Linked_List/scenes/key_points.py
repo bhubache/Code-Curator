@@ -19,40 +19,46 @@ from code_curator.script_handling.components.animation_script.composite_animatio
 
 POINTS: list[str] = [
     'The node to be deleted is not the tail',
-    'We\'re just given the node to be deleted',
+    # 'We\'re just given the node to be deleted',
 ]
 
 INSIGHTS: list[str] = [
     'The node immediately after the node to be deleted is necessary',
-    'Nodes after the node to be deleted are necessary',
+    # 'Nodes after the node to be deleted are necessary',
 ]
 
 
 class KeyPoints(BaseKeyPoints):
     def __init__(
         self,
-        points: list[str],
-        insights: list[str],
         problem_dir: str,
         aligned_animation_scene: CompositeAnimationScript,
     ) -> None:
         super().__init__(
-            points=points, insights=insights, problem_dir=problem_dir,
+            points=POINTS, insights=INSIGHTS, problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
         )
+        self.add_overriding_animation(self.key_point_1)
 
-    def explanation_1(self) -> Iterable[Animation]:
-        sll = SinglyLinkedList(0)
+    def key_point_1(self) -> Iterable[Animation]:
+        sll = SinglyLinkedList(0, 1, 2, 3, 4)
 
         return [
             FadeIn(sll),
-            sll.add_last(
-                data=1,
+            sll.remove_at(
+                index=2,
+                display_first_trav=True,
+                display_second_trav=True,
             )
-            .with_fade_in_container()
-            .with_fade_in_pointer()
-            .with_move_tail()
-            .with_center_sll()
+            .subsequently_shrink_pointer()
+            .subsequently_unshrink_pointer()
+            .subsequently_curve_pointer()
+            .subsequently_fade_out_container()
+                .with_fade_out_pointer()
+            .subsequently_flatten_list()
+                .with_fade_out_first_temp_trav()
+                .with_fade_out_second_temp_trav()
+                .with_center_sll()
             .build_animation(),
             Wait(),
         ]
