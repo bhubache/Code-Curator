@@ -51,6 +51,10 @@ class SceneScheduler:
                 )
                 in_overriding_animation_group = False
             elif in_overriding_animation_group:
+                if leaf not in leaf.parent.children:
+                    logger.critical(f'{leaf.unique_id} not in parents children. Adding it')
+                    insertion_index = leaf.parent.children.index(flattened[i - 1]) + 1
+                    leaf.parent.children.insert(insertion_index, leaf)
                 continue
             elif leaf.is_overriding_start:
                 logger.critical('leaf is overriding start')
@@ -80,8 +84,15 @@ class SceneScheduler:
 
     # TODO: Change sucky method name
     def handle_override_end(self, end_leaf, next_leaf, end_parent):
-        if not next_leaf.has_time_to_spare(self._override_end_time * 2):
-            raise Exception('No time to give overriding animation end')
+        if end_leaf.is_wait_animation:
+            if not end_leaf.has_time_to_spare(self._override_end_time * 2):
+                raise Exception('No time to give overriding animation end for WAIT.')
 
-        next_leaf.remove_time(self._override_end_time * 2)
-        end_parent.override_end_time = self._override_end_time
+            end_leaf.remove_time(self._override_end_time * 2)
+            end_parent.override_end_time = self._override_end_time
+        else:
+            if not next_leaf.has_time_to_spare(self._override_end_time * 2):
+                raise Exception('No time to give overriding animation end')
+
+            next_leaf.remove_time(self._override_end_time * 2)
+            end_parent.override_end_time = self._override_end_time
