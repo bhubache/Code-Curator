@@ -5,7 +5,10 @@ from collections.abc import Sequence
 
 from manim import Animation
 from manim import AnimationGroup
+from manim import Succession
 from manim import Wait
+from manim import FadeIn
+from animations.fixed_succession import FixedSuccession
 from script_handling.components.animation_script.subanimation_time_keeper import SubanimationTimeKeeper
 
 # TODO: The 'and' time that extends to the next time keeper is getting lost
@@ -15,7 +18,7 @@ class ParallelAnimation(Animation):
         self,
         *string_alignments: str,
         time_keepers: list[SubanimationTimeKeeper],
-        animations: Iterable[Animation]
+        animations: Iterable[Animation],
     ):
         """*string_alignments MUST BE CONTIGUOUS strings from the animation_script yaml!!!"""
         self.string_alignments: tuple[str] = string_alignments
@@ -34,10 +37,10 @@ class ParallelAnimation(Animation):
         raise NotImplementedError()
 
     def build(self):
-        # breakpoint()
-        animation_group = AnimationGroup(
+        # NOTE: Can't use AnimationGroup to animate the same mobject more than once even with lag_ratio=1!!!
+        animation_group = FixedSuccession(
             *self.finalized_animations,
-            lag_ratio=1,
+            # lag_ratio=1,
         )
         # animation_group.is_overriding_animation = True
         return animation_group

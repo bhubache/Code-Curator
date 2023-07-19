@@ -6,6 +6,9 @@ from collections.abc import Iterable
 
 
 class AnimationScript(ABC):
+    def __init__(self) -> None:
+        pass
+    
     @property
     @abstractmethod
     def unique_id(self) -> str:

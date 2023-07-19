@@ -125,13 +125,15 @@ class BaseScene(ABC, Scene):
                     for i, anim_func in enumerate(list_of_funcs):
                         self.aligned_animation_scene.add_animation(
                             unique_id=f'{section_name}_{i}',
-                            func=anim_func, animation=anim_func(),
+                            func=anim_func,
+                            animation=anim_func(),
                             is_overriding_animation=False,
                         )
                 else:
                     self.aligned_animation_scene.add_animation(
                         unique_id=section_name,
-                        func=func, animation=func(),
+                        func=func,
+                        animation=func(),
                         is_overriding_animation=False,
                     )
 

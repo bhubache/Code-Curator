@@ -3,6 +3,9 @@
 You can either create a video using custom scenes or test some animation code!
 """
 
+# TODO: Look into overriding Scene.play to enable special functions to run and allow Fading in and Fading out of the same
+# object within an animation. Currently not allowed by AnimationGroup or Succession.
+
 from __future__ import annotations
 
 __all__: Sequence[str] = []
@@ -15,8 +18,12 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from manim import Circle
+from manim import AnimationGroup
+from manim import Succession
 from manim import config
 from manim import FadeIn
+from manim import FadeOut
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
@@ -193,7 +200,18 @@ class TestScene(Scene):
     config.disable_caching = True
 
     def construct(self) -> None:
-        pass
+        c = Circle()
+        c_2 = Circle(radius=2)
+        c_3 = Circle(radius=2.5)
+        c.set_opacity(0)
+        c_2.set_opacity(0)
+        c_3.set_opacity(0)
+        a = Succession(
+            FadeIn(c),
+            FadeOut(c),
+        )
+        self.play(a)
+
 
 
         from code_curator.data_structures.singly_linked_list import SinglyLinkedList

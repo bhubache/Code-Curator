@@ -177,31 +177,56 @@ class CompositeAnimationScript(AnimationScript):
         self,
         unique_id: str,
         func: Callable,
-        animation: Animation | Sequence[Animation],
+        animation: Sequence[Animation],
         is_overriding_animation: bool,
     ) -> bool:
         if self.unique_id == unique_id:
-            if isinstance(animation, Sequence):
-                pass
-            else:
-                raise NotImplementedError()
-        else:
-            for child in self.children:
-                # child could be a composite or a leaf
-                try:
+            if not isinstance(animation, Sequence):
+                raise TypeError(f'animation should be of type Sequence, not {type(animation)}')
+            
+            self.is_overriding_animation = is_overriding_animation
+            if len(animation) == 1:
+                raise Exception('Is this supposed to happen?')
+            elif len(animation) > 1:
+                # Create new leaves
+                for i, (child, anim) in enumerate(zip(self.children, animation)):
+                    is_overriding_start = i == 0
+                    is_overriding_end = i == len(self.children) - 1
+
+                    if i > 0:
+                        # We only want the real function to be called once so we let the first leaf have it
+                        def func(): return 0
+
                     child.add_animation(
-                        unique_id=unique_id,
-                        func=func,
-                        animation=animation,
-                        is_overriding_animation=is_overriding_animation,
+                        unique_id=f'{unique_id}_{i}', func=func, animation=anim,
+                        is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end,
                     )
-                except TypeError:
+            else:
+                raise ValueError(f'Length of animations must be greater than zero: given {len(animation)}')
+        else:
+            if not isinstance(animation, Sequence):
+                return
+            
+            if len(animation) == 1:
+                anim = animation[0]
+            elif len(animation) > 1:
+                anim = animation
+            else:
+                ValueError(f'There must be at least one animation: given {len(animation)}')    
+
+            for child in self.children:
+                if isinstance(child, AnimationLeaf):
                     child.add_animation(
                         unique_id=unique_id,
                         func=func,
-                        animation=animation,
-                        is_overriding_start=False,
-                        is_overriding_end=False,
+                        animation=anim,
+                    )
+                else:
+                    child.add_animation(
+                        unique_id=unique_id,
+                        func=func,
+                        animation=anim,
+                        is_overriding_animation=is_overriding_animation,
                     )
 
     # TODO: Seemingly A LOT of time wasted in this method.
