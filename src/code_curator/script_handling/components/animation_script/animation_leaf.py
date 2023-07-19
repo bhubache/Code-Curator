@@ -207,13 +207,6 @@ class AnimationLeaf(AnimationScript):
 
     def get_flattened_iterable(self) -> list:
         # Separate explicit animation from the extra wait time!
-        logger.info(self.unique_id)
-        if self.unique_id == 'explanation_1_1':
-            logger.info(self.animation)
-            logger.info(type(self.animation))
-            logger.info(self.is_wait_animation)
-            logger.info(self.animation_run_time)
-            logger.info(self.audio_duration)
         if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
             wait_padding_explicit_animation_leaf = AnimationLeaf(
                 unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[],
@@ -226,9 +219,17 @@ class AnimationLeaf(AnimationScript):
             wait_padding_explicit_animation_leaf.audio_duration = \
                 wait_padding_explicit_animation_leaf.animation_run_time
 
+            wait_padding_explicit_animation_leaf.parent = self.parent
+
             self.audio_duration = self.animation_run_time
+
+            if self.is_overriding_end:
+                self.is_overriding_end = False
+                wait_padding_explicit_animation_leaf.is_overriding_end = True
+
             self.end += self.animation_run_time
             return [self, wait_padding_explicit_animation_leaf]
+
         return [self]
 
     def has_sufficient_audio_duration(self):

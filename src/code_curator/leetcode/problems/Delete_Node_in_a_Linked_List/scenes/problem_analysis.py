@@ -38,7 +38,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
             aligned_animation_scene=aligned_animation_scene,
         )
         self.add_overriding_animation(self.explanation_1)
-        self.add_overriding_animation(self.explanation_3)
+        # self.add_overriding_animation(self.explanation_3)
         # self.add_overriding_animation(self.explanation_2)
 
     def explanation_1(self) -> Iterable[Animation]:
@@ -57,10 +57,9 @@ class ProblemAnalysis(BaseProblemAnalysis):
         data_structure_animation.insert_subanimation(1, WaitSubanimation(3))
 
         return [
+            Wait(),
             FadeIn(sll),
             data_structure_animation,
-            Wait(),
-            # FadeIn(Circle()),
         ]
 
     def explanation_2(self) -> Sequence[Animation]:
