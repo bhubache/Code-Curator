@@ -69,6 +69,10 @@ class RemoveAt(DataStructureAnimator):
         self._first_trav: Pointer | None = None
         self._second_trav: Pointer | None = None
 
+        self._fade_in_temp_trav_timing_info = kwargs.get('fade_in_temp_trav_timing_info')
+        self._move_first_temp_trav_timing_info = kwargs.get('move_first_temp_trav_timing_info')
+        self._move_second_temp_trav_timing_info = kwargs.get('move_second_temp_trav_timing_info')
+
         self._build_animation()
 
     @staticmethod
@@ -98,12 +102,12 @@ class RemoveAt(DataStructureAnimator):
         )
 
     @_register_subanimation
-    def with_fade_out_container(self) -> DataStructureAnimator:
-        return self._add_subanimation_concurrently(self._create_fade_out_container())
+    def with_fade_out_container(self, run_time: float = 1) -> DataStructureAnimator:
+        return self._add_subanimation_concurrently(self._create_fade_out_container(), run_time=run_time)
 
     @_register_subanimation
-    def subsequently_fade_out_container(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_fade_out_container())
+    def subsequently_fade_out_container(self, *, timing_info: dict) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_fade_out_container(), timing_info=timing_info)
 
     @_register_subanimation
     def with_fade_out_pointer(self) -> DataStructureAnimator:
@@ -134,8 +138,8 @@ class RemoveAt(DataStructureAnimator):
         return self._add_subanimation_concurrently(self._create_curve_pointer())
 
     @_register_subanimation
-    def subsequently_curve_pointer(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_curve_pointer())
+    def subsequently_curve_pointer(self, *, timing_info: dict) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_curve_pointer(), timing_info=timing_info)
 
     @_register_subanimation
     def with_center_sll(self) -> DataStructureAnimator:
@@ -150,8 +154,8 @@ class RemoveAt(DataStructureAnimator):
         return self._add_subanimation_concurrently(self._create_flatten_list())
 
     @_register_subanimation
-    def subsequently_flatten_list(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_flatten_list())
+    def subsequently_flatten_list(self, *, timing_info: dict) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_flatten_list(), timing_info=timing_info)
 
     @_register_subanimation
     def with_fade_out_first_temp_trav(self) -> DataStructureAnimator:
@@ -182,6 +186,9 @@ class RemoveAt(DataStructureAnimator):
             display_second_trav=self._display_second_trav,
             second_trav_name=self._second_trav_name,
             trav_position=self._trav_position,
+            fade_in_temp_trav_timing_info=self._fade_in_temp_trav_timing_info,
+            move_first_temp_trav_timing_info=self._move_first_temp_trav_timing_info,
+            move_second_temp_trav_timing_info=self._move_second_temp_trav_timing_info,
         )
         if temp_trav_subanimator.has_subanimations():
             self._prepend_subanimation(

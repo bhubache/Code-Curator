@@ -11,6 +11,7 @@ from manim import UP
 from ...subanimation_group import SubanimationGroup
 from ..subanimations.fade_in_mobject import FadeInMobject
 from ..subanimations.move_trav import MoveTrav
+from code_curator.animations.subanimations.wait import WaitSubanimation
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -27,6 +28,9 @@ class TempTravSubanimator:
         display_second_trav: bool = False,
         second_trav_name: str = 'p2',
         trav_position: str | int = 'start',
+        fade_in_temp_trav_timing_info: dict | None = None,
+        move_first_temp_trav_timing_info: dict | None = None,
+        move_second_temp_trav_timing_info: dict | None = None,
     ) -> None:
         self._sll = sll
         self._index = index
@@ -38,6 +42,10 @@ class TempTravSubanimator:
         self._first_trav: Pointer = NullPointer()
         self._second_trav: Pointer = NullPointer()
 
+        self._fade_in_temp_trav_timing_info = fade_in_temp_trav_timing_info
+        self._move_first_temp_trav_timing_info = move_first_temp_trav_timing_info
+        self._move_second_temp_trav_timing_info = move_second_temp_trav_timing_info
+
         # Start
         self._subanimation_group: SubanimationGroup = self._get_trav_subanimation_group()
 
@@ -48,7 +56,7 @@ class TempTravSubanimator:
             )
 
         if not self._display_first_trav:
-            return SubanimationGroup()
+            return SubanimationGroup(parent=None)
 
         self._first_trav = self._create_first_trav()
         self._second_trav = self._create_second_trav()
@@ -107,11 +115,15 @@ class TempTravSubanimator:
         return 0 if self._trav_position == 'start' else self._index - 1
 
     def _get_first_trav_move_subanimations(self) -> SubanimationGroup:
+        num_groups = self._index - (self._get_first_trav_starting_index() + 1)
+        run_time_per_group = self._move_first_temp_trav_timing_info['run_time'] / num_groups
         return SubanimationGroup(
             *[
                 MoveTrav(
-                    sll=self._sll, trav=self._first_trav,
+                    sll=self._sll,
+                    trav=self._first_trav,
                     to_node=self._sll[index],
+                    run_time=run_time_per_group,
                 )
                 for index in range(self._get_first_trav_starting_index() + 1, self._index)
             ],
@@ -120,16 +132,28 @@ class TempTravSubanimator:
 
     def _get_second_trav_move_subanimations(self) -> SubanimationGroup:
         if not self._display_second_trav:
-            return SubanimationGroup(lag_ratio=1)
+            return SubanimationGroup(lag_ratio=1, parent=None)
 
+        num_groups = self._index - (self._get_first_trav_starting_index() + 1)
+        run_time_per_group = self._move_first_temp_trav_timing_info['run_time'] / num_groups
         return SubanimationGroup(
             *[
                 MoveTrav(
-                    sll=self._sll, trav=self._second_trav,
+                    sll=self._sll,
+                    trav=self._second_trav,
                     to_node=self._sll[index],
+                    run_time=run_time_per_group,
                 )
-                for index in range(self._get_second_trav_starting_index() + 1, self._index + 2)
+                for index in range(self._get_second_trav_starting_index() + 1, self._index + 1)
             ],
+            SubanimationGroup(
+                MoveTrav(
+                    sll=self._sll,
+                    trav=self._second_trav,
+                    to_node=self._sll[self._index + 1],
+                    run_time=self._move_second_temp_trav_timing_info['run_time'],
+                ),
+            ),
             lag_ratio=1,
         )
 
@@ -144,19 +168,24 @@ class TempTravSubanimator:
             return first_trav_moves
 
         combined_moves: SubanimationGroup = SubanimationGroup(lag_ratio=1)
-        for first, second in zip(first_trav_moves, second_trav_moves):
+        for i, (first, second) in enumerate(zip(first_trav_moves, second_trav_moves)):
             combined_moves.add(
-                SubanimationGroup(first, second, lag_ratio=0),
+                SubanimationGroup(first, second, lag_ratio=0, parent=combined_moves, unique_id=f'move_first_temp_trav_{i}'),
             )
-        combined_moves.add(second_trav_moves.get(-1))
+
+        move_second_temp_trav_n: SubanimationGroup = second_trav_moves.get(-1)
+        combined_moves.add(move_second_temp_trav_n)
         return combined_moves
 
     def _prepend_trav_fade_in_subanimations(
         self,
         subanimations: SubanimationGroup,
     ) -> SubanimationGroup:
+        run_time = self._fade_in_temp_trav_timing_info['run_time']
         trav_fade_in_subanimations: SubanimationGroup = SubanimationGroup(
             lag_ratio=0,
+            unique_id='fade_in_temp_trav',
+            parent=subanimations,
         )
 
         if self._display_first_trav:
@@ -175,6 +204,7 @@ class TempTravSubanimator:
             )
 
         subanimations.insert(0, trav_fade_in_subanimations)
+        subanimations.insert(1, WaitSubanimation(sll=self._sll, run_time=run_time))
         return subanimations
 
     def has_subanimations(self) -> bool:

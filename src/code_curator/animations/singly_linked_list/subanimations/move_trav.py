@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 
 class MoveTrav(LeafSubanimation):
-    def __init__(self, sll: SinglyLinkedList, trav: Pointer, to_node: SLLNode) -> None:
-        super().__init__(sll)
+    def __init__(self, sll: SinglyLinkedList, trav: Pointer, to_node: SLLNode, run_time: float = 1.0) -> None:
+        super().__init__(sll, run_time=run_time)
         self._trav: Pointer = trav
         self._to_node: SLLNode = to_node
 

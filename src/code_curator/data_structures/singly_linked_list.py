@@ -154,6 +154,7 @@ class SinglyLinkedList(CustomVMobject):
             trav_position=trav_position,
             aligned=aligned,
             sll_calling_method=self.remove_at,
+            **kwargs,
         )
 
     # NOTE: Maybe also remove node from sll?
