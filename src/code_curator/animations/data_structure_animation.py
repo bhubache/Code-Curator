@@ -45,6 +45,10 @@ class DataStructureAnimation(Animation):
         self._animator: DataStructureAnimator = data_structure_animator
         self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
 
+        # self.run_time = self._animator.get_run_time()
+        # self._subanimation_group = self._animator.get_subanimation_group()
+        # self._subanimation_group.init_run_time()
+
     def begin(self) -> None:
         """Set up the animation."""
         self.run_time = self._animator.get_run_time()
@@ -88,3 +92,21 @@ class DataStructureAnimation(Animation):
             index: Index at which the subanimation should be removed.
         """
         self._subanimation_group.remove(self._subanimation_group.get(index))
+
+    def set_timing(self, subanimation_identifier: str, run_time: float) -> None:
+        """Set the timing of a subanimation."""
+        success = self._subanimation_group.set_timing(
+            identifier=subanimation_identifier,
+            run_time=run_time,
+        )
+        if not success:
+            raise LookupError(f'Unable to find subanimation {subanimation_identifier}')
+
+    def pad_with_wait(self, subanimation_identifier: str, run_time: float) -> None:
+        success = self._subanimation_group.pad_with_wait(
+            identifier=subanimation_identifier,
+            run_time=run_time,
+        )
+        if not success:
+            raise LookupError(f'Unable to find subanimation {subanimation_identifier}')
+        print(self._subanimation_group)

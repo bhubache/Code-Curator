@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from collections.abc import Mapping
 
 from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Animation
@@ -29,6 +30,7 @@ class AnimationLeaf(AnimationScript):
         self._is_overriding_animation = False
         self._tags = tags
         self._func = lambda: 0
+        self.SUBANIMATION_TIMINGS_NAME = '_subanimation_timings'
 
     def __str__(self) -> str:
         formatted_info: str = (
@@ -50,7 +52,10 @@ class AnimationLeaf(AnimationScript):
 
     @property
     def text(self) -> str:
-        return self._text.strip()
+        try:
+            return ' '.join([text for text in self._text.values()])
+        except AttributeError:
+            return self._text.strip()
 
     @property
     def num_words(self):
@@ -138,7 +143,10 @@ class AnimationLeaf(AnimationScript):
 
     @property
     def animation_run_time(self) -> float:
-        return self._animation.run_time
+        try:
+            return self._animation.run_time
+        except AttributeError:
+            return None
 
     @animation_run_time.setter
     def animation_run_time(self, new_run_time: float):
@@ -149,11 +157,29 @@ class AnimationLeaf(AnimationScript):
         return Tag.CODE_TIMING in self.tags
 
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
-        self.start = aligned_script.get_word_start(start)
-        self.end = aligned_script.get_word_end(end)
-        self.audio_duration = aligned_script.get_word_duration_from_to(
-            start, end,
-        )
+        if isinstance(self._text, Mapping):
+            setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
+            for subsection_name, text in self._text.items():
+                subsection_start = aligned_script.get_word_start(start)
+                subsection_end = aligned_script.get_word_end(start + len(text.split()))
+                logger.info(f'{subsection_name} start: {subsection_start}')
+                logger.info(f'{subsection_name} end: {subsection_end}')
+                subsection_audio_duration = aligned_script.get_word_duration_from_to(
+                    start,
+                    start + len(text.split()),
+                )
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = {}
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name]['run_time'] = subsection_audio_duration
+                # setattr(self, f'{subsection_name}', subsection_audio_duration)
+                start = start + len(text.split()) + 1
+                logger.info(f'{subsection_name} duration: {subsection_audio_duration}')
+                logger.info(f'new start: {start}')
+        else:
+            self.start = aligned_script.get_word_start(start)
+            self.end = aligned_script.get_word_end(end)
+            self.audio_duration = aligned_script.get_word_duration_from_to(
+                start, end,
+            )
 
         # Default animation to Wait
         self.animation = Wait(self._audio_duration)
@@ -206,29 +232,32 @@ class AnimationLeaf(AnimationScript):
         return None
 
     def get_flattened_iterable(self) -> list:
-        # Separate explicit animation from the extra wait time!
-        if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
-            wait_padding_explicit_animation_leaf = AnimationLeaf(
-                unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[],
-            )
-            wait_padding_explicit_animation_leaf.add_animation(
-                'WAIT_PADDING', lambda: 0, Wait(
-                    round(self.audio_duration - self.animation_run_time, 2),
-                ), False,
-            )
-            wait_padding_explicit_animation_leaf.audio_duration = \
-                wait_padding_explicit_animation_leaf.animation_run_time
-
-            wait_padding_explicit_animation_leaf.parent = self.parent
-
+        if isinstance(self._text, Mapping):
             self.audio_duration = self.animation_run_time
+        else:
+            # Separate explicit animation from the extra wait time!
+            if not self.is_wait_animation and self.animation_run_time < self.audio_duration:
+                wait_padding_explicit_animation_leaf = AnimationLeaf(
+                    unique_id='WAIT_PADDING', text=self._text, is_wait_animation=True, tags=[],
+                )
+                wait_padding_explicit_animation_leaf.add_animation(
+                    'WAIT_PADDING', lambda: 0, Wait(
+                        round(self.audio_duration - self.animation_run_time, 2),
+                    ), False,
+                )
+                wait_padding_explicit_animation_leaf.audio_duration = \
+                    wait_padding_explicit_animation_leaf.animation_run_time
 
-            if self.is_overriding_end:
-                self.is_overriding_end = False
-                wait_padding_explicit_animation_leaf.is_overriding_end = True
+                wait_padding_explicit_animation_leaf.parent = self.parent
 
-            self.end += self.animation_run_time
-            return [self, wait_padding_explicit_animation_leaf]
+                self.audio_duration = self.animation_run_time
+
+                if self.is_overriding_end:
+                    self.is_overriding_end = False
+                    wait_padding_explicit_animation_leaf.is_overriding_end = True
+
+                self.end += self.animation_run_time
+                return [self, wait_padding_explicit_animation_leaf]
 
         return [self]
 

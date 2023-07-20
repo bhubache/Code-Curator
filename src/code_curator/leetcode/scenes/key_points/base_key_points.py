@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import inspect
+
 from manim import AnimationGroup
 from manim import FadeIn
 from manim import UP
@@ -26,6 +28,22 @@ class BaseKeyPoints(BaseScene):
         self._key_points_table = ProblemText.create_key_points_table(self._points, self._insights)
         self._animation_spec = self.create_animation_spec()
         self.add_base_animations()
+
+    def __getattr__(self, attr_name):
+        section_name = inspect.stack()[1].function
+        subsection_name = '_'.join(attr_name.split('_')[:-1])
+        subsection_number = attr_name.split('_')[-1]
+        print(self.aligned_animation_scene.unique_id)
+        animation_leaf = self.aligned_animation_scene.get_component(f'{section_name}_{subsection_number}')
+        # result = self.aligned_animation_scene.get_child(section_name)
+        timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
+        # if attr_name == 'curve_pointer_1':
+        #     breakpoint()
+        return timing_info[subsection_name]
+        # print(result)
+        # raise
+        # return result
+        # return getattr(self.aligned_animation_scene, attr_name)
 
     def create_animation_spec(self):
         return {

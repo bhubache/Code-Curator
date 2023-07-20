@@ -24,7 +24,7 @@ class ForecastedSubanimationGroupCreator:
 
     def _chain_subanimations(self) -> None:
         for builder_helper_func in self._subanimation_builder_helpers:
-            builder_helper_func(self._animator)
+            builder_helper_func(self._animator, *builder_helper_func.args, **builder_helper_func.kwargs)
 
     def _replace_subanimations_with_successive_counterparts(self) -> None:
         self._animator.create_subanimation_group_successive_counterpart()

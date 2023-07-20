@@ -7,8 +7,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class WaitSubanimation(LeafSubanimation):
-    def __init__(self, run_time: int = 1):
-        super().__init__(None, run_time=run_time)
+    def __init__(self, sll, run_time: int = 1):
+        super().__init__(sll=sll, run_time=run_time)
 
     def begin(self) -> None:
         pass
@@ -20,4 +20,4 @@ class WaitSubanimation(LeafSubanimation):
         pass
 
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return Wait()
+        return WaitSubanimation(sll=self._sll, run_time=self._run_time)
