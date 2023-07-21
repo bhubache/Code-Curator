@@ -7,6 +7,7 @@ from manim import Animation
 from manim import AnimationGroup
 from manim import Wait
 from code_curator.script_handling.components.animation_script.subanimation_time_keeper import SubanimationTimeKeeper
+from code_curator.animations.fixed_succession import FixedSuccession
 
 # TODO: The 'and' time that extends to the next time keeper is getting lost
 
@@ -34,11 +35,9 @@ class ParallelAnimation(Animation):
         raise NotImplementedError()
 
     def build(self):
-        animation_group = AnimationGroup(
+        return FixedSuccession(
             *self.finalized_animations,
-            lag_ratio=1,
         )
-        return animation_group
 
     def _build(self):
         animations = []
