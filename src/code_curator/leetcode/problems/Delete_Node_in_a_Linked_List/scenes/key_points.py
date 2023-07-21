@@ -96,7 +96,7 @@ class KeyPoints(BaseKeyPoints):
                         FadeIn(c),
                         FadeIn(s),
                         FadeIn(r),
-                        # FadeOut(c, s, r),
+                        FadeOut(c, s, r),
                     ],
                 ).build(),
                 data_structure_animation,
