@@ -12,6 +12,7 @@ from ..alignment_script.alignments.aligned_script import AlignedScript
 from .animation_script import AnimationScript
 # from code_curator.script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
 # from code_curator.script_handling.tag import Tag
+from .subanimation_time_keeper import SubanimationTimeKeeper
 logger = CustomLogger.getLogger(__name__)
 
 
@@ -159,21 +160,18 @@ class AnimationLeaf(AnimationScript):
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         if isinstance(self._text, Mapping):
             setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
+            subanimation_time_accumulation: float = 0.0
             for subsection_name, text in self._text.items():
-                subsection_start = aligned_script.get_word_start(start)
-                subsection_end = aligned_script.get_word_end(start + len(text.split()))
-                logger.info(f'{subsection_name} start: {subsection_start}')
-                logger.info(f'{subsection_name} end: {subsection_end}')
-                subsection_audio_duration = aligned_script.get_word_duration_from_to(
-                    start,
-                    start + len(text.split()),
+                subanimation_time_keeper = SubanimationTimeKeeper(
+                    text=text,
+                    words=[aligned_script.get_word(word_index) for word_index in range(start, start + len(text.split()))],
+                    time_until_start=subanimation_time_accumulation,
                 )
-                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = {}
-                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name]['run_time'] = subsection_audio_duration
-                # setattr(self, f'{subsection_name}', subsection_audio_duration)
-                start = start + len(text.split()) + 1
-                logger.info(f'{subsection_name} duration: {subsection_audio_duration}')
-                logger.info(f'new start: {start}')
+
+                subanimation_time_accumulation += subanimation_time_keeper.total_run_time
+                getattr(self, self.SUBANIMATION_TIMINGS_NAME)[subsection_name] = subanimation_time_keeper
+
+                start = start + len(text.split())
         else:
             self.start = aligned_script.get_word_start(start)
             self.end = aligned_script.get_word_end(end)

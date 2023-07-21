@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Callable
+from collections.abc import Sequence
 
 from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import Animation
@@ -97,7 +98,8 @@ class CompositeAnimationScript(AnimationScript):
                 self._children[i] = new_child
                 return True
         return False
-
+    
+    # TODO: Raise LookupError if comment can't be found
     def get_component(self, unique_id: str) -> AnimationScript:
         if self.unique_id == unique_id:
             return self
@@ -108,6 +110,7 @@ class CompositeAnimationScript(AnimationScript):
                 return comp
         return None
 
+    # TODO: I believe there's some wasted time recalculating this recursively every time
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
         for child in self.children:
             child.apply_alignments(

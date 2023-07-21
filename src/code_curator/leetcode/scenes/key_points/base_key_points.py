@@ -39,7 +39,7 @@ class BaseKeyPoints(BaseScene):
         timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
         # if attr_name == 'curve_pointer_1':
         #     breakpoint()
-        return timing_info[subsection_name]
+        return timing_info[subsection_name].copy()
         # print(result)
         # raise
         # return result

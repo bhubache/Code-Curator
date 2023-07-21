@@ -14,8 +14,15 @@ from manim import Line
 from manim import UP
 from manim import Wait
 from manim import Write
+from manim import Circle
+from manim import Square
+from manim import Rectangle
+from manim import RED
+from manim import Transform
+from manim import FadeOut
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 from code_curator.animations.subanimations.wait import WaitSubanimation
+from code_curator.animations.parallel_animation import ParallelAnimation
 
 POINTS: list[str] = [
     'The node to be deleted is not the tail',
@@ -59,6 +66,7 @@ class KeyPoints(BaseKeyPoints):
             )
             # .subsequently_shrink_pointer()
             # .subsequently_unshrink_pointer()
+            .subsequently_wave_pointer(timing_info=self.wave_pointer_1)
             .subsequently_curve_pointer(timing_info=self.curve_pointer_1)
             .subsequently_fade_out_container(timing_info=self.fade_out_container_1)
                 .with_fade_out_pointer()
@@ -68,10 +76,31 @@ class KeyPoints(BaseKeyPoints):
                 .with_center_sll()
             .build_animation(),
         )
-
+        c = Circle()
+        s = Square()
+        r = Rectangle()
         return [
             FadeIn(sll),
-            data_structure_animation,
+            AnimationGroup(
+                ParallelAnimation(
+                    'take p1s next pointer and',
+                    'set it equal',
+                    'to p2.',
+                    'We have',
+                    time_keepers=(
+                        self.wave_pointer_1,
+                        self.curve_pointer_1,
+                        self.fade_out_container_1,
+                    ),
+                    animations=[
+                        FadeIn(c),
+                        FadeIn(s),
+                        FadeIn(r),
+                        # FadeOut(c, s, r),
+                    ],
+                ).build(),
+                data_structure_animation,
+            ),
             Wait(),
         ]
 

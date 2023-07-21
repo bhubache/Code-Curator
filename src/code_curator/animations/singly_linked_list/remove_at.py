@@ -10,6 +10,7 @@ from code_curator.data_structures.pointers.pointer import Pointer
 from manim import VGroup
 
 from .data_structure_animator import _register_subanimation
+from .data_structure_animator import _determine_timing
 from .data_structure_animator import DataStructureAnimator
 from .subanimations.base_subanimation import BaseSubanimation
 from .subanimations.center_sll import CenterSLL
@@ -21,6 +22,7 @@ from .subanimations.flatten_list_for_remove import FlattenListForRemove
 from .subanimations.shrink_pointer import ShrinkPointer
 from .subanimations.unshrink_pointer import UnshrinkPointer
 from .utils.temp_trav_subanimator import TempTravSubanimator
+from .subanimations.wave_pointer import WavePointer
 logger = CustomLogger.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -102,76 +104,89 @@ class RemoveAt(DataStructureAnimator):
         )
 
     @_register_subanimation
+    @_determine_timing
+    def subsequently_wave_pointer(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_wave_pointer(kwargs['run_time']), timing_info=timing_info)
+
+    @_register_subanimation
     def with_fade_out_container(self, run_time: float = 1) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_fade_out_container(), run_time=run_time)
 
     @_register_subanimation
-    def subsequently_fade_out_container(self, *, timing_info: dict) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_fade_out_container(), timing_info=timing_info)
+    @_determine_timing
+    def subsequently_fade_out_container(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_fade_out_container(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_fade_out_pointer(self) -> DataStructureAnimator:
-        return self._add_subanimation_concurrently(self._create_fade_out_pointer())
+        return self._add_subanimation_concurrently(self._create_fade_out_pointer(run_time=1.0))
 
     @_register_subanimation
-    def subsequently_fade_out_pointer(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_fade_out_pointer())
+    @_determine_timing
+    def subsequently_fade_out_pointer(self, * timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_fade_out_pointer(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_shrink_pointer(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_shrink_pointer())
 
     @_register_subanimation
-    def subsequently_shrink_pointer(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_shrink_pointer())
+    @_determine_timing
+    def subsequently_shrink_pointer(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_shrink_pointer(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_unshrink_pointer(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_unshrink_pointer())
 
     @_register_subanimation
-    def subsequently_unshrink_pointer(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_unshrink_pointer())
+    @_determine_timing
+    def subsequently_unshrink_pointer(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_unshrink_pointer(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_curve_pointer(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_curve_pointer())
 
     @_register_subanimation
-    def subsequently_curve_pointer(self, *, timing_info: dict) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_curve_pointer(), timing_info=timing_info)
+    @_determine_timing
+    def subsequently_curve_pointer(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_curve_pointer(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_center_sll(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_center_sll())
 
     @_register_subanimation
-    def subsequently_center_sll(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_center_sll())
+    def subsequently_center_sll(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_center_sll(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_flatten_list(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_flatten_list())
 
     @_register_subanimation
-    def subsequently_flatten_list(self, *, timing_info: dict) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_flatten_list(), timing_info=timing_info)
+    @_determine_timing
+    def subsequently_flatten_list(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_flatten_list(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_fade_out_first_temp_trav(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_fade_out_first_temp_trav())
 
     @_register_subanimation
-    def subsequently_fade_out_first_temp_trav(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_fade_out_first_temp_trav())
+    @_determine_timing
+    def subsequently_fade_out_first_temp_trav(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_fade_out_first_temp_trav(kwargs['run_time']), timing_info=timing_info)
 
     @_register_subanimation
     def with_fade_out_second_temp_trav(self) -> DataStructureAnimator:
         return self._add_subanimation_concurrently(self._create_fade_out_second_temp_trav())
 
     @_register_subanimation
-    def subsequently_fade_out_second_temp_trav(self) -> DataStructureAnimator:
-        return self._add_subanimation_successively(self._create_fade_out_second_temp_trav())
+    @_determine_timing
+    def subsequently_fade_out_second_temp_trav(self, *, timing_info: dict, **kwargs) -> DataStructureAnimator:
+        return self._add_subanimation_successively(self._create_fade_out_second_temp_trav(kwargs['run_time']), timing_info=timing_info)
 
     # TODO: Give a more descriptive name
     def _build_animation(self) -> None:
@@ -206,18 +221,27 @@ class RemoveAt(DataStructureAnimator):
         sll_to_forecast = self._sll.copy()
         return sll_to_forecast
 
-    def _create_fade_out_container(self) -> BaseSubanimation:
+    def _create_wave_pointer(self, run_time: float) -> BaseSubanimation:
+        return WavePointer(
+            sll=self._sll,
+            pointer=self._prev_node_pointer,
+            run_time=run_time,
+        )
+
+    def _create_fade_out_container(self, run_time: float) -> BaseSubanimation:
         return FadeOutContainer(
             sll=self._sll,
             container=self._removed_node.container,
             node=self._removed_node,
+            run_time=run_time,
         )
 
-    def _create_fade_out_pointer(self) -> BaseSubanimation:
+    def _create_fade_out_pointer(self, run_time: float) -> BaseSubanimation:
         return FadeOutMobject(
             sll=self._sll,
             mobject=self._removed_node.pointer_to_next,
             parent_mobject=self._removed_node,
+            run_time=run_time,
         )
 
     def _create_shrink_pointer(self) -> BaseSubanimation:
@@ -234,12 +258,13 @@ class RemoveAt(DataStructureAnimator):
             node=self._prev_node,
         )
 
-    def _create_curve_pointer(self) -> BaseSubanimation:
+    def _create_curve_pointer(self, run_time: float) -> BaseSubanimation:
         return CurvePointer(
             sll=self._sll,
             pointer=self._prev_node_pointer,
             start_node=self._prev_node,
             new_end_node=self._next_node,
+            run_time=run_time,
         )
 
     def _create_center_sll(self) -> BaseSubanimation:
@@ -249,7 +274,7 @@ class RemoveAt(DataStructureAnimator):
             post_subanimation_reference_index=self._removed_node_index,
         )
 
-    def _create_flatten_list(self) -> BaseSubanimation:
+    def _create_flatten_list(self, run_time: float) -> BaseSubanimation:
         sub_list_to_shift = VGroup(
             *[
                 node for i, node in enumerate(
@@ -266,6 +291,7 @@ class RemoveAt(DataStructureAnimator):
             end_node=self._next_node,
             pointer_to_straighten=self._prev_node_pointer,
             sub_list_to_shift=sub_list_to_shift,
+            run_time=run_time,
         )
 
     def _create_fade_out_first_temp_trav(self) -> BaseSubanimation:

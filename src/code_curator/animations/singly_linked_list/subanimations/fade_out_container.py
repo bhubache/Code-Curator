@@ -7,8 +7,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class FadeOutContainer(LeafSubanimation):
-    def __init__(self, sll, container, node) -> None:
-        super().__init__(sll)
+    def __init__(self, sll, container, node, run_time: float = 1.0) -> None:
+        super().__init__(sll, run_time=run_time)
         self._container = container
         self._node = node
 
@@ -30,4 +30,4 @@ class FadeOutContainer(LeafSubanimation):
             submobject.set_opacity(opacity)
 
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return FadeOutContainer(self._sll, self._container, self._node)
+        return FadeOutContainer(self._sll, self._container, self._node, run_time=self._run_time)
