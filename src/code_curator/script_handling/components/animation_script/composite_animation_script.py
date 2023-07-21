@@ -174,8 +174,64 @@ class CompositeAnimationScript(AnimationScript):
                 return True
         return False
 
+    def add_animation(
+        self,
+        unique_id: str,
+        func: Callable,
+        animation: Sequence[Animation],
+        is_overriding_animation: bool,
+    ) -> bool:
+        if self.unique_id == unique_id:
+            if not isinstance(animation, Sequence):
+                raise TypeError(f'animation should be of type Sequence, not {type(animation)}')
+            
+            self.is_overriding_animation = is_overriding_animation
+            if len(animation) == 1:
+                raise Exception('Is this supposed to happen?')
+            elif len(animation) > 1:
+                # Create new leaves
+                for i, (child, anim) in enumerate(zip(self.children, animation)):
+                    is_overriding_start = i == 0
+                    is_overriding_end = i == len(self.children) - 1
+
+                    if i > 0:
+                        # We only want the real function to be called once so we let the first leaf have it
+                        def func(): return 0
+
+                    child.add_animation(
+                        unique_id=f'{unique_id}_{i}', func=func, animation=anim,
+                        is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end,
+                    )
+            else:
+                raise ValueError(f'Length of animations must be greater than zero: given {len(animation)}')
+        else:
+            if not isinstance(animation, Sequence):
+                return
+            
+            if len(animation) == 1:
+                anim = animation[0]
+            elif len(animation) > 1:
+                anim = animation
+            else:
+                ValueError(f'There must be at least one animation: given {len(animation)}')    
+
+            for child in self.children:
+                if isinstance(child, AnimationLeaf):
+                    child.add_animation(
+                        unique_id=unique_id,
+                        func=func,
+                        animation=anim,
+                    )
+                else:
+                    child.add_animation(
+                        unique_id=unique_id,
+                        func=func,
+                        animation=anim,
+                        is_overriding_animation=is_overriding_animation,
+                    )
+
     # @_check_that_unique_id_exists
-    def add_animation(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
+    def add_animation_v1(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
             for child in self.children:
