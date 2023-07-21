@@ -17,14 +17,6 @@ class SceneScheduler:
     def schedule(self, aligned_animation_scene: CompositeAnimationScript):
         flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
 
-        for leaf in flattened:
-            if isinstance(leaf.animation, DataStructureAnimation):
-                print(leaf)
-                print(leaf.animation)
-                print(leaf.audio_duration)
-                print(leaf.animation_run_time)
-                # raise
-
         # Give spare time from Wait animations to other animations
         for i in range(len(flattened) - 1):
             curr_leaf = flattened[i]
@@ -86,7 +78,9 @@ class SceneScheduler:
     def handle_override_end(self, end_leaf, next_leaf, end_parent):
         if end_leaf.is_wait_animation:
             if not end_leaf.has_time_to_spare(self._override_end_time * 2):
-                raise Exception('No time to give overriding animation end for WAIT.')
+                logger.critical(f'Ignoring inability to give time to overriding animation end for WAIT!')
+                # raise Exception('No time to give overriding animation end for WAIT.')
+                pass
 
             end_leaf.remove_time(self._override_end_time * 2)
             end_parent.override_end_time = self._override_end_time

@@ -10,6 +10,7 @@ class AlignedAnimationScript:
         self._aligned_script:   AlignedScript = aligned_script
         self._animation_script: CompositeAnimationScript = animation_script
 
+        # TODO: Don't access non-public variable _words
         self._animation_script.apply_alignments(
             1, len(self._aligned_script._words), self._aligned_script,
         )

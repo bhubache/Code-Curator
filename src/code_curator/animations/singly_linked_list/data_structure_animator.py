@@ -41,6 +41,7 @@ class DataStructureAnimator:
             lag_ratio=1,
             parent=None,
         )
+        self.DEFAULT_RUN_TIME: float = 1.0
 
     # TODO: Make abstract
     def clean_up_mobject(self) -> None:
@@ -77,7 +78,7 @@ class DataStructureAnimator:
             return subanimation
         raise LookupError(f'Unable to find last non wait padding subanimation group in {self._subanimation_group}')
 
-    def _add_subanimation_concurrently(self, *subanimations_to_add: BaseSubanimation, run_time: float = 1) -> DataStructureAnimator:
+    def _add_subanimation_concurrently(self, *subanimations_to_add: BaseSubanimation, timing_info: dict | None = None) -> DataStructureAnimator:
         last_non_wait_padding_subanimation_group = self._get_last_non_wait_padding_subanimation_group()
         if last_non_wait_padding_subanimation_group.is_successive_group():
             last_non_wait_padding_subanimation_group.lag_ratio = 0
@@ -86,6 +87,7 @@ class DataStructureAnimator:
             raise ValueError('I do not think more than one subanimation should be allowed here?')
 
         for subanimation in subanimations_to_add:
+            subanimation._run_time = last_non_wait_padding_subanimation_group.get_run_time()
             last_non_wait_padding_subanimation_group.add(subanimation)
 
         return self
@@ -93,7 +95,7 @@ class DataStructureAnimator:
     def _add_subanimation_successively(self, *subanimations_to_add: BaseSubanimation, timing_info: dict | None = None) -> DataStructureAnimator:
         if len(subanimations_to_add) > 1:
             raise ValueError('I do not think more than one subanimation should be allowed here?')
-        
+
         if timing_info is None:
             self._subanimation_group.add(
                 *[
@@ -115,7 +117,7 @@ class DataStructureAnimator:
                     lag_ratio=1,
                     run_time=timing_info['run_time'],
                     parent=self._subanimation_group,
-                )
+                ),
             )
 
         return self
@@ -151,4 +153,14 @@ def _register_subanimation(builder_helper_func):
             builder_helper_func,
         )
         return builder_helper_func(self, *args, **kwargs)
+    return inner
+
+def _determine_timing(fn):
+    def inner(self, *args, **kwargs):
+        timing_info = kwargs['timing_info']
+        run_time: float = min(timing_info['run_time'], self.DEFAULT_RUN_TIME)
+        timing_info['run_time'] -= run_time
+        kwargs['timing_info'] = timing_info
+        result = fn(self, *args, run_time=run_time, **kwargs)
+        return result
     return inner
