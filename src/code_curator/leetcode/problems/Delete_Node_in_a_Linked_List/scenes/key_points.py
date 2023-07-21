@@ -74,7 +74,7 @@ class KeyPoints(BaseKeyPoints):
                 .with_fade_out_first_temp_trav()
                 .with_fade_out_second_temp_trav()
                 .with_center_sll()
-            .build_animation(),
+            .build_animation()
         )
         c = Circle()
         s = Square()
