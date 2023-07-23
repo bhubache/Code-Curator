@@ -118,7 +118,15 @@ class TempTravSubanimator:
 
     def _get_first_trav_move_subanimations(self) -> SubanimationGroup:
         num_groups = self._index - (self._get_first_trav_starting_index() + 1)
-        run_time_per_group = self._move_first_temp_trav_timing_info['run_time'] / num_groups
+        total_time_allotted = self._move_first_temp_trav_timing_info['run_time']
+        if (total_trav_move_run_time := DEFAULT_RUN_TIME * num_groups) > total_time_allotted:
+            raise ValueError(f'There is not enough time to give each advancement of the first temp trav one second: time allotted is {time_alloted}')
+
+        post_wait_time = total_time_allotted - total_trav_move_run_time
+        run_time_per_group = DEFAULT_RUN_TIME
+        self.first_move_trav_run_time_per_group = run_time_per_group
+        self.first_trav_post_wait_time = post_wait_time
+
         return SubanimationGroup(
             *[
                 MoveTrav(
@@ -129,6 +137,10 @@ class TempTravSubanimator:
                 )
                 for index in range(self._get_first_trav_starting_index() + 1, self._index)
             ],
+            WaitSubanimation(
+                sll=self._sll,
+                run_time=post_wait_time,
+            ),
             lag_ratio=1,
         )
 
@@ -136,25 +148,39 @@ class TempTravSubanimator:
         if not self._display_second_trav:
             return SubanimationGroup(lag_ratio=1, parent=None)
 
-        num_groups = self._index - (self._get_first_trav_starting_index() + 1)
-        run_time_per_group = self._move_first_temp_trav_timing_info['run_time'] / num_groups
+        total_time_allotted = self._move_second_temp_trav_timing_info['run_time']
+        if DEFAULT_RUN_TIME > total_time_allotted:
+            raise ValueError(f'There is not enough time to give the last advancement of the second temp trav one second: time allotted is {time_alloted}')
+
+        trav_move_time = DEFAULT_RUN_TIME
+        post_wait_time = total_time_allotted - trav_move_time
+
         return SubanimationGroup(
             *[
                 MoveTrav(
                     sll=self._sll,
                     trav=self._second_trav,
                     to_node=self._sll[index],
-                    run_time=run_time_per_group,
+                    run_time=self.first_move_trav_run_time_per_group,
                 )
                 for index in range(self._get_second_trav_starting_index() + 1, self._index + 1)
             ],
+            WaitSubanimation(
+                sll=self._sll,
+                run_time=self.first_trav_post_wait_time,
+            ),
             SubanimationGroup(
                 MoveTrav(
                     sll=self._sll,
                     trav=self._second_trav,
                     to_node=self._sll[self._index + 1],
-                    run_time=self._move_second_temp_trav_timing_info['run_time'],
+                    run_time=trav_move_time,
                 ),
+                WaitSubanimation(
+                    sll=self._sll,
+                    run_time=post_wait_time,
+                ),
+                lag_ratio=1,
             ),
             lag_ratio=1,
         )
