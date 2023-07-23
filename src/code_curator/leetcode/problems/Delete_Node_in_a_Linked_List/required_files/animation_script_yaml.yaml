@@ -10,6 +10,15 @@ KeyPoints:
       curve_pointer: and set it equal to p2.
       fade_out_container: We have now effectively removed the node from the linked list.
       flatten_list: Return everything to normal.
-    2: is in the list and is not
-  key_point_1_fade_in: a
-  _IMPLICIT_WAIT_1: tail node ok now that we've
+    2: is in
+    3:
+      next_fade_in_temp_trav: the list
+      next_move_first_temp_trav_n: and is not
+      next_wave_pointer: a tail node ok now that we've been introduced
+      next_shrink_pointer: to the problem let's try to understand
+      next_unshrink_pointer: the problem constraints because they can
+      next_curve_pointer: often provide insight about the solution
+      next_fade_out_container: at first glance the first constraint may seem
+      next_flatten_list: quite strange why is the lower bound 2 is
+  key_point_1_fade_in: there 
+  _IMPLICIT_WAIT_1: something special about 2 well if

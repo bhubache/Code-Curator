@@ -2,7 +2,8 @@ import re
 import difflib
 import os
 
-from manim import Code, BLACK, RED, YELLOW, BLUE, ORANGE, PURPLE, Rectangle, LEFT, UP, DOWN, AnimationGroup
+from manim import Code, BLACK, RED, YELLOW, BLUE, ORANGE, PURPLE, Rectangle, LEFT, UP, DOWN, RIGHT, AnimationGroup, FadeIn, FadeOut, Mobject
+from manim import Animation
 
 from .code_highlighter import CodeHighlighter
 
@@ -10,15 +11,24 @@ class CustomCode(Code):
     def __init__(
         self,
         file_name: str,
-        tab_width = 4,
+        tab_width=4,
         font='Monospace',
-        font_size = 24,
+        font_size=24,
+        stroke_width=0,
+        margin: float = 0.1,
+        background: str | None = None,
         background_stroke_width: float = 0,
-        background_color = BLACK,
+        background_stroke_color: str = '#FFFFFF',
+        corner_radius=0.0,
+        background_color=None,
         insert_line_no: bool = False,
         style: str = 'nord',
         language: str = 'java',
-        **kwargs):
+        position_relative_to: Mobject = None,
+        move_up: float = 0.0,
+        move_right: float = 0.0,
+        **kwargs,
+    ) -> None:
         self._make_blank_lines_not_empty(file_name)
 
         super().__init__(
@@ -26,14 +36,101 @@ class CustomCode(Code):
             tab_width=tab_width,
             font=font,
             font_size=font_size,
+            stroke_width=stroke_width,
+            margin=margin,
+            background=background,
             background_stroke_width=background_stroke_width,
+            background_stroke_color=background_stroke_color,
+            corner_radius=corner_radius,
             insert_line_no=insert_line_no,
             style=style,
             language=language,
-            **kwargs
+            **kwargs,
         )
         self._set_background_color(background_color)
         self._highlighter = None
+
+        if position_relative_to is None:
+            position_relative_to = Mobject()
+
+        relatives_x, relatives_y, relatives_z = position_relative_to.get_center()
+        self.move_to(
+            [
+                relatives_x + move_right,
+                relatives_y + move_up,
+                relatives_z,
+            ],
+        )
+
+    def get_fade_out_animation(
+        self,
+        string: str | None = None,
+        occurrence: int = 1,
+    ) -> Animation:
+        return FadeOut(self.get_substring_code(string, occurrence))
+
+
+    def get_opacity_animation(
+        self,
+        string: str | None = None,
+        occurrence: int = 1,
+        opacity: float = 1.0,
+    ) -> Animation:
+        code_opacity_animation = self.get_substring_code(string, occurrence).animate.set_opacity(opacity)
+        no_op_animation = Animation(Mobject())
+        try:
+            if self[0].fill_opacity == 1:
+                background_opacity_animation = no_op_animation
+            else:
+                self[0].fill_opacity = 1
+                background_opacity_animation = self[0].animate.set_opacity(1)
+        except AttributeError:
+            background_opacity_animation = no_op_animation
+
+        return AnimationGroup(
+            code_opacity_animation,
+            background_opacity_animation,
+        )
+        # return FadeIn(self.get_substring_code(string, occurrence))
+
+    def get_substring_code(self, substring: str | None, occurrence: int = 1):
+        if occurrence < 1:
+            raise ValueError(f'``occurrence`` must be positive and non-zero. Given: {occurrence}')
+
+        if substring is None:
+            # Return everything including the background
+            return self
+            # substring = self.code_string
+
+        code_string: str = self.code_string
+        occurrences_seen: int = 0
+        num_chars_seen: int = 0
+        while occurrences_seen < occurrence:
+            match = re.search(substring, code_string)
+            try:
+                new_code_string = code_string[match.end():]
+            except (TypeError, AttributeError):
+                raise RuntimeError(f'Unable to find occurrence ``{occurrence}`` for substring ``{substring}`` in code.') from None
+            else:
+                occurrences_seen += 1
+                # TODO: Remove duplicate code check that also occurs in while loop
+                if occurrences_seen < occurrence:
+                    num_chars_seen += len(code_string) - len(new_code_string)
+                    code_string = new_code_string
+
+        return self._get_substring_code(num_chars_seen + match.start(), num_chars_seen + match.end())
+
+    def _get_substring_code(self, start: int, stop: int):
+        """Return substring code.
+
+        Args:
+            start: Starting index of substring.
+            stop: Ending index of substring, exclusive.
+
+        Returns:
+
+        """
+        return self.code.lines_text[start : stop]
 
     @property
     def num_lines(self) -> int:
@@ -63,7 +160,7 @@ class CustomCode(Code):
 
                 if match is None:
                     raise RuntimeError(f'Unable to find occurrence {occurrence} of token {token} in line {line}')
-                
+
                 start_index = token_start_index
                 end_index = match.end() + token_start_index
                 break
@@ -95,7 +192,7 @@ class CustomCode(Code):
                 content_lines[i] = ' '
 
         no_blank_lines_contents = '\n'.join(content_lines)
-        
+
 
         with open(file_path, 'w') as write_file:
             write_file.write(no_blank_lines_contents)
@@ -112,7 +209,6 @@ class CustomCode(Code):
             if line.width > max_width:
                 max_width = line.width
         return max_width
-
 
     def has_more_height(self, other):
         return self.height >= other.height

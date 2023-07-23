@@ -244,18 +244,20 @@ class RemoveAt(DataStructureAnimator):
             run_time=run_time,
         )
 
-    def _create_shrink_pointer(self) -> BaseSubanimation:
+    def _create_shrink_pointer(self, run_time: float) -> BaseSubanimation:
         return ShrinkPointer(
             sll=self._sll,
             pointer=self._prev_node_pointer,
             node=self._prev_node,
+            run_time=run_time,
         )
 
-    def _create_unshrink_pointer(self) -> BaseSubanimation:
+    def _create_unshrink_pointer(self, run_time: float) -> BaseSubanimation:
         return UnshrinkPointer(
             sll=self._sll,
             pointer=self._prev_node_pointer,
             node=self._prev_node,
+            run_time=run_time,
         )
 
     def _create_curve_pointer(self, run_time: float) -> BaseSubanimation:

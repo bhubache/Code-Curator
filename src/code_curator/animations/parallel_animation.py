@@ -50,7 +50,7 @@ class ParallelAnimation(Animation):
 
         animations.insert(0, initial_wait_animation)
         return animations
-    
+
     def _get_animation_timings(self) -> Sequence[Animation]:
         # self.time_keepers[0].partition(string_alignment)
         # If resulting tuple has an empty string as the second element, shrink string_alignment by one token from the right
@@ -111,7 +111,12 @@ class ParallelAnimation(Animation):
                         break
                     else:
                         # TODO: Strip strings?
-                        animation_timings[-1] += self.time_keepers[latest_exhausted_time_keeper + 1].get_sequence_time(partition[1])
+                        additional_time = self.time_keepers[latest_exhausted_time_keeper + 1].get_sequence_time(partition[1])
+                        try:
+                            animation_timings[-1] += additional_time
+                        except IndexError:
+                            animation_timings.append(additional_time)
+
                         latest_exhausted_time_keeper += 1
                         partition = self.time_keepers[latest_exhausted_time_keeper + 1].partition(' '.join(overflow_sequence))
                         # # NOTE: Error if overflow_sequence extends past curr_time_keeper?

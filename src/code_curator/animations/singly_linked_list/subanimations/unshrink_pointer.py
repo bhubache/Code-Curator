@@ -22,8 +22,9 @@ class UnshrinkPointer(LeafSubanimation):
         sll: SinglyLinkedList,
         pointer: Pointer,
         node: SLLNode,
+        run_time: float = 1.0,
     ) -> None:
-        super().__init__(sll)
+        super().__init__(sll, run_time=run_time)
         self._pointer: Pointer = pointer
         self._node: SLLNode = node
 
