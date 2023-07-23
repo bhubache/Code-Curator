@@ -89,7 +89,12 @@ class ParallelAnimation(Animation):
 
                     if len(overflow_sequence) == 0:
                         DEFAULT_RUN_TIME = 1
-                        animation_timings[-1] += self.time_keepers[latest_exhausted_time_keeper + 1].get_sequence_time(partition[1])
+                        additional_time = self.time_keepers[latest_exhausted_time_keeper + 1].get_sequence_time(partition[1])
+                        try:
+                            animation_timings[-1] += additional_time
+                        except IndexError:
+                            animation_timings.append(additional_time)
+
                         next_animation = self.animations.pop(0)
                         if animation_timings[-1] > DEFAULT_RUN_TIME:
                             next_animation.run_time = DEFAULT_RUN_TIME

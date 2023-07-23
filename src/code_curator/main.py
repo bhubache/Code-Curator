@@ -19,6 +19,7 @@ from manim import FadeIn
 from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
+from moviepy.editor import AudioFileClip
 
 from code_curator.ai_audio_creator import AIAudioCreator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
@@ -335,10 +336,9 @@ def main() -> None:
             # Generate audio from text
             audio_path: Path = AIAudioCreator.create_audio(problem_dir / 'dev_files' / 'MFA' / 'input' / 'ai_script.txt')
             ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(problem_dir / 'dev_files')
-            breakpoint()
 
             # Create and parse alignments into file
-            
+
 
 
         aligned_animation_script = get_aligned_animation_script(
@@ -349,6 +349,12 @@ def main() -> None:
             scene_classes, problem_dir,
             aligned_animation_script.get_scenes(),
         )
+
+        # Combine video and audio together!
+        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'KeyPoints.mp4')))
+        audio_clip = AudioFileClip(str(audio_path))
+        final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
+        final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=60)
     else:
         test_scene = TestScene()
         test_scene.render()

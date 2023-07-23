@@ -96,16 +96,30 @@ class BaseScene(ABC, Scene):
 
             for child in composite.children:
                 self.play(child.animation)
+            
+            try:
+                self.play(
+                    FadeOut(*self.mobjects),
+                    run_time=composite.override_end_time,
+                )
+            except AttributeError:
+                # FIXME: THIS IS A WORKAROUND!
+                self.play(
+                    FadeOut(*self.mobjects),
+                    run_time=0.5,
+                )
+            try:
+                self.play(
+                    FadeIn(*mobjects_on_screen_before_animation),
+                    run_time=composite.override_end_time,
+                )
+            except AttributeError:
+                # FIXME: THIS IS A WORKAROUND!
+                self.play(
+                    FadeIn(*mobjects_on_screen_before_animation),
+                    run_time=0.5,
+                )
 
-            self.play(
-                FadeOut(*self.mobjects),
-                run_time=composite.override_end_time,
-            )
-
-            self.play(
-                FadeIn(*mobjects_on_screen_before_animation),
-                run_time=composite.override_end_time,
-            )
         return inner
 
     def add_base_animations(self) -> None:

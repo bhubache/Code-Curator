@@ -1,1 +1,6 @@
-Delete Node in a linked list. Ok, so the problem is as follows. Write a function to delete a node in a singly linked list. Here, we have a linked list with pointers p1 and p2, with p1 situated at the head, and p2 at the heads next node. We advance both pointers until p1 reaches the node before the node to be removed. Then, move p2 one more node so that p1 and p2 sandwich the node to be removed. Now, take p1s next pointer and set it equal to p2. We have now effectively removed the node from the linked ist. Return everything to normal. is in the list and is not a tail node ok now that we've
+Now, considering everything about this problem, let's identify and examine the key peices of information.
+Here, we have a linked list with pointers p1 and p2, with p1 situated at the head, and p2 at the heads next node. We advance both pointers
+until p1 reaches the node before the node to be removed. Then, move p2 one more node so that p1 and p2 sandwich the node to be removed.
+Now, take p1s next pointer and set it equal to p2. We have now effectively removed the node from the linked list. Return everything to normal.
+We can also solve this with just p1. Again, advance p1 until it's just before the node we want to remove. Then take p1s next pointer and set it
+equal to p1.next.next. We have again removed the node. Now return everything to normal again. As you can see, the node to be deleted is not the tail.

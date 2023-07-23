@@ -26,7 +26,6 @@ class SceneScheduler:
                 run_time_curr_needs = curr_leaf.get_needed_run_time()
 
                 if not next_leaf.has_time_to_spare(run_time_curr_needs):
-                    continue  # TODO: REMOVE!
                     raise Exception(
                         f'The next leaf {next_leaf.unique_id} does not have time to spare: {run_time_curr_needs}'
                     )
@@ -79,16 +78,15 @@ class SceneScheduler:
     def handle_override_end(self, end_leaf, next_leaf, end_parent):
         if end_leaf.is_wait_animation:
             if not end_leaf.has_time_to_spare(self._override_end_time * 2):
-                logger.critical(f'Ignoring inability to give time to overriding animation end for WAIT!')
-                # raise Exception('No time to give overriding animation end for WAIT.')
-                pass
+                # logger.critical(f'Ignoring inability to give time to overriding animation end for WAIT!')
+                raise Exception('No time to give overriding animation end for WAIT.')
+                # pass
 
             end_leaf.remove_time(self._override_end_time * 2)
             end_parent.override_end_time = self._override_end_time
         else:
             if not next_leaf.has_time_to_spare(self._override_end_time * 2):
-                pass
-                # raise Exception('No time to give overriding animation end')
+                raise Exception('No time to give overriding animation end')
 
             next_leaf.remove_time(self._override_end_time * 2)
             end_parent.override_end_time = self._override_end_time

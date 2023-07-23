@@ -8,8 +8,8 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class SuccessiveMoveTrav(LeafSubanimation):
-    def __init__(self, sll, trav, to_node):
-        super().__init__(sll)
+    def __init__(self, sll, trav, to_node, run_time: float = 1.0):
+        super().__init__(sll, run_time=run_time)
         self._trav = trav
         self._to_node = to_node
 
@@ -27,4 +27,4 @@ class SuccessiveMoveTrav(LeafSubanimation):
         super().clean_up_from_animation()
 
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
+        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node, run_time=self._run_time)
