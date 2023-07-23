@@ -129,9 +129,9 @@ class KeyPoints(BaseKeyPoints):
             FadeIn(sll),
             AnimationGroup(
                 ParallelAnimation(
-                    'Now, take p1s next pointer and',
-                    'set it equal',
-                    'to p2.',
+                    'Now, take p1s next pointer',
+                    'and set it',
+                    'equal to p2.',
                     'We have now effectively removed the node from the linked list.',
                     # 'We have now effectively',
                     time_keepers=(
