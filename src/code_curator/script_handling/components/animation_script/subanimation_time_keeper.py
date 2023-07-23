@@ -43,8 +43,17 @@ class SubanimationTimeKeeper:
             raise ValueError(f'Length of text does not match length of word_timings: {len(text.split())} != {len(words)}')
 
         for text_word, aligned_word in zip(text.split(), words):
-            if text_word != aligned_word.text:
+            if self.normalize_word(text_word) != self.normalize_word(aligned_word.text):
+                breakpoint()
                 raise ValueError('Aligned words are not matching up with text from yaml file!')
+
+    def normalize_word(self, word: str) -> str:
+        word = word.strip()
+        word = word.lower()
+
+        chars_to_remove: str = '.,'
+        word = word.strip(chars_to_remove)
+
 
     @property
     def total_run_time(self) -> float:
@@ -69,6 +78,7 @@ class SubanimationTimeKeeper:
     def partition(self, sequence: str, occurrence: int | None = None) -> float:
         """Return [start, stop) of ``sequence``."""
         if self.text.count(sequence) > 1 and occurrence is None:
+            breakpoint()
             raise ValueError(
                 f'There is more than one occurrence of ``sequence`` ``{sequence}`` in ``{self.text}``, yet an occurrence has not been specified. Please provide one.'
             )

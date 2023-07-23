@@ -23,7 +23,7 @@ class MoveTrav(LeafSubanimation):
         self._to_node: SLLNode = to_node
 
     def create_successive_counterpart(self) -> LeafSubanimation:
-        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node)
+        return SuccessiveMoveTrav(self._sll, self._trav, self._to_node, run_time=self._run_time)
 
     def begin(self) -> None:
         self._trav.save_state()

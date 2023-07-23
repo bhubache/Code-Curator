@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 
@@ -23,7 +24,6 @@ class MontrealForcedAligner:
         self._verify_input_dir_has_two_files()
         self._verify_input_dir_has_text_and_audio()
         self._verify_audio_and_text_have_same_name()
-        breakpoint()
 
     def _verify_mfa_dir_exists(self) -> None:
         if not self.mfa_dir_path.exists():
@@ -56,4 +56,15 @@ class MontrealForcedAligner:
             raise ValueError(f'Text and audio file in {self.input_dir_path} must have the same names: found {file_one.stem} and {file_two.stem}')
 
     def _perform_alignment(self) -> Path:
-        pass
+        conda_venv = 'aligner'
+        cwd = self.mfa_dir_path
+        python_run_alignment_script = (
+            Path.cwd()
+            / 'src'
+            / 'code_curator'
+            / 'alignment_text_creation'
+            / 'run_alignment.py'
+        )
+        subprocess.run(f'conda run -n {conda_venv} python3 {python_run_alignment_script } --cwd={cwd}'.split())
+
+        return list(self.output_dir_path.iterdir())[0]

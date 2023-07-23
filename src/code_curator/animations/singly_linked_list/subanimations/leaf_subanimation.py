@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
+# TODO: MAKE PASSING IN THE RUN_TIME EASIER TO DO!!!
+
+
 class LeafSubanimation(BaseSubanimation):
     def __init__(self, sll: SinglyLinkedList, run_time: int = 1):
         self._sll: SinglyLinkedList = sll

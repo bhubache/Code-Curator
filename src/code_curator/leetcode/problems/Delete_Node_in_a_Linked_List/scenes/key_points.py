@@ -154,16 +154,13 @@ class KeyPoints(BaseKeyPoints):
             ),
             AnimationGroup(
                 ParallelAnimation(
-                    'the list and is not',
-                    "a tail node ok now that we've been introduced",
-                    "to the problem let's try to understand",
-                    'the problem constraints because they can',
-                    'often provide insight about the solution',
-                    'at first glance the first constraint may seem',
-                    # 'quite strange why is the lower bound 2 is',
+                    'Then take p1s next pointer and set it',
+                    'equal',
+                    'to p1',
+                    '.next',
+                    '.next.',
+                    'We have again removed the node.',
                     time_keepers=(
-                        self.next_fade_in_temp_trav_3,
-                        self.next_move_first_temp_trav_n_3,
                         self.next_wave_pointer_3,
                         self.next_shrink_pointer_3,
                         self.next_unshrink_pointer_3,
