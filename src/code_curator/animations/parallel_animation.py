@@ -23,12 +23,6 @@ class ParallelAnimation(Animation):
         self.time_keepers = time_keepers
         self.animations = animations
 
-        # TODO:
-        # animation: (first animation at least)
-        #   1. Wait animation before start
-        #   2. Time start for full string length or default time
-        #   3. If timing default and time left over in string, pad with Wait
-
         self.finalized_animations = self._build()
 
     def __str__(self) -> str:
