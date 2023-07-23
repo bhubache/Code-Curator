@@ -20,7 +20,9 @@ from manim import Scene
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
 
+from code_curator.ai_audio_creator import AIAudioCreator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
+from code_curator.alignment_text_creation.alignment_text_creator import AlignmentTextCreator
 from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
 from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 # from manim.utils.file_ops import open_file as open_media_file
@@ -321,15 +323,6 @@ class TestScene(Scene):
         self.wait()
 
 
-def create_ai_audio(text_dir_path: Path) -> Path:
-    # name of audio and text files must be the same for MFA.
-    base_name = 'ai_script'
-    audio_path = f'{text_dir_path / base_name}.wav'
-    text_path = f'{text_dir_path / base_name}.txt'
-
-    cmd: str = f'pico2wave --wave={audio_path} "$(cat {text_path})"'
-    subprocess.getoutput(cmd)
-    return audio_path
 
 
 def main() -> None:
@@ -340,11 +333,12 @@ def main() -> None:
 
         if generate_ai_speech:
             # Generate audio from text
-            audio_path: Path = create_ai_audio(problem_dir / 'dev_files')
+            audio_path: Path = AIAudioCreator.create_audio(problem_dir / 'dev_files' / 'MFA' / 'input' / 'ai_script.txt')
+            ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(problem_dir / 'dev_files')
             breakpoint()
 
             # Create and parse alignments into file
-
+            
 
 
         aligned_animation_script = get_aligned_animation_script(
