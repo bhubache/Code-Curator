@@ -38,7 +38,8 @@ logger = logging.getLogger(__name__)
 
 PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 
-ALIGNED_SCRIPT_PATH = Path('generated_files', 'aligned_script.txt')
+# ALIGNED_SCRIPT_PATH = Path('generated_files', 'aligned_script.txt')
+ALIGNED_SCRIPT_PATH = Path('generated_files', 'ai_aligned_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
 ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script_yaml.yaml')
@@ -181,11 +182,35 @@ class TestScene(Scene):
     config.disable_caching = True
 
     def construct(self) -> None:
+        from code_curator.code.custom_code import CustomCode
+        code = CustomCode(Path.home() / 'ManimCS' / 'Code_Curator' / 'src' / 'code_curator' / 'leetcode' / 'problems' / 'Delete_Node_in_a_Linked_List' / 'required_files' / 'two_pointer_sll_node_removal.java')
+
+        code.set_opacity(0)
+        self.add(code)
+        self.play(code.get_opacity_animation('p1.next'))
+        self.play(code.get_opacity_animation('='))
+        self.play(code.get_opacity_animation('p2;'))
+        self.play(code.get_fade_out_animation())
+        # self.play(FadeIn(self.create_highlighter()))
+
+        # self.play(code.move_highlighter_to_token('Solution', 1))
+        # self.wait()
+
+        # self.play(code.move_highlighter_to_token('class', 1))
+        # self.wait()
+
+        # self.play(code.move_highlighter_to_token('lass Sol', 1))
+        # self.wait()
+
+        # self.play(code.move_highlighter(2))
+        # self.wait()
+
+
         from code_curator.data_structures.singly_linked_list import SinglyLinkedList
         # from code_curator.data_structures.nodes.singly_linked_list_node import SLLNode
         # from code_curator.data_structures.edges.singly_directed_edge import SinglyDirectedEdge
-        self.sll = SinglyLinkedList(1)
-        self.play(FadeIn(self.sll))
+        # self.sll = SinglyLinkedList(1)
+        # self.play(FadeIn(self.sll))
 
         # from code_curator.animations.data_structure_animation import DataStructureAnimation
         # from code_curator.animations.singly_linked_list.data_structure_animator import DataStructureAnimator
@@ -207,16 +232,6 @@ class TestScene(Scene):
         #     )
         # )
 
-        self.play(
-            self.sll.add_last(
-                data=17,
-            )
-            .with_fade_in_container()
-            .with_fade_in_pointer()
-            .with_move_tail()
-            .with_center_sll()
-            .build_animation(),
-        )
 
         # for sub in self.sll.submobjects:
         #     self.play(sub.animate.set_color('#FF0000'))
@@ -306,10 +321,32 @@ class TestScene(Scene):
         self.wait()
 
 
+def create_ai_audio(text_dir_path: Path) -> Path:
+    # name of audio and text files must be the same for MFA.
+    base_name = 'ai_script'
+    audio_path = f'{text_dir_path / base_name}.wav'
+    text_path = f'{text_dir_path / base_name}.txt'
+
+    cmd: str = f'pico2wave --wave={audio_path} "$(cat {text_path})"'
+    subprocess.getoutput(cmd)
+    return audio_path
+
+
 def main() -> None:
     test_data_structure = False
+    generate_ai_speech: bool = True
     if not test_data_structure:
         scene_classes, problem_dir = get_scene_classes()
+
+        if generate_ai_speech:
+            # Generate audio from text
+            audio_path: Path = create_ai_audio(problem_dir / 'dev_files')
+            breakpoint()
+
+            # Create and parse alignments into file
+
+
+
         aligned_animation_script = get_aligned_animation_script(
             alignment_path=os.path.join(problem_dir, ALIGNED_SCRIPT_PATH),
             script_path=os.path.join(problem_dir, ANIMATION_SCRIPT_PATH),
