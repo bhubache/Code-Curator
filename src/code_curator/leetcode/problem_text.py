@@ -2,7 +2,8 @@ from manim import *
 
 class ProblemText(Tex):
     def __init__(self, text, color = '#DBC9B8', **kwargs):
-        super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
+        super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{20 cm}}', **kwargs)
+        # super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
 
     @staticmethod
     def create_title(text, **kwargs):

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import inspect
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
+from collections.abc import Iterable
 
 from code_curator.custom_logging.custom_logger import CustomLogger
 from manim import config
@@ -36,6 +38,31 @@ class BaseScene(ABC, Scene):
         self._scene_scheduler: SceneScheduler = SceneScheduler()
         self._mobjects_pickle: str = 'mobjects_pickle.pkl'
 
+        # self._last_num_mobjects_in_scene = 0
+
+    # def __getattribute__(self, attr):
+    #     try:
+    #         if len(object.__getattribute__(self, 'mobjects')) > (curr_num_mobjects_in_scene := object.__getattribute__(self, '_last_num_mobjects_in_scene')):
+    #             breakpoint()
+    #             setattr(self, '_last_num_mobjects_in_scene', curr_num_mobjects_in_scene + 1)
+    #     except RecursionError:
+    #         pass
+
+    #     object.__getattribute__(self, attr)
+
+    def __getattr__(self, attr_name):
+        section_name = inspect.stack()[1].function
+        subsection_name = '_'.join(attr_name.split('_')[:-1])
+        subsection_number = attr_name.split('_')[-1]
+        if subsection_number.isnumeric():
+            animation_leaf = self.aligned_animation_scene.get_component(f'{section_name}_{subsection_number}')
+            timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
+            return timing_info[subsection_name].copy()
+        else:
+            animation_leaf = self.aligned_animation_scene.get_component(section_name)
+            timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
+            return timing_info[section_name].copy()
+
     @property
     def aligned_animation_scene(self) -> CompositeAnimationScript:
         return self._aligned_animation_scene
@@ -67,6 +94,10 @@ class BaseScene(ABC, Scene):
         self._animations = rolled_up_animations
 
     def construct(self) -> None:
+        # anim = self._animations[0]
+        # anim.func()
+        # self.play(anim.animation)
+
         for obj in self._animations:
             if isinstance(obj, AnimationLeaf):
                 obj.func()
@@ -96,7 +127,7 @@ class BaseScene(ABC, Scene):
 
             for child in composite.children:
                 self.play(child.animation)
-            
+
             try:
                 self.play(
                     FadeOut(*self.mobjects),
@@ -146,7 +177,9 @@ class BaseScene(ABC, Scene):
 
     def _func_outputs_list_of_funcs(self, func: Callable) -> bool:
         poorly_named_var = func()
-        for elem in poorly_named_var:
-            if isinstance(elem, type(func)):
-                return True
+        if isinstance(poorly_named_var, Iterable):
+            for elem in poorly_named_var:
+                if isinstance(elem, type(func)):
+                    return True
+
         return False

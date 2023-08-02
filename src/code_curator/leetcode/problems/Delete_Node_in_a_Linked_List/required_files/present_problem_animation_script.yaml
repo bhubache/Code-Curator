@@ -1,0 +1,18 @@
+PresentProblem:
+  title: Delete node in a linked list.
+  intro: Ok, before we get started, I want to say that I'm not going to start with a distilled description of this problem. And by that I mean I'm going to keep the redundant information and strange wording as they're found on leetcode. I'm doing this because you may see questions with redundant information and such wording in interviews, and it's important to become skilled at identifying what's important and discarding what is not. I will work through distilling the description after the initial showing.
+  statement_header: And with that out of the way, let's move on to the problem.
+  statement: There is a singly linked list head and we want to delete a node node in it. You are given the node to be deleted node. You will not be given access to the first node of head. All the values of the linked list are unique, and it is guaranteeded that the given node node is not the last node in the linked list. Delete the given node. Note that by deleting the node, we do not mean removing it from memory. We mean
+  deleting_point_1: The value of the given node should not exist in the linked list.
+  deleting_point_2: The number of nodes in the linked list should decrease by one.
+  deleting_point_3: All the values before node should be in the same order.
+  deleting_point_4: All the values after node should be in the same order.
+  special_note: Before moving on, take note of how important these bullet points are. The problem is providing its own definition of what it means to delete a node from a linked list. The traditional method for removing a node from a linked list involves removing it from memory whereas in this problem it doesn't. We have to think unconventionally, and consider only the criteria they've provided.
+  constraints_header: Next we have the constraints.
+  constraints:
+    0: The number of nodes in the given list is in the range two to one-thousand inclusive.
+    1: A node's value ranges from negative one thousand to positive one-thousand inclusive.
+    2: The value of each node in the list is unique.
+    3: The node to be deleted is in the list and is not a tail node.
+  remove_duplication: First, let's get rid of the duplicate information.
+  smooth_over_wording: Then, let's smooth over the wording and give it another read.

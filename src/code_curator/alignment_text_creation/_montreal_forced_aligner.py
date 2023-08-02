@@ -4,6 +4,9 @@ import subprocess
 from pathlib import Path
 
 
+ALIGNMENT_HAS_CHANGED = True
+
+
 class MontrealForcedAligner:
     def __init__(self, dev_files_dir_path: Path) -> None:
         self.dev_files_dir_path = dev_files_dir_path
@@ -65,6 +68,10 @@ class MontrealForcedAligner:
             / 'alignment_text_creation'
             / 'run_alignment.py'
         )
+
+        if not ALIGNMENT_HAS_CHANGED:
+            return list(self.output_dir_path.iterdir())[0]
+
         subprocess.run(f'conda run -n {conda_venv} python3 {python_run_alignment_script } --cwd={cwd}'.split())
 
         return list(self.output_dir_path.iterdir())[0]
