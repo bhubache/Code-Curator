@@ -147,7 +147,14 @@ class AnimationLeaf(AnimationScript):
         try:
             return self._animation.run_time
         except AttributeError:
-            return None
+            total_run_time: float = 0.0
+            try:
+                for anim in self._animation:
+                    total_run_time += anim.run_time
+            except TypeError:
+                pass
+            else:
+                return total_run_time
 
     @animation_run_time.setter
     def animation_run_time(self, new_run_time: float):
@@ -158,8 +165,8 @@ class AnimationLeaf(AnimationScript):
         return Tag.CODE_TIMING in self.tags
 
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
+        setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
         if isinstance(self._text, Mapping):
-            setattr(self, self.SUBANIMATION_TIMINGS_NAME, {})
             subanimation_time_accumulation: float = 0.0
             for subsection_name, text in self._text.items():
                 subanimation_time_keeper = SubanimationTimeKeeper(
@@ -173,6 +180,11 @@ class AnimationLeaf(AnimationScript):
 
                 start = start + len(text.split())
         else:
+            getattr(self, self.SUBANIMATION_TIMINGS_NAME)[self.unique_id] = SubanimationTimeKeeper(
+                text=self.text,
+                words=[aligned_script.get_word(word_index) for word_index in range(start, end + 1)],
+                time_until_start=0.0,
+            )
             self.start = aligned_script.get_word_start(start)
             self.end = aligned_script.get_word_end(end)
             self.audio_duration = aligned_script.get_word_duration_from_to(
@@ -222,11 +234,13 @@ class AnimationLeaf(AnimationScript):
             raise RuntimeError(
                 f'This leaf isn\t correct: {self.unique_id} != {unique_id}',
             )
+
         return self
 
     def get_component(self, unique_id: str) -> AnimationScript:
         if unique_id == self.unique_id:
             return self
+
         return None
 
     def get_flattened_iterable(self) -> list:

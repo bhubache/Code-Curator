@@ -108,7 +108,8 @@ class CompositeAnimationScript(AnimationScript):
             comp = child.get_component(unique_id)
             if comp is not None:
                 return comp
-        return None
+
+        raise LookupError(f'Unable to find component of {self.unique_id} matching {unique_id}.')
 
     # TODO: I believe there's some wasted time recalculating this recursively every time
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
@@ -181,10 +182,50 @@ class CompositeAnimationScript(AnimationScript):
         animation: Sequence[Animation],
         is_overriding_animation: bool,
     ) -> bool:
+        component = self.get_component(unique_id)
+        if isinstance(component, AnimationLeaf):
+            if len(animation) > 1:
+                raise ValueError('Should only be adding one animation to AnimationLeaf.')
+
+            anim = animation[0]
+            component.add_animation(
+                unique_id=unique_id,
+                func=func,
+                animation=anim,
+            )
+        elif isinstance(component, CompositeAnimationScript):
+            if len(animation) == 1:
+                raise Exception('Is this supposed to happen?')
+            else:
+                for i, (child, anim) in enumerate(zip(self.children, animation)):
+                    is_overriding_start = i == 0
+                    is_overriding_end = i == len(self.children) - 1
+
+                    if i > 0:
+                        # We only want the real function to be called once so we let the first leaf have it
+                        def func():
+                            return 0
+
+                    child.add_animation(
+                        unique_id=f'{unique_id}_{i}', func=func, animation=anim,
+                        is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end,
+                    )
+
+
+
+
+
+    def add_animation_v2(
+        self,
+        unique_id: str,
+        func: Callable,
+        animation: Sequence[Animation],
+        is_overriding_animation: bool,
+    ) -> bool:
         if self.unique_id == unique_id:
             if not isinstance(animation, Sequence):
                 raise TypeError(f'animation should be of type Sequence, not {type(animation)}')
-            
+
             self.is_overriding_animation = is_overriding_animation
             if len(animation) == 1:
                 raise Exception('Is this supposed to happen?')
@@ -207,13 +248,13 @@ class CompositeAnimationScript(AnimationScript):
         else:
             if not isinstance(animation, Sequence):
                 return
-            
+
             if len(animation) == 1:
                 anim = animation[0]
             elif len(animation) > 1:
                 anim = animation
             else:
-                ValueError(f'There must be at least one animation: given {len(animation)}')    
+                ValueError(f'There must be at least one animation: given {len(animation)}')
 
             for child in self.children:
                 if isinstance(child, AnimationLeaf):

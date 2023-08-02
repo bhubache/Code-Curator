@@ -11,12 +11,21 @@ import importlib
 import logging
 import os
 import subprocess
+import yaml
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from manim import config
+from manim import UP
+from manim import DOWN
+from manim import Wait
 from manim import FadeIn
+from manim import Circle
 from manim import Scene
+from manim import MoveAlongPath
+from manim import Line
+from manim import Tex
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
 from moviepy.editor import AudioFileClip
@@ -26,6 +35,7 @@ from code_curator.script_handling.aligned_animation_script import AlignedAnimati
 from code_curator.alignment_text_creation.alignment_text_creator import AlignmentTextCreator
 from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
 from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
+from code_curator.animations.fixed_succession import FixedSuccession
 # from manim.utils.file_ops import open_file as open_media_file
 
 
@@ -45,7 +55,8 @@ PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
 ALIGNED_SCRIPT_PATH = Path('generated_files', 'ai_aligned_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
-ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script_yaml.yaml')
+# ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script_yaml.yaml')
+ANIMATION_SCRIPT_PATH = Path('required_files', 'present_problem_animation_script.yaml')
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
@@ -84,11 +95,10 @@ def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts:
             super().__init__()
             self._video_dir = Path.home().joinpath('ManimCS', 'Code-Curator', 'media', 'videos', '1080p60')
             self._scene_instances = []
-            for i, (cls, scene_script) in enumerate(zip(scene_classes[2:], aligned_animation_scene_scripts)):
-                if i == 0:
-                    scene_inst = cls(problem_dir, scene_script)
-                    scene_inst.video_dir = self._video_dir
-                    self._scene_instances.append(scene_inst)
+            for i, (cls, scene_script) in enumerate(zip(scene_classes[:1], aligned_animation_scene_scripts)):
+                scene_inst = cls(problem_dir, scene_script)
+                scene_inst.video_dir = self._video_dir
+                self._scene_instances.append(scene_inst)
 
         def construct(self) -> None:
             """Create the scenes."""
@@ -185,6 +195,31 @@ class TestScene(Scene):
     config.disable_caching = True
 
     def construct(self) -> None:
+        t = Tex(
+            r'There is a singly linked list head and we want to delete a node node in it. You are given the node to be deleted node. You will not be given access to the first node of head. All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list. Delete the given node. Note that by deleting the node, we do not mean removing it from memory. We mean',
+            font_size=20,
+        )
+
+        self.play(FadeIn(t))
+
+
+        return
+
+        c = Circle()
+        self.play(
+            FixedSuccession(
+                FadeIn(c),
+                MoveAlongPath(c, Line(c.get_center(), c.get_center() + [0, 2.5, 0])),
+                MoveAlongPath(c, Line(c, [0, -2.5, 0])),
+                # c.animate.to_edge(DOWN),
+                # c.animate.to_edge(UP),
+                Wait(),
+                scene=self,
+            ),
+        )
+
+        return
+
         from code_curator.code.custom_code import CustomCode
         code = CustomCode(Path.home() / 'ManimCS' / 'Code_Curator' / 'src' / 'code_curator' / 'leetcode' / 'problems' / 'Delete_Node_in_a_Linked_List' / 'required_files' / 'two_pointer_sll_node_removal.java')
 
@@ -333,11 +368,30 @@ def main() -> None:
         scene_classes, problem_dir = get_scene_classes()
 
         if generate_ai_speech:
-            # Generate audio from text
-            audio_path: Path = AIAudioCreator.create_audio(problem_dir / 'dev_files' / 'MFA' / 'input' / 'ai_script.txt')
-            ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(problem_dir / 'dev_files')
+            # Generate ai_script.txt from the animation script
+            ai_script_path: Path = problem_dir / 'dev_files' / 'MFA' / 'input' / 'ai_script.txt'
+            animation_script_dict = yaml.safe_load((problem_dir / ANIMATION_SCRIPT_PATH).read_text())
 
-            # Create and parse alignments into file
+            def flatten_iterable(animation_script_dict: dict):
+                # result = []
+                for element in animation_script_dict.values():
+                    if isinstance(element, Iterable) and not isinstance(element, (str, bytes)):
+                        # result.append(extract_text(element))
+                        yield from flatten_iterable(element)
+                    else:
+                        yield element
+                        # result.append(element)
+
+                # return ' '.join(result)
+                # return ' '.join(list(result))
+
+            script = ' '.join(flatten_iterable(animation_script_dict))
+            with open(ai_script_path, 'w', encoding='UTF-8') as write_file:
+                write_file.write(script)
+
+            # Generate audio from text
+            audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
+            ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(problem_dir / 'dev_files')
 
 
 
@@ -351,7 +405,7 @@ def main() -> None:
         )
 
         # Combine video and audio together!
-        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'KeyPoints.mp4')))
+        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'PresentProblem.mp4')))
         audio_clip = AudioFileClip(str(audio_path))
         final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
         final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=60)
