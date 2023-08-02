@@ -30,35 +30,39 @@ class FixedSuccession(Animation):
     """Enables multiple animations of the same mobject in one Scene.play() call."""
 
     def __init__(self, *animations: Animation) -> None:
-        self.group = Group(*[anim.mobject for anim in animations])
+        # NOTE: This two lines were originally flipped
         self.animations: tuple[Animation] = self._translate_remove_animations(list(animations))
+        self.group = Group(*[anim.mobject for anim in self.animations])
         super().__init__(
             mobject=self.group,
             run_time=self._get_run_time(self.animations),
         )
         self.mobjects_to_remove = _get_mobjects_to_remove(*self.animations)
-
-    def begin(self):
-        for anim in self.animations:
-            if not isinstance(anim, FadeOut):
-                anim.begin()
-
-        super().begin()
+        self.animations_started: list[bool] = [False for _ in self.animations]
 
     def interpolate(self, alpha) -> None:
-        animation, corrected_alpha = self._get_animation_and_corrected_alpha(alpha)
+        index, animation, corrected_alpha = self._get_animation_and_corrected_alpha(alpha)
+        if not self.animations_started[index]:
+            if index > 0:
+                self.animations[index - 1].finish()
+
+            self.animations_started[index] = True
+            animation.begin()
+
         animation.interpolate(smooth(corrected_alpha))
 
     def clean_up_from_scene(self, scene: Scene):
+        for anim in self.animations:
+            anim.clean_up_from_scene(scene)
+
         for mobject in self.mobjects_to_remove:
             scene.remove(mobject)
 
     def _get_animation_and_corrected_alpha(self, alpha: float) -> Animation:
         for index, (lower_bound, upper_bound) in enumerate(self.animation_alpha_range_map):
             if lower_bound <= alpha < upper_bound or (lower_bound <= alpha <= upper_bound and upper_bound == 1.0):
-                return self.animations[index], ((alpha - lower_bound) / (upper_bound - lower_bound))
-        
-        breakpoint()
+                return index, self.animations[index], ((alpha - lower_bound) / (upper_bound - lower_bound))
+
         raise ValueError(f'Unable to find corresponding animation for alpha {alpha}')
 
     @cached_property
