@@ -6,6 +6,8 @@ from manim import BulletedList
 from manim import MobjectTable
 from manim import Tex
 
+from code_curator._utils.string import partition
+
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -21,7 +23,10 @@ class ProblemText(Tex):
         color: str = '#DBC9B8',
         **kwargs,
     ) -> None:
-        super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
+        # self.text_strings = text.split()
+        # self.tex_pieces: list[Tex] = [Tex(word, color=color, **kwargs) for word in text.split()]
+        super().__init__(*text.split(), arg_separator=' ', color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
+        # super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
 
     @staticmethod
     def create_title(text: str, **kwargs) -> ProblemText:
@@ -45,7 +50,7 @@ class ProblemText(Tex):
         **kwargs,
     ) -> BulletedList:
         bulleted_list = BulletedList(
-            constraints,
+            *constraints,
             color=color,
             font_size=font_size,
             dot_scale_factor=dot_scale_factor,
@@ -105,3 +110,9 @@ class ProblemText(Tex):
             include_outer_lines=True,
             line_config={'color': color, 'stroke_width': 1.5},
         ).scale(0.75)
+
+    def get_sub_tex(self, substring: str):
+        text_partition = partition(' '.join(self.tex_strings), substring)
+        start_index = len(text_partition[0].split())
+        end_index = start_index + len(text_partition[1].split())
+        return self[start_index : end_index]
