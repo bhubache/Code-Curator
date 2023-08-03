@@ -258,3 +258,6 @@ class BasePresentProblem(BaseScene):
                 self._position_element_below_other(element, fall_back)
         else:
             self._position_element_below_other(element, lowest_mobject)
+
+    def get_constraint_tex(self, num: int) -> Tex:
+        return self._constraints[num - 1]
