@@ -2,14 +2,21 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from functools import wraps
+from typing import TYPE_CHECKING
 
-from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem
-from code_curator.leetcode.problem_text import ProblemText
 from manim import Animation
-from manim import DOWN
 from manim import FadeIn
-from manim import LEFT
+from manim import FadeOut
+from manim import Indicate
 from manim import Wait
+
+from code_curator.animations.fixed_succession import FixedSuccession
+from code_curator.leetcode.problem_text import ProblemText
+from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem
+
+
+if TYPE_CHECKING:
+    from manim import Tex
 
 
 TITLE = 'Delete Node in a Linked List'
@@ -51,6 +58,7 @@ class PresentProblem(BasePresentProblem):
         self.add_nonoverriding_animation(self.deleting_point_3)
         self.add_nonoverriding_animation(self.deleting_point_4)
         self.add_nonoverriding_animation(self.special_note)
+        self.add_nonoverriding_animation(self.remove_duplication)
 
     def _create_statement(self, text: str, font_size=25):
         return super()._create_statement(text, font_size=font_size)
@@ -86,4 +94,18 @@ class PresentProblem(BasePresentProblem):
         return [Wait()]
 
     def remove_duplication(self) -> CustomAnimations:
-        pass
+        text_to_remove: str = (
+            ' All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.'
+        )
+
+        problem_text_to_remove: ProblemText = self._statement.get_sub_tex(text_to_remove)
+        third_constraint_tex: Tex = self.get_constraint_tex(3)
+        fourth_constraint_tex: Tex = self.get_constraint_tex(4)
+
+        return [
+            FixedSuccession(
+                Indicate(problem_text_to_remove),
+            )
+        ]
+
+        return [FadeOut(problem_text_to_remove)]

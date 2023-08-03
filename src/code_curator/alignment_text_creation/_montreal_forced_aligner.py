@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 
-ALIGNMENT_HAS_CHANGED = True
+ALIGNMENT_HAS_CHANGED = False
 
 
 class MontrealForcedAligner:
