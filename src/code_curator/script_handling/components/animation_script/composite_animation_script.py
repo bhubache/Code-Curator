@@ -97,8 +97,9 @@ class CompositeAnimationScript(AnimationScript):
             if child.unique_id == unique_id:
                 self._children[i] = new_child
                 return True
+
         return False
-    
+
     # TODO: Raise LookupError if comment can't be found
     def get_component(self, unique_id: str) -> AnimationScript:
         if self.unique_id == unique_id:
@@ -109,7 +110,8 @@ class CompositeAnimationScript(AnimationScript):
             if comp is not None:
                 return comp
 
-        raise LookupError(f'Unable to find component of {self.unique_id} matching {unique_id}.')
+        if self.parent is None:
+            raise LookupError(f'Unable to find component of {self.unique_id} matching {unique_id}.')
 
     # TODO: I believe there's some wasted time recalculating this recursively every time
     def apply_alignments(self, start, end, aligned_script: AlignedScript):
