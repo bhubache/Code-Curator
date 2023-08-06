@@ -15,7 +15,12 @@ PresentProblem:
     2: The value of each node in the list is unique.
     3: The node to be deleted is in the list and is not a tail node.
   remove_duplication:
-    intro: First, let's get rid of the duplicate information.
-    constraints_duplication: Constraints three and four are repeated in the statement so let's remove it.
+    _intro: First, let's get rid of the duplicate information.
+    constraints_duplication:
+      _intro: Constraints
+      three: three and
+      four: four
+      statement: are repeated in the statement
+      remove: so let's remove it.
     delete_node: Next, remove the second reference to deleting the node.
   smooth_over_wording: Then, let's smooth over the wording and give it another read.
