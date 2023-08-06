@@ -4,13 +4,15 @@ from collections.abc import Sequence
 from functools import wraps
 from typing import TYPE_CHECKING
 
+import manim
 from manim import Animation
+from manim import AnimationGroup
 from manim import FadeIn
 from manim import FadeOut
-from manim import Indicate
 from manim import Wait
 
 from code_curator.animations.fixed_succession import FixedSuccession
+from code_curator.animations.change_color import ChangeColor
 from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem
 
@@ -102,10 +104,22 @@ class PresentProblem(BasePresentProblem):
         third_constraint_tex: Tex = self.get_constraint_tex(3)
         fourth_constraint_tex: Tex = self.get_constraint_tex(4)
 
+        remove_color: str = '#FF0000'
+        keep_color: str = '#00FF00'
+        reset_color = third_constraint_tex.color
         return [
+            Wait(),
             FixedSuccession(
-                Indicate(problem_text_to_remove),
+                AnimationGroup(
+                    ChangeColor(problem_text_to_remove, remove_color),
+                    ChangeColor(third_constraint_tex, keep_color),
+                    ChangeColor(fourth_constraint_tex, keep_color),
+                ),
+                AnimationGroup(
+                    FadeOut(problem_text_to_remove),
+                    ChangeColor(third_constraint_tex, reset_color),
+                    ChangeColor(fourth_constraint_tex, reset_color),
+                ),
+            FadeIn(manim.Circle()),
             )
         ]
-
-        return [FadeOut(problem_text_to_remove)]
