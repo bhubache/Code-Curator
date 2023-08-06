@@ -107,6 +107,39 @@ class PresentProblem(BasePresentProblem):
         remove_color: str = '#FF0000'
         keep_color: str = '#00FF00'
         reset_color = third_constraint_tex.color
+
+        def constraints_duplication():
+
+            def three():
+                pass
+
+            def four():
+                pass
+
+            def statement():
+                pass
+
+            def remove():
+                pass
+
+        def delete_node():
+            pass
+
+
+
+        # return {
+        #     'constraints_duplication': {
+        #         'three': ChangeColor(third_constraint_tex, keep_color),
+        #         'four': ChangeColor(fourth_constraint_tex, keep_color),
+        #         'statement': ChangeColor(problem_text_to_remove, remove_color),
+        #         'remove': AnimationGroup(
+        #             FadeOut(problem_text_to_remove),
+        #             ChangeColor(third_constraint_tex, reset_color),
+        #             ChangeColor(fourth_constraint_tex, reset_color),
+        #         ),
+        #     },
+        #     'delete_node': Wait(),
+        # }
         return [
             Wait(),
             FixedSuccession(
