@@ -175,3 +175,4 @@ poetry.toml
 media/
 mce/
 *.pkl
+src/code_curator/leetcode/problems/Delete_Node_in_a_Linked_List/dev_files/*
