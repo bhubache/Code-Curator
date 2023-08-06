@@ -54,6 +54,8 @@ class PresentProblem(BasePresentProblem):
         )
         self._special_notes_list = ProblemText.create_constraints_list(SPECIAL_NOTES, font_size=20)
 
+        breakpoint()
+
         self.add_nonoverriding_animation(self.intro)
         self.add_nonoverriding_animation(self.deleting_point_1)
         self.add_nonoverriding_animation(self.deleting_point_2)
@@ -95,35 +97,47 @@ class PresentProblem(BasePresentProblem):
     def special_note(self) -> CustomAnimations:
         return [Wait()]
 
-    def remove_duplication(self) -> CustomAnimations:
-        text_to_remove: str = (
-            ' All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.'
-        )
-
-        problem_text_to_remove: ProblemText = self._statement.get_sub_tex(text_to_remove)
-        third_constraint_tex: Tex = self.get_constraint_tex(3)
-        fourth_constraint_tex: Tex = self.get_constraint_tex(4)
-
-        remove_color: str = '#FF0000'
-        keep_color: str = '#00FF00'
-        reset_color = third_constraint_tex.color
-
+    def remove_duplication(self):
         def constraints_duplication():
+            text_to_remove: str = (
+                ' All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.'
+            )
+
+            problem_text_to_remove: ProblemText = self._statement.get_sub_tex(text_to_remove)
+            third_constraint_tex: Tex = self.get_constraint_tex(3)
+            fourth_constraint_tex: Tex = self.get_constraint_tex(4)
+
+            remove_color: str = '#FF0000'
+            keep_color: str = '#00FF00'
+            reset_color = third_constraint_tex.color
+            # TODO: Maybe have the generator send in the time
 
             def three():
-                pass
+                yield ChangeColor(third_constraint_tex, keep_color)
 
             def four():
-                pass
+                yield ChangeColor(fourth_constraint_tex, keep_color)
 
             def statement():
-                pass
+                yield ChangeColor(problem_text_to_remove, remove_color)
 
             def remove():
-                pass
+                yield AnimationGroup(
+                    FadeOut(problem_text_to_remove),
+                    ChangeColor(third_constraint_tex, reset_color),
+                    ChangeColor(fourth_constraint_tex, reset_color),
+                )
+
+            yield from three()
+            yield from four()
+            yield from statement()
+            yield from remove()
 
         def delete_node():
-            pass
+            yield Wait()
+
+        yield from constraints_duplication()
+        yield from delete_node()
 
 
 
@@ -140,19 +154,19 @@ class PresentProblem(BasePresentProblem):
         #     },
         #     'delete_node': Wait(),
         # }
-        return [
-            Wait(),
-            FixedSuccession(
-                AnimationGroup(
-                    ChangeColor(problem_text_to_remove, remove_color),
-                    ChangeColor(third_constraint_tex, keep_color),
-                    ChangeColor(fourth_constraint_tex, keep_color),
-                ),
-                AnimationGroup(
-                    FadeOut(problem_text_to_remove),
-                    ChangeColor(third_constraint_tex, reset_color),
-                    ChangeColor(fourth_constraint_tex, reset_color),
-                ),
-            FadeIn(manim.Circle()),
-            )
-        ]
+        # return [
+        #     Wait(),
+        #     FixedSuccession(
+        #         AnimationGroup(
+        #             ChangeColor(problem_text_to_remove, remove_color),
+        #             ChangeColor(third_constraint_tex, keep_color),
+        #             ChangeColor(fourth_constraint_tex, keep_color),
+        #         ),
+        #         AnimationGroup(
+        #             FadeOut(problem_text_to_remove),
+        #             ChangeColor(third_constraint_tex, reset_color),
+        #             ChangeColor(fourth_constraint_tex, reset_color),
+        #         ),
+        #     FadeIn(manim.Circle()),
+        #     )
+        # ]
