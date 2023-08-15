@@ -1,5 +1,4 @@
 """Convert TextGrid from forced aligner aligned_script.txt."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,7 +12,11 @@ if TYPE_CHECKING:
 
 
 def create_aligned_script(textgrid_path: Path, output_file_path: Path) -> None:
-    """Create aligned_script.txt."""
+    """Create aligned_script.txt.
+
+    If there a silences found, the time they take up are
+    given to the first word prior to the silences.
+    """
     word_tier: Tier = TextGrid(textgrid_path)['words']
 
     word_tier = fix_initial_intervals(word_tier)
