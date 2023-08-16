@@ -1,14 +1,14 @@
-'''
-TODO
+"""
+TODO.
 - Allow person to put in basic text and have parser convert it to something that's readable by Tex
-'''
+"""
 from __future__ import annotations
 
 from collections.abc import Callable
+from types import MethodType
 
 from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.base_scene import BaseScene
-from code_curator.constants import DEFAULT_MOBJECT_COLOR
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.leetcode.problem_text import ProblemText
 from manim import Animation
@@ -17,9 +17,9 @@ from manim import DOWN
 from manim import FadeIn
 from manim import LEFT
 from manim import Mobject
+from manim import Tex
 from manim import UP
 from manim import Wait
-from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
 logger = CustomLogger.getLogger(__name__)
 
 
@@ -217,23 +217,65 @@ class BasePresentProblem(BaseScene):
             return [FadeIn(self._constraints[index])]
         return inner
 
-    def _position_element_below_other(self, element, other):
+    def add_overriding_animation(self, method):
+        """Add overriding animation.
+
+        .. see-also::
+
+            :meth:`_add_animation`
+        """
+        self._add_animation(method, is_overriding_animation=True)
+
+    def _position_element_below_other(self, element: Mobject, other: Mobject) -> None:
+        """Place ``element`` below ``other``.
+
+        Args:
+            element: Element to be placed below.
+            other: Reference Mobject for placement.
+        """
         element.next_to(other, DOWN)
         element.to_edge(LEFT)
 
-    def add_overriding_animation(self, method):
-        self._add_animation(method, is_overriding_animation=True)
-
     def add_nonoverriding_animation(self, method):
+        """Add non-overriding animation.
+
+        .. see-also::
+
+            :meth:`_add_animation`
+        """
         self._add_animation(method, is_overriding_animation=False)
 
     def _add_animation(self, method, *, is_overriding_animation: bool) -> None:
+        """Animation will be played.
+
+        Args:
+            method: Method that creates animation.
+            is_overriding_animation: Whether the animation overrides other animations playing.
+        """
+        if isinstance(method, MethodType):
+            unique_id = method.__func__.__name__
+            animation = method()
+        else:
+            unique_id = method.__class__.__name__
+            animation = next(method)
+
         self._aligned_animation_scene.add_animation(
-            unique_id=method.__name__,
+            unique_id=unique_id,
             func=method,
-            animation=method(),
+            animation=animation,
             is_overriding_animation=is_overriding_animation,
         )
+
+    def get_constraint_tex(self, num: int) -> Tex:
+        """Retrieve ``Tex`` for constraint ``num``.
+
+        Args:
+            num: Number of constraint
+
+        Returns:
+            Constraint ``Tex``
+        """
+        return self._constraints[num - 1]
 
     def _position_element_below_lowest_in_scene(
         self,
@@ -241,16 +283,22 @@ class BasePresentProblem(BaseScene):
         *,
         fall_back: Mobject | None = None,
     ) -> None:
+        """Positions ``element`` below the current lowest mobject in the scene.
+
+        Args:
+            element: Mobject to be placed the lowest.
+            fall_back: Mobject to be used as reference if lowest Mobject can't be found/used.
+        """
         try:
-            mobjects_by_height = sorted(self.mobjects, key=lambda mob : mob.get_center()[1])
-            lowest_mobject = [mob for mob in mobjects_by_height if type(mob) != Mobject and mob is not element][0]
+            mobjects_by_height = sorted(self.mobjects, key=lambda mob: mob.get_center()[1])
+            lowest_mobject = [mob for mob in mobjects_by_height if type(mob) != Mobject and mob is not element][0]  # noqa: E721
         except IndexError:
             # No mobjects in scene yet. This is expected.
             if fall_back is None or not self.mobjects:
                 return
 
             try:
-                lowest_mobject = [mob for mob in mobjects_by_height if type(mob) != Mobject][0]
+                lowest_mobject = [mob for mob in mobjects_by_height if type(mob) != Mobject][0]  # noqa: E721
             except IndexError:
                 # All mobjects in the scene are of type Mobject, study this (this might not be a big deal at all)
                 breakpoint()
@@ -258,6 +306,3 @@ class BasePresentProblem(BaseScene):
                 self._position_element_below_other(element, fall_back)
         else:
             self._position_element_below_other(element, lowest_mobject)
-
-    def get_constraint_tex(self, num: int) -> Tex:
-        return self._constraints[num - 1]
