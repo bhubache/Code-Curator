@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from collections.abc import Sequence
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -11,6 +12,7 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import Wait
 
+from code_curator.animations.animation_generator import AnimationGenerator
 from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.animations.change_color import ChangeColor
 from code_curator.leetcode.problem_text import ProblemText
@@ -54,7 +56,21 @@ class PresentProblem(BasePresentProblem):
         )
         self._special_notes_list = ProblemText.create_constraints_list(SPECIAL_NOTES, font_size=20)
 
-        breakpoint()
+        # obj = self.remove_duplication(owner=self)  # instance of remove_duplication
+        # val_1 = next(obj)                          # generator AnimationGenerator.send (call to abc send)
+        # val_2 = next(val_1)                        # instance of constraints_duplication
+        # val_3 = next(val_2)                        # generator AnimationGenerator.send
+        # val_4 = next(val_3)                        # function three (not method!)
+        # three_gen = val_4(val_2)
+        # breakpoint()
+        # animation_cls = globals()[three_gen.gi_code.co_names[0]]
+        # revised_args = [getattr(val_2, name) for name in three_gen.gi_code.co_names[1:]]
+        # print(animation_cls)
+        # print(revised_args)
+        # print(animation_cls(*revised_args))
+        # print(ChangeColor(self._third_constraint_tex, self._keep_color, __namespace_path=self.namespace_path, __aligned_animation_scene=self.aligned_animation_scene))
+        # breakpoint()
+        # val_5 = next(val_4)
 
         self.add_nonoverriding_animation(self.intro)
         self.add_nonoverriding_animation(self.deleting_point_1)
@@ -62,7 +78,7 @@ class PresentProblem(BasePresentProblem):
         self.add_nonoverriding_animation(self.deleting_point_3)
         self.add_nonoverriding_animation(self.deleting_point_4)
         self.add_nonoverriding_animation(self.special_note)
-        self.add_nonoverriding_animation(self.remove_duplication)
+        self.add_nonoverriding_animation(self.remove_duplication(owner=self))
 
     def _create_statement(self, text: str, font_size=25):
         return super()._create_statement(text, font_size=font_size)
@@ -97,8 +113,48 @@ class PresentProblem(BasePresentProblem):
     def special_note(self) -> CustomAnimations:
         return [Wait()]
 
-    def remove_duplication(self):
+    class remove_duplication(AnimationGenerator):
+        class constraints_duplication(AnimationGenerator):
+            def __init__(self, owner):
+                super().__init__(owner)
+                text_to_remove: str = (
+                    ' All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.'
+                )
+                self._problem_text_to_remove: ProblemText = self._statement.get_sub_tex(text_to_remove)
+                self._third_constraint_tex: Tex = self.get_constraint_tex(3)
+                self._fourth_constraint_tex: Tex = self.get_constraint_tex(4)
+
+                self._remove_color: str = '#FF0000'
+                self._keep_color: str = '#00FF00'
+                self._reset_color = self._third_constraint_tex.color
+
+            def three(self) -> Iterator[Animation]:
+                yield ChangeColor(
+                    self._third_constraint_tex,
+                    self._keep_color,
+                    run_time=0.25,
+                )
+
+            def four(self):
+                yield ChangeColor(self._fourth_constraint_tex, self._keep_color)
+
+            def statement(self):
+                yield ChangeColor(self._problem_text_to_remove, self._remove_color)
+
+            def remove(self):
+                yield FadeOut(self._problem_text_to_remove)
+                # yield AnimationGroup(
+                #     FadeOut(self._problem_text_to_remove),
+                #     ChangeColor(self._third_constraint_tex, self._reset_color),
+                #     ChangeColor(self._fourth_constraint_tex, self._reset_color),
+                # )
+
+        # def delete_node(self):
+        #     yield Wait()
+
+    def remove_duplication_METHOD(self):
         def constraints_duplication():
+            breakpoint()
             text_to_remove: str = (
                 ' All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list.'
             )
@@ -113,6 +169,7 @@ class PresentProblem(BasePresentProblem):
             # TODO: Maybe have the generator send in the time
 
             def three():
+                breakpoint()
                 yield ChangeColor(third_constraint_tex, keep_color)
 
             def four():
@@ -128,16 +185,23 @@ class PresentProblem(BasePresentProblem):
                     ChangeColor(fourth_constraint_tex, reset_color),
                 )
 
-            yield from three()
-            yield from four()
-            yield from statement()
-            yield from remove()
+            # yield from three()
+            # yield from four()
+            # yield from statement()
+            # yield from remove()
+
+            yield three
+            yield four
+            yield statement
+            yield remove
 
         def delete_node():
             yield Wait()
 
-        yield from constraints_duplication()
-        yield from delete_node()
+        # yield from constraints_duplication()
+        # yield from delete_node()
+        yield constraints_duplication
+        yield delete_node
 
 
 
