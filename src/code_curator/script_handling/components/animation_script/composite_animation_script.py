@@ -3,10 +3,11 @@ from __future__ import annotations
 import inspect
 from collections.abc import Callable
 from collections.abc import Sequence
+from types import GeneratorType
 
 from code_curator.custom_logging.custom_logger import CustomLogger
-from manim import Animation
 from code_curator.script_handling.components.alignment_script.alignments.aligned_script import AlignedScript
+from manim import Animation
 
 from .animation_leaf import AnimationLeaf
 from .animation_script import AnimationScript
@@ -30,10 +31,15 @@ class CompositeAnimationScript(AnimationScript):
         return f'{self._unique_id}{new_line}{new_line_and_tab.join([tab+str(child) for child in self._children])}'
 
     def get_flattened_iterable(self) -> list:
-        flattened = []
-        for child in self.children:
-            flattened += child.get_flattened_iterable()
-        return flattened
+        try:
+            return [self.animation]
+            # return self.animation
+        except AttributeError:
+            flattened = []
+            for child in self.children:
+                flattened += child.get_flattened_iterable()
+
+            return flattened
 
     @property
     def is_overriding_animation(self) -> bool:
@@ -86,19 +92,19 @@ class CompositeAnimationScript(AnimationScript):
             total_run_time += child.animation_run_time
         return total_run_time
 
-    def get_child(self, unique_id: str) -> AnimationScript | None:
+    def get_child(self, unique_id: str) -> AnimationScript:
         for child in self.children:
             if child.unique_id == unique_id:
                 return child
-        return None
 
-    def set_child(self, unique_id: str, new_child: AnimationScript) -> bool:
+        raise LookupError(f'Unable to find child ``{unique_id}`` of parent ``{self.unique_id}``')
+
+    def set_child(self, unique_id: str, new_child: AnimationScript) -> None:
         for i, child in enumerate(self._children):
             if child.unique_id == unique_id:
                 self._children[i] = new_child
-                return True
 
-        return False
+        raise LookupError(f'Unable to find child ``{unique_id}`` of parent ``{self.unique_id}``')
 
     # TODO: Raise LookupError if comment can't be found
     def get_component(self, unique_id: str) -> AnimationScript:
@@ -183,7 +189,30 @@ class CompositeAnimationScript(AnimationScript):
         func: Callable,
         animation: Sequence[Animation],
         is_overriding_animation: bool,
-    ) -> bool:
+    ) -> None:
+        if isinstance(animation, GeneratorType):
+            child = self.get_child(unique_id)
+            child.is_overriding_animation = is_overriding_animation
+            child.animation = animation
+
+            # val = next(animation)
+            # breakpoint()
+            # val = val()
+            # val = next(val)
+            # val = val()
+            # val = next(val)
+            # val = val()
+            # val = next(val)
+            # for generator_func in animation:
+            #     child.add_animation(
+            #         unique_id=generator_func.__name__,
+            #         func=(generator := generator_func()),
+            #         animation=generator,
+            #         is_overriding_animation=False,
+            #     )
+
+            return
+
         component = self.get_component(unique_id)
         if isinstance(component, AnimationLeaf):
             if len(animation) > 1:
@@ -212,10 +241,6 @@ class CompositeAnimationScript(AnimationScript):
                         unique_id=f'{unique_id}_{i}', func=func, animation=anim,
                         is_overriding_start=is_overriding_start, is_overriding_end=is_overriding_end,
                     )
-
-
-
-
 
     def add_animation_v2(
         self,
@@ -273,7 +298,6 @@ class CompositeAnimationScript(AnimationScript):
                         is_overriding_animation=is_overriding_animation,
                     )
 
-    # @_check_that_unique_id_exists
     def add_animation_v1(self, unique_id: str, func: Callable, animation, is_overriding_animation: bool) -> bool:
         # If we're not at the correct component, search children
         if self.unique_id != unique_id:
