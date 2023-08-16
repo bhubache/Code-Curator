@@ -1,19 +1,22 @@
 from __future__ import annotations
 
 import inspect
+import itertools
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
+from collections.abc import Generator
 from collections.abc import Iterable
 
 from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.scene_scheduler import SceneScheduler
+from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
+from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 from manim import config
 from manim import FadeIn
 from manim import FadeOut
 from manim import Scene
-from code_curator.scene_scheduler import SceneScheduler
-from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
-from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from manim import Wait
 logger = CustomLogger.getLogger(__name__)
 
 
@@ -32,23 +35,12 @@ class BaseScene(ABC, Scene):
 
     def __init__(self, problem_dir: str, aligned_animation_scene: CompositeAnimationScript) -> None:
         Scene.__init__(self)
+        # CuratorAnimation.animation_scene_script = aligned_animation_scene
         self._aligned_animation_scene: CompositeAnimationScript = aligned_animation_scene
         self._problem_dir: str = problem_dir
         self._animation_spec: dict = {}
         self._scene_scheduler: SceneScheduler = SceneScheduler()
         self._mobjects_pickle: str = 'mobjects_pickle.pkl'
-
-        # self._last_num_mobjects_in_scene = 0
-
-    # def __getattribute__(self, attr):
-    #     try:
-    #         if len(object.__getattribute__(self, 'mobjects')) > (curr_num_mobjects_in_scene := object.__getattribute__(self, '_last_num_mobjects_in_scene')):
-    #             breakpoint()
-    #             setattr(self, '_last_num_mobjects_in_scene', curr_num_mobjects_in_scene + 1)
-    #     except RecursionError:
-    #         pass
-
-    #     object.__getattribute__(self, attr)
 
     def __getattr__(self, attr_name):
         section_name = inspect.stack()[1].function
@@ -86,10 +78,15 @@ class BaseScene(ABC, Scene):
         )
 
         for i, composite in enumerate(rolled_up_animations):
-            if composite.is_overriding_animation:
-                rolled_up_animations[i] = self.super_add_overriding_animation(
-                    composite,
-                )
+            try:
+                if composite.is_overriding_animation:
+                    rolled_up_animations[i] = self.super_add_overriding_animation(
+                        composite,
+                    )
+            except AttributeError:
+                pass
+
+        rolled_up_animations.insert(-1, self.aligned_animation_scene.get_child('remove_duplication').animation)
 
         self._animations = rolled_up_animations
 
@@ -100,14 +97,32 @@ class BaseScene(ABC, Scene):
 
         for obj in self._animations:
             if isinstance(obj, AnimationLeaf):
-                # obj.func()
+                obj.func()
                 self.play(obj.animation)
             elif callable(obj):
                 obj()
+            elif isinstance(obj, Generator):
+                # TODO: Handle wait animations elsewhere
+                for elem in itertools.chain.from_iterable(obj):
+                    self.play(elem)
+                    wait_animation = self.__create_filling_wait_animation(elem)
+                    if wait_animation is not None:
+                        self.play(wait_animation)
             else:
                 raise RuntimeError(
                     f'Unexpected type {type(obj)} when running animations: {obj}',
                 )
+
+    def __create_filling_wait_animation(self, animation) -> Wait:
+        try:
+            if animation.remaining_time > 0:
+                return Wait(animation.remaining_time)
+        except AttributeError:
+            return Wait(min(sub_anim.remaining_time for sub_anim in animation.animations))
+
+    def _from_iterable(self, iterables):
+        for it in iterables:
+            yield from it
 
     def tear_down(self) -> None:
         self.play(FadeOut(*self.mobjects))
@@ -161,10 +176,13 @@ class BaseScene(ABC, Scene):
                 )
             else:
                 if self._func_outputs_list_of_funcs(func):
+                    # FIXME: index as name will only work for constraints children and similar situations
                     list_of_funcs = func()
                     for i, anim_func in enumerate(list_of_funcs):
-                        self.aligned_animation_scene.add_animation(
-                            unique_id=f'{section_name}_{i}',
+                        parent_of_animations = self.aligned_animation_scene.get_child(section_name)
+                        parent_of_animations.add_animation(
+                            # unique_id=f'{section_name}_{i}',
+                            unique_id=i,
                             func=anim_func, animation=anim_func(),
                             is_overriding_animation=False,
                         )
