@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class ChangeColor(Animation):
-    def __init__(self, mobject: Mobject, color: str | Color) -> None:
-        super().__init__(mobject, run_time=1)
+    def __init__(self, mobject: Mobject, color: str | Color, **kwargs) -> None:
+        super().__init__(mobject, run_time=kwargs.pop('run_time', None), **kwargs)
         self.initial_color = mobject.color
         self.target_color = color
 
