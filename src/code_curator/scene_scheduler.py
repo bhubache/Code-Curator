@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Generator
+
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 logger = CustomLogger.getLogger(__name__)
-
-# DEVELOPMENT IMPORTS
-from .animations.data_structure_animation import DataStructureAnimation
 
 
 class SceneScheduler:
@@ -17,9 +16,15 @@ class SceneScheduler:
     def schedule(self, aligned_animation_scene: CompositeAnimationScript):
         flattened: list[AnimationLeaf] = aligned_animation_scene.get_flattened_iterable()
 
+        flattened.pop(-2)
+        flattened.pop(-2)
+
         # Give spare time from Wait animations to other animations
         for i in range(len(flattened) - 1):
             curr_leaf = flattened[i]
+            if isinstance(curr_leaf, Generator):
+                continue
+
             if not curr_leaf.has_sufficient_audio_duration():
                 next_leaf = flattened[i + 1]
 
@@ -27,7 +32,7 @@ class SceneScheduler:
 
                 if not next_leaf.has_time_to_spare(run_time_curr_needs):
                     raise Exception(
-                        f'The next leaf {next_leaf.unique_id} does not have time to spare: {run_time_curr_needs}'
+                        f'The next leaf {next_leaf.unique_id} does not have time to spare: {run_time_curr_needs}',
                     )
 
                 next_leaf.give_spare_time_to(curr_leaf, run_time_curr_needs)
@@ -36,6 +41,10 @@ class SceneScheduler:
         in_overriding_animation_group = False
         rolled_up_animations = []
         for i, leaf in enumerate(flattened):
+            if isinstance(leaf, Generator):
+                rolled_up_animations.append(leaf)
+                continue
+
             if leaf.is_overriding_end:
                 logger.critical('leaf is overriding end')
                 self.handle_override_end(
