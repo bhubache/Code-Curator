@@ -106,13 +106,23 @@ class CompositeAnimationScript(AnimationScript):
 
         raise LookupError(f'Unable to find child ``{unique_id}`` of parent ``{self.unique_id}``')
 
+    def get_component(self, namespace_path: Sequence[str]) -> AnimationLeaf:
+        if len(namespace_path) == 0:
+            raise ValueError('You must provide a non-empty ``namespace_path`` to find a component')
+
+        component = self
+        for name in namespace_path:
+            component = component.get_child(name)
+
+        return component
+
     # TODO: Raise LookupError if comment can't be found
-    def get_component(self, unique_id: str) -> AnimationScript:
+    def get_component_deprecated(self, unique_id: str) -> AnimationScript:
         if self.unique_id == unique_id:
             return self
 
         for child in self.children:
-            comp = child.get_component(unique_id)
+            comp = child.get_component_deprecated(unique_id)
             if comp is not None:
                 return comp
 
@@ -129,7 +139,7 @@ class CompositeAnimationScript(AnimationScript):
             start += child.num_words
 
     def component_uses_code_timing(self, leaf_unique_id: str) -> bool:
-        comp = self.get_component(leaf_unique_id)
+        comp = self.get_component_deprecated(leaf_unique_id)
         if comp is None:
             logger.error(
                 f'Component by the name {leaf_unique_id} does not exist',
@@ -144,7 +154,7 @@ class CompositeAnimationScript(AnimationScript):
         return False
 
     def apply_code_timing(self, section_name: str, func: Callable):
-        comp = self.get_component(section_name)
+        comp = self.get_component_deprecated(section_name)
         comp_animations = func()
 
         new_leaves = []
@@ -173,6 +183,14 @@ class CompositeAnimationScript(AnimationScript):
             output = fn(*args, **kwargs)
             return output
         return inner
+
+    def namespace_path_exists(self, namespace_path: Sequence[str]) -> bool:
+        try:
+            self.get_component(namespace_path)
+        except LookupError:
+            return False
+        else:
+            return True
 
     def _unique_id_exists(self, unique_id: str) -> bool:
         if self._unique_id == unique_id:
@@ -213,7 +231,7 @@ class CompositeAnimationScript(AnimationScript):
 
             return
 
-        component = self.get_component(unique_id)
+        component = self.get_component_deprecated(unique_id)
         if isinstance(component, AnimationLeaf):
             if len(animation) > 1:
                 raise ValueError('Should only be adding one animation to AnimationLeaf.')

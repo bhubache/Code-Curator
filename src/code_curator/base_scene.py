@@ -7,6 +7,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from collections.abc import Generator
 from collections.abc import Iterable
+from collections.abc import Sequence
 
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.scene_scheduler import SceneScheduler
@@ -47,13 +48,16 @@ class BaseScene(ABC, Scene):
         subsection_name = '_'.join(attr_name.split('_')[:-1])
         subsection_number = attr_name.split('_')[-1]
         if subsection_number.isnumeric():
-            animation_leaf = self.aligned_animation_scene.get_component(f'{section_name}_{subsection_number}')
+            animation_leaf = self.aligned_animation_scene.get_component_deprecated(f'{section_name}_{subsection_number}')
             timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
             return timing_info[subsection_name].copy()
         else:
-            animation_leaf = self.aligned_animation_scene.get_component(section_name)
+            animation_leaf = self.aligned_animation_scene.get_component_deprecated(section_name)
             timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
             return timing_info[section_name].copy()
+
+    def namespace_path_exists(self, namespace_path: Sequence[str]) -> bool:
+        return self.aligned_animation_scene.namespace_path_exists(namespace_path)
 
     @property
     def aligned_animation_scene(self) -> CompositeAnimationScript:

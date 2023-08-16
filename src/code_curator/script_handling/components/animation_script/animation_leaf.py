@@ -237,7 +237,7 @@ class AnimationLeaf(AnimationScript):
 
         return self
 
-    def get_component(self, unique_id: str) -> AnimationScript:
+    def get_component_deprecated(self, unique_id: str) -> AnimationScript:
         if unique_id == self.unique_id:
             return self
 
