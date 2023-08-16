@@ -17,27 +17,6 @@ from code_curator.base_scene import BaseScene
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 
-# def test_deco(cls, owner):
-#     def inner(*args, **kwargs):
-#         available_time = owner.aligned_animation_script_owner.get_child(owner.func_name).audio_duration
-#         run_time = kwargs.get('run_time', min(1, available_time))
-#         if run_time > available_time:
-#             raise ValueError()
-#
-#         remaining_time = available_time - run_time
-#         owner.remaining_time = remaining_time
-#
-#         animation = cls(*args, **kwargs)
-#         yield animation
-#
-#         # return animation
-#         from manim import Wait
-#         # yield Wait(remaining_time)
-#         # if remaining_time > 0.0:
-#         #     yield Wait(remaining_time)
-#
-#     return inner
-
 class AnimationGenerator(Generator):
     def __init__(self, owner: BaseScene) -> None:
         super().__init__()
@@ -60,10 +39,25 @@ class AnimationGenerator(Generator):
     def _get_organized_sub_generators(self):
         sub_generators = []
         for attr_value in self.__class__.__dict__.values():
-            if self._obj_is_generator_function(attr_value) or self._obj_is_generator(attr_value):
+            if self._is_specified_in_animation_scene(attr_value) and self._is_generator(attr_value):
                 sub_generators.append(attr_value)
 
         return sub_generators
+
+    def _is_specified_in_animation_scene(self, obj) -> bool:
+        try:
+            obj_namespace_path = self.namespace_path + [self._get_gen_name(obj)]
+        except AttributeError:
+            return False
+        else:
+            return self.owner.namespace_path_exists(obj_namespace_path)
+
+    def _is_generator(self, obj) -> bool:
+        return self._is_generator_function(obj) or issubclass(obj, Generator)
+
+    @staticmethod
+    def _is_generator_function(obj) -> bool:
+        return inspect.isgeneratorfunction(obj)
 
     def _insert_timing_logic(self, gen_method):
         for attr_name, attr_value in gen_method.__globals__.items():
@@ -91,34 +85,15 @@ class AnimationGenerator(Generator):
 # TODO: Ensure generator methods are ordered according to animation script
     def _get_sub_generators(self):
         for gen_method in self.sub_generators:
-            if self._obj_is_generator_function(gen_method):
+            if self._is_generator_function(gen_method):
                 gen_method = AutoAnimationTimer.time(gen_method, owner=self, aligned_animation_script_owner=self.aligned_animation_script_owner)
                 self._insert_timing_logic(gen_method)
                 yield gen_method(self)
             else:
                 yield from gen_method(owner=self).send(None)
-        # try:
-        #     for attr_value in self.__class__.__dict__.values():
-        #         if self._obj_is_generator_function(attr_value):
-        #             attr_value = AutoAnimationTimer.time(attr_value, owner=self, aligned_animation_script_owner=self.aligned_animation_script_owner)
-        #             self._insert_timing_logic(attr_value)
-        #             # yield from attr_value(self)
-        #             # breakpoint()
-        #             yield attr_value(self)
-        #         elif self._obj_is_generator(attr_value):
-        #             yield from attr_value(owner=self).send(None)
-        # except RuntimeError:
-        #     breakpoint()
 
-    def _obj_is_generator_function(self, obj) -> bool:
-        return isinstance(obj, FunctionType) and not obj.__name__.startswith('_')
-
-    def _obj_is_generator(self, obj) -> bool:
-        # TODO: Make check better
-        try:
-            return not obj.__name__.startswith('_')
-        except AttributeError:
-            return False
+    def _get_gen_name(self, obj) -> str:
+        return obj.__name__
 
     def send(self, value=None):
         return self._get_sub_generators()
