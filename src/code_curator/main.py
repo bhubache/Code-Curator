@@ -415,6 +415,13 @@ def main() -> None:
 
     # open_media_file(scene.renderer.file_writer.movie_file_path)
 
+def postmortem_main():
+    try:
+        main()
+    except Exception:
+        import pdb; pdb.post_mortem()
+
+
 
 if __name__ == '__main__':
     main()
