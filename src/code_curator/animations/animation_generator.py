@@ -39,6 +39,7 @@ class AnimationGenerator(Generator):
             for child in self.aligned_animation_script.children
         }
         self.sub_generators: Sequence[Generator] = []
+        self._post_init()
 
     def __getattr__(self, item: str):
         owner = self.owner
@@ -52,6 +53,9 @@ class AnimationGenerator(Generator):
                     print(f"Unable to find item {item}!")
                     breakpoint()
                     raise
+
+    def _post_init(self) -> None:
+        """Construct your class."""
 
     def prep_rendering(self):
         self.sub_generators = self._get_organized_sub_generators()
@@ -110,6 +114,7 @@ class AnimationGenerator(Generator):
                 cls_gen.prep_rendering()
                 yield from cls_gen.send(None)
 
+    # TODO: _MethodAnimation
     def _insert_timing_logic(self, gen_method):
         for attr_value in gen_method.__globals__.values():
             if (
