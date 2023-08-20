@@ -5,79 +5,33 @@ import inspect
 import textwrap
 from typing import TYPE_CHECKING
 
-from manim import Wait
 
 if TYPE_CHECKING:
     from ast import FunctionDef
-    from ast import Expr
-    from typing import Any
-
-def _get_run_time(func_ast, *, default: float) -> float:
-    all_run_time_keywords = [attr for attr in func_ast.body[-1].body[-1].value.value.keywords if attr.arg == 'run_time']
-
-    if len(all_run_time_keywords) == 0:
-        return default
-
-    if len(all_run_time_keywords) > 1:
-        raise RuntimeError(f'More than one ``run_time`` arg found in {ast.unparse(func_ast)}!')
-    # run_time_keyword = next(func_ast.body[-1].body[-1].value.value.keywords, None)
-
-    keyword = all_run_time_keywords[0]
-
-    try:
-        return keyword.value.value
-    except AttributeError:
-        identifier = keyword.value.id
-
-        breakpoint()
-
-
-
-    return next((attr.value.value for attr in keywords if attr.arg == 'run_time'), default)
-
-
-def _add_wait(run_time: float):
-    pass
 
 
 class _FuncNameInserter(ast.NodeTransformer):
-    # def generic_visit(self, node: AST) -> AST:
-    #     pass
+    def __init__(self, name: str) -> None:
+        self.name = name
 
-    def visit_FunctionDef(self, node: FunctionDef) -> Any:
-        # wait_yield = ast.Expr(
-        #     ast.Yield(
-        #         ast.Call(
-        #             func=ast.Name(
-        #                 'Wait',
-        #                 ctx=node.body[-1].value.value.func.ctx,
-        #             ),
-        #             args=[
-        #                 # ast.Constant(self.run_time),
-        #                 ast.Constant(10),
-        #             ],
-        #             keywords=[],
-        #         )
-        #     )
-        # )
-        # node.body.append(wait_yield)
+    def visit_FunctionDef(self, node: FunctionDef) -> FunctionDef:  # noqa: N802
         node.body.insert(
             0,
             ast.Assign(
                 targets=[
                     ast.Attribute(
                         value=ast.Name(
-                            id='self',
+                            id="self",
                             ctx=ast.Load(),
                         ),
-                        attr='func_name',
+                        attr="func_name",
                         ctx=ast.Store(),
                     ),
                 ],
                 value=ast.Constant(
-                    value=node.name,
+                    value=self.name,
                 ),
-            )
+            ),
         )
         ast.fix_missing_locations(node)
         return node
@@ -91,11 +45,11 @@ class AutoAnimationTimer:
         func_source = textwrap.dedent(func_source)
         func_ast = ast.parse(func_source)
 
-        new_func_ast = _FuncNameInserter().visit(func_ast)
-        new_code_obj = compile(new_func_ast, filename='', mode='exec')
+        new_func_ast = _FuncNameInserter(name=func_name).visit(func_ast)
+        new_code_obj = compile(new_func_ast, filename="", mode="exec")
 
-        exec(new_code_obj, gen_method.__globals__, locals())
-        return locals()[func_name]
-
-
-        # return gen_method
+        exec(new_code_obj, gen_method.__globals__, locals())  # noqa: SCS101
+        try:
+            return locals()[func_name]
+        except KeyError:
+            return locals()["_wait"]
