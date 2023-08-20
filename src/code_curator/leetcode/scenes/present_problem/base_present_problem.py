@@ -49,10 +49,12 @@ class BasePresentProblem(BaseScene):
         constraints=CONSTRAINTS,
         problem_dir=None,
         aligned_animation_scene=None,
+        **kwargs
     ):
         super().__init__(
             problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
+            **kwargs
         )
         self._title = self._create_title(title)
         self._statement_header = self._create_statement_header(statement_header)
