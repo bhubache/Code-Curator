@@ -85,26 +85,11 @@ class _FuncNameInserter(ast.NodeTransformer):
 
 class AutoAnimationTimer:
     @staticmethod
-    def time(gen_method, owner, aligned_animation_script_owner) -> None:
+    def time(gen_method, owner) -> None:
         func_name = gen_method.__name__
         func_source = inspect.getsource(gen_method)
         func_source = textwrap.dedent(func_source)
         func_ast = ast.parse(func_source)
-        # available_time = aligned_animation_script_owner.get_child(func_name).audio_duration
-        # given_run_time = _get_run_time(func_ast, default=available_time)
-
-        # if given_run_time > available_time:
-        #     raise ValueError(f'{func_name} only has {available_time} second(s) of available time. Attempted: {given_run_time} second(s)')
-        # 1. Check that the run_time if <= audio_duration
-        # 2. Any extra time should be yielded as a wait animation after current animation
-
-        # remaining_time = available_time - given_run_time
-        # if remaining_time > 0:
-        #     new_func_ast = _WaitAnimationAdder(remaining_time).visit(func_ast)
-        #     new_code_obj = compile(new_func_ast, filename='', mode='exec')
-
-        #     exec(new_code_obj, gen_method.__globals__, locals())
-        #     return locals()[func_name]
 
         new_func_ast = _FuncNameInserter().visit(func_ast)
         new_code_obj = compile(new_func_ast, filename='', mode='exec')
