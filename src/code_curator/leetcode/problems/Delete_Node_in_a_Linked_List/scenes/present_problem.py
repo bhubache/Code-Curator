@@ -1,7 +1,6 @@
 """Animations for presenting the problem."""
 from __future__ import annotations
 
-from collections.abc import Iterator
 from collections.abc import Sequence
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -14,10 +13,14 @@ from manim import Wait
 
 from code_curator.animations.animation_generator import AnimationGenerator
 from code_curator.animations.change_color import ChangeColor
+from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import (
     BasePresentProblem,
 )
+
+
+logger = CustomLogger.getLogger(__name__)
 
 
 if TYPE_CHECKING:
@@ -31,7 +34,7 @@ STATEMENT = (
     r" node of head. All the values of the linked list are unique, and it is guaranteed"
     r" that the given node node is not the last node in the linked list. Delete the"
     r" given node. Note that by deleting the node, we do not mean removing it from"
-    r" memory. We mean"
+    r" memory. We mean:"
 )
 SPECIAL_NOTES = []
 SPECIAL_NOTES.append("The value of the given node should not exist in the linked list.")
@@ -45,6 +48,9 @@ CONSTRAINTS.append(r"-1000 $\leq$ Node.val $\leq$ 1000")
 CONSTRAINTS.append("The value of each node in the list is unique.")
 CONSTRAINTS.append("The node to be deleted is in the list and is not a tail node.")
 
+REMOVE_COLOR = "#FF0000"
+KEEP_COLOR = "#00FF00"
+RESET_COLOR = "#DBC9B8"
 
 CustomAnimations = Sequence[Animation]
 
@@ -92,52 +98,123 @@ class PresentProblem(BasePresentProblem):
         yield Wait()
 
     class remove_duplication(AnimationGenerator):
+        def _post_init(self) -> None:
+            text_to_remove: str = (
+                " All the values of the linked list are unique, and it is"
+                " guaranteed that the given node node is not the last node in the"
+                " linked list."
+            )
+            self._problem_text_to_remove: ProblemText = self._statement.get_sub_tex(
+                text_to_remove,
+            )
+            self.second_mention_tex = self._statement.get_sub_tex(
+                "Delete the given node.",
+            )
+
         class constraints_duplication(AnimationGenerator):
-            def __init__(self, owner, aligned_animation_script):
-                super().__init__(
-                    owner=owner,
-                    aligned_animation_script=aligned_animation_script,
-                )
-                text_to_remove: str = (
-                    " All the values of the linked list are unique, and it is"
-                    " guaranteed that the given node node is not the last node in the"
-                    " linked list."
-                )
-                self._problem_text_to_remove: ProblemText = self._statement.get_sub_tex(
-                    text_to_remove,
-                )
+            def _post_init(self) -> None:
                 self._third_constraint_tex: Tex = self.get_constraint_tex(3)
                 self._fourth_constraint_tex: Tex = self.get_constraint_tex(4)
 
-                self._remove_color: str = "#FF0000"
-                self._keep_color: str = "#00FF00"
-                self._reset_color = self._third_constraint_tex.color
-
-            def three(self) -> Iterator[Animation]:
-                yield ChangeColor(
-                    self._third_constraint_tex,
-                    self._keep_color,
-                    run_time=0.25,
+            def highlight_duplication(self):
+                yield AnimationGroup(
+                    ChangeColor(self._third_constraint_tex, KEEP_COLOR),
+                    ChangeColor(self._fourth_constraint_tex, KEEP_COLOR),
+                    ChangeColor(
+                        self._problem_text_to_remove,
+                        REMOVE_COLOR,
+                        starting_color=self._statement.color,
+                    ),
                 )
-
-            def four(self):
-                yield ChangeColor(self._fourth_constraint_tex, self._keep_color)
-
-            def statement(self):
-                yield ChangeColor(self._problem_text_to_remove, self._remove_color)
 
             def remove(self):
                 yield AnimationGroup(
                     FadeOut(self._problem_text_to_remove),
-                    ChangeColor(self._third_constraint_tex, self._reset_color),
-                    ChangeColor(self._fourth_constraint_tex, self._reset_color),
+                    ChangeColor(self._third_constraint_tex, RESET_COLOR),
+                    ChangeColor(self._fourth_constraint_tex, RESET_COLOR),
                 )
 
-        def delete_node(self):
-            yield Wait()
+        class delete_node(AnimationGenerator):
+            def _post_init(self) -> None:
+                self.first_mention_tex = self._statement.get_sub_tex(
+                    "delete a node node in it.",
+                )
 
-    def smooth_over_wording(self):
-        yield Wait()
+            def change_color(self):
+                yield AnimationGroup(
+                    ChangeColor(
+                        self.first_mention_tex,
+                        KEEP_COLOR,
+                        starting_color=self._statement.color,
+                    ),
+                    ChangeColor(
+                        self.second_mention_tex,
+                        REMOVE_COLOR,
+                        starting_color=self._statement.color,
+                    ),
+                )
+
+            def remove(self):
+                yield AnimationGroup(
+                    FadeOut(self.second_mention_tex),
+                    ChangeColor(self.first_mention_tex, RESET_COLOR),
+                )
+
+        def smooth_over_wording(self):
+            # base = self._statement
+            self._problem_text_to_remove.set_opacity(0)
+            self.second_mention_tex.set_opacity(0)
+            new_statement = self._create_statement(
+                "There is a singly linked list called head and a node that we wish to"
+                " remove called node. You will not be given access to the head of the"
+                " list. Instead, you will be given access to the node to be deleted.",
+            )
+            self._position_element_below_other(new_statement, self._statement_header)
+            yield AnimationGroup(
+                FadeOut(self._statement),
+                FadeIn(new_statement),
+            )
+            # self.add(new_statement)
+
+            # target = new_statement
+            # line = Line(2*UP, 2*DOWN, color=RED).next_to(base, LEFT, buff=1)
+            # base_background = Square(
+            #     fill_color=PINK,
+            #     fill_opacity=0.3
+            # ).rotate(PI / 2).scale(5).next_to(line, RIGHT, buff=0)
+            # target_background = Square(fill_color=MAROON, fill_opacity=0.3).rotate(PI / 2).scale(5).next_to(line, LEFT, buff=0)
+            # slider = VGroup(base_background, target_background, line)
+
+            # self.add(slider)
+
+            # def get_intersection_updater(no_added_mob, background):
+            #     def updater(added_mob):
+            #         grp = []
+            #         extract_all_submobjects(grp, no_added_mob)
+            #         added_mob.become(
+            #             VGroup(
+            #                 *[
+            #                     Intersection(submob, background).match_style(submob)
+            #                     for submob in grp
+            #                 ]
+            #             )
+            #         )
+
+            #     def extract_all_submobjects(grp, mob):
+            #         if len(mob.submobjects) == 0:
+            #             grp.append(mob)
+            #         else:
+            #             for submob in mob.submobjects:
+            #                 extract_all_submobjects(grp, submob)
+            #         # added_mob.become(Intersection(no_added_mob, background).match_style(no_added_mob))
+            #     return updater
+
+            # pre_mob = VMobject().add_updater(get_intersection_updater(base, base_background))
+            # pos_mob = VMobject().add_updater(get_intersection_updater(target, target_background))
+            # self.add(pre_mob, pos_mob)
+
+            # yield slider.animate.shift(RIGHT * 4)
+            # # yield FadeIn(Tex('HELLO WORLD!'))
 
     def _create_statement(self, text: str, font_size=25):
         return super()._create_statement(text, font_size=font_size)
