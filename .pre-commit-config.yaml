@@ -87,7 +87,6 @@ repos:
             'flake8-comprehensions==3.14.0',
             'flake8-datetimez==20.10.0',
             'flake8-implicit-str-concat==0.4.0',
-            'flake8-multiline-containers==0.0.19',
             'flake8-picky-parentheses==0.5.0',
             'flake8-return==1.2.0',
             'tryceratops==2.3.2',

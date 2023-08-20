@@ -49,6 +49,15 @@ CONSTRAINTS.append("The node to be deleted is in the list and is not a tail node
 CustomAnimations = Sequence[Animation]
 
 
+def position_special_notes_list(fn):
+    @wraps(fn)
+    def inner(self, *args, **kwargs):
+        self._position_element_below_lowest_in_scene(self._special_notes_list)
+        yield from fn(self, *args, **kwargs)
+
+    return inner
+
+
 class PresentProblem(BasePresentProblem):
     def __init__(self, problem_dir: str, aligned_animation_scene):
         super().__init__(
@@ -65,32 +74,6 @@ class PresentProblem(BasePresentProblem):
             SPECIAL_NOTES,
             font_size=20,
         )
-
-        self.add_nonoverriding_animation(self.intro)
-        self.add_nonoverriding_animation(self.deleting_point_1)
-        self.add_nonoverriding_animation(self.deleting_point_2)
-        self.add_nonoverriding_animation(self.deleting_point_3)
-        self.add_nonoverriding_animation(self.deleting_point_4)
-        self.add_nonoverriding_animation(self.special_note)
-        self.add_nonoverriding_animation(self.remove_duplication(owner=self))
-
-    def _create_statement(self, text: str, font_size=25):
-        return super()._create_statement(text, font_size=font_size)
-
-    def _create_constraints(self, text: str, font_size=20):
-        return super()._create_constraints(text, font_size=font_size)
-
-    def intro(self) -> CustomAnimations:
-        yield Wait()
-
-    def position_special_notes_list(fn):
-        @wraps(fn)
-        def inner(self, *args, **kwargs):
-            self._position_element_below_lowest_in_scene(self._special_notes_list)
-            result = fn(self, *args, **kwargs)
-            return result
-
-        return inner
 
     @position_special_notes_list
     def deleting_point_1(self) -> CustomAnimations:
@@ -110,8 +93,11 @@ class PresentProblem(BasePresentProblem):
 
     class remove_duplication(AnimationGenerator):
         class constraints_duplication(AnimationGenerator):
-            def __init__(self, owner):
-                super().__init__(owner)
+            def __init__(self, owner, aligned_animation_script):
+                super().__init__(
+                    owner=owner,
+                    aligned_animation_script=aligned_animation_script,
+                )
                 text_to_remove: str = (
                     " All the values of the linked list are unique, and it is"
                     " guaranteed that the given node node is not the last node in the"
@@ -149,3 +135,12 @@ class PresentProblem(BasePresentProblem):
 
         def delete_node(self):
             yield Wait()
+
+    def smooth_over_wording(self):
+        yield Wait()
+
+    def _create_statement(self, text: str, font_size=25):
+        return super()._create_statement(text, font_size=font_size)
+
+    def _create_constraints(self, text: str, font_size=20):
+        return super()._create_constraints(text, font_size=font_size)
