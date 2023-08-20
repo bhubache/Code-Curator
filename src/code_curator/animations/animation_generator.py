@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Generator
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from manim import Animation
@@ -24,7 +25,7 @@ class AnimationGenerator(Generator):
     def __init__(self, *args, owner: BaseScene | None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.owner = owner
-        self.sub_generators = self._get_organized_sub_generators()
+        self.sub_generators: Sequence[Generator] = []
 
     def __getattr__(self, item: str):
         owner = self.owner
@@ -36,7 +37,7 @@ class AnimationGenerator(Generator):
                     owner = owner.owner
                 except AttributeError:
                     print(f"Unable to find item {item}!")
-                    breakpoint()
+                    raise
 
     @property
     def namespace_path(self) -> list[str]:
@@ -51,10 +52,14 @@ class AnimationGenerator(Generator):
     @property
     def aligned_animation_script_owner(self) -> AnimationScript:
         child = self.owner.aligned_animation_scene
+
         for child_id in self.namespace_path:
             child = child.get_child(child_id)
 
         return child
+
+    def prep_rendering(self):
+        self.sub_generators = self._get_organized_sub_generators()
 
     def send(self, value=None):
         return self._get_sub_generators()
@@ -73,7 +78,12 @@ class AnimationGenerator(Generator):
 
     def _get_organized_sub_generators(self):
         sub_generators = []
-        for attr_value in self.__class__.__dict__.values():
+        for attr_name in dir(self):
+            try:
+                attr_value = getattr(self, attr_name)
+            except AttributeError:
+                continue
+
             if self._is_specified_in_animation_scene(attr_value) and self._is_generator(
                 attr_value,
             ):
@@ -87,7 +97,10 @@ class AnimationGenerator(Generator):
         except AttributeError:
             return False
         else:
-            return self.owner.namespace_path_exists(obj_namespace_path)
+            try:
+                return self.owner.namespace_path_exists(obj_namespace_path)
+            except AttributeError:
+                return self.namespace_path_exists(obj_namespace_path[1:])
 
     def _is_generator(self, obj) -> bool:
         return self._is_generator_function(obj) or issubclass(obj, Generator)
