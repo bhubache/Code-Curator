@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import inspect
-import itertools
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Callable
-from collections.abc import Generator
 from collections.abc import Iterable
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from manim import config
 from manim import FadeIn
@@ -17,28 +15,17 @@ from manim import Wait
 from .generator_scene import GeneratorScene
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.scene_scheduler import SceneScheduler
-from code_curator.script_handling.components.animation_script.animation_leaf import (
-    AnimationLeaf,
-)
-from code_curator.script_handling.components.animation_script.composite_animation_script import (
-    CompositeAnimationScript,
-)
+
+
+if TYPE_CHECKING:
+    from .script_handling.components.animation_script.composite_animation_script import (  # noqa: E501
+        CompositeAnimationScript,
+    )
 
 logger = CustomLogger.getLogger(__name__)
 
 
 class BaseScene(ABC, GeneratorScene):
-    """Test docstring
-
-    :param ABC: _description_
-    :type ABC: _type_
-    :param Scene: _description_
-    :type Scene: _type_
-    :raises RuntimeError: _description_
-    :return: _description_
-    :rtype: _type_
-    """
-
     config.background_color = "#000E15"
 
     def __init__(
@@ -48,9 +35,11 @@ class BaseScene(ABC, GeneratorScene):
         *args,
         **kwargs,
     ) -> None:
-        super().__init__(*args, **kwargs)
-        # Scene.__init__(self)
-        # CuratorAnimation.animation_scene_script = aligned_animation_scene
+        super().__init__(
+            *args,
+            aligned_animation_script=aligned_animation_scene,
+            **kwargs,
+        )
         self._aligned_animation_scene: CompositeAnimationScript = (
             aligned_animation_scene
         )
@@ -78,17 +67,10 @@ class BaseScene(ABC, GeneratorScene):
                 animation_leaf,
                 animation_leaf.SUBANIMATION_TIMINGS_NAME,
             )
-        except AttributeError:
-            return super().__getattr__(attr_name)
+        except AttributeError as attr_exc:
+            raise NotImplementedError(attr_name) from attr_exc
 
         return timing_info[timing_info_name].copy()
-
-    def render(self, preview: bool = False):
-        self.prep_rendering()
-        super().render()
-
-    def namespace_path_exists(self, namespace_path: Sequence[str]) -> bool:
-        return self.aligned_animation_scene.namespace_path_exists(namespace_path)
 
     @property
     def aligned_animation_scene(self) -> CompositeAnimationScript:
@@ -106,46 +88,17 @@ class BaseScene(ABC, GeneratorScene):
     def scene_scheduler(self) -> SceneScheduler:
         return self._scene_scheduler
 
-    # NOTE: This may not work with multiple scenes!!!
-    def setup(self) -> None:
-        rolled_up_animations = self.scene_scheduler.schedule(
-            self.aligned_animation_scene,
-        )
-
-        for i, composite in enumerate(rolled_up_animations):
-            try:
-                if composite.is_overriding_animation:
-                    rolled_up_animations[i] = self.super_add_overriding_animation(
-                        composite,
-                    )
-            except AttributeError:
-                pass
-
-        rolled_up_animations.insert(
-            -1,
-            self.aligned_animation_scene.get_child("remove_duplication").animation,
-        )
-
-        self._animations = rolled_up_animations
+    def render(self, preview: bool = False):
+        self.prep_rendering()
+        super().render()
 
     def construct(self) -> None:
-        for obj in self._animations:
-            if isinstance(obj, AnimationLeaf):
-                obj.func()
-                self.play(obj.animation)
-            elif callable(obj):
-                obj()
-            elif isinstance(obj, Generator):
-                # TODO: Handle wait animations elsewhere
-                for elem in itertools.chain.from_iterable(obj):
-                    self.play(elem)
-                    wait_animation = self.__create_filling_wait_animation(elem)
-                    if wait_animation is not None:
-                        self.play(wait_animation)
-            else:
-                raise RuntimeError(
-                    f"Unexpected type {type(obj)} when running animations: {obj}",
-                )
+        something = next(self)
+        for elem in something:
+            self.play(elem)
+            wait_animation = self.__create_filling_wait_animation(elem)
+            if wait_animation is not None:
+                self.play(wait_animation)
 
     def __create_filling_wait_animation(self, animation) -> Wait:
         try:
@@ -155,10 +108,6 @@ class BaseScene(ABC, GeneratorScene):
             return Wait(
                 min(sub_anim.remaining_time for sub_anim in animation.animations),
             )
-
-    def _from_iterable(self, iterables):
-        for it in iterables:
-            yield from it
 
     def tear_down(self) -> None:
         self.play(FadeOut(*self.mobjects))
