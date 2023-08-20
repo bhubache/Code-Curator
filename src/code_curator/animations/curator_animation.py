@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from manim import Animation
@@ -32,10 +33,14 @@ class CuratorAnimation(Animation):
         super().__init__(*mobjects, run_time=run_time, **kwargs)
 
     def _check_run_time(self, *, run_time: float, owner) -> float:
-        available_time: float = owner.animation_name_timing_map[owner.func_name]
+        available_time: Decimal = Decimal(
+            str(owner.animation_name_timing_map[owner.func_name]),
+        )
 
         if run_time is None:
-            run_time = min(available_time, 1.0)
+            run_time = min(available_time, Decimal(str(1.0)))
+        else:
+            run_time = Decimal(str(run_time))
 
         if run_time > available_time:
             err_msg = (
@@ -55,9 +60,9 @@ class CuratorAnimation(Animation):
             else:
                 raise ValueError(err_msg)
 
-        self.remaining_time = available_time - run_time
+        self.remaining_time = float(Decimal(str(available_time - run_time)))
 
-        return run_time
+        return float(run_time)
 
     def _is_wait_animation(self) -> bool:
         return Wait in self.__class__.__mro__
