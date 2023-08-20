@@ -15,7 +15,11 @@ repos:
     rev: v3.10.0
     hooks:
         -   id: reorder-python-imports
-            args: [--py39-plus, --add-import, 'from __future__ import annotations']
+            args: [
+                --py39-plus,
+                --add-import, 'from __future__ import annotations',
+                --application-directories=src,
+            ]
 -   repo: https://github.com/asottile/pyupgrade
     rev: v3.10.1
     hooks:
@@ -63,7 +67,13 @@ repos:
     hooks:
     -   id: flake8
         language_version: python3.10.12
-        args: [--max-line-length=120]
+        args: [
+            '--config=./.flake8',
+            # '--max-line-length=79',
+            # '--application-import-names=code_curator',
+            # '--use-class-attributes-order-strict-mode',
+            # '--import-order-style=smarkets'
+        ]
         additional_dependencies: [
             'flake8-2020==1.8.1',
             'flake8-encodings==0.5.0',
@@ -90,6 +100,7 @@ repos:
             'flake8-eradicate==1.5.0',
             # 'flake8-docstrings==1.7.0',
             # 'flake8-docstrings-complete==1.2.0',
+            'flake8-type-checking==2.4.1',
             'flake8-rst-docstrings==0.3.0',
             'flake8-sphinx-links==0.2.1',
             'flake8-aaa==0.16.0',
