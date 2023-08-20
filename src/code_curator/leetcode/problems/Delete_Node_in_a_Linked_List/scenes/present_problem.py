@@ -6,17 +6,18 @@ from collections.abc import Sequence
 from functools import wraps
 from typing import TYPE_CHECKING
 
+from manim import Animation
+from manim import AnimationGroup
+from manim import FadeIn
+from manim import FadeOut
+from manim import Wait
+
 from code_curator.animations.animation_generator import AnimationGenerator
 from code_curator.animations.change_color import ChangeColor
 from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import (
     BasePresentProblem,
 )
-from manim import Animation
-from manim import AnimationGroup
-from manim import FadeIn
-from manim import FadeOut
-from manim import Wait
 
 
 if TYPE_CHECKING:
@@ -58,6 +59,7 @@ class PresentProblem(BasePresentProblem):
             constraints=CONSTRAINTS,
             problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
+            owner=None,
         )
         self._special_notes_list = ProblemText.create_constraints_list(
             SPECIAL_NOTES,
@@ -79,7 +81,7 @@ class PresentProblem(BasePresentProblem):
         return super()._create_constraints(text, font_size=font_size)
 
     def intro(self) -> CustomAnimations:
-        return [Wait()]
+        yield Wait()
 
     def position_special_notes_list(fn):
         @wraps(fn)
@@ -92,19 +94,19 @@ class PresentProblem(BasePresentProblem):
 
     @position_special_notes_list
     def deleting_point_1(self) -> CustomAnimations:
-        return [FadeIn(self._special_notes_list[0])]
+        yield FadeIn(self._special_notes_list[0])
 
     def deleting_point_2(self) -> CustomAnimations:
-        return [FadeIn(self._special_notes_list[1])]
+        yield FadeIn(self._special_notes_list[1])
 
     def deleting_point_3(self) -> CustomAnimations:
-        return [FadeIn(self._special_notes_list[2])]
+        yield FadeIn(self._special_notes_list[2])
 
     def deleting_point_4(self) -> CustomAnimations:
-        return [FadeIn(self._special_notes_list[3])]
+        yield FadeIn(self._special_notes_list[3])
 
     def special_note(self) -> CustomAnimations:
-        return [Wait()]
+        yield Wait()
 
     class remove_duplication(AnimationGenerator):
         class constraints_duplication(AnimationGenerator):
