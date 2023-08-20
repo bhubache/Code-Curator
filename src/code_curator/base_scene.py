@@ -9,19 +9,25 @@ from collections.abc import Generator
 from collections.abc import Iterable
 from collections.abc import Sequence
 
-from code_curator.custom_logging.custom_logger import CustomLogger
-from code_curator.scene_scheduler import SceneScheduler
-from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
-from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 from manim import config
 from manim import FadeIn
 from manim import FadeOut
-from manim import Scene
 from manim import Wait
+
+from .generator_scene import GeneratorScene
+from code_curator.custom_logging.custom_logger import CustomLogger
+from code_curator.scene_scheduler import SceneScheduler
+from code_curator.script_handling.components.animation_script.animation_leaf import (
+    AnimationLeaf,
+)
+from code_curator.script_handling.components.animation_script.composite_animation_script import (
+    CompositeAnimationScript,
+)
+
 logger = CustomLogger.getLogger(__name__)
 
 
-class BaseScene(ABC, Scene):
+class BaseScene(ABC, GeneratorScene):
     """Test docstring
 
     :param ABC: _description_
@@ -32,29 +38,54 @@ class BaseScene(ABC, Scene):
     :return: _description_
     :rtype: _type_
     """
-    config.background_color = '#000E15'
 
-    def __init__(self, problem_dir: str, aligned_animation_scene: CompositeAnimationScript) -> None:
-        Scene.__init__(self)
+    config.background_color = "#000E15"
+
+    def __init__(
+        self,
+        problem_dir: str,
+        aligned_animation_scene: CompositeAnimationScript,
+        *args,
+        **kwargs,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        # Scene.__init__(self)
         # CuratorAnimation.animation_scene_script = aligned_animation_scene
-        self._aligned_animation_scene: CompositeAnimationScript = aligned_animation_scene
+        self._aligned_animation_scene: CompositeAnimationScript = (
+            aligned_animation_scene
+        )
         self._problem_dir: str = problem_dir
         self._animation_spec: dict = {}
         self._scene_scheduler: SceneScheduler = SceneScheduler()
-        self._mobjects_pickle: str = 'mobjects_pickle.pkl'
+        self._mobjects_pickle: str = "mobjects_pickle.pkl"
 
     def __getattr__(self, attr_name):
         section_name = inspect.stack()[1].function
-        subsection_name = '_'.join(attr_name.split('_')[:-1])
-        subsection_number = attr_name.split('_')[-1]
+        subsection_name = "_".join(attr_name.split("_")[:-1])
+        subsection_number = attr_name.split("_")[-1]
         if subsection_number.isnumeric():
-            animation_leaf = self.aligned_animation_scene.get_component_deprecated(f'{section_name}_{subsection_number}')
-            timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
-            return timing_info[subsection_name].copy()
+            component_name = f"{section_name}_{subsection_number}"
+            timing_info_name = subsection_name
         else:
-            animation_leaf = self.aligned_animation_scene.get_component_deprecated(section_name)
-            timing_info = getattr(animation_leaf, animation_leaf.SUBANIMATION_TIMINGS_NAME)
-            return timing_info[section_name].copy()
+            component_name = section_name
+            timing_info_name = section_name
+
+        animation_leaf = self.aligned_animation_scene.get_component_deprecated(
+            component_name,
+        )
+        try:
+            timing_info = getattr(
+                animation_leaf,
+                animation_leaf.SUBANIMATION_TIMINGS_NAME,
+            )
+        except AttributeError:
+            return super().__getattr__(attr_name)
+
+        return timing_info[timing_info_name].copy()
+
+    def render(self, preview: bool = False):
+        self.prep_rendering()
+        super().render()
 
     def namespace_path_exists(self, namespace_path: Sequence[str]) -> bool:
         return self.aligned_animation_scene.namespace_path_exists(namespace_path)
@@ -90,15 +121,14 @@ class BaseScene(ABC, Scene):
             except AttributeError:
                 pass
 
-        rolled_up_animations.insert(-1, self.aligned_animation_scene.get_child('remove_duplication').animation)
+        rolled_up_animations.insert(
+            -1,
+            self.aligned_animation_scene.get_child("remove_duplication").animation,
+        )
 
         self._animations = rolled_up_animations
 
     def construct(self) -> None:
-        # anim = self._animations[0]
-        # anim.func()
-        # self.play(anim.animation)
-
         for obj in self._animations:
             if isinstance(obj, AnimationLeaf):
                 obj.func()
@@ -114,7 +144,7 @@ class BaseScene(ABC, Scene):
                         self.play(wait_animation)
             else:
                 raise RuntimeError(
-                    f'Unexpected type {type(obj)} when running animations: {obj}',
+                    f"Unexpected type {type(obj)} when running animations: {obj}",
                 )
 
     def __create_filling_wait_animation(self, animation) -> Wait:
@@ -122,7 +152,9 @@ class BaseScene(ABC, Scene):
             if animation.remaining_time > 0:
                 return Wait(animation.remaining_time)
         except AttributeError:
-            return Wait(min(sub_anim.remaining_time for sub_anim in animation.animations))
+            return Wait(
+                min(sub_anim.remaining_time for sub_anim in animation.animations),
+            )
 
     def _from_iterable(self, iterables):
         for it in iterables:
@@ -135,7 +167,10 @@ class BaseScene(ABC, Scene):
     def create_animation_spec(self) -> dict:
         pass
 
-    def super_add_overriding_animation(self, composite: CompositeAnimationScript) -> Callable:
+    def super_add_overriding_animation(
+        self,
+        composite: CompositeAnimationScript,
+    ) -> Callable:
         def inner() -> None:
             mobjects_on_screen_before_animation = self.mobjects.copy()
 
@@ -158,6 +193,7 @@ class BaseScene(ABC, Scene):
                     FadeOut(*self.mobjects),
                     run_time=0.5,
                 )
+
             try:
                 self.play(
                     FadeIn(*mobjects_on_screen_before_animation),
@@ -176,28 +212,31 @@ class BaseScene(ABC, Scene):
         for section_name, func in self.animation_spec.items():
             if self.aligned_animation_scene.component_uses_code_timing(section_name):
                 self.aligned_animation_scene.apply_code_timing(
-                    section_name, func,
+                    section_name,
+                    func,
                 )
             else:
-                if self._func_outputs_list_of_funcs(func):
-                    # FIXME: index as name will only work for constraints children and similar situations
+                if self._func_does_output_list_of_funcs(func):
                     list_of_funcs = func()
                     for i, anim_func in enumerate(list_of_funcs):
-                        parent_of_animations = self.aligned_animation_scene.get_child(section_name)
+                        parent_of_animations = self.aligned_animation_scene.get_child(
+                            section_name,
+                        )
                         parent_of_animations.add_animation(
-                            # unique_id=f'{section_name}_{i}',
                             unique_id=i,
-                            func=anim_func, animation=anim_func(),
+                            func=anim_func,
+                            animation=anim_func(),
                             is_overriding_animation=False,
                         )
                 else:
                     self.aligned_animation_scene.add_animation(
                         unique_id=section_name,
-                        func=func, animation=func(),
+                        func=func,
+                        animation=func(),
                         is_overriding_animation=False,
                     )
 
-    def _func_outputs_list_of_funcs(self, func: Callable) -> bool:
+    def _func_does_output_list_of_funcs(self, func: Callable) -> bool:
         poorly_named_var = func()
         if isinstance(poorly_named_var, Iterable):
             for elem in poorly_named_var:
