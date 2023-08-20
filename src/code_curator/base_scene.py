@@ -92,21 +92,37 @@ class BaseScene(ABC, GeneratorScene):
         super().render()
 
     def construct(self) -> None:
-        something = next(self)
-        for elem in something:
-            self.play(elem)
-            wait_animation = self.__create_filling_wait_animation(elem)
+        animation_generator = next(self)
+        for i, animation in enumerate(animation_generator):
+            logger.critical(f"{i}   {animation}")
+            # if i < 6 or i == 20:
+            self.play(animation)
+
+            wait_animation = self.__create_filling_wait_animation(animation)
             if wait_animation is not None:
                 self.play(wait_animation)
 
     def __create_filling_wait_animation(self, animation) -> Wait:
+        assert len(Wait.__bases__) == 2
+        # Remove CuratorAnimation from bases to create basic manim Wait
+        Wait.__bases__ = Wait.__bases__[1:]
         try:
             if animation.remaining_time > 0:
                 return Wait(animation.remaining_time)
         except AttributeError:
-            return Wait(
-                min(sub_anim.remaining_time for sub_anim in animation.animations),
-            )
+            min_remaining_time = float("inf")
+            try:
+                for sub_anim in animation.animations:
+                    try:
+                        min_remaining_time = min(
+                            sub_anim.remaining_time, min_remaining_time
+                        )
+                    except AttributeError:
+                        min_remaining_time = 1.0
+            except AttributeError:
+                min_remaining_time = 1.0
+
+            return Wait(min_remaining_time)
 
     def tear_down(self) -> None:
         self.play(FadeOut(*self.mobjects))
