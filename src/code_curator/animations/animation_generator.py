@@ -112,7 +112,6 @@ class AnimationGenerator(Generator):
                 gen_method = AutoAnimationTimer.time(
                     gen_method,
                     owner=self,
-                    aligned_animation_script_owner=self.aligned_animation_script_owner,
                 )
                 self._insert_timing_logic(gen_method)
                 yield gen_method(self)
