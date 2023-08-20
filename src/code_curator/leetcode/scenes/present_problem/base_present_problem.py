@@ -63,12 +63,13 @@ class BasePresentProblem(BaseScene):
         self._constraints_header = self._create_constraints_header(constraints_header)
         self._constraints = self._create_constraints(constraints)
 
-    def title(self):
-        yield FixedSuccession(
-            FadeIn(self._title),
-            Wait(),
-            self._title.animate().to_edge(UP),
-        )
+    def fade_in_title(self):
+        yield FadeIn(self._title)
+
+    def move_title(self):
+        self._title.to_edge(UP)
+        yield Wait()
+        # yield self._title.animate.to_edge(UP)
 
     def statement_header(self):
         self._position_element_below_lowest_in_scene(
