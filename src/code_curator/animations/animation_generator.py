@@ -7,24 +7,37 @@ from typing import TYPE_CHECKING
 
 from manim import Animation
 from manim import AnimationGroup
+from manim import Wait
 
 from code_curator.animations.curator_animation import CuratorAnimation
 from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.auto_animation_timer import AutoAnimationTimer
+from code_curator.custom_logging.custom_logger import CustomLogger
+
+
+logger = CustomLogger.getLogger(__name__)
 
 
 if TYPE_CHECKING:
     from types import TracebackType
     from code_curator.base_scene import BaseScene
-    from ..script_handling.components.animation_script.animation_script import (
-        AnimationScript,
-    )
 
 
 class AnimationGenerator(Generator):
-    def __init__(self, *args, owner: BaseScene | None, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        owner: BaseScene | None,
+        aligned_animation_script,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.owner = owner
+        self.aligned_animation_script = aligned_animation_script
+        self.animation_name_timing_map = {
+            child.unique_id: child.audio_duration
+            for child in self.aligned_animation_script.children
+        }
         self.sub_generators: Sequence[Generator] = []
 
     def __getattr__(self, item: str):
@@ -37,26 +50,8 @@ class AnimationGenerator(Generator):
                     owner = owner.owner
                 except AttributeError:
                     print(f"Unable to find item {item}!")
+                    breakpoint()
                     raise
-
-    @property
-    def namespace_path(self) -> list[str]:
-        namespace_parts: list[str] = []
-        owner = self
-        while isinstance(owner, AnimationGenerator):
-            namespace_parts.insert(0, owner.__class__.__name__)
-            owner = owner.owner
-
-        return namespace_parts
-
-    @property
-    def aligned_animation_script_owner(self) -> AnimationScript:
-        child = self.owner.aligned_animation_scene
-
-        for child_id in self.namespace_path:
-            child = child.get_child(child_id)
-
-        return child
 
     def prep_rendering(self):
         self.sub_generators = self._get_organized_sub_generators()
@@ -77,51 +72,25 @@ class AnimationGenerator(Generator):
         return inspect.isgeneratorfunction(obj)
 
     def _get_organized_sub_generators(self):
-        sub_generators = []
-        for attr_name in dir(self):
-            try:
-                attr_value = getattr(self, attr_name)
-            except AttributeError:
-                continue
+        animation_gens = []
+        for animation_name in self.animation_name_timing_map:
+            # TODO: Default animation names starting with an underscore as Wait
+            if animation_name.startswith("_"):
 
-            if self._is_specified_in_animation_scene(attr_value) and self._is_generator(
-                attr_value,
-            ):
-                sub_generators.append(attr_value)
+                def _wait(self):
+                    yield Wait()
 
-        self._sort_by_animation_script(sub_generators)
+                _wait.__name__ = animation_name
 
-        return sub_generators
+                setattr(self.__class__, animation_name, _wait)
 
-    def _is_specified_in_animation_scene(self, obj) -> bool:
-        try:
-            obj_namespace_path = self.namespace_path + [self._get_gen_name(obj)]
-        except AttributeError:
-            return False
-        else:
-            try:
-                return self.owner.namespace_path_exists(obj_namespace_path)
-            except AttributeError:
-                return self.namespace_path_exists(obj_namespace_path[1:])
+            animation_gens.append(getattr(self, animation_name))
+
+        return animation_gens
 
     def _is_generator(self, obj) -> bool:
         return self._is_generator_function(obj) or issubclass(obj, Generator)
 
-    def _sort_by_animation_script(self, gen_methods: list) -> None:
-        animation_order_map = {
-            child.unique_id: i
-            for i, child in enumerate(self.aligned_animation_scene.children)
-        }
-
-        def compare(animation_order_map):
-            def inner(gen_method):
-                return animation_order_map[gen_method.__name__]
-
-            return inner
-
-        gen_methods.sort(key=compare(animation_order_map))
-
-    # TODO: Ensure generator methods are ordered according to animation script
     def _get_sub_generators(self):
         for gen_method in self.sub_generators:
             if self._is_generator_function(gen_method):
@@ -130,9 +99,16 @@ class AnimationGenerator(Generator):
                     owner=self,
                 )
                 self._insert_timing_logic(gen_method)
-                yield gen_method(self)
+                yield from gen_method(self)
             else:
-                yield from gen_method(owner=self).send(None)
+                cls_gen = gen_method(
+                    owner=self,
+                    aligned_animation_script=self.aligned_animation_script.get_child(
+                        gen_method.__name__,
+                    ),
+                )
+                cls_gen.prep_rendering()
+                yield from cls_gen.send(None)
 
     def _insert_timing_logic(self, gen_method):
         for attr_value in gen_method.__globals__.values():
@@ -150,7 +126,7 @@ class AnimationGenerator(Generator):
                             CuratorAnimation,
                         ) + attr_value.__bases__
                     except TypeError:
-                        breakpoint()
+                        pass  # Can't add class to its own bases
 
     def _get_gen_name(self, obj) -> str:
         return obj.__name__
