@@ -1,5 +1,6 @@
 PresentProblem:
-  title: Delete node in a linked list.
+  fade_in_title: Delete node
+  move_title: in a linked list.
   _intro: Ok, before we get started, I want to say that I'm not going to start with a distilled description of this problem. And by that I mean I'm going to keep the redundant information and strange wording as they're found on leetcode. I'm doing this because you may see questions with redundant information and such wording in interviews, and it's important to become skilled at identifying what's important and discarding what is not. I will work through distilling the description after the initial showing.
   statement_header: And with that out of the way, let's move on to the problem.
   statement: There is a singly linked list head and we want to delete a node node in it. You are given the node to be deleted node. You will not be given access to the first node of head. All the values of the linked list are unique, and it is guaranteeded that the given node node is not the last node in the linked list. Delete the given node. Note that by deleting the node, we do not mean removing it from memory. We mean
@@ -17,10 +18,10 @@ PresentProblem:
   remove_duplication:
     _intro: First, let's get rid of the duplicate information.
     constraints_duplication:
-      _intro: Constraints
-      three: three and
-      four: four
-      statement: are repeated in the statement
+      highlight_duplication: Constraints three and four are repeated in the statement
       remove: so let's remove it.
-    delete_node: Next, remove the second reference to deleting the node.
-  smooth_over_wording: Then, let's smooth over the wording and give it another read.
+    delete_node:
+      change_color: Next, we are told twice to delete the node
+      remove: so let's remove the second time it's stated
+    smooth_over_wording: Then, let's smooth over the wording and give it another read.
+  _read_new_statement: There is a singly linked list called head and a node that we wish to remove called node. You will not be given access to the head of the list. Instead, you will be given access to the node to be deleted.
