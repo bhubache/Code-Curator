@@ -17,3 +17,4 @@ target-version = ['py310']
 
 [project.scripts]
 curate = "code_curator.main:main"
+cpm = "code_curator.main:postmortem_main"
