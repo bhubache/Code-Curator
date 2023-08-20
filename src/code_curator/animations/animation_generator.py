@@ -89,6 +89,8 @@ class AnimationGenerator(Generator):
             ):
                 sub_generators.append(attr_value)
 
+        self._sort_by_animation_script(sub_generators)
+
         return sub_generators
 
     def _is_specified_in_animation_scene(self, obj) -> bool:
@@ -104,6 +106,20 @@ class AnimationGenerator(Generator):
 
     def _is_generator(self, obj) -> bool:
         return self._is_generator_function(obj) or issubclass(obj, Generator)
+
+    def _sort_by_animation_script(self, gen_methods: list) -> None:
+        animation_order_map = {
+            child.unique_id: i
+            for i, child in enumerate(self.aligned_animation_scene.children)
+        }
+
+        def compare(animation_order_map):
+            def inner(gen_method):
+                return animation_order_map[gen_method.__name__]
+
+            return inner
+
+        gen_methods.sort(key=compare(animation_order_map))
 
     # TODO: Ensure generator methods are ordered according to animation script
     def _get_sub_generators(self):
