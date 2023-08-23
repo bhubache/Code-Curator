@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from collections.abc import Sequence
 
+from code_curator.animations.animation_generator import AnimationGenerator
+from code_curator.animations.utils.utils import overriding_animation
 from code_curator.data_structures.pointers.simple_pointer import SimplePointer
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.leetcode.problem_text import ProblemText
@@ -14,6 +16,7 @@ from manim import Line
 from manim import UP
 from manim import Wait
 from manim import Write
+from manim import Square, Circle, Line
 from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
 
 from .present_problem import CONSTRAINTS
@@ -36,10 +39,23 @@ class ProblemAnalysis(BaseProblemAnalysis):
             explanations=EXPLANATIONS,
             problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
+            owner=None,
         )
-        self.add_overriding_animation(self.explanation_1)
-        # self.add_overriding_animation(self.explanation_3)
-        # self.add_overriding_animation(self.explanation_2)
+
+    # @overriding_animation
+    # def explain_constraint_one(self):
+    #     yield FadeIn(Line())
+    @overriding_animation
+    class explain_constraint_one(AnimationGenerator):
+
+        def one(self):
+            yield FadeIn(Square())
+
+        def two(self):
+            yield FadeIn(Circle())
+
+        def aa(self):
+            yield FadeIn(Line())
 
     def explanation_1(self) -> Iterable[Animation]:
         sll = SinglyLinkedList(0)
