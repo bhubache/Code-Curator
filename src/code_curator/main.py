@@ -56,7 +56,8 @@ ALIGNED_SCRIPT_PATH = Path('generated_files', 'ai_aligned_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'key_points_animation_script.txt')
 # ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script_yaml.yaml')
-ANIMATION_SCRIPT_PATH = Path('required_files', 'present_problem_animation_script.yaml')
+# ANIMATION_SCRIPT_PATH = Path('required_files', 'present_problem_animation_script.yaml')
+ANIMATION_SCRIPT_PATH = Path('required_files', 'problem_analysis_animation_script.yaml')
 
 CONCRETE_PRESENT_PROBLEM_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.present_problem'
 CONCRETE_PROBLEM_ANALYSIS_PATH = f'code_curator.leetcode.problems.{PROBLEM_NAME}.scenes.problem_analysis'
@@ -95,7 +96,8 @@ def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts:
             super().__init__()
             self._video_dir = Path.home().joinpath('ManimCS', 'Code-Curator', 'media', 'videos', '1080p60')
             self._scene_instances = []
-            for i, (cls, scene_script) in enumerate(zip(scene_classes[:1], aligned_animation_scene_scripts)):
+            custom_scene_classes = [scene_classes[1]]
+            for i, (cls, scene_script) in enumerate(zip(custom_scene_classes, aligned_animation_scene_scripts)):
                 scene_inst = cls(problem_dir, scene_script)
                 scene_inst.video_dir = self._video_dir
                 self._scene_instances.append(scene_inst)
@@ -405,7 +407,7 @@ def main() -> None:
         )
 
         # Combine video and audio together!
-        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'PresentProblem.mp4')))
+        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'ProblemAnalysis.mp4')))
         audio_clip = AudioFileClip(str(audio_path))
         final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
         final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=60)

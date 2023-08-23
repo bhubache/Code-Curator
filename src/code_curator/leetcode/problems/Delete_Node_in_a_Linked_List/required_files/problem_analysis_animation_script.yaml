@@ -1,0 +1,13 @@
+ProblemAnalysis:
+  fade_in_table:
+    one:
+      inner_one: Now, let's
+      inner_a: analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive.
+  explain_constraint_one:
+    inner_something:
+      inner_one: This can actualy be
+      inner_two: explained by the fourth constraint.
+    one: Because the node to be deleted is in the list, there must be at least one node.
+    two: But the fourth constraint also bars the node to be deleted from being the tail node.
+    aa: And, when there's only one node in a linked list, it is both the head and the tail. Therefore, there must be at least one more node, giving us our 2 node minimum.
+  show_constraint_one_explanation: The upper bound of 1000 seems to be arbitrary, so don't worry about it.
