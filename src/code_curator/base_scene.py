@@ -11,9 +11,12 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import Wait
 
+from code_curator.animations.utils import utils
 from .generator_scene import GeneratorScene
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.scene_scheduler import SceneScheduler
+from code_curator.script_handling.components.animation_script.animation_leaf import AnimationLeaf
+from code_curator.animations.animation_generator import AnimationGenerator
 
 
 if TYPE_CHECKING:
@@ -46,6 +49,11 @@ class BaseScene(ABC, GeneratorScene):
         self._animation_spec: dict = {}
         self._scene_scheduler: SceneScheduler = SceneScheduler()
         self._mobjects_pickle: str = "mobjects_pickle.pkl"
+        # self.flattened_gen_methods = self._get_flattened_gen_methods(self.aligned_animation_scene)
+        # self.flattened_gen_methods_V2 = self._get_flattened_gen_methods_V2(self.sub_generators, self.aligned_animation_scene)
+
+    def _post_init(self) -> None:
+        pass
 
     def __getattr__(self, attr_name):
         section_name = inspect.stack()[1].function
@@ -91,6 +99,10 @@ class BaseScene(ABC, GeneratorScene):
         self.prep_rendering()
         super().render()
 
+    def prep_rendering(self):
+        super().prep_rendering()
+        self._get_flattened_gen_methods_V2(self.sub_generators, self.aligned_animation_scene)
+
     def construct(self) -> None:
         animation_generator = next(self)
         for i, animation in enumerate(animation_generator):
@@ -105,7 +117,8 @@ class BaseScene(ABC, GeneratorScene):
     def __create_filling_wait_animation(self, animation) -> Wait:
         assert len(Wait.__bases__) == 2
         # Remove CuratorAnimation from bases to create basic manim Wait
-        Wait.__bases__ = Wait.__bases__[1:]
+        utils.remove_timing_validation(Wait)
+
         try:
             if animation.remaining_time > 0:
                 return Wait(animation.remaining_time)
@@ -195,6 +208,36 @@ class BaseScene(ABC, GeneratorScene):
                         animation=func(),
                         is_overriding_animation=False,
                     )
+
+    def _get_flattened_gen_methods(self, script_component):
+        if isinstance(script_component, AnimationLeaf):
+            return [script_component]
+
+        flattened = []
+        for child in script_component.children:
+            flattened.extend(
+                self._get_flattened_gen_methods(child)
+            )
+
+        return flattened
+
+    def _get_flattened_gen_methods_V2(self, sub_generators, aligned_animation_helper):
+        breakpoint()
+        flattened = []
+        for sub_generator in sub_generators:
+            if isinstance(sub_generator, AnimationGenerator):
+                sub_sub_generators = [
+                    getattr(sub_generator, child.unique_id)
+                    for child in aligned_animation_helper.children
+                ]
+                flattened.extend(
+                    self._get_flattened_gen_methods_V2(sub_sub_generators, aligned_animation_helper.get_child(sub_generator.__name__))
+                )
+
+        breakpoint()
+
+        return flattened
+
 
     def _func_does_output_list_of_funcs(self, func: Callable) -> bool:
         poorly_named_var = func()
