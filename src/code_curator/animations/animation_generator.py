@@ -5,12 +5,9 @@ from collections.abc import Generator
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from manim import Animation
-from manim import AnimationGroup
 from manim import Wait
 
-from code_curator.animations.curator_animation import CuratorAnimation
-from code_curator.animations.fixed_succession import FixedSuccession
+from code_curator.animations.utils import utils
 from code_curator.auto_animation_timer import AutoAnimationTimer
 from code_curator.custom_logging.custom_logger import CustomLogger
 
@@ -59,6 +56,7 @@ class AnimationGenerator(Generator):
 
     def prep_rendering(self):
         self.sub_generators = self._get_organized_sub_generators()
+        # self._adjust_timing_for_overriding_animations()
 
     def send(self, value=None):
         return self._get_sub_generators()
@@ -92,6 +90,46 @@ class AnimationGenerator(Generator):
 
         return animation_gens
 
+    def _adjust_timing_for_overriding_animations(self) -> None:
+        breakpoint()
+        for i, gen_method in enumerate(self.sub_generators):
+            if utils.is_overriding_animation(gen_method):
+                self._adjust_timing_for_overriding_start(i)
+                self._adjust_timing_for_overriding_end(i)
+
+    def _get_cls_attributes_in_order(self, cls):
+        if not inspect.isclass(cls):
+            raise TypeError(f"Expected class, got {type(cls)}")
+
+        return list(cls.__dict__)
+
+    def _adjust_timing_for_overriding_start(self, overriding_gen_method_index):
+        breakpoint()
+        previous_gen_obj = self.sub_generators[overriding_gen_method_index - 1]
+        if inspect.isclass(previous_gen_obj):
+            previous_gen_obj = self._get_latest_gen_method(previous_gen_obj)
+
+        breakpoint()
+        prev_gen_method = self.sub_generators[overriding_gen_method_index - 1]
+        self.animation_name_timing_map[
+            prev_gen_method.__name__
+        ] -= utils.OVERRIDING_START_RUN_TIME_IN_SECONDS
+
+    def _get_latest_gen_method(self, gen_method):
+        for attr_name in reversed(self._get_cls_attributes_in_order(gen_method)):
+            attr_value = getattr(gen_method, attr_name)
+            if self._is_generator_function(attr_value):
+                return attr_value
+
+            if self._is_generator(attr_value):
+                return self._get_latest_gen_method(attr_value)
+
+    def _adjust_timing_for_overriding_end(self, overriding_gen_method_index):
+        next_gen_method = self.sub_generators[overriding_gen_method_index + 1]
+        self.animation_name_timing_map[
+            next_gen_method.__name__
+        ] -= utils.OVERRIDING_END_RUN_TIME_IN_SECONDS
+
     def _is_generator(self, obj) -> bool:
         return self._is_generator_function(obj) or issubclass(obj, Generator)
 
@@ -117,21 +155,7 @@ class AnimationGenerator(Generator):
     # TODO: _MethodAnimation
     def _insert_timing_logic(self, gen_method):
         for attr_value in gen_method.__globals__.values():
-            if (
-                isinstance(attr_value, type)
-                and issubclass(attr_value, Animation)
-                and attr_value is not Animation
-                and attr_value is not AnimationGroup
-                and attr_value is not FixedSuccession
-            ):
-                CuratorAnimation._owner = self
-                if CuratorAnimation not in attr_value.__bases__:
-                    try:
-                        attr_value.__bases__ = (
-                            CuratorAnimation,
-                        ) + attr_value.__bases__
-                    except TypeError:
-                        pass  # Can't add class to its own bases
+            utils.add_timing_validation(attr_value, self)
 
     def _get_gen_name(self, obj) -> str:
         return obj.__name__
