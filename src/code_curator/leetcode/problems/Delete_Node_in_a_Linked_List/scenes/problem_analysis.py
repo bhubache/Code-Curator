@@ -1,52 +1,66 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
+from manim import Animation
+from manim import AnimationGroup
+from manim import Circle
+from manim import FadeIn
+from manim import Line
+from manim import Square
+from manim import UP
+from manim import Wait
+from manim import Write
+
+from .present_problem import CONSTRAINTS
 from code_curator.animations.animation_generator import AnimationGenerator
+from code_curator.animations.subanimations.wait import WaitSubanimation
 from code_curator.animations.utils.utils import overriding_animation
 from code_curator.data_structures.pointers.simple_pointer import SimplePointer
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.leetcode.problem_text import ProblemText
-from code_curator.leetcode.scenes.problem_analysis.base_problem_analysis import BaseProblemAnalysis
-from manim import Animation
-from manim import AnimationGroup
-from manim import FadeIn
-from manim import Line
-from manim import UP
-from manim import Wait
-from manim import Write
-from manim import Square, Circle, Line
-from code_curator.script_handling.components.animation_script.composite_animation_script import CompositeAnimationScript
+from code_curator.leetcode.scenes.problem_analysis.base_problem_analysis import (
+    BaseProblemAnalysis,
+)
 
-from .present_problem import CONSTRAINTS
 
-# DEV IMPORTS
-from code_curator.animations.subanimations.wait import WaitSubanimation
-from code_curator.animations.data_structure_animation import DataStructureAnimation
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from collections.abc import Sequence
+
+    from code_curator.script_handling.components.animation_script.composite_animation_script import (  # noqa: E501
+        CompositeAnimationScript,
+    )
+    from code_curator.animations.data_structure_animation import DataStructureAnimation
 
 EXPLANATIONS = []
-EXPLANATIONS.append('Node is in the list and is not the tail node')
-EXPLANATIONS.append('Not pertinent')
-EXPLANATIONS.append('Not pertinent')
-EXPLANATIONS.append('It\'s impossible to delete the tail')
+EXPLANATIONS.append("Node is in the list and is not the tail node")
+EXPLANATIONS.append("Not pertinent")
+EXPLANATIONS.append("Not pertinent")
+EXPLANATIONS.append("It's impossible to delete the tail")
 
 
 class ProblemAnalysis(BaseProblemAnalysis):
-    def __init__(self, problem_dir: str, aligned_animation_scene: CompositeAnimationScript):
+    def __init__(
+        self,
+        problem_dir: str,
+        aligned_animation_scene: CompositeAnimationScript,
+    ):
         super().__init__(
             constraints=CONSTRAINTS,
             explanations=EXPLANATIONS,
             problem_dir=problem_dir,
             aligned_animation_scene=aligned_animation_scene,
-            owner=None,
         )
 
-    # @overriding_animation
-    # def explain_constraint_one(self):
-    #     yield FadeIn(Line())
     @overriding_animation
     class explain_constraint_one(AnimationGenerator):
+        class inner_something(AnimationGenerator):
+            def inner_one(self):
+                yield FadeIn(Square(0.1))
+
+            def inner_two(self):
+                yield FadeIn(Circle(0.1))
 
         def one(self):
             yield FadeIn(Square())
@@ -80,16 +94,15 @@ class ProblemAnalysis(BaseProblemAnalysis):
 
     def explanation_2(self) -> Sequence[Animation]:
         pass
-        # return [FadeIn(Circle()), FadeIn(Square()), FadeIn(Triangle())]
 
     def explanation_3(self) -> Sequence[Animation]:
         title = ProblemText.create_title(
-            'Remove the value 2 from the linked list',
+            "Remove the value 2 from the linked list",
         )
         title.to_edge(UP)
         sll = SinglyLinkedList(9, 2, 5, 2, 2)
 
-        question_mark = ProblemText.create_statement('?')
+        question_mark = ProblemText.create_statement("?")
         question_mark.next_to(sll, UP)
         pointers: list[SimplePointer] = []
         for node in sll:
@@ -97,19 +110,20 @@ class ProblemAnalysis(BaseProblemAnalysis):
                 continue
 
             question_mark_to_node_path = Line(
-                start=question_mark, end=node.get_container_top(),
+                start=question_mark,
+                end=node.get_container_top(),
             )
             p = SimplePointer(
                 start=question_mark_to_node_path.point_from_proportion(
                     0.01,
-                ), end=question_mark_to_node_path.point_from_proportion(0.9),
+                ),
+                end=question_mark_to_node_path.point_from_proportion(0.9),
             )
             pointers.append(p)
 
         return [
             FadeIn(title),
             FadeIn(sll),
-            # FadeIn(question_mark),
             AnimationGroup(
                 FadeIn(question_mark),
                 *[Write(arrow) for arrow in pointers],
