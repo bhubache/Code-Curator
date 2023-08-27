@@ -5,9 +5,12 @@ import inspect
 import textwrap
 from typing import TYPE_CHECKING
 
+from code_curator.animations.utils import utils
+
 
 if TYPE_CHECKING:
     from ast import FunctionDef
+    from types import FunctionType
 
 
 class _FuncNameInserter(ast.NodeTransformer):
@@ -39,7 +42,17 @@ class _FuncNameInserter(ast.NodeTransformer):
 
 class AutoAnimationTimer:
     @staticmethod
-    def time(gen_method, owner) -> None:
+    def time(gen_method, owner) -> FunctionType:
+        if utils.is_overriding_start(gen_method.next):
+            owner.animation_name_timing_map[
+                gen_method.__name__
+            ] -= utils.OVERRIDING_START_RUN_TIME_IN_SECONDS
+
+        if utils.is_overriding_end(gen_method):
+            owner.animation_name_timing_map[
+                gen_method.__name__
+            ] -= utils.OVERRIDING_END_RUN_TIME_IN_SECONDS
+
         func_name = gen_method.__name__
         func_source = inspect.getsource(gen_method)
         func_source = textwrap.dedent(func_source)

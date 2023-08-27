@@ -1,8 +1,5 @@
 ProblemAnalysis:
-  fade_in_table:
-    one:
-      inner_one: Now, let's
-      inner_a: analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive.
+  fade_in_table: Now, let's analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive.
   explain_constraint_one:
     inner_something:
       inner_one: This can actualy be
