@@ -75,12 +75,6 @@ class BaseScene(ABC, GeneratorScene):
 
     # TODO: Move this to somewhere internal
     def __create_filling_wait_animation(self, animation) -> Wait:
-        if (num_wait_bases := len(Wait.__bases__)) != 2:
-            raise RuntimeError(
-                "As far as I know, Wait should have 2 bases here, but it has"
-                f" {num_wait_bases}",
-            )
-
         # Remove CuratorAnimation from bases to create basic manim Wait
         utils.remove_timing_validation(Wait)
 
