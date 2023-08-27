@@ -98,7 +98,7 @@ class PresentProblem(BasePresentProblem):
         yield Wait()
 
     class remove_duplication(AnimationGenerator):
-        def _post_init(self) -> None:
+        def initialize(self) -> None:
             text_to_remove: str = (
                 " All the values of the linked list are unique, and it is"
                 " guaranteed that the given node node is not the last node in the"
@@ -112,7 +112,7 @@ class PresentProblem(BasePresentProblem):
             )
 
         class constraints_duplication(AnimationGenerator):
-            def _post_init(self) -> None:
+            def initialize(self) -> None:
                 self._third_constraint_tex: Tex = self.get_constraint_tex(3)
                 self._fourth_constraint_tex: Tex = self.get_constraint_tex(4)
 
@@ -135,7 +135,7 @@ class PresentProblem(BasePresentProblem):
                 )
 
         class delete_node(AnimationGenerator):
-            def _post_init(self) -> None:
+            def initialize(self) -> None:
                 self.first_mention_tex = self._statement.get_sub_tex(
                     "delete a node node in it.",
                 )
