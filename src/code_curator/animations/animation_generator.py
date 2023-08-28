@@ -6,7 +6,9 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from manim import Wait
+from manim.animation.transform import _MethodAnimation
 
+from code_curator.animations.data_structure_animation import DataStructureAnimation
 from code_curator.animations.utils import utils
 from code_curator.auto_animation_timer import AutoAnimationTimer
 from code_curator.custom_logging.custom_logger import CustomLogger
@@ -48,6 +50,7 @@ class AnimationGenerator(Generator):
         self.sub_generators: Sequence[MethodType | AnimationGenerator] = (
             self._get_organized_sub_generators()
         )
+        self._set_gen_attrs()
 
     def __getattr__(self, attr_name: str):
         owner = self.owner
@@ -89,7 +92,7 @@ class AnimationGenerator(Generator):
         for animation_name in self.animation_name_timing_map:
             if animation_name.startswith("_"):
 
-                def _wait(_):
+                def _wait(self):
                     yield Wait()
 
                 _wait.__name__ = animation_name
@@ -108,14 +111,6 @@ class AnimationGenerator(Generator):
                         gen.__name__,
                     ),
                 )
-
-        if utils.is_overriding_animation(self):
-            utils.label_as_overriding_start(
-                self.__get_first_gen_method(animation_gens),
-            )
-            utils.label_as_overriding_end(
-                self.__get_last_gen_method(animation_gens),
-            )
 
         return animation_gens
 
@@ -137,30 +132,41 @@ class AnimationGenerator(Generator):
         for attr_value in gen_method.__globals__.values():
             utils.add_timing_validation(attr_value, self)
 
+        # Explicitly add timing logic to DataStructureAnimation
+        # because it's used internally
+        utils.add_timing_validation(DataStructureAnimation, self)
+        utils.add_timing_validation(_MethodAnimation, self)
+
     def _get_gen_name(self, obj) -> str:
         return obj.__name__
 
-    def __get_extremity_gen_method(
+    def _set_gen_attrs(self) -> None:
+        for animation_name, audio_duration in self.animation_name_timing_map.items():
+            try:
+                obj = getattr(self, animation_name).__func__
+            except AttributeError:  # generator class
+                obj = getattr(self, animation_name)
+
+            obj.name = animation_name
+            obj.audio_duration = audio_duration
+
+    def _get_extremity_gen_method(
         self,
-        sub_generators: Sequence[MethodType | AnimationGenerator],
         index: int,
     ) -> MethodType:
-        if self._is_generator_function(sub_generators[index]):
-            return sub_generators[index]
+        if self._is_generator_function(self.sub_generators[index]):
+            return self.sub_generators[index]
 
-        return sub_generators[index].__get_extremity_gen_method(
-            sub_generators[index].sub_generators,
+        return self.sub_generators[index]._get_extremity_gen_method(
             index,
         )
 
-    def __get_first_gen_method(
+    def _get_first_gen_method(
         self,
-        sub_generators: Sequence[MethodType | AnimationGenerator],
     ) -> MethodType:
-        return self.__get_extremity_gen_method(sub_generators=sub_generators, index=0)
+        return self._get_extremity_gen_method(index=0)
 
-    def __get_last_gen_method(
+    def _get_last_gen_method(
         self,
-        sub_generators: Sequence[MethodType | AnimationGenerator],
     ) -> MethodType:
-        return self.__get_extremity_gen_method(sub_generators=sub_generators, index=-1)
+        return self._get_extremity_gen_method(index=-1)
