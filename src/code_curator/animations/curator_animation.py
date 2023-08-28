@@ -23,24 +23,35 @@ class CuratorAnimation(Animation):
         self,
         *mobjects: Mobject,
         run_time: float | None = None,
+        run_time_proportion: float | None = None,
         **kwargs,
     ) -> None:
         self.remaining_time = None
         run_time = self._check_run_time(
             run_time=run_time,
             owner=self.__class__._owner,
+            run_time_proportion=run_time_proportion,
         )
         super().__init__(*mobjects, run_time=run_time, **kwargs)
 
-    def _check_run_time(self, *, run_time: float, owner) -> float:
+    def _check_run_time(
+        self,
+        *,
+        run_time: float,
+        owner,
+        run_time_proportion: float,
+    ) -> float:
         available_time: Decimal = Decimal(
-            str(owner.animation_name_timing_map[owner.func_name]),
+            str(getattr(owner, owner.func_name).audio_duration),
         )
 
         if run_time is None:
             run_time = min(available_time, Decimal(str(1.0)))
         else:
             run_time = Decimal(str(run_time))
+
+        if run_time_proportion is not None:
+            run_time = Decimal(str(available_time * Decimal(str(run_time_proportion))))
 
         if run_time > available_time:
             err_msg = (
