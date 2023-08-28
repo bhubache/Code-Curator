@@ -36,6 +36,7 @@ from code_curator.alignment_text_creation.alignment_text_creator import Alignmen
 from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
 from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
 from code_curator.animations.fixed_succession import FixedSuccession
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 # from manim.utils.file_ops import open_file as open_media_file
 
 
@@ -44,6 +45,9 @@ if TYPE_CHECKING:
     from code_curator.base_scene import BaseScene
     from types import ModuleType
     from collections.abc import Sequence
+
+
+FRAMES_PER_SECOND = 60
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -85,6 +89,7 @@ def create_class(scene_classes: Sequence[type], aligned_animation_scene_scripts:
         """
 
         config.disable_caching = True
+        config.frame_rate = FRAMES_PER_SECOND
 
         def __init__(self, problem_dir: str) -> None:
             """Construct MyScene.
@@ -197,6 +202,22 @@ class TestScene(Scene):
     config.disable_caching = True
 
     def construct(self) -> None:
+        from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+        sll = SinglyLinkedList(0)
+        self.play(
+            sll.add_last(data=1)
+            .subsequently_fade_in_container()
+            .with_fade_in_pointer()
+            .with_move_tail()
+            .with_center_sll()
+            .build_animation()
+        )
+
+        self.play(
+            FadeIn(Circle()),
+            FadeIn(Circle(0.1)),
+        )
+        return
         t = Tex(
             r'There is a singly linked list head and we want to delete a node node in it. You are given the node to be deleted node. You will not be given access to the first node of head. All the values of the linked list are unique, and it is guaranteed that the given node node is not the last node in the linked list. Delete the given node. Note that by deleting the node, we do not mean removing it from memory. We mean',
             font_size=20,
@@ -407,10 +428,10 @@ def main() -> None:
         )
 
         # Combine video and audio together!
-        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', '1080p60', 'ProblemAnalysis.mp4')))
+        video_clip = VideoFileClip(str(Path(Path.cwd() / 'media', 'videos', f'1080p{FRAMES_PER_SECOND}', 'ProblemAnalysis.mp4')))
         audio_clip = AudioFileClip(str(audio_path))
         final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
-        final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=60)
+        final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=FRAMES_PER_SECOND)
     else:
         test_scene = TestScene()
         test_scene.render()
