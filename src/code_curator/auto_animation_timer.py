@@ -43,15 +43,16 @@ class _FuncNameInserter(ast.NodeTransformer):
 class AutoAnimationTimer:
     @staticmethod
     def time(gen_method, owner) -> FunctionType:
-        if utils.is_overriding_start(gen_method.next):
-            owner.animation_name_timing_map[
-                gen_method.__name__
-            ] -= utils.OVERRIDING_START_RUN_TIME_IN_SECONDS
+        # utils.adjust_if_overriding(gen_method)
+        # if utils.is_overriding_start(gen_method.next):
+        #     owner.animation_name_timing_map[
+        #         gen_method.__name__
+        #     ] -= utils.OVERRIDING_START_RUN_TIME_IN_SECONDS
 
-        if utils.is_overriding_end(gen_method):
-            owner.animation_name_timing_map[
-                gen_method.__name__
-            ] -= utils.OVERRIDING_END_RUN_TIME_IN_SECONDS
+        # if utils.is_overriding_end(gen_method):
+        #     owner.animation_name_timing_map[
+        #         gen_method.__name__
+        #     ] -= utils.OVERRIDING_END_RUN_TIME_IN_SECONDS
 
         func_name = gen_method.__name__
         func_source = inspect.getsource(gen_method)
@@ -61,6 +62,7 @@ class AutoAnimationTimer:
         new_func_ast = _FuncNameInserter(name=func_name).visit(func_ast)
         new_code_obj = compile(new_func_ast, filename="", mode="exec")
 
+        # NOTE: If the animation is overriding, this will call the decorator again
         exec(new_code_obj, gen_method.__globals__, locals())  # noqa: SCS101
         try:
             return locals()[func_name]
