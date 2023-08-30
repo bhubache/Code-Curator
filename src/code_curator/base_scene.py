@@ -59,6 +59,8 @@ class BaseScene(ABC, GeneratorScene):
             self.sub_generators,
             self.aligned_animation_scene,
         )
+        utils.pre_scene_render_hook(self.golden_flattened_generators[0])
+
 
     def construct(self) -> None:
         animation_generator = next(self)
