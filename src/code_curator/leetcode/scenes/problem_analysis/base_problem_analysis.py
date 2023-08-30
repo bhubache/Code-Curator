@@ -6,6 +6,7 @@ from manim import AnimationGroup
 from manim import FadeIn
 from manim import UP
 
+from code_curator.animations.attribute_animation import AttributeAnimation
 from code_curator.base_scene import BaseScene
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.leetcode.problem_text import ProblemText
@@ -60,10 +61,18 @@ class BaseProblemAnalysis(BaseScene):
         # TODO: Make an "attribute animation" that can take in a string like
         #  "opacity" and animate it's change so I don't have to use
         #  the animate attribute
-        yield self._get_constraint_explanations(1).animate.set_opacity(1)
+        yield AttributeAnimation(self._get_constraint_explanations(1), attribute='opacity', value=1)
+        # yield self._get_constraint_explanations(1).animate.set_opacity(1)
+
+    def show_constraint_two_explanation(self):
+        yield AttributeAnimation(self._get_constraint_explanations(2), attribute='opacity', value=1)
+        # yield self._get_constraint_explanations(2).animate.set_opacity(1)
 
     def _get_constraint_explanations(self, num: int):
-        return self._constraints_analysis_table.get_columns()[1][num - 1]
+        return self._constraints_analysis_table.get_columns()[1][num]
+
+    def _get_constraint_mobject(self, num: int):
+        return self._constraints_analysis_table.get_columns()[0][num]
 
     def _init_constraints_animations(self):
         constraints_dict = {}
