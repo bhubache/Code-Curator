@@ -3,9 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from manim import BulletedList
+from manim import Group
+from manim import LEFT
 from manim import MobjectTable
+from manim import RIGHT
 from manim import Tex
+from manim import UP
 
+from code_curator.constants import DEFAULT_MOBJECT_COLOR
 from code_curator._utils.string import partition
 
 
@@ -41,6 +46,81 @@ class ProblemText(Tex):
         return ProblemText(text, font_size=font_size, **kwargs)
 
     @staticmethod
+    def create_tex(
+        text: str,
+        font_size: int = 30,
+        color: str = DEFAULT_MOBJECT_COLOR,
+        **kwargs,
+    ) -> Tex:
+        tex_strings: list[str] = []
+        latex_math_mode_started = False
+        for char in text:
+            if char == "$":
+                latex_math_mode_started = not latex_math_mode_started
+                if latex_math_mode_started:
+                    tex_strings.append("")
+                else:
+                    tex_strings[-1] += char
+                    continue
+
+            if latex_math_mode_started:
+                tex_strings[-1] += char
+            else:
+                tex_strings.append(char)
+
+        return Tex(
+            # *tex_strings,
+            *text.split(),
+            font_size=font_size,
+            color=color,
+            arg_separator=" ",
+            **kwargs,
+        )
+
+    @staticmethod
+    def create_list(
+        *list_items,
+        preamble: str = '',
+        color: str = DEFAULT_MOBJECT_COLOR,
+        font_size: int = 20,
+        dot_scale_factor: int = 1,
+        vertical_buff: float = 0.25,
+        horizontal_buff: float = 0.25,
+    ) -> BulletedList | Group:
+        bulleted_list = BulletedList(
+            *list_items,
+            color=color,
+            font_size=font_size,
+            dot_scale_factor=dot_scale_factor,
+            buff=vertical_buff,
+        )
+
+        for bullet in bulleted_list:
+            # Cut of the sequence of backslashes at the end
+            bullet.tex_string = bullet.tex_string[:-2]
+            bullet.set_color(color)
+
+        if preamble:
+            # preamble_tex = ProblemText.create_statement(
+            #     preamble,
+            #     font_size=font_size,
+            # )
+            preamble_tex = ProblemText.create_tex(
+                preamble,
+                font_size=font_size,
+            )
+            preamble_tex.next_to(bulleted_list, UP)
+            bulleted_list.align_to(preamble_tex, LEFT)
+            bulleted_list.shift(RIGHT * horizontal_buff)
+            group = Group(
+                preamble_tex,
+                bulleted_list,
+            )
+            return group
+
+        return bulleted_list
+
+    @staticmethod
     def create_constraints_list(
         constraints: Sequence[str],
         color: str = '#DBC9B8',
@@ -62,6 +142,38 @@ class ProblemText(Tex):
         return bulleted_list
 
     @staticmethod
+    def create_table(
+        first_column_entries: Sequence[str],
+        second_column_entries: Sequence[str],
+        *,
+        row_headers: Sequence[str],
+        columns_to_hide: Sequence[int] = (),
+        color: str = DEFAULT_MOBJECT_COLOR,
+    ) -> MobjectTable:
+        rows = []
+        for left_entry, right_entry in zip(first_column_entries, second_column_entries):
+            rows.append(
+                [
+                    ProblemText.create_tex(left_entry),
+                    ProblemText.create_tex(right_entry),
+                ],
+            )
+
+        for row in rows:
+            for column in columns_to_hide:
+                row[column].set_opacity(0)
+
+        return MobjectTable(
+            rows,
+            col_labels=[
+                ProblemText.create_header(header)
+                for header in row_headers
+            ],
+            include_outer_lines=True,
+            line_config={'color': color, 'stroke_width': 1.5},
+        )
+
+    @staticmethod
     def create_constraints_table(
         constraints: Sequence[str],
         explanations: Sequence[str],
@@ -71,8 +183,10 @@ class ProblemText(Tex):
         for constraint, explanation in zip(constraints, explanations):
             row_list.append(
                 [
-                    ProblemText.create_statement(constraint),
-                    ProblemText.create_statement(explanation, fill_opacity=0),
+                    ProblemText.create_tex(constraint),
+                    ProblemText.create_tex(explanation, fill_opacity=0),
+                    # ProblemText.create_statement(constraint),
+                    # ProblemText.create_statement(explanation, fill_opacity=0),
                 ],
             )
 
@@ -115,4 +229,6 @@ class ProblemText(Tex):
         text_partition = partition(' '.join(self.tex_strings), substring)
         start_index = len(text_partition[0].split())
         end_index = start_index + len(text_partition[1].split())
-        return self[start_index : end_index]
+        sub_tex = self[start_index: end_index]
+        sub_tex.problem_tex_parent = self
+        return sub_tex

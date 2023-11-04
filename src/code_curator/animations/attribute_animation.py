@@ -10,7 +10,8 @@ class AttributeAnimation(Animation):
     def __init__(self, mobject: Mobject, *, attribute: str, value, **kwargs):
         super().__init__(mobject, **kwargs)
         self.attribute = attribute
-        self.value = value
+        self.target_value = value
+        self.initial_value = getattr(mobject, attribute)
 
     def interpolate_mobject(self, alpha: float):
         setter = getattr(
@@ -22,7 +23,7 @@ class AttributeAnimation(Animation):
             math_.value_from_range_to_range(
                 value=alpha,
                 init_min=0,
-                init_max=self.value,
+                init_max=self.target_value,
                 new_min=0,
                 new_max=1.0,
             ),

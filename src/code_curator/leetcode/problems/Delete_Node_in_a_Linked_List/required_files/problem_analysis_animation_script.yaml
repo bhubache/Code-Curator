@@ -1,3 +1,35 @@
+- Now, let's analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive.
+- word: This
+  1: explain_fourth_constraint
+- can actually be explained by the fourth constraint. Because the node to be deleted is in the list
+- word: there
+  1: at_least_one_node
+- must be at least one node. But the fourth constraint also bars the node
+- word: to
+  1: bars_node
+- be deleted from being the tail node. And, when there's only one node in a linked list, it is
+- word: both
+  1: both_the_head
+- the head
+- word: and
+  1: and_tail
+- the tail. Therefore, there must be
+- word: at
+  1: at_least_two_nodes
+- least one more node, giving us our 2 node minimum.
+- word: The
+  1: show_constraint_one_explanation
+- upper bound of 1000 seems arbitrary, so don't worry about it.
+- word: The
+  1: present_second_constraint
+- second constraint states that a node's value ranges from negative one thousand to positive one thousand inclusive.
+- word: The
+  1: explain_constraint_two
+- value of numbers are bounded usually because the solution to the problem would cause underflow or overflow.
+- word: So,
+  1: show_constraint_two_explanation
+- this could be a hint that the solution involves arithmetic.
+
 ProblemAnalysis:
   fade_in_table: Now, let's analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive.
   explain_constraint_one:

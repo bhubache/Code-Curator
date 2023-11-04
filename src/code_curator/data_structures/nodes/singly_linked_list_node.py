@@ -9,10 +9,16 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class SLLNode(LinearNode):
-    def __init__(self, data: float | str, shape: CustomVMobject | None = None):
+    def __init__(
+        self,
+        data: float | str,
+        /,
+        *,
+        shape: CustomVMobject | None = None,
+    ) -> None:
         if shape is None:
             shape = Circle
-        super().__init__(data, shape)
+        super().__init__(data, shape=shape)
 
     @property
     def radius(self):

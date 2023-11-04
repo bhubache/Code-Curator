@@ -47,7 +47,7 @@ class DataStructureAnimator:
     def clean_up_mobject(self) -> None:
         pass
 
-    def build_animation(self) -> DataStructureAnimation:
+    def build(self) -> DataStructureAnimation:
         self.__forecast_subanimations()
         return DataStructureAnimation(self._sll, self)
 

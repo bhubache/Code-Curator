@@ -113,7 +113,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
                 .with_fade_in_pointer()
                 .with_center_sll()
                 .with_move_tail()
-                .build_animation(),
+                .build(),
                 FadeIn(is_not_a_tail_node_checkmark),
             )
 
@@ -135,7 +135,7 @@ class ProblemAnalysis(BaseProblemAnalysis):
             .with_fade_in_pointer()
             .with_move_tail()
             .with_center_sll()
-            .build_animation()
+            .build()
         )
         data_structure_animation.insert_subanimation(1, WaitSubanimation(3))
 

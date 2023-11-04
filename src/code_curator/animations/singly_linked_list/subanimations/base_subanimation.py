@@ -20,6 +20,10 @@ class BaseSubanimation(ABC):
     def __len__(self):
         return 1
 
+    @property
+    def run_time(self) -> float:
+        return self._run_time
+
     def get_run_time(self) -> float:
         return self._run_time
 
