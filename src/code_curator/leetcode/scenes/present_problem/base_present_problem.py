@@ -16,9 +16,10 @@ from manim import Wait
 
 from code_curator.animations.animation_generator import AnimationGenerator
 from code_curator.animations.fixed_succession import FixedSuccession
-from code_curator.base_scene import BaseScene
 from code_curator.custom_logging.custom_logger import CustomLogger
 from code_curator.leetcode.problem_text import ProblemText
+# from code_curator.base_scene import run_time_can_be_truncated
+from code_curator.animations.utils.utils import run_time_can_be_truncated
 
 logger = CustomLogger.getLogger(__name__)
 
@@ -40,74 +41,88 @@ CONSTRAINTS.append(
 )
 
 
-class BasePresentProblem(BaseScene):
+class BasePresentProblem:
     def __init__(
         self,
-        title=TITLE,
+        title="",
         statement_header="Statement",
-        statement=STATEMENT,
+        statement="",
         constraints_header="Constraints",
-        constraints=CONSTRAINTS,
-        problem_dir=None,
-        aligned_animation_scene=None,
+        constraints=None,
+        scene=None,
         **kwargs,
     ):
-        super().__init__(
-            problem_dir=problem_dir,
-            aligned_animation_scene=aligned_animation_scene,
-            **kwargs,
-        )
-        self._title = self._create_title(title)
-        self._statement_header = self._create_statement_header(statement_header)
-        self._statement = self._create_statement(statement)
-        self._constraints_header = self._create_constraints_header(constraints_header)
-        self._constraints = self._create_constraints(constraints)
+        # super().__init__(
+        #     problem_dir=problem_dir,
+        #     aligned_animation_scene=aligned_animation_scene,
+        #     **kwargs,
+        # )
+        self.title_tex = self._create_title(title)
+        self.statement_header_tex = self._create_statement_header(statement_header)
+        self.statement_tex = self._create_statement(statement)
+        self.constraints_header_tex = self._create_constraints_header(constraints_header)
+        self.constraints_tex = self._create_constraints(constraints)
+        self.scene = scene
 
+    @property
+    def mobjects(self):
+        return self.scene.mobjects
+
+    @run_time_can_be_truncated
     def fade_in_title(self):
-        yield FadeIn(self._title)
+        return FadeIn(self.title_tex)
 
     def move_title(self):
-        self._title.to_edge(UP)
-        yield Wait()
-        # yield self._title.animate.to_edge(UP)
+        return self.title_tex.animate.to_edge(UP)
 
     def statement_header(self):
         self._position_element_below_lowest_in_scene(
-            self._statement_header,
-            fall_back=self._title,
+            self.statement_header_tex,
         )
-        yield FadeIn(self._statement_header)
+        return FadeIn(self.statement_header_tex)
 
     def statement(self):
         self._position_element_below_lowest_in_scene(
-            self._statement,
-            fall_back=self._statement_header,
+            self.statement_tex,
         )
-        yield FadeIn(self._statement)
+        return FadeIn(self.statement_tex)
 
     def constraints_header(self):
         self._position_element_below_lowest_in_scene(
-            self._constraints_header,
-            fall_back=self._statement_header,
+            self.constraints_header_tex,
         )
-        yield FadeIn(self._constraints_header)
+        return FadeIn(self.constraints_header_tex)
+
+    def constraint_one(self):
+        self._position_element_below_lowest_in_scene(
+            self.constraints_tex,
+        )
+        return FadeIn(self.constraints_tex[0])
+
+    def constraint_two(self):
+        return FadeIn(self.constraints_tex[1])
+
+    def constraint_three(self):
+        return FadeIn(self.constraints_tex[2])
+
+    def constraint_four(self):
+        return FadeIn(self.constraints_tex[3])
 
     class constraints(AnimationGenerator):
         def zero(self):
             self._position_element_below_lowest_in_scene(
-                self._constraints,
-                fall_back=self._constraints_header,
+                self.constraints,
             )
-            yield FadeIn(self._constraints[0])
+            yield FadeIn(self.constraints[0])
 
         def one(self):
-            yield FadeIn(self._constraints[1])
+            yield FadeIn(self.constraints[1])
 
         def two(self):
-            yield FadeIn(self._constraints[2])
+            yield FadeIn(self.constraints[2])
 
         def three(self):
-            yield FadeIn(self._constraints[3])
+            yield FadeIn(self.constraints[3])
 
     def get_constraint_tex(self, num: int) -> Tex:
         """Retrieve ``Tex`` for constraint ``num``.
@@ -118,7 +133,7 @@ class BasePresentProblem(BaseScene):
         Returns:
             Constraint ``Tex``
         """
-        return self._constraints[num - 1]
+        return self.constraints_tex[num - 1]
 
     def _create_exclude_none_kwargs(self, **kwargs) -> dict:
         for key, value in kwargs.copy().items():
@@ -140,45 +155,20 @@ class BasePresentProblem(BaseScene):
     def _position_element_below_lowest_in_scene(
         self,
         element: Mobject,
-        *,
-        fall_back: Mobject | None = None,
     ) -> None:
         """Positions ``element`` below the current lowest mobject in the scene.
 
         Args:
             element: Mobject to be placed the lowest.
-            fall_back:
-                Mobject to be used as reference if lowest Mobject can't be found/used.
         """
-        try:
-            mobjects_by_height = sorted(
-                self.mobjects,
-                key=lambda mob: mob.get_center()[1],
-            )
-            lowest_mobject = [
-                mob
-                for mob in mobjects_by_height
-                if type(mob) != Mobject and mob is not element  # noqa: E721
-            ][0]
-        except IndexError:
-            # No mobjects in scene yet. This is expected.
-            if fall_back is None or not self.mobjects:
-                return
-
-            try:
-                lowest_mobject = [
-                    mob
-                    for mob in mobjects_by_height
-                    if type(mob) != Mobject  # noqa: E721
-                ][0]
-            except IndexError:
-                # All mobjects in the scene are of type Mobject
-                # study this (this might not be a big deal at all)
-                breakpoint()
-            else:
-                self._position_element_below_other(element, fall_back)
+        # NOTE: All scenes will now contain just one Mobject with submobjects
+        mobjects_by_height = sorted(self.mobjects[0].submobjects, key=lambda mob: mob.get_center()[1])
+        if mobjects_by_height[0] is element:
+            lowest_mobject = mobjects_by_height[1]
         else:
-            self._position_element_below_other(element, lowest_mobject)
+            lowest_mobject = mobjects_by_height[0]
+
+        self._position_element_below_other(element, lowest_mobject)
 
     def _create_title(
         self,

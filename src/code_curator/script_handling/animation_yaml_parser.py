@@ -8,6 +8,7 @@ from .animation_script_parser import AnimationScriptParser
 from .components.animation_script.animation_script import AnimationScript
 from .components.animation_script.animation_leaf import AnimationLeaf
 from .components.animation_script.composite_animation_script import CompositeAnimationScript
+from .components.animation_script.animation_stream import AnimationStream
 
 
 logger = CustomLogger.getLogger(__name__)
@@ -21,83 +22,61 @@ class LeetcodeYAMLParser(AnimationScriptParser):
         super().__init__(script_path=script_path)
         self._wait_animation_prefix = '_IMPLICIT_WAIT_'
 
-    def parse(self) -> CompositeAnimationScript:
-        scene_map = self._get_file_contents()
-        import json
-        print(json.dumps(scene_map, indent=4, default=str))
+    def parse(self) -> dict:
+        animation_script: dict = self._get_file_contents()
+        animation_stream_map: dict[str, AnimationStream] = {}
 
-        composite_animation_script = self._create_composite_animation_script(
-            scene_map,
-        )
+        stream_num_to_class_name_map = animation_script["stream_num_to_class_name"]
 
-        return composite_animation_script
+        # Collect all stream names
+        for element in animation_script["content"]:
+            try:
+                element["word"]
+            except TypeError:
+                continue
+            except KeyError as exc:
+                raise ValueError(f"Stream missing word entry") from exc
+            else:
+                animation_stream_map.update({name: AnimationStream(name=name) for name in element.keys()})
 
-    def _get_file_contents(self):
+        # "word" is not a stream name
+        del animation_stream_map["word"]
+
+        for stream_name, stream in animation_stream_map.items():
+            stream_gap_words: list[str] = []
+            for element in animation_script["content"]:
+                if isinstance(element, str):
+                    stream_gap_words += element.strip().split()
+                elif stream_name not in element:
+                    stream_gap_words.append(element["word"].strip())
+                else:
+                    if stream_gap_words:
+                        stream.append(text=" ".join(stream_gap_words))
+
+                    stream.append(
+                        text=element["word"],
+                        is_overriding_start=element.get("is_overriding_start", False),
+                        is_overriding_end=element.get("is_overriding_end", False),
+                        name=element[stream_name]["name"],
+                    )
+
+                    stream_gap_words.clear()
+
+            if stream_gap_words:
+                stream.append(text=" ".join(stream_gap_words))
+
+
+        # Change stream names to their aliases
+        for stream_name, stream in animation_stream_map.copy().items():
+            # A different stream cannot have another stream's alias
+            if stream_name in animation_stream_map.values():
+                raise ValueError(f"The stream name {stream_name} conflicts with the alias of another stream")
+
+            animation_stream_map[stream_num_to_class_name_map[stream_name]] = stream
+            del animation_stream_map[stream_name]
+
+        return animation_stream_map
+
+    def _get_file_contents(self) -> dict:
         with open(self._script_path, 'r') as read_yaml:
             return yaml.safe_load(read_yaml)
-
-    def _create_composite_animation_script(self, animation_script_map: dict) -> CompositeAnimationScript:
-        composite_scenes = []
-        for scene_name, section_map in animation_script_map.items():
-            composite_sections = []
-            for section_name, section_info in section_map.items():
-
-                is_wait_animation = section_name.startswith(self._wait_animation_prefix)
-                if isinstance(section_info, Mapping):
-                    composite_sections.append(
-                        CompositeAnimationScript(
-                            unique_id=section_name,
-                            children=self._create_composite_helper(name=section_name, info=section_info),
-                        )
-                    )
-                else:
-                    composite_sections.append(
-                        AnimationLeaf(
-                            unique_id=section_name,
-                            text=section_info,
-                            is_wait_animation=is_wait_animation,
-                            tags=[],
-                        )
-                    )
-
-            composite_scenes.append(
-                CompositeAnimationScript(
-                    unique_id=scene_name, children=[
-                        composite for composite in composite_sections
-                    ],
-                ),
-            )
-
-        script_composite = CompositeAnimationScript(
-            unique_id='script', children=[composite for composite in composite_scenes],
-        )
-
-        # Recurively adds parents (this uses @property)
-        script_composite.parent = None
-
-        print(script_composite)
-
-        return script_composite
-
-    def _create_composite_helper(self, name: str, info: Mapping) -> list[AnimationScript]:
-        animation_scripts: list[AnimationScript] = []
-        for sub_name, sub_info in info.items():
-            if isinstance(sub_info, str):
-                animation_scripts.append(
-                    AnimationLeaf(
-                        unique_id=sub_name,
-                        text=sub_info,
-                        is_wait_animation=False,
-                        tags=[],
-                    )
-                )
-                continue
-
-            animation_scripts.append(
-                CompositeAnimationScript(
-                    unique_id=sub_name,
-                    children=self._create_composite_helper(name=sub_name, info=sub_info),
-                )
-            )
-
-        return animation_scripts

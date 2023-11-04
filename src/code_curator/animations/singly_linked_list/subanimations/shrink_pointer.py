@@ -33,7 +33,8 @@ class ShrinkPointer(LeafSubanimation):
         # self._path = Line(start=self._pointer.end, start=self._pointer.start)
 
     def interpolate(self, alpha: float) -> None:
-        pointer_start = self._node.get_container_right()
+        # pointer_start = self._node.get_container_right()
+        pointer_start = self._pointer.start
         self._path = Line(
             start=pointer_start,
             end=self._node.next.get_container_left(),

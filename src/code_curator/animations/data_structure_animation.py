@@ -40,10 +40,11 @@ class DataStructureAnimation(Animation):
             sll: The data structure to be animated.
             data_structure_animator: The object controlling the animation.
         """
-        super().__init__(sll, run_time=data_structure_animator.get_run_time())
+        super().__init__(sll, run_time=data_structure_animator.run_time)
         self._sll: SinglyLinkedList = sll
         self._animator: DataStructureAnimator = data_structure_animator
-        self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
+        # self._subanimation_group: SubanimationGroup = self._animator.get_subanimation_group()
+        # self._subanimation_group = self._animator.animation_groups
 
         # self.run_time = self._animator.get_run_time()
         # self._subanimation_group = self._animator.get_subanimation_group()
@@ -51,9 +52,9 @@ class DataStructureAnimation(Animation):
 
     def begin(self) -> None:
         """Set up the animation."""
-        self.run_time = self._animator.get_run_time()
-        self._subanimation_group = self._animator.get_subanimation_group()
-        self._subanimation_group.init_run_time()
+        self.run_time = self._animator.run_time
+        # self._subanimation_group = self._animator.get_subanimation_group()
+        # self._subanimation_group.init_run_time()
         super().begin()
     
     def interpolate_mobject(self, alpha: float) -> None:
@@ -62,7 +63,7 @@ class DataStructureAnimation(Animation):
         Args:
             alpha: The progress of the animation ranging from [0, 1].
         """
-        self._subanimation_group.interpolate(alpha)
+        self._animator.interpolate(alpha)
 
     def clean_up_from_scene(self, scene: Scene) -> None:
         """Clean up the animation.
@@ -70,8 +71,8 @@ class DataStructureAnimation(Animation):
         Args:
             scene: The scene in which the animation is taking place.
         """
-        self._subanimation_group.clean_up_from_scene(scene)
-        self._animator.clean_up_mobject()
+        self._animator.clean_up_from_scene(scene)
+        # self._animator.clean_up_mobject()
         super().clean_up_from_scene(scene)
 
     # @_update_animation

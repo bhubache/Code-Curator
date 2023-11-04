@@ -15,6 +15,7 @@ from manim import LEFT
 from manim import RIGHT
 from manim import UP
 from code_curator.null_vmobject import NullVMobject
+from code_curator.animations.singly_linked_list.animator import Animator
 
 from .edges.singly_directed_edge import SinglyDirectedEdge
 from .nodes.singly_linked_list_node import SLLNode
@@ -31,6 +32,7 @@ class SinglyLinkedList(CustomVMobject):
         super().__init__()
         self._elements = elements
         self._nodes: list[SLLNode] = []
+        self.animator = Animator(sll=self)
 
         if len(self._elements) == 0:
             raise AttributeError('Linked List cannot have zero elements')
@@ -84,6 +86,76 @@ class SinglyLinkedList(CustomVMobject):
     @staticmethod
     def create_sll(sll: SinglyLinkedList) -> SinglyLinkedList:
         return SinglyLinkedList(*[node.data for node in sll])
+
+    def add_incoming_arrow_at_index(
+        self,
+        index: int,
+        /,
+        *,
+        direction: Sequence[float],
+        name: str = "",
+    ) -> Pointer:
+        node = self[index]
+
+        pointer = Pointer(
+            node=node,
+            sll=self,
+            label=name,
+            direction=direction,
+        )
+
+        self.add(pointer)
+        # TODO: Crutch to return the pointer, figure out better way to access this later
+        return pointer
+
+    def build_animation(self):
+        return self.animator.build()
+
+    def then(self):
+        self.animator.create_new_grouping()
+        return self
+
+    def advance_pointer(
+        self,
+        pointer: Pointer,
+        /, *,
+        num_nodes: int = 1,
+        continuous: bool = False,
+        run_time: float = 1.0,
+    ) -> Animation:
+        return self.animator.advance_pointer(
+            pointer,
+            num_nodes=num_nodes,
+            continuous=continuous,
+            run_time=run_time,
+        )
+
+    def wave_pointer(
+        self,
+        pointer: SinglyDirectedEdge,
+        /, *,
+        run_time: float = 1.0,
+        num_waves: int = 1,
+    ) -> SinglyLinkedList:
+        # Add to SubanimationGroup
+        # Forecast
+        # DataStructureAnimation
+        return self.animator.wave_pointer(
+            pointer,
+            run_time=run_time,
+            num_waves=num_waves,
+        )
+
+    def shrink_pointer(
+        self,
+        pointer: SinglyDirectedEdge,
+        /,
+        *,
+        run_time: float = 1.0,
+    ) -> SinglyLinkedList:
+        return self.animator.shrink_pointer(
+
+        )
 
     # def insert(
     #     self,

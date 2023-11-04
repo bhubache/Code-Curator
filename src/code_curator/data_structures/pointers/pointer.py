@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from code_curator.custom_logging.custom_logger import CustomLogger
@@ -16,9 +17,21 @@ from ..nodes.node import Node
 from .base_pointer import BasePointer
 logger = CustomLogger.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from ..singly_linked_list import SinglyLinkedList
+
 
 class Pointer(SinglyDirectedEdge, BasePointer):
-    def __init__(self, node: Node, sll, label=None, direction=DOWN, start=None, end=None, tip_shape=None):
+    def __init__(
+        self,
+        node: Node,
+        sll: SinglyLinkedList,
+        label=None,
+        direction=DOWN,
+        start=None,
+        end=None,
+        tip_shape=None,
+    ) -> None:
         self._sll = sll
         # TODO: More fleshed out implementation for where the pointer starts and ends
         relative_placement = None
@@ -68,18 +81,18 @@ class Pointer(SinglyDirectedEdge, BasePointer):
     def node(self):
         return self._node
 
-    def move(self, positioned_node, actual_node) -> Iterable[Animation]:
-        self._node = actual_node
-        if self._node not in self._sll.submobjects:
-            raise
-        relative_location = self._relative_placement(positioned_node)
-        start = [
-            relative_location[0], relative_location[1] +
-            (self.vertical_length * -self._direction[1]), 0,
-        ]
-        return AnimationGroup(
-            self.animate.put_start_and_end_on(start, relative_location),
-        )
+    # def move(self, positioned_node, actual_node) -> Iterable[Animation]:
+    #     self._node = actual_node
+    #     if self._node not in self._sll.submobjects:
+    #         raise
+    #     relative_location = self._relative_placement(positioned_node)
+    #     start = [
+    #         relative_location[0], relative_location[1] +
+    #         (self.vertical_length * -self._direction[1]), 0,
+    #     ]
+    #     return AnimationGroup(
+    #         self.animate.put_start_and_end_on(start, relative_location),
+    #     )
 
     # TODO: Use vectors to make this generalized to all directions
     def move_immediately_alpha(self, positioned_node, actual_node, alpha) -> None:

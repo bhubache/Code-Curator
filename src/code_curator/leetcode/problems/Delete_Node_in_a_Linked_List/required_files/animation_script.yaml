@@ -1,0 +1,168 @@
+stream_num_to_class_name:
+  1: PrimaryStream
+  2: TestStream
+  3: ThirdStream
+content:
+  # - word: Delete
+  #   1:
+  #     name: fade_in_title
+  # - node
+  # - word: in
+  #   1:
+  #     name: move_title
+  # - a linked list. Ok, before we get started, I want to say that I'm not going to start with a distilled description of this problem. And by that I mean I'm going to keep the redundant information and strange wording as they're found on leetcode. I'm doing this because you may see questions with redundant information and such wording in interviews, and it's important to become skilled at identifying what's important and discarding what is not. I will work through distilling the description after the initial showing.
+  # - word: And
+  #   1:
+  #     name: statement_header
+  # - with that out of the way, let's move on to the problem.
+  # - word: There
+  #   1:
+  #     name: statement
+  # - is a singly linked list head and we want to delete a node node in it. You are given the node to be deleted node. You will not be given access to the first node of head. All the values of the linked list are unique, and it is guaranteeded that the given node node is not the last node in the linked list. Delete the given node. Note that by deleting the node, we do not mean removing it from memory. We mean
+  # - word: The
+  #   1:
+  #     name: deleting_point_1
+  # - value of the given node should not exist in the linked list.
+  # - word: The
+  #   1:
+  #     name: deleting_point_2
+  # - number of nodes in the linked list should decrease by one.
+  # - word: All
+  #   1:
+  #     name: deleting_point_3
+  # - the values before node should be in the same order.
+  # - word: All
+  #   1:
+  #     name: deleting_point_4
+  # - the values after node should be in the same order. Before moving on, take note of how important these bullet points are. The problem is providing its own definition of what it means to delete a node from a linked list. The traditional method for removing a node from a linked list involves removing it from memory whereas in this problem it doesn't. We have to think unconventionally, and consider only the criteria they've provided.
+  # - word: Next
+  #   1:
+  #     name: constraints_header
+  # - we have the constraints.
+  # - word: The
+  #   1:
+  #     name: constraint_one
+  # - number of nodes in the given list is in the range two to one thousand inclusive.
+  # - word: A
+  #   1:
+  #     name: constraint_two
+  # - node's value ranges from negative one thousand to positive one thousand inclusive.
+  # - word: The
+  #   1:
+  #     name: constraint_three
+  # - value of each node in the list is unique.
+  # - word: The
+  #   1:
+  #     name: constraint_four
+  # - node to be deleted is in the list and is not a tail node. First, let's get rid of the duplicate information.
+  # - word: Constraints
+  #   1:
+  #     name: highlight_constraints_duplication
+  # - three and four are repeated in the statement
+  # - word: so
+  #   1:
+  #     name: remove_constraints_duplication
+  # - let's remove it.
+  # - word: Next,
+  #   1:
+  #     name: highlight_statement_duplication
+  # - we are told twice to delete the node
+  # - word: so
+  #   1:
+  #     name: remove_statement_duplication
+  # - let's remove the second time it's stated
+  # - word: Then,
+  #   1:
+  #     name: smooth_over_wording
+  #   2:
+  #     name: fade_in_new_statement
+  # - let's smooth over the wording and give it another read. There is a singly linked list called head and a node that we wish to remove called node. You will not be given access to the head of the list. Instead, you will be given access to the node to be deleted.
+  - word: Now,
+    # 1:
+    #   name: fade_out_everything
+    2:
+      name: fade_in_constraint_setup
+  - let's analyze the constraints.
+  # - let's analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive. This can actually be explained by
+  # - word: the
+  #   1:
+  #     name: start_first_constraint_explanation
+  #   2:
+  #     name: fade_out_table
+  # - fourth constraint. Because the node to be deleted is in the list, there must be
+  # - word: at
+  #   1:
+  #     name: fade_in_node
+  #   2:
+  #     name: fade_in_first_requirement_met
+  # - least one node. But the fourth constraint also bars the node to be deleted from # being the tail node. And, when there's only one node in a linked list, it is both
+  # - word: the
+  #   1:
+  #     name: fade_in_head
+  # - head and
+  # - word: the
+  #   1:
+  #     name: fade_in_tail
+  # - tail. Therefore, there must be
+  # - word: at
+  #   1:
+  #     name: add_second_node
+  #   2:
+  #     name: fade_in_second_requirement_met
+  # - least one more node, giving us our 2 node minimum.
+  # - word: The
+  #   1:
+  #     name: fade_in_constraints_table
+  #   2:
+  #     name: fade_out_explanation
+  # - upper bound of 1000
+  # - word: seems
+  #   1:
+  #     name: fade_in_constraint_explanation_text
+  # - to be arbitrary, so don't worry about it. The second constraint states that a node's#  value ranges from negative one thousand to positive 1000 inclusive. The value # of numbers are bounded usually because the solution to the problem would cause # underflow or overflow. So, this
+  # - word: could
+  #   1:
+  #     name: fade_in_second_constraint_explanation_text
+  # - be a hint that the solution involves arithmetic. The third constraint states that # the value of each node in the list is unique.
+  # - word: I
+  #   1:
+  #     name: fade_out_table_for_constraint_three_explanation
+  #   2:
+  #     name: fade_in_constraint_three_explanation_title
+  # - can see this being relevant if we were given
+  # - word: the
+  #   2:
+  #     name: highlight_value_text
+  # - value of the node to be removed rather than the node itself. If that were the case, # and not all values were unique, then which
+  # - word: node
+  #   2:
+  #     name: fade_in_question_mark
+  #   3:
+  #     name: move_arrows_to_nodes
+  # - to delete could be unclear.
+  # - word: However,
+  #   1:
+  #     name: fade_in_constraints_table_for_four
+  #   2:
+  #    name: fade_out_constraint_three_explanation
+  - that is not the case, so the constraint
+  # - word: seems
+  #   1:
+  #     name: fade_in_third_constraint_explanation
+  # - irrelevant. The fourth constraint states that the node to be deleted is in the list and is not a tail node. We saw that this constraint helped explain the first. Can we use the first constraint to explain this one? Well, no. There being at least two nodes in the linked list does not necessitate the node to be deleted being in the list and not the tail. So, let's look at each component of the constraint and ponder what removing the node would like if the opposite were true. Namely, if the node to be deleted is not in the list, and if the node to be deleted could be the tail. But before this, let's get some context by looking at how a node is normally removed from a linked list.
+  - word: skipping
+    1:
+      name: fade_out_constraints_table_for_constraint_four_explanation
+  - stuff a lot of words.
+  - word: Here,
+    1:
+      name: fade_in_linked_list
+  - we have a linked list with
+  - word: pointer
+    1:
+      name: advance_pointer
+  - p situated at the head
+  - word: and
+    1:
+      name: wave_pointer
+  - we're going to remove the third node.

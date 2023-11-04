@@ -7,7 +7,13 @@ from code_curator.data_structures.static_array_parts.values.element import Eleme
 
 
 class Node(CustomVMobject):
-    def __init__(self, data: float | str, shape: CustomVMobject):
+    def __init__(
+        self,
+        data: float | str,
+        /,
+        *,
+        shape: CustomVMobject,
+    ) -> None:
         super().__init__(color='#DBC9B8')
         self._radius: float = 0.5
         self._stroke_width: int = 2
@@ -18,6 +24,14 @@ class Node(CustomVMobject):
         )
         self._container.add(self._data)
         self.add(self._container)
+        self.incoming_arrows: dict = {}
+        self.outgoing_arrows: dict = {}
+
+    def add_incoming_arrow(
+        self,
+        arrow,
+    ) -> None:
+        self.incoming_arrows[arrow.name] = arrow
 
     def data_equals(self, value) -> bool:
         return self._data._value == value

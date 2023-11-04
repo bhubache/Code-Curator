@@ -77,7 +77,7 @@ class KeyPoints(BaseKeyPoints):
                 .with_fade_out_first_temp_trav()
                 .with_fade_out_second_temp_trav()
                 .with_center_sll()
-            .build_animation()
+            .build()
         )
 
         code = CustomCode(Path.home() / 'ManimCS' / 'Code_Curator' / 'src' / 'code_curator' / 'leetcode' / 'problems' / 'Delete_Node_in_a_Linked_List' / 'required_files' / 'two_pointer_sll_node_removal.java',
@@ -122,7 +122,7 @@ class KeyPoints(BaseKeyPoints):
             .subsequently_flatten_list(timing_info=self.next_flatten_list_3)
                 .with_fade_out_first_temp_trav()
                 .with_center_sll()
-            .build_animation()
+            .build()
         )
 
         return [

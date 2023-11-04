@@ -18,9 +18,10 @@ class ChangeColor(Animation):
         mobject: Mobject,
         color: str | Color,
         starting_color: str | Color | None = None,
+        run_time: float = 1.0,
         **kwargs,
     ) -> None:
-        super().__init__(mobject, run_time=kwargs.pop("run_time", None), **kwargs)
+        super().__init__(mobject, run_time=run_time, **kwargs)
         self.initial_color = mobject.color
         self.target_color = color
 
