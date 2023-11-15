@@ -2,7 +2,7 @@
 max-line-length=88
 extend-ignore =
     # Google Python style is not RST until after processed by Napoleon
-    RST201, RST203, RST301,
+    RST201, RST203, RST301, FNE005
 
 per-file-ignores =
     src/code_curator/leetcode/scenes/*:N801
