@@ -4,6 +4,7 @@ import collections
 import math
 from typing import TYPE_CHECKING
 
+import numpy as np
 from manim import BLACK
 from manim import Circle
 from manim import Line
@@ -21,6 +22,9 @@ DEFAULT_LABEL_FONT_SIZE = 15
 DEFAULT_CONTENTS_FONT_SIZE = 15
 DEFAULT_VERTEX_RADIUS = 0.2
 DEFAULT_VERTEX_STROKE_WIDTH = 0.75
+DEFAULT_TIP_LENGTH = 0.1
+DEFAULT_TIP_WIDTH = 0.075
+DEFAULT_EDGE_STROKE_WIDTH = 0.75
 
 
 class Vertex(CustomVMobject):
@@ -97,6 +101,12 @@ class Vertex(CustomVMobject):
     def label_is(self, value: str) -> bool:
         return self.label.value == value
 
+    def proportion_from_point(self, point) -> float:
+        return self.container.proportion_from_point(point)
+
+    def point_from_proportion(self, alpha: float) -> np.ndarray:
+        return self.container.point_from_proportion(alpha)
+
 
 class Edge(CustomVMobject):
     def __init__(
@@ -107,15 +117,15 @@ class Edge(CustomVMobject):
         label: str | None = None,
         color: str | Color = BLACK,
         opacity: float = 1.0,
-        line_stroke_width: float = 0.75,
+        line_stroke_width: float = DEFAULT_EDGE_STROKE_WIDTH,
         label_distance_proportion: float = 0.5,
         label_line_sep: float = 0.1,
         label_container: Mobject | None = None,
         label_out: bool = False,
         label_revolve_angle_in_degrees: float = 0.0,
         label_rotate_angle_in_degrees: float = 0.0,
-        tip_length: float = 0.1,
-        tip_width: float = 0.075,
+        tip_length: float = DEFAULT_TIP_LENGTH,
+        tip_width: float = DEFAULT_TIP_WIDTH,
         directedness: str = "-",
     ) -> None:
         super().__init__()
@@ -208,3 +218,60 @@ class Graph(CustomVMobject):
                 return vertex
 
         raise LookupError(f"Unable to find vertex with label ``{label}``")
+
+
+class LabeledLine(CustomVMobject):
+    def __init__(
+        self,
+        start: tuple[float, float, float],
+        end: tuple[float, float, float] | Mobject,
+        *,
+        label: str | Mobject = "",
+        label_dist: float = 0.1,
+        color: str | Color = DEFAULT_COLOR,
+        label_color: str | Color = DEFAULT_COLOR,
+        tip_length: float = DEFAULT_TIP_LENGTH,
+        tip_width: float = DEFAULT_TIP_WIDTH,
+        directedness: str = "->",
+    ) -> None:
+        super().__init__()
+        if isinstance(label, str):
+            label = Element(
+                label,
+                color=DEFAULT_COLOR,
+                font_size=DEFAULT_LABEL_FONT_SIZE,
+            )
+
+        self.line = Line(
+            start,
+            end,
+            color=DEFAULT_COLOR,
+            stroke_width=DEFAULT_EDGE_STROKE_WIDTH,
+        )
+        self.label = label
+        self.line_mob_connecting_proportion: float = end.proportion_from_point(
+            end.get_boundary_point(-self.line.get_unit_vector()),
+        )
+        self.label_dist = label_dist
+        if directedness.endswith(">"):
+            self.line.add_tip(tip_length=tip_length, tip_width=tip_width)
+
+        if directedness.startswith("<"):
+            self.line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
+
+        def line_updater(line) -> None:
+            current_end = line.get_end()
+            new_end = end.point_from_proportion(self.line_mob_connecting_proportion)
+            line.shift(new_end - current_end)
+
+        if isinstance(end, Mobject):
+            self.line.add_updater(line_updater)
+
+        def label_updater(label) -> None:
+            label.move_to(self.line.get_start())
+            label.shift(-self.line.get_unit_vector() * self.label_dist)
+
+        self.label.add_updater(label_updater)
+
+        self.add(self.line)
+        self.add(self.label)
