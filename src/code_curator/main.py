@@ -2,7 +2,6 @@
 
 You can either create a video using custom scenes or test some animation code!
 """
-
 from __future__ import annotations
 
 __all__: Sequence[str] = []
@@ -12,7 +11,6 @@ import logging
 import os
 import subprocess
 import yaml
-from collections.abc import Iterable
 from collections.abc import Mapping
 from collections.abc import Sequence
 from pathlib import Path
@@ -24,9 +22,15 @@ from moviepy.editor import AudioFileClip
 
 from code_curator.ai_audio_creator import AIAudioCreator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
-from code_curator.alignment_text_creation.alignment_text_creator import AlignmentTextCreator
-from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import AlignmentParser
-from code_curator.script_handling.simple_script_parser_factory import SimpleScriptParserFactory
+from code_curator.alignment_text_creation.alignment_text_creator import (
+    AlignmentTextCreator,
+)
+from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import (
+    AlignmentParser,
+)
+from code_curator.script_handling.simple_script_parser_factory import (
+    SimpleScriptParserFactory,
+)
 
 
 if TYPE_CHECKING:
@@ -55,32 +59,38 @@ QUALITY_MAP = {
 }
 
 
-QUALITY = 'low_quality'
+QUALITY = "low_quality"
 FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
 RESOLUTION = QUALITY_MAP[QUALITY]["res"]
-PROBLEM_NAME = 'Delete_Node_in_a_Linked_List'
-ALIGNED_SCRIPT_PATH = Path('generated_files', 'ai_aligned_script.txt')
-ANIMATION_SCRIPT_PATH = Path('required_files', 'animation_script.yaml')
-CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
+PROBLEM_NAME = "Delete_Node_in_a_Linked_List"
+ALIGNED_SCRIPT_PATH = Path("generated_files", "ai_aligned_script.txt")
+ANIMATION_SCRIPT_PATH = Path("required_files", "animation_script.yaml")
+CONCRETE_VIDEO_SCRIPT_PATH = (
+    f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
+)
 
 
 def concatenate_scenes(video_dir: str, num_scenes: int) -> None:
     scene_video_paths = [
         VideoFileClip(
             os.path.join(
-                video_dir, f'{str(i)}.mp4',
+                video_dir,
+                f"{str(i)}.mp4",
             ),
-        ) for i in range(num_scenes)
+        )
+        for i in range(num_scenes)
     ]
     final_clip = concatenate_videoclips(scene_video_paths)
-    final_clip.write_videofile(os.path.join(video_dir, 'output.mp4'))
+    final_clip.write_videofile(os.path.join(video_dir, "output.mp4"))
 
 
-def get_aligned_animation_script(alignment_path: str | os.PathLike, script_path: str | os.PathLike) -> AlignedAnimationScript:
+def get_aligned_animation_script(
+    alignment_path: str | os.PathLike, script_path: str | os.PathLike
+) -> AlignedAnimationScript:
     aligned_script = AlignmentParser(file_path=alignment_path).parse()
     script_parser_factory = SimpleScriptParserFactory(script_path=script_path)
     animation_script = script_parser_factory.create_script_parser(
-        'leetcode',
+        "leetcode",
     ).parse()
     return AlignedAnimationScript(
         aligned_script=aligned_script,
@@ -91,23 +101,25 @@ def get_aligned_animation_script(alignment_path: str | os.PathLike, script_path:
 def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
     old_file_path = Path(
         scene_instance.video_dir,
-        f'{type(scene_instance).__name__}.mp4',
+        f"{type(scene_instance).__name__}.mp4",
     )
     new_file_path = Path(
         scene_instance.video_dir,
-        f'{index}.mp4',
+        f"{index}.mp4",
     )
 
     new_file_path.unlink()
 
-    subprocess.getoutput(f'mv {old_file_path} {new_file_path}')
-    subprocess.getoutput(f'chmod 777 {new_file_path}')
+    subprocess.getoutput(f"mv {old_file_path} {new_file_path}")
+    subprocess.getoutput(f"chmod 777 {new_file_path}")
 
 
-def get_video_and_stream_clses(module_import_path: str, aligned_animation_script) -> Sequence[type]:
+def get_video_and_stream_clses(
+    module_import_path: str, aligned_animation_script
+) -> Sequence[type]:
     video_module: ModuleType = importlib.import_module(module_import_path)
     if video_module.__file__ is None:
-        raise TypeError(f'file for {video_module} is None.')
+        raise TypeError(f"file for {video_module} is None.")
 
     return (
         getattr(
@@ -121,14 +133,16 @@ def get_video_and_stream_clses(module_import_path: str, aligned_animation_script
                     stream_name,
                 )
                 for stream_name in aligned_animation_script.stream_names
-            )
-        ]
+            ),
+        ],
     )
 
 
 def get_script_text_from_animation_script(animation_script_info: Mapping) -> str:
     script_text = ""
-    animation_spec: list[str | Mapping[str | int, str]] = animation_script_info["content"]
+    animation_spec: list[str | Mapping[str | int, str]] = animation_script_info[
+        "content"
+    ]
     for element in animation_spec:
         try:
             script_text += f" {element['word']}"
@@ -153,12 +167,14 @@ def main() -> None:
 
     if generate_ai_speech:
         # Generate ai_script.txt from the animation script
-        ai_script_path: Path = problem_dir / 'dev_files' / 'MFA' / 'input' / 'ai_script.txt'
+        ai_script_path: Path = (
+            problem_dir / "dev_files" / "MFA" / "input" / "ai_script.txt"
+        )
 
         script = get_script_text_from_animation_script(
             yaml.safe_load(
-                (problem_dir / ANIMATION_SCRIPT_PATH).read_text()
-            )
+                (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
+            ),
         )
         ai_script_path.write_text(script)
 
@@ -167,13 +183,13 @@ def main() -> None:
 
         # Generate audio from text
         audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
-        ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(problem_dir / 'dev_files')
-
-
+        ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
+            problem_dir / "dev_files"
+        )
 
     aligned_animation_script = get_aligned_animation_script(
-        alignment_path=problem_dir/ALIGNED_SCRIPT_PATH,
-        script_path=problem_dir/ANIMATION_SCRIPT_PATH,
+        alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
+        script_path=problem_dir / ANIMATION_SCRIPT_PATH,
     )
     video_cls, stream_clses = get_video_and_stream_clses(
         module_import_path=CONCRETE_VIDEO_SCRIPT_PATH,
@@ -197,20 +213,129 @@ def main() -> None:
 
     # Combine video and audio together!
     video_clip = VideoFileClip(
-        str(Path(Path.cwd() / 'media', 'videos', f'{RESOLUTION}p{FRAME_RATE}', 'Video.mp4'))
+        str(
+            Path(
+                Path.cwd() / "media",
+                "videos",
+                f"{RESOLUTION}p{FRAME_RATE}",
+                "Video.mp4",
+            )
+        ),
     )
     audio_clip = AudioFileClip(str(audio_path))
     final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
-    final_clip.write_videofile(str(Path(Path.home(), 'Videos', 'FULL_VIDEO.mp4')), fps=FRAME_RATE)
+    final_clip.write_videofile(
+        str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")), fps=FRAME_RATE
+    )
 
 
 def postmortem_main():
     try:
         main()
     except Exception:
-        import pdb; pdb.post_mortem()
+        import pdb
+
+        pdb.post_mortem()
 
 
+from manim import Scene
+from code_curator.data_structures.graph import Graph
+from manim import config
 
-if __name__ == '__main__':
-    main()
+
+class TestScene(Scene):
+    config["background_color"] = "#FFFFFF"
+
+    def construct(self):
+        graph = Graph()
+        graph.add_vertex(
+            "u",
+            contents="1/4",
+            label_out=True,
+            label_revolve_angle_in_degrees=90,
+        )
+        graph.add_vertex(
+            "v",
+            label_out=True,
+            position=(1.0, 0.0, 0.0),
+            label_revolve_angle_in_degrees=90,
+        )
+        graph.add_vertex(
+            "w",
+            label_out=True,
+            position=(2.0, 0.0, 0.0),
+            label_revolve_angle_in_degrees=90,
+        )
+        graph.add_vertex(
+            "x",
+            label_out=True,
+            position=(0.0, -1.0, 0.0),
+            label_revolve_angle_in_degrees=-90,
+        )
+        graph.add_vertex(
+            "y",
+            label_out=True,
+            position=(1.0, -1.0, 0.0),
+            label_revolve_angle_in_degrees=-90,
+        )
+        graph.add_vertex(
+            "z",
+            label_out=True,
+            position=(2.0, -1.0, 0.0),
+            label_revolve_angle_in_degrees=-90,
+        )
+
+        graph.add_edge(
+            "u",
+            "v",
+            directedness="->"
+        )
+        graph.add_edge(
+            "u",
+            "x",
+            directedness="->"
+        )
+        graph.add_edge(
+            "v",
+            "y",
+            directedness="->"
+        )
+        graph.add_edge(
+            "y",
+            "x",
+            directedness="->"
+        )
+        graph.add_edge(
+            "x",
+            "v",
+            directedness="->"
+        )
+        graph.add_edge(
+            "w",
+            "y",
+            directedness="->"
+        )
+        graph.add_edge(
+            "w",
+            "z",
+            directedness="->"
+        )
+        # graph.add_edge(
+        #     "z",
+        #     "z",
+        #     directedness="->"
+        # )
+        graph.move_to([0.0, 0.0, 0.0])
+        self.add(graph)
+
+        self.play(
+            graph.get_vertex("z").animate.move_to([3, 1, 0]),
+            graph.get_vertex("u").animate.move_to([-3, 2, 0]),
+            graph.get_vertex("w").animate.move_to([0, -3, 0]),
+            run_time=5.0,
+        )
+
+
+if __name__ == "__main__":
+    # main()
+    TestScene().render()
