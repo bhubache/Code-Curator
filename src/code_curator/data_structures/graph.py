@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from manim import BLACK
 from manim import Circle
+from manim import DOWN
 from manim import Line
 from manim import Mobject
 
@@ -97,6 +98,12 @@ class Vertex(CustomVMobject):
         self.add(container)
         if show_label:
             self.add(label)
+
+        if self.contents.value == "null":
+            mock_contents = Element("n")
+            mock_contents.move_to(self.container.get_center())
+            mock_contents.match_style(self.contents)
+            self.contents.align_to(mock_contents, DOWN)
 
     def label_is(self, value: str) -> bool:
         return self.label.value == value
