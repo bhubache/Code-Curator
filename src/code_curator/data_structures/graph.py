@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import math
 from typing import TYPE_CHECKING
 
@@ -38,17 +39,6 @@ class Vertex(CustomVMobject):
         if container is None:
             container = Circle(color=BLACK, radius=0.2, stroke_width=0.75)
 
-        if label_out:
-            circumscribing_circle = Circle(stroke_width=0.75).surround(
-                container,
-                buffer_factor=1 + label_dist,
-            )
-            label.move_to(
-                circumscribing_circle.point_at_angle(
-                    math.radians(label_revolve_angle_in_degrees),
-                ),
-            )
-
         self.label = label
         self.container = container
         self.contents = contents
@@ -61,10 +51,21 @@ class Vertex(CustomVMobject):
             )
             self.container.add(self.contents)
 
-        self.container.add(label)
         self.container.move_to(position)
 
+        if label_out:
+            circumscribing_circle = Circle(stroke_width=0.75).surround(
+                container,
+                buffer_factor=1 + label_dist,
+            )
+            label.move_to(
+                circumscribing_circle.point_at_angle(
+                    math.radians(label_revolve_angle_in_degrees),
+                ),
+            )
+
         self.add(container)
+        self.add(label)
 
     def label_is(self, value: str) -> bool:
         return self.label.value == value
@@ -74,6 +75,7 @@ class Graph(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
         self.vertices: list[Vertex] = []
+        self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
 
     def add_vertex(
         self,
@@ -118,6 +120,31 @@ class Graph(CustomVMobject):
             edge.add_tip(tip_length=0.1, tip_width=0.075, at_start=True)
 
         self.add(edge)
+
+        self.adjacency_list[vertex_one].append(vertex_two)
+
+        def shortest_path_updater(edge_to_update: Line) -> None:
+            reference_line = Line(
+                vertex_one.container.get_center(),
+                vertex_two.container.get_center(),
+                color=BLACK,
+            )
+
+            edge_to_update.become(
+                Line(
+                    reference_line.point_from_proportion(
+                        vertex_one.container.radius / reference_line.get_length(),
+                    ),
+                    reference_line.point_from_proportion(
+                        1 - (vertex_two.container.radius / reference_line.get_length()),
+                    ),
+                )
+                .add_tip(edge_to_update.tip)
+                .match_style(edge_to_update),
+            )
+
+        edge.add_updater(shortest_path_updater)
+        edge.add_updater(shortest_path_updater)
 
     def get_vertex(self, label: str, /) -> Vertex:
         for vertex in self.vertices:
