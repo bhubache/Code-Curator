@@ -18,9 +18,11 @@ if TYPE_CHECKING:
 
 
 class Vertex(CustomVMobject):
+    _default_label: int = 0
+
     def __init__(
         self,
-        label: str | Mobject,
+        label: str | Mobject | None = None,
         /,
         *,
         contents: str | Mobject | None = None,
@@ -31,8 +33,13 @@ class Vertex(CustomVMobject):
         label_revolve_angle_in_degrees: float = 0.0,
         label_rotate_angle_in_degrees: float = 0.0,
         show_label: bool = True,
+        show_container: bool = True,
     ) -> None:
         super().__init__()
+        if label is None:
+            label = f"Label{Vertex._default_label}"
+            Vertex._default_label += 1
+
         if not isinstance(label, Mobject):
             label = Element(label, color=BLACK, font_size=DEFAULT_ELEMENT_FONT_SIZE - 2)
 
@@ -42,6 +49,9 @@ class Vertex(CustomVMobject):
         self.label = label
         self.container = container
         self.contents = contents
+
+        if not show_container:
+            self.container.set_opacity(0)
 
         if self.contents is not None:
             self.contents = Element(
@@ -65,7 +75,8 @@ class Vertex(CustomVMobject):
             )
 
         self.add(container)
-        self.add(label)
+        if show_label:
+            self.add(label)
 
     def label_is(self, value: str) -> bool:
         return self.label.value == value
@@ -74,19 +85,21 @@ class Vertex(CustomVMobject):
 class Graph(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
-        self.vertices: list[Vertex] = []
+        self.vertices: set[Vertex] = set()
         self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
 
     def add_vertex(
         self,
-        label_or_vertex: str | Vertex,
+        label_or_vertex: str | Vertex | None = None,
         **kwargs,
     ) -> None:
         if not isinstance(label_or_vertex, Vertex):
             label_or_vertex = Vertex(label_or_vertex, **kwargs)
 
         self.add(label_or_vertex)
-        self.vertices.append(label_or_vertex)
+        self.vertices.add(label_or_vertex)
+        if label_or_vertex not in self.adjacency_list:
+            self.adjacency_list[label_or_vertex] = []
 
     def add_edge(
         self,
@@ -119,10 +132,6 @@ class Graph(CustomVMobject):
         if directedness.startswith("<"):
             edge.add_tip(tip_length=0.1, tip_width=0.075, at_start=True)
 
-        self.add(edge)
-
-        self.adjacency_list[vertex_one].append(vertex_two)
-
         def shortest_path_updater(edge_to_update: Line) -> None:
             reference_line = Line(
                 vertex_one.container.get_center(),
@@ -145,6 +154,13 @@ class Graph(CustomVMobject):
 
         edge.add_updater(shortest_path_updater)
         edge.add_updater(shortest_path_updater)
+
+        self.add(edge)
+
+        self.adjacency_list[vertex_one].append(vertex_two)
+
+        self.vertices.add(vertex_one)
+        self.vertices.add(vertex_two)
 
     def get_vertex(self, label: str, /) -> Vertex:
         for vertex in self.vertices:
