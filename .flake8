@@ -1,5 +1,5 @@
 [flake8]
-max-line-length=88
+max-line-length=120
 extend-ignore =
     # Google Python style is not RST until after processed by Napoleon
     RST201, RST203, RST301, FNE005
