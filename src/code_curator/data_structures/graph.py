@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from manim import BLACK
 from manim import Circle
+from manim import Dot
 from manim import DOWN
 from manim import Line
 from manim import Mobject
@@ -26,6 +27,7 @@ DEFAULT_VERTEX_STROKE_WIDTH = 0.75
 DEFAULT_TIP_LENGTH = 0.1
 DEFAULT_TIP_WIDTH = 0.075
 DEFAULT_EDGE_STROKE_WIDTH = 0.75
+DEFAULT_LINE_LENGTH = 0.75
 
 
 class Vertex(CustomVMobject):
@@ -99,7 +101,7 @@ class Vertex(CustomVMobject):
         if show_label:
             self.add(label)
 
-        if self.contents.value == "null":
+        if self.contents is not None and self.contents.value == "null":
             mock_contents = Element("n")
             mock_contents.move_to(self.container.get_center())
             mock_contents.match_style(self.contents)
@@ -139,8 +141,8 @@ class Edge(CustomVMobject):
         self.vertex_one = vertex_one
         self.vertex_two = vertex_two
         self.line = Line(
-            vertex_one,
-            vertex_two,
+            self.vertex_one,
+            self.vertex_two,
             color=DEFAULT_COLOR,
             stroke_width=line_stroke_width,
         )
@@ -153,25 +155,25 @@ class Edge(CustomVMobject):
 
         def shortest_path_updater(edge_to_update: Line) -> None:
             reference_line = Line(
-                vertex_one.get_center(),
-                vertex_two.get_center(),
+                self.vertex_one.container.get_center(),
+                self.vertex_two.container.get_center(),
+                color=BLACK,
             )
-
             edge_to_update.become(
                 Line(
                     reference_line.point_from_proportion(
-                        vertex_one.container.radius / reference_line.get_length(),
+                        min(1, self.vertex_one.container.radius / reference_line.get_length()),
                     ),
                     reference_line.point_from_proportion(
-                        1 - (vertex_two.container.radius / reference_line.get_length()),
+                        max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
                     ),
                 )
                 .add_tip(edge_to_update.tip)
                 .match_style(edge_to_update),
             )
 
-        self.line.add_updater(shortest_path_updater)
-        self.line.add_updater(shortest_path_updater)
+        self.line.add_updater(shortest_path_updater, call_updater=True)
+        self.line.add_updater(shortest_path_updater, call_updater=True)
 
         self.add(self.line)
 
@@ -230,9 +232,11 @@ class Graph(CustomVMobject):
 class LabeledLine(CustomVMobject):
     def __init__(
         self,
-        start: tuple[float, float, float],
-        end: tuple[float, float, float] | Mobject,
+        start: tuple[float, float, float] | Mobject,
+        end: tuple[float, float, float] | Mobject | None = None,
         *,
+        direction: tuple[float, float, float] | None = None,
+        length: float = DEFAULT_LINE_LENGTH,
         label: str | Mobject = "",
         label_dist: float = 0.1,
         color: str | Color = DEFAULT_COLOR,
@@ -249,6 +253,14 @@ class LabeledLine(CustomVMobject):
                 font_size=DEFAULT_LABEL_FONT_SIZE,
             )
 
+        if end is None:
+            # Assume user passed in the location/Mobject they want the line to point to
+            end = start.get_boundary_point(-direction)
+            target_mobject = start
+            start = Dot(end).shift(-direction * length)
+        else:
+            raise NotImplementedError()
+
         self.line = Line(
             start,
             end,
@@ -256,9 +268,12 @@ class LabeledLine(CustomVMobject):
             stroke_width=DEFAULT_EDGE_STROKE_WIDTH,
         )
         self.label = label
-        self.line_mob_connecting_proportion: float = end.proportion_from_point(
-            end.get_boundary_point(-self.line.get_unit_vector()),
-        )
+
+        if target_mobject:
+            self.line_mob_connecting_proportion: float = target_mobject.proportion_from_point(
+                target_mobject.get_boundary_point(-self.line.get_unit_vector()),
+            )
+
         self.label_dist = label_dist
         if directedness.endswith(">"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width)
@@ -268,17 +283,22 @@ class LabeledLine(CustomVMobject):
 
         def line_updater(line) -> None:
             current_end = line.get_end()
-            new_end = end.point_from_proportion(self.line_mob_connecting_proportion)
+            new_end = target_mobject.point_from_proportion(
+                self.line_mob_connecting_proportion,
+            )
             line.shift(new_end - current_end)
 
         if isinstance(end, Mobject):
+            self.line.add_updater(line_updater)
+
+        if isinstance(start, Mobject):
             self.line.add_updater(line_updater)
 
         def label_updater(label) -> None:
             label.move_to(self.line.get_start())
             label.shift(-self.line.get_unit_vector() * self.label_dist)
 
-        self.label.add_updater(label_updater)
+        self.label.add_updater(label_updater, call_updater=True)
 
         self.add(self.line)
         self.add(self.label)
