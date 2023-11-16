@@ -10,9 +10,10 @@ from code_curator.data_structures.graph import Vertex
 
 
 class SinglyLinkedList(CustomVMobject):
-    def __init__(self, *values) -> None:
+    def __init__(self, *values, show_null: bool = False) -> None:
         super().__init__()
         self.values = values
+        self.show_null = show_null
         self.graph = Graph()
 
         for index, value in enumerate(self.values):
@@ -28,6 +29,19 @@ class SinglyLinkedList(CustomVMobject):
             next_node = self.graph.get_vertex(f"Label{index + 1}")
 
             self.graph.add_edge(curr_node, next_node, directedness="->")
+
+        if self.show_null:
+            self.graph.add_vertex(
+                contents="null",
+                position=(len(self.values), 0.0, 0.0),
+                show_container=False,
+                show_label=False,
+            )
+            self.graph.add_edge(
+                self.graph.get_vertex(f"Label{len(self.values) - 1}"),
+                self.graph.get_vertex(f"Label{len(self.values)}"),
+                directedness="->",
+            )
 
         self.head_pointer = LabeledLine(self.graph.get_vertex("Label0"), label="head", direction=DOWN)
         self.tail_pointer = LabeledLine(
