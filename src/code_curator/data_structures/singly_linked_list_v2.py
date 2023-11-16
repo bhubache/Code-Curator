@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from manim import DOWN
 from manim import ORIGIN
 
 from code_curator.custom_vmobject import CustomVMobject
 from code_curator.data_structures.graph import Graph
+from code_curator.data_structures.graph import LabeledLine
 from code_curator.data_structures.graph import Vertex
 
 
@@ -27,5 +29,14 @@ class SinglyLinkedList(CustomVMobject):
 
             self.graph.add_edge(curr_node, next_node, directedness="->")
 
+        self.head_pointer = LabeledLine(self.graph.get_vertex("Label0"), label="head", direction=DOWN)
+        self.tail_pointer = LabeledLine(
+            self.graph.get_vertex(f"Label{len(self.values) - 1}"),
+            label="tail",
+            direction=DOWN,
+        )
+
         self.add(self.graph)
+        self.add(self.head_pointer)
+        self.add(self.tail_pointer)
         self.move_to(ORIGIN)
