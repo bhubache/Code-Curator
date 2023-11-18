@@ -27,6 +27,8 @@ from code_curator.leetcode.problem_text import ProblemText
 from code_curator.animations.change_color import ChangeColor
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+# from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.data_structures.graph import LabeledLine
 from code_curator.data_structures.pointers.simple_pointer import SimplePointer
 
 # TODO: Try and just have the special Mobject in curator animation be in the scene.mobjects
@@ -295,22 +297,25 @@ class PrimaryStream:
         return FadeOut(*self.scene.scene_mobjects)
 
     def fade_in_linked_list(self):
-        self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4)
-        self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
-            0,
-            direction=UP,
-            name="p",
-        )
+        self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
+        # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
+        # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
+        #     0,
+        #     direction=UP,
+        #     name="p",
+        # )
         return FadeIn(self.sll_for_normal_removal)
 
     @run_time_can_be_truncated
     def advance_pointer(self):
+        return Wait()
         return (
             self.sll_for_normal_removal
             .advance_pointer(self.pointer_p)
         )
 
     def wave_pointer(self):
+        return Wait()
         return self.sll_for_normal_removal.wave_pointer(
             self.sll_for_normal_removal[1].pointer_to_next,
         )
