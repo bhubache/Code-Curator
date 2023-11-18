@@ -17,8 +17,13 @@ class TransformSinglyLinkedList(AnimationGroup):
         self.submobjects_to_fade_in = []
         self.matching_submobject_pairs: list[tuple[Mobject, Mobject]] = []
 
-        self.shorter_list = min(mobject, target_mobject, key=len)
-        self.longer_list = max(mobject, target_mobject, key=len)
+        # If the lengths are the same, we cannot rely on output of min/max because they will choose arbitrarily
+        if self.length_change == 0:
+            self.shorter_list = mobject
+            self.longer_list = target_mobject
+        else:
+            self.shorter_list = min(mobject, target_mobject, key=len)
+            self.longer_list = max(mobject, target_mobject, key=len)
 
         short_node = next(iter(self.shorter_list))
         for long_node in self.longer_list:
