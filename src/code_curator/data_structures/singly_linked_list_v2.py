@@ -63,25 +63,26 @@ class SinglyLinkedList(CustomVMobject):
                 tip_width=DEFAULT_TIP_WIDTH,
             )
 
-        self.head_pointer = LabeledLine(
+        self.labeled_pointers: dict[Hashable, LabeledLine] = {}
+
+        self.labeled_pointers["head"] = LabeledLine(
             self.get_node(0),
             label="head",
             direction=DOWN,
             color=color,
             label_font_size=DEFAULT_FONT_SIZE,
         )
-        self.tail_pointer = LabeledLine(
+        self.labeled_pointers["tail"] = LabeledLine(
             self.get_node(len(self.values) - 1),
             label="tail",
             direction=DOWN,
             color=color,
         )
 
-        self.labeled_pointers: dict[Hashable, LabeledLine] = {}
-
         self.add(self.graph)
         self.add(self.head_pointer)
         self.add(self.tail_pointer)
+
         self.move_to(ORIGIN)
 
     def __len__(self) -> int:
@@ -99,6 +100,14 @@ class SinglyLinkedList(CustomVMobject):
         else:
             self.iteration_counter += 1
             return node
+
+    @property
+    def head_pointer(self) -> LabeledLine:
+        return self.labeled_pointers["head"]
+
+    @property
+    def tail_pointer(self) -> LabeledLine:
+        return self.labeled_pointers["tail"]
 
     def get_node(self, index: int) -> Node:
         try:

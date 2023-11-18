@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from manim import Animation
 from manim import AnimationGroup
 from manim import FadeIn
@@ -7,9 +9,12 @@ from manim import FadeOut
 from manim import Mobject
 from manim import Transform
 
+if TYPE_CHECKING:
+    from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+
 
 class TransformSinglyLinkedList(AnimationGroup):
-    def __init__(self, mobject: Mobject, target_mobject: Mobject, **kwargs) -> None:
+    def __init__(self, mobject: SinglyLinkedList, target_mobject: SinglyLinkedList, **kwargs) -> None:
         self.length_change: int = len(target_mobject) - len(mobject)
 
         self.target_mobject = target_mobject
@@ -49,6 +54,20 @@ class TransformSinglyLinkedList(AnimationGroup):
                     self.submobjects_to_fade_in.append(long_node.next_pointer)
                 else:
                     raise NotImplementedError("The node's value has changed")
+
+        original_labeled_line_labels = set(mobject.labeled_pointers.keys())
+        target_labeled_line_labels = set(target_mobject.labeled_pointers.keys())
+        self.submobjects_to_fade_out.extend(
+            list(original_labeled_line_labels - target_labeled_line_labels),
+        )
+        self.submobjects_to_fade_in.extend(
+            list(target_labeled_line_labels - original_labeled_line_labels),
+        )
+
+        for label in original_labeled_line_labels.intersection(target_labeled_line_labels):
+            self.matching_submobject_pairs.append(
+                (mobject.labeled_pointers[label], target_mobject.labeled_pointers[label]),
+            )
 
         animations: list[Animation] = []
         for submobject in self.submobjects_to_fade_out:
