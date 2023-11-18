@@ -28,7 +28,7 @@ logger = CustomLogger.getLogger(__name__)
 
 
 class SinglyLinkedList(CustomVMobject):
-    def __init__(self, *elements: Any, shape: CustomVMobject | None = None) -> None:
+    def __init__(self, *elements: Any, shape: CustomVMobject | None = None, **kwargs) -> None:
         super().__init__()
         self._elements = elements
         self._nodes: list[SLLNode] = []
