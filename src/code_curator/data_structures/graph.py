@@ -31,15 +31,17 @@ DEFAULT_LINE_LENGTH = 0.75
 
 
 class Vertex(CustomVMobject):
-    _default_label: int = 0
-
     def __init__(
         self,
         label: str | Mobject | None = None,
-        /,
         *,
         contents: str | Mobject | None = None,
+        contents_font_size: float = DEFAULT_LABEL_FONT_SIZE,
+        position_relative_to: tuple[float, float, float] | Mobject | None = None,
+        color: str | Color = DEFAULT_COLOR,
         container: Mobject | None = None,
+        container_stroke_width: float = DEFAULT_VERTEX_STROKE_WIDTH,
+        radius: float = DEFAULT_VERTEX_RADIUS,
         position: tuple[float, float, float] = (0.0, 0.0, 0.0),
         label_out: bool = False,
         label_dist: float = 0.0,
@@ -49,22 +51,18 @@ class Vertex(CustomVMobject):
         show_container: bool = True,
     ) -> None:
         super().__init__()
-        if label is None:
-            label = f"Label{Vertex._default_label}"
-            Vertex._default_label += 1
-
         if not isinstance(label, Mobject):
             label = Element(
                 label,
-                color=DEFAULT_COLOR,
+                color=color,
                 font_size=DEFAULT_LABEL_FONT_SIZE,
             )
 
         if container is None:
             container = Circle(
-                color=DEFAULT_COLOR,
-                radius=DEFAULT_VERTEX_RADIUS,
-                stroke_width=DEFAULT_VERTEX_STROKE_WIDTH,
+                color=color,
+                radius=radius,
+                stroke_width=container_stroke_width,
             )
 
         self.label = label
@@ -77,12 +75,17 @@ class Vertex(CustomVMobject):
         if self.contents is not None:
             self.contents = Element(
                 contents,
-                color=DEFAULT_COLOR,
-                font_size=DEFAULT_CONTENTS_FONT_SIZE,
+                color=color,
+                font_size=contents_font_size,
             )
             self.container.add(self.contents)
 
-        self.container.move_to(position)
+        if position_relative_to is None:
+            position_relative_to = np.array([0.0, 0.0, 0.0])
+        elif isinstance(position_relative_to, Mobject):
+            position_relative_to = position_relative_to.get_center()
+
+        self.container.move_to(position + position_relative_to)
 
         if label_out:
             circumscribing_circle = Circle(
@@ -106,6 +109,10 @@ class Vertex(CustomVMobject):
             mock_contents.move_to(self.container.get_center())
             mock_contents.match_style(self.contents)
             self.contents.align_to(mock_contents, DOWN)
+
+    @property
+    def value(self):
+        return self.contents.value
 
     def label_is(self, value: str) -> bool:
         return self.label.value == value
@@ -143,7 +150,7 @@ class Edge(CustomVMobject):
         self.line = Line(
             self.vertex_one,
             self.vertex_two,
-            color=DEFAULT_COLOR,
+            color=color,
             stroke_width=line_stroke_width,
         )
 
@@ -157,7 +164,7 @@ class Edge(CustomVMobject):
             reference_line = Line(
                 self.vertex_one.container.get_center(),
                 self.vertex_two.container.get_center(),
-                color=BLACK,
+                color=color,
             )
             edge_to_update.become(
                 Line(
@@ -182,7 +189,10 @@ class Graph(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
         self.vertices: set[Vertex] = set()
+        self.edges: set[Edge] = set()
         self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
+
+        self.default_vertex_label_counter: int = 0
 
     def add_vertex(
         self,
@@ -221,6 +231,8 @@ class Graph(CustomVMobject):
         self.vertices.add(edge.vertex_one)
         self.vertices.add(edge.vertex_two)
 
+        self.edges.add(edge)
+
     def get_vertex(self, label: str, /) -> Vertex:
         for vertex in self.vertices:
             if vertex.label_is(label):
@@ -236,6 +248,7 @@ class LabeledLine(CustomVMobject):
         end: tuple[float, float, float] | Mobject | None = None,
         *,
         direction: tuple[float, float, float] | None = None,
+        label_font_size: float = DEFAULT_LABEL_FONT_SIZE,
         length: float = DEFAULT_LINE_LENGTH,
         label: str | Mobject = "",
         label_dist: float = 0.1,
@@ -249,8 +262,8 @@ class LabeledLine(CustomVMobject):
         if isinstance(label, str):
             label = Element(
                 label,
-                color=DEFAULT_COLOR,
-                font_size=DEFAULT_LABEL_FONT_SIZE,
+                color=color,
+                font_size=label_font_size,
             )
 
         if end is None:
@@ -264,7 +277,7 @@ class LabeledLine(CustomVMobject):
         self.line = Line(
             start,
             end,
-            color=DEFAULT_COLOR,
+            color=color,
             stroke_width=DEFAULT_EDGE_STROKE_WIDTH,
         )
         self.label = label
@@ -302,3 +315,7 @@ class LabeledLine(CustomVMobject):
 
         self.add(self.line)
         self.add(self.label)
+
+    @property
+    def direction(self) -> tuple[float, float, float]:
+        return self.line.get_unit_vector()
