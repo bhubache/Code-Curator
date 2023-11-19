@@ -160,35 +160,62 @@ class Edge(CustomVMobject):
         if directedness.startswith("<"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
 
-        def shortest_path_updater(edge_to_update: Line) -> None:
-            reference_line = Line(
-                self.vertex_one.container.get_center(),
-                self.vertex_two.container.get_center(),
-                color=color,
-            )
-            edge_to_update.become(
-                Line(
-                    reference_line.point_from_proportion(
-                        min(1, self.vertex_one.container.radius / reference_line.get_length()),
-                    ),
-                    reference_line.point_from_proportion(
-                        max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
-                    ),
-                )
-                .add_tip(edge_to_update.tip)
-                .match_style(edge_to_update),
-            )
-
-        self.line.add_updater(shortest_path_updater, call_updater=True)
-        self.line.add_updater(shortest_path_updater, call_updater=True)
+        self.add_updater(self.shortest_path_updater)
 
         self.add(self.line)
+
+    def shortest_path_updater(self, some_obj) -> None:
+        reference_line = Line(
+            self.vertex_one.container.get_center(),
+            self.vertex_two.container.get_center(),
+            color=self.color,
+        )
+        self.line.become(
+            Line(
+                reference_line.point_from_proportion(
+                    min(1, self.vertex_one.container.radius / reference_line.get_length()),
+                ),
+                reference_line.point_from_proportion(
+                    max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
+                ),
+            )
+            .add_tip(self.line.tip)
+            .match_style(self.line),
+        )
+
+    def get_start(self):
+        return self.line.get_start()
+
+    def get_end(self):
+        return self.line.get_end()
+
+    def get_start_and_end(self):  # noqa: FNE007
+        return self.line.get_start_and_end()
+
+    def put_start_and_end_on(self, start, end) -> Edge:  # noqa: FNE007
+        arrow_tip_padding = 0
+        if np.array_equal(start, end):
+            arrow_tip_padding = self.line.tip.length
+
+        new_line = Line(start, [end[0] + arrow_tip_padding, end[1], end[2]])
+        new_line.add_tip(self.line.get_tip())
+        new_line.match_style(self.line)
+        self.line.become(new_line)
+
+    def get_tip(self):
+        return self.line.get_tip()
+
+    def become(self, *args, **kwargs):
+        old_line_copy = self.line.copy()
+        self.line.become(*args, **kwargs).match_style(old_line_copy).get_tip().match_style(old_line_copy.get_tip())
+
+        return self
 
 
 class Graph(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
-        self.vertices: set[Vertex] = set()
+        self.vertices: list[Vertex] = []
         self.edges: set[Edge] = set()
         self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
 
@@ -202,8 +229,11 @@ class Graph(CustomVMobject):
         if not isinstance(label_or_vertex, Vertex):
             label_or_vertex = Vertex(label_or_vertex, **kwargs)
 
+        if label_or_vertex in self.vertices:
+            return
+
         self.add(label_or_vertex)
-        self.vertices.add(label_or_vertex)
+        self.vertices.append(label_or_vertex)
         if label_or_vertex not in self.adjacency_list:
             self.adjacency_list[label_or_vertex] = []
 
@@ -228,12 +258,43 @@ class Graph(CustomVMobject):
 
         self.adjacency_list[edge.vertex_one].append(edge.vertex_two)
 
-        self.vertices.add(edge.vertex_one)
-        self.vertices.add(edge.vertex_two)
+        if edge.vertex_one not in self.vertices:
+            self.vertices.append(edge.vertex_one)
+
+        if edge.vertex_two not in self.vertices:
+            self.vertices.append(edge.vertex_two)
 
         self.edges.add(edge)
 
-    def get_vertex(self, label: str, /) -> Vertex:
+    def remove(self, *mobjects: Mobject):
+        for mob in mobjects:
+            if isinstance(mob, Vertex):
+                self.vertices.remove(mob)
+                del self.adjacency_list[mob]
+                for vertex in self.adjacency_list:
+                    try:
+                        self.adjacency_list[vertex].remove(mob)
+                    except ValueError:
+                        pass
+
+                for edge in self.edges:
+                    if mob is edge.vertex_one:
+                        edge.vertex_one = None
+
+                    if mob is edge.vertex_two:
+                        edge.vertex_two = None
+
+            elif isinstance(mob, Edge):
+                self.edges.remove(mob)
+            else:
+                raise NotImplementedError(f"Removing mob {mob} from {self.__class__.__name__} is not yet supported")
+
+            self.submobjects.remove(mob)
+
+    def get_vertex(self, label: str | int, /) -> Vertex:
+        if isinstance(label, int):
+            return self.vertices[label]
+
         for vertex in self.vertices:
             if vertex.label_is(label):
                 return vertex

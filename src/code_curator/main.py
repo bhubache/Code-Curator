@@ -403,28 +403,48 @@ class TestScene(Scene):
         from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
         from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
         from manim import BLACK
-        from manim import MoveToTarget
-        from manim import Transform
 
         sll = SinglyLinkedList(1, 2, 3, 4, 5, show_null=True, color=BLACK)
-        self.add(sll)
-
-        # self.wait(0.2)
-        # self.play(TransformSinglyLinkedList(sll, other))
-        # self.play(FadeTransformPieces(sll, SinglyLinkedList(1, 2, 3, 5, show_null=True, color=BLACK)), run_time=3.0)
-
         sll.add_labeled_pointer(0, "pointer")
-        self.wait()
 
         other = sll.copy()
         other.remove_labeled_pointer("pointer")
         other.add_labeled_pointer(1, "pointer")
-
         self.play(TransformSinglyLinkedList(sll, other))
 
+        other_2 = other.copy()
+        other_2_start = other_2.get_node(1).next_pointer.get_start()
+        other_2_original_end = other_2.get_node(1).next_pointer.get_end()
+        other_2.get_node(1).next_pointer.put_start_and_end_on(other_2_start, other_2_start)
+        other_2.suspend_updating()
+        self.play(TransformSinglyLinkedList(other, other_2))
 
+        other_3 = other_2.copy()
+        other_3.get_node(1).next_pointer.put_start_and_end_on(other_2_start, other_2_original_end)
+        self.play(TransformSinglyLinkedList(other_2, other_3))
 
+        other_4 = other_3.copy()
+        from manim import CurvedArrow
+        other_4.get_node(1).next_pointer.become(
+            CurvedArrow(
+                other_3.get_node(1).next_pointer.get_start(),
+                other_3.get_node(2).next_pointer.get_end(),
+                tip_length=other_3.get_node(2).next_pointer.get_tip().length,
+            )
+        )
+        self.play(TransformSinglyLinkedList(other_3, other_4))
 
+        other_5 = other_4.copy()
+        other_5.remove(other_5.get_node(2).next_pointer)
+        other_5.get_node(1).next_pointer.vertex_two = other_5.get_node(2)
+        self.play(TransformSinglyLinkedList(other_4, other_5))
+
+        # other_5_5 = other_5.copy()
+        # other_5_5.remove(other_5_5.get_node(2))
+        # self.play(TransformSinglyLinkedList(other_5, other_5_5))
+
+        other_6 = other_5.create_reset_copy()
+        self.play(TransformSinglyLinkedList(other_5, other_6, debug=True))
 
 
 if __name__ == "__main__":
