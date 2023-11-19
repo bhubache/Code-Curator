@@ -286,6 +286,8 @@ class Graph(CustomVMobject):
 
             elif isinstance(mob, Edge):
                 self.edges.remove(mob)
+                mob.vertex_one = None
+                mob.vertex_two = None
             else:
                 raise NotImplementedError(f"Removing mob {mob} from {self.__class__.__name__} is not yet supported")
 
