@@ -432,19 +432,34 @@ class TestScene(Scene):
                 tip_length=other_3.get_node(2).next_pointer.get_tip().length,
             )
         )
+        other_4.get_node(1).next_pointer.vertex_two = other_4.get_node(3)
         self.play(TransformSinglyLinkedList(other_3, other_4))
 
         other_5 = other_4.copy()
         other_5.remove(other_5.get_node(2).next_pointer)
-        other_5.get_node(1).next_pointer.vertex_two = other_5.get_node(2)
+        # other_5.get_node(1).next_pointer.vertex_two = other_5.get_node(3)
         self.play(TransformSinglyLinkedList(other_4, other_5))
 
-        # other_5_5 = other_5.copy()
-        # other_5_5.remove(other_5_5.get_node(2))
-        # self.play(TransformSinglyLinkedList(other_5, other_5_5))
+        other_5_5 = other_5.copy()
+        other_5_5.remove(other_5_5.get_node(2))
+        self.play(TransformSinglyLinkedList(other_5, other_5_5))
 
-        other_6 = other_5.create_reset_copy()
-        self.play(TransformSinglyLinkedList(other_5, other_6, debug=True))
+        # other_6 = other_5.create_reset_copy(
+        #     remove_indices=[2],
+        # )
+        other_6 = other_5_5.create_reset_copy()
+        # other_6 = SinglyLinkedList(1, 2, 4, 5, show_null=True, color=BLACK)
+        # other_6.remove(other_6.get_node(2).next_pointer)
+        # other_6.remove(other_6.get_node(2))
+        from manim import FadeIn
+        # FIXME: Animation of curved to straight arrow doesn't look right
+        self.play(TransformSinglyLinkedList(other_5_5, other_6, debug=True))
+        from manim import TransformMatchingShapes
+        from manim import Transform
+        # self.play(Transform(
+        #     other_5.get_node(1).next_pointer,
+        #     other_6.get_node(1).next_pointer,
+        # ))
 
 
 if __name__ == "__main__":

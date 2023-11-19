@@ -15,6 +15,7 @@ from code_curator.data_structures.graph import Vertex
 
 if TYPE_CHECKING:
     from collections.abc import Hashable
+    from collections.abc import Sequence
     from colour import Color
 
 DEFAULT_NODE_RADIUS = 0.5
@@ -52,7 +53,7 @@ class SinglyLinkedList(CustomVMobject):
             )
             self.graph.add_vertex(vertex)
 
-        for index in range(len(self.values) - 0 if show_null else 1):
+        for index in range(len(self.nodes) - 1):
             curr_node = self.get_node(index)
             next_node = self.get_node(index + 1)
 
@@ -108,8 +109,12 @@ class SinglyLinkedList(CustomVMobject):
         return [node.value for node in self.graph.vertices if node.value != "null"]
 
     @property
-    def nodes(self):
+    def nodes(self) -> list[Node]:
         return self.graph.vertices
+
+    @property
+    def pointers(self) -> list[Edge]:
+        return [node.next_pointer for node in self.nodes if node.next_pointer is not None]
 
     @property
     def head_pointer(self) -> LabeledLine:
@@ -129,9 +134,24 @@ class SinglyLinkedList(CustomVMobject):
 
         return copy
 
-    def create_reset_copy(self) -> SinglyLinkedList:
-        fresh_linked_list = SinglyLinkedList(*self.values, show_null=self.show_null, color=self.color)
+    def create_reset_copy(self, remove_indices: Sequence[int] = ()) -> SinglyLinkedList:
+        fresh_linked_list = SinglyLinkedList(
+            *[value for index, value in enumerate(self.values) if index not in remove_indices],
+            show_null=self.show_null,
+            color=self.color,
+        )
+
         copy = self.copy()
+        for index in remove_indices:
+            node_to_remove = copy.get_node(index)
+            if node_to_remove is not None and node_to_remove.next_pointer is not None:
+                copy.remove(node_to_remove.next_pointer)
+            elif node_to_remove is not None:
+                copy.remove(node_to_remove)
+
+        for old_pointer, new_pointer in zip(copy.pointers, fresh_linked_list.pointers):
+            old_pointer.become(new_pointer)
+
         copy.become(fresh_linked_list)
         for label in fresh_linked_list.labeled_pointers:
             copy.labeled_pointers[label].become(fresh_linked_list.labeled_pointers[label])
@@ -152,10 +172,7 @@ class SinglyLinkedList(CustomVMobject):
                 raise NotImplementedError(f"Removal of mobject {mob} from SLL not yet supported")
 
     def get_node(self, index: int) -> Node:
-        try:
-            return self.graph.get_vertex(index)
-        except LookupError as exc:
-            raise IndexError(f"Index {index} out of bounds for length {len(self)}") from exc
+        return self.nodes[index]
 
     def add_labeled_pointer(self, index: int, label, direction: tuple[float, float, float] | None = None) -> None:
         if direction is None:
