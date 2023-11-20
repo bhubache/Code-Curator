@@ -313,6 +313,8 @@ class PrimaryStream:
         # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
         # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
         #  refer to the same copy!!!
+        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        return animation
         return Wait()
         self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         return animation
