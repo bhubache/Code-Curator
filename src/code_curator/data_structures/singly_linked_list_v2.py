@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from manim import Animation
+from manim import CurvedArrow
 from manim import DOWN
 from manim import Line
 from manim import Mobject
@@ -177,6 +178,9 @@ class SinglyLinkedList(CustomVMobject):
     def get_node(self, index: int) -> Node:
         return self.nodes[index]
 
+    def get_node_index(self, node: Node) -> int:
+        return self.nodes.index(node)
+
     def add_labeled_pointer(
         self, index: int, label: str | Element, direction: tuple[float, float, float] | None = None
     ) -> None:
@@ -236,6 +240,28 @@ class SinglyLinkedList(CustomVMobject):
             copy_next_pointer.get_start(),
             copy_next_pointer.vertex_two,
         )
+        return copy, TransformSinglyLinkedList(
+            self,
+            copy,
+        )
+
+    def curve_pointer_to(self, pointer: Edge, node: Node) -> tuple[SinglyLinkedList, Animation]:
+        node_index_from: int = self.get_node_index(pointer.vertex_one)
+        node_index_to: int = self.get_node_index(node)
+        copy = self._create_animation_copy()
+
+        node_from_copy = copy.get_node(node_index_from)
+        prev_node_to_copy = copy.get_node(node_index_to - 1)
+
+        node_from_copy.next_pointer.become(
+            CurvedArrow(
+                pointer.get_start(),
+                prev_node_to_copy.next_pointer.get_end(),
+                tip_length=prev_node_to_copy.next_pointer.get_tip().length,
+            )
+        )
+
+        node_from_copy.next_pointer.vertex_two = node
         return copy, TransformSinglyLinkedList(
             self,
             copy,
