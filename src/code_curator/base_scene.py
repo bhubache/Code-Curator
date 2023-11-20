@@ -1,22 +1,16 @@
 from __future__ import annotations
 
-from abc import ABC
-from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from manim import config
-from manim import FadeOut
+from manim import Group
 from manim import Mobject
 from manim import Scene
-from manim import Wait
 
-from .generator_scene import GeneratorScene
-from code_curator.animations.utils import utils
-from code_curator.custom_logging.custom_logger import CustomLogger
-from code_curator.animations.curator_animation_new import CuratorAnimation
 from code_curator import constants
-from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem
+from code_curator.animations.curator_animation_new import CuratorAnimation
 from code_curator.animations.curator_animation_new import ExcludeDuplicationSubmobjectsMobject
+from code_curator.custom_logging.custom_logger import CustomLogger
 
 
 if TYPE_CHECKING:
@@ -114,111 +108,33 @@ class BaseScene(Scene):
                 stream_instances=self.stream_instances,
                 run_time=self.animation_script.run_time,
                 scene=self,
-            )
+            ),
         )
 
     @property
     def scene_mobjects(self) -> list[Mobject]:
         return self.mobjects[0].submobjects
 
-    # def add(self, *mobjects: Mobject) -> None:
-    #     if len(mobjects) == 0 and isinstance(mobjects[0], ExcludeDuplicationSubmobjectsMobject):
-    #         super().add(mobjects[0])
+    def replace(self, old_mobject: Mobject, new_mobject: Mobject) -> None:
+        # There might be a group with submobjects of a SLL that's also in the scene's mobjects. Remove the duplication
+        non_groups = [mob for mob in self.mobjects[0].submobjects if not isinstance(mob, Group)]
+        duplicating_mobs = []
+        for non_group in non_groups:
+            for mob in self.mobjects[0].submobjects:
+                if non_group is mob:
+                    continue
 
-    #     if len(mobjects) > 1:
-    #         raise RuntimeError(f"{self.__class__.__name__}.mobjects should never exceed 1, it is currently {len(self.mobjects)}")
+                # FIXME: Only search groups
+                is_duplicating_mob = any(
+                    [sub_mob in mob for sub_mob in non_group],
+                )
+                if is_duplicating_mob:
+                    duplicating_mobs.append(non_group)
+                    break
 
-    #     if len(mobjects) == 1 and not isinstance(mobjects[0], ExcludeDuplicationSubmobjectsMobject):
-    #         raise RuntimeError(f"Only {ExcludeDuplicationSubmobjectsMobject.__name__} should be in {self.__class__.__name__}.mobjects, found {self.mobjects}")
+        for mob in duplicating_mobs:
+            self.mobjects[0].submobjects.remove(mob)
 
-
-
-# class BaseScene(ABC, GeneratorScene):
-#     config.background_color = "#000E15"
-#     generator_classes = []
-#
-#     def __init__(
-#         self,
-#         problem_dir: str,
-#         aligned_animation_scene: CompositeAnimationScript,
-#         *args,
-#         **kwargs,
-#     ) -> None:
-#         super().__init__(
-#             *args,
-#             aligned_animation_script=aligned_animation_scene,
-#             **kwargs,
-#         )
-#         self._aligned_animation_scene: CompositeAnimationScript = (
-#             aligned_animation_scene
-#         )
-#         self._problem_dir: str = problem_dir
-#
-#     @property
-#     def aligned_animation_scene(self) -> CompositeAnimationScript:
-#         return self._aligned_animation_scene
-#
-#     @property
-#     def problem_dir(self) -> str:
-#         return self._problem_dir
-#
-#     def render(self, preview: bool = False):
-#         self.prep_rendering()
-#         super().render()
-#
-#     def prep_rendering(self):
-#         super().prep_rendering()
-#         self._make_doubly_linked_generators(
-#             self.sub_generators,
-#             self.aligned_animation_scene,
-#         )
-#         utils.pre_scene_render_hook(self.golden_flattened_generators[0])
-#
-#
-#     def construct(self) -> None:
-#         animation_generator = next(self)
-#         for i, animation in enumerate(animation_generator):
-#             logger.critical(f"{i}   {animation}")
-#             self.play(animation)
-#
-#             wait_animation = self.__create_filling_wait_animation(animation)
-#             if wait_animation is not None:
-#                 self.play(wait_animation)
-#
-#     def tear_down(self) -> None:
-#         self.play(FadeOut(*self.mobjects))
-#
-#     # TODO: Move this to somewhere internal
-#     def __create_filling_wait_animation(self, animation) -> Wait:
-#         # Remove CuratorAnimation from bases to create basic manim Wait
-#         utils.remove_timing_validation(Wait)
-#
-#         try:
-#             if animation.remaining_time > 0:
-#                 return Wait(animation.remaining_time)
-#         except AttributeError:
-#             min_remaining_time = float("inf")
-#             try:
-#                 for sub_anim in animation.animations:
-#                     try:
-#                         min_remaining_time = min(
-#                             sub_anim.remaining_time,
-#                             min_remaining_time,
-#                         )
-#                     except AttributeError:
-#                         min_remaining_time = 1.0
-#             except AttributeError:
-#                 min_remaining_time = 1.0
-#
-#             return Wait(min_remaining_time)
-#
-#     def _make_doubly_linked_generators(self, sub_generators, aligned_animation_helper):
-#         for i, generator_method in enumerate(self.golden_flattened_generators):
-#             generator_method.__func__.prev = self.golden_flattened_generators[i - 1]
-#             try:
-#                 generator_method.__func__.next = self.golden_flattened_generators[i + 1]
-#             except IndexError:
-#                 generator_method.__func__.next = None  # last gen method
-#
-#         # Break cycle between first and last generator methods
-#         self.golden_flattened_generators[0].__func__.prev = None
+        insertion_index = self.mobjects[0].submobjects.index(old_mobject)
+        self.mobjects[0].submobjects.insert(insertion_index, new_mobject)
+        self.mobjects[0].submobjects.remove(old_mobject)

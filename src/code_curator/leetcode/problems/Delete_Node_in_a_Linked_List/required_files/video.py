@@ -1,35 +1,28 @@
 from __future__ import annotations
 
 from manim import AnimationGroup
-from manim import Arrow
 from manim import config
 from manim import FadeIn
 from manim import FadeOut
-from manim import Circumscribe
-from manim import GREEN
-from manim import Group
 from manim import LEFT
 from manim import Line
-from manim import Tex
-from manim import Transform
 from manim import UP
 from manim import VGroup
 from manim import Wait
 from manim import Write
 
-from code_curator.animations.attribute_animation import AttributeAnimation
 from code_curator.animations.arrow_transport_transformation import ArrowTransportTransformation
+from code_curator.animations.change_color import ChangeColor
+from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
+from code_curator.data_structures.pointers.simple_pointer import SimplePointer
+from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem as PresentProblem
 from code_curator.leetcode.scenes.problem_analysis.base_problem_analysis import BaseProblemAnalysis as ProblemAnalysis
 from code_curator.main import QUALITY
-from code_curator.leetcode.problem_text import ProblemText
-from code_curator.animations.change_color import ChangeColor
-from code_curator.animations.utils.utils import run_time_can_be_truncated
-from code_curator.data_structures.singly_linked_list import SinglyLinkedList
-# from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
-from code_curator.data_structures.graph import LabeledLine
-from code_curator.data_structures.pointers.simple_pointer import SimplePointer
+
+# from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 # TODO: Try and just have the special Mobject in curator animation be in the scene.mobjects
 # TODO: Consider substrings_to_isolate when creating Tex for TransformMatchingTex
@@ -86,8 +79,12 @@ class Video(BaseScene):
             constraints=CONSTRAINTS,
             explanations=CONSTRAINT_EXPLANATIONS,
         )
-        self.present_problem.statement_tex = self.present_problem._create_statement(STATEMENT, font_size=STATEMENT_FONT_SIZE)
-        self.present_problem.constraints_tex = self.present_problem._create_constraints(CONSTRAINTS, font_size=20, buff=0.20)
+        self.present_problem.statement_tex = self.present_problem._create_statement(
+            STATEMENT, font_size=STATEMENT_FONT_SIZE
+        )
+        self.present_problem.constraints_tex = self.present_problem._create_constraints(
+            CONSTRAINTS, font_size=20, buff=0.20
+        )
         self.special_notes_list = ProblemText.create_constraints_list(
             SPECIAL_NOTES,
             font_size=20,
@@ -96,7 +93,6 @@ class Video(BaseScene):
 
 
 class PrimaryStream:
-
     def __init__(
         self,
         present_problem: PresentProblem,
@@ -112,11 +108,10 @@ class PrimaryStream:
         self.scene = scene
         self.shared = shared
 
-
         self.tex_to_remove = self.present_problem.statement_tex.get_sub_tex(
             " All the values of the linked list are unique, and it is"
             " guaranteed that the given node node is not the last node in the"
-            " linked list."
+            " linked list.",
         )
         self.third_constraint_tex = self.get_constraint_tex(3)
         self.fourth_constraint_tex = self.get_constraint_tex(4)
@@ -182,7 +177,7 @@ class PrimaryStream:
                 self.second_mention_tex,
                 REMOVE_COLOR,
                 starting_color=self.present_problem.statement_tex.color,
-            )
+            ),
         )
 
     def remove_statement_duplication(self):
@@ -298,6 +293,7 @@ class PrimaryStream:
 
     def fade_in_linked_list(self):
         self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
+        self.sll_for_normal_removal.add_labeled_pointer(0, "p")
         # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
         # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
         #     0,
@@ -308,11 +304,9 @@ class PrimaryStream:
 
     @run_time_can_be_truncated
     def advance_pointer(self):
+        return self.sll_for_normal_removal.advance_pointer("p")
         return Wait()
-        return (
-            self.sll_for_normal_removal
-            .advance_pointer(self.pointer_p)
-        )
+        return self.sll_for_normal_removal.advance_pointer(self.pointer_p)
 
     def wave_pointer(self):
         return Wait()
@@ -326,7 +320,6 @@ class PrimaryStream:
 
 
 class TestStream:
-
     def __init__(
         self,
         present_problem: PresentProblem,
@@ -344,6 +337,7 @@ class TestStream:
 
     def test_statement_header(self):
         from manim import Square
+
         return FadeIn(Square(), run_time=15.0)
 
     def fade_in_new_statement(self):
@@ -381,7 +375,7 @@ class TestStream:
 
     def fade_in_constraint_three_explanation_title(self):
         self.constraint_two_explanation_title = ProblemText.create_title(
-            "Remove the value 2 from the linked list"
+            "Remove the value 2 from the linked list",
         )
         self.constraint_two_explanation_title.to_edge(UP)
         self.constraint_two_sll = SinglyLinkedList(9, 2, 5, 2, 2)
@@ -415,7 +409,7 @@ class TestStream:
                         starts[num_nodes_with_value_2_seen],
                     ),
                     end=question_mark_to_node_path.point_from_proportion(0.9),
-                )
+                ),
             )
 
             num_nodes_with_value_2_seen += 1
@@ -433,10 +427,7 @@ class ThirdStream:
     def move_arrows_to_nodes(self):
         return Write(
             VGroup(
-                *[
-                    arrow
-                    for arrow in self.shared.pointers
-                ]
+                *[arrow for arrow in self.shared.pointers],
             ),
             run_time=2.0,
         )

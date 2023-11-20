@@ -333,6 +333,7 @@ class LabeledLine(CustomVMobject):
             # Assume user passed in the location/Mobject they want the line to point to
             end = start.get_boundary_point(-direction)
             target_mobject = start
+            self.pointee = start
             start = Dot(end).shift(-direction * length)
         else:
             raise NotImplementedError()
