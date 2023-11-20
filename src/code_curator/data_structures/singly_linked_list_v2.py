@@ -211,7 +211,7 @@ class SinglyLinkedList(CustomVMobject):
         copy.remove_labeled_pointer(labeled_pointer.label)
         copy.add_labeled_pointer(old_labeled_pointer_index + num_nodes, labeled_pointer.label)
 
-        return TransformSinglyLinkedList(
+        return copy, TransformSinglyLinkedList(
             self,
             copy,
         )
@@ -222,7 +222,7 @@ class SinglyLinkedList(CustomVMobject):
         copy = self.copy()
         start = self.get_node(node_index).next_pointer.get_start()
         copy.get_node(node_index).next_pointer.put_start_and_end_on(start, start)
-        return TransformSinglyLinkedList(
+        return copy, TransformSinglyLinkedList(
             self,
             copy,
         )
