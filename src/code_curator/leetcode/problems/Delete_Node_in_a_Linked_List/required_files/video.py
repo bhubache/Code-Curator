@@ -305,18 +305,18 @@ class PrimaryStream:
     @run_time_can_be_truncated
     def advance_pointer(self):
         return self.sll_for_normal_removal.advance_pointer("p")
-        return Wait()
-        return self.sll_for_normal_removal.advance_pointer(self.pointer_p)
 
     def wave_pointer(self):
-        return Wait()
-        return self.sll_for_normal_removal.wave_pointer(
-            self.sll_for_normal_removal[1].pointer_to_next,
-        )
+        # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
+        # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
+        #  refer to the same copy!!!
+        return self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        # return self.sll_for_normal_removal.wave_pointer(
+        #     self.sll_for_normal_removal[1].pointer_to_next,
+        # )
 
     def shrink_pointer(self):
-        return Wait()
-        # return self.sll_for_normal_removal.
+        return self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
 
 
 class TestStream:
