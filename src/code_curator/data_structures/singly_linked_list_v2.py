@@ -216,6 +216,17 @@ class SinglyLinkedList(CustomVMobject):
             copy,
         )
 
+    def shrink_pointer(self, pointer: Edge) -> Animation:
+        node_index: int = [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
+
+        copy = self.copy()
+        start = self.get_node(node_index).next_pointer.get_start()
+        copy.get_node(node_index).next_pointer.put_start_and_end_on(start, start)
+        return TransformSinglyLinkedList(
+            self,
+            copy,
+        )
+
 
 class Node(Vertex):
     def __init__(self, edges, **kwargs) -> None:
