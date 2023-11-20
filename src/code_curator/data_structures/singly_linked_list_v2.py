@@ -201,7 +201,7 @@ class SinglyLinkedList(CustomVMobject):
         return self.labeled_pointers[name]
 
     def advance_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> Animation:
-        copy = self.copy()
+        copy = self._create_animation_copy()
         if isinstance(pointer, str):
             labeled_pointer = copy.get_labeled_pointer(pointer)
         else:
@@ -219,13 +219,20 @@ class SinglyLinkedList(CustomVMobject):
     def shrink_pointer(self, pointer: Edge) -> Animation:
         node_index: int = [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
-        copy = self.copy()
+        copy = self._create_animation_copy()
         start = self.get_node(node_index).next_pointer.get_start()
         copy.get_node(node_index).next_pointer.put_start_and_end_on(start, start)
         return copy, TransformSinglyLinkedList(
             self,
             copy,
         )
+
+    def _create_animation_copy(self) -> SinglyLinkedList:
+        attr_name = "_copy_for_animation"
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, self.copy())
+
+        return getattr(self, attr_name)
 
 
 class Node(Vertex):
