@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from manim import Animation
 from manim import DOWN
 from manim import Line
 from manim import Mobject
 from manim import ORIGIN
 
+from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.custom_vmobject import CustomVMobject
+from code_curator.data_structures.element import Element
 from code_curator.data_structures.graph import Edge
 from code_curator.data_structures.graph import Graph
 from code_curator.data_structures.graph import LabeledLine
@@ -174,15 +177,44 @@ class SinglyLinkedList(CustomVMobject):
     def get_node(self, index: int) -> Node:
         return self.nodes[index]
 
-    def add_labeled_pointer(self, index: int, label, direction: tuple[float, float, float] | None = None) -> None:
+    def add_labeled_pointer(
+        self, index: int, label: str | Element, direction: tuple[float, float, float] | None = None
+    ) -> None:
+        if isinstance(label, Element):
+            label = label.value
+
         if direction is None:
             direction = -self.head_pointer.direction
 
-        self.labeled_pointers[label] = LabeledLine(self.get_node(index), label=label, direction=direction)
+        self.labeled_pointers[label] = LabeledLine(
+            self.get_node(index), label=label, direction=direction, color=self.color
+        )
         self.add(self.labeled_pointers[label])
 
-    def remove_labeled_pointer(self, label) -> None:
+    def remove_labeled_pointer(self, label: str | Element) -> None:
+        if isinstance(label, Element):
+            label = label.value
+
         self.remove(self.labeled_pointers[label])
+
+    def get_labeled_pointer(self, name: str) -> LabeledLine:
+        return self.labeled_pointers[name]
+
+    def advance_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> Animation:
+        copy = self.copy()
+        if isinstance(pointer, str):
+            labeled_pointer = copy.get_labeled_pointer(pointer)
+        else:
+            labeled_pointer = copy.get_labeled_pointer(pointer.label)
+
+        old_labeled_pointer_index: int = copy.nodes.index(labeled_pointer.pointee)
+        copy.remove_labeled_pointer(labeled_pointer.label)
+        copy.add_labeled_pointer(old_labeled_pointer_index + num_nodes, labeled_pointer.label)
+
+        return TransformSinglyLinkedList(
+            self,
+            copy,
+        )
 
 
 class Node(Vertex):
