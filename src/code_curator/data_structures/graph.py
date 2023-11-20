@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import math
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -192,12 +193,16 @@ class Edge(CustomVMobject):
     def get_start_and_end(self):  # noqa: FNE007
         return self.line.get_start_and_end()
 
-    def put_start_and_end_on(self, start, end) -> Edge:  # noqa: FNE007
+    def put_start_and_end_on(self, start: Iterable[float] | Mobject, end: Iterable[float] | Mobject) -> None:  # noqa: FNE007
         arrow_tip_padding = 0
-        if np.array_equal(start, end):
-            arrow_tip_padding = self.line.tip.length
+        if isinstance(start, Mobject) or isinstance(end, Mobject):
+            new_line = Line(start, end)
+        else:
+            if np.array_equal(start, end):
+                arrow_tip_padding = self.line.tip.length
 
-        new_line = Line(start, [end[0] + arrow_tip_padding, end[1], end[2]])
+            new_line = Line(start, [end[0] + arrow_tip_padding, end[1], end[2]])
+
         new_line.add_tip(self.line.get_tip())
         new_line.match_style(self.line)
         self.line.become(new_line)

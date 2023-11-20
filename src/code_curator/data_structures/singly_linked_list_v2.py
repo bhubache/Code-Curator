@@ -200,7 +200,7 @@ class SinglyLinkedList(CustomVMobject):
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
 
-    def advance_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> Animation:
+    def advance_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> tuple[SinglyLinkedList, Animation]:
         copy = self._create_animation_copy()
         if isinstance(pointer, str):
             labeled_pointer = copy.get_labeled_pointer(pointer)
@@ -216,8 +216,8 @@ class SinglyLinkedList(CustomVMobject):
             copy,
         )
 
-    def shrink_pointer(self, pointer: Edge) -> Animation:
-        node_index: int = [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
+    def shrink_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
+        node_index: int = self.get_next_pointers_node_index(pointer)
 
         copy = self._create_animation_copy()
         start = self.get_node(node_index).next_pointer.get_start()
@@ -226,6 +226,23 @@ class SinglyLinkedList(CustomVMobject):
             self,
             copy,
         )
+
+    def grow_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
+        node_index: int = self.get_next_pointers_node_index(pointer)
+
+        copy = self._create_animation_copy()
+        copy_next_pointer = copy.get_node(node_index).next_pointer
+        copy_next_pointer.put_start_and_end_on(
+            copy_next_pointer.get_start(),
+            copy_next_pointer.vertex_two,
+        )
+        return copy, TransformSinglyLinkedList(
+            self,
+            copy,
+        )
+
+    def get_next_pointers_node_index(self, pointer: Edge) -> int:
+        return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
     def _create_animation_copy(self) -> SinglyLinkedList:
         attr_name = "_copy_for_animation"
