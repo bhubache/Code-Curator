@@ -182,29 +182,19 @@ class SinglyLinkedList(CustomVMobject):
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
 
-    def advance_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> tuple[SinglyLinkedList, Animation]:
+    def move_labeled_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> tuple[SinglyLinkedList, Animation]:
         copy = self._create_animation_copy()
         if isinstance(pointer, str):
             labeled_pointer = copy.get_labeled_pointer(pointer)
         else:
             labeled_pointer = copy.get_labeled_pointer(pointer.label)
 
-        # TODO: Clean up
-        # FIXME: Only advances one node regardless of what the num_nodes arg says
-
-        # labeled_pointer_family = labeled_pointer.get_family()
-
-        old_labeled_pointer_index: int = copy.nodes.index(labeled_pointer.pointee)
-        # copy.get_labeled_pointer(labeled_pointer.label.value).move_to(copy.get_node(1))
+        old_node_index: int = copy.nodes.index(labeled_pointer.pointee)
+        new_node_index: int = old_node_index + num_nodes
         copy.get_labeled_pointer(labeled_pointer.label.value).shift(
-            labeled_pointer.pointee.next_pointer.vertex_two.get_center() - labeled_pointer.pointee.next_pointer.vertex_one.get_center()
+            copy.get_node(new_node_index).get_center() - copy.get_node(old_node_index).get_center(),
         )
-        copy.get_labeled_pointer(labeled_pointer.label.value).pointee = copy.get_node(1)
-        # copy.remove_labeled_pointer(labeled_pointer.label)
-        # copy.add_labeled_pointer(old_labeled_pointer_index + num_nodes, labeled_pointer.label)
-
-        # for original_submobject, copied_submobject in zip(labeled_pointer_family, copy.get_labeled_pointer(labeled_pointer.label.value).get_family()):
-        #     copied_submobject.original_id = str(id(original_submobject))
+        copy.get_labeled_pointer(labeled_pointer.label.value).pointee = copy.get_node(new_node_index)
 
         return copy, TransformSinglyLinkedList(
             self,
