@@ -323,8 +323,8 @@ class PrimaryStream:
         #  refer to the same copy!!!
         # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
         # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
-        # self.sll_for_normal_removal.resume_updating()
-        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
+        self.sll_for_normal_removal.resume_updating()
+        return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
         return Wait()
         self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         return animation

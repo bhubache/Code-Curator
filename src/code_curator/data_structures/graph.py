@@ -165,10 +165,10 @@ class Edge(CustomVMobject):
 
         self.add(self.line)
 
-    def __deepcopy__(self, memodict):
-        copy = super().__deepcopy__(memodict)
-        copy.add_updater(copy.shortest_path_updater)
-        return copy
+    # def __deepcopy__(self, memodict):
+    #     copy = super().__deepcopy__(memodict)
+    #     # copy.add_updater(copy.shortest_path_updater)
+    #     return copy
 
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
@@ -368,12 +368,12 @@ class LabeledLine(CustomVMobject):
         if directedness.startswith("<"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
 
-        def line_updater(line) -> None:
-            current_end = line.get_end()
-            new_end = target_mobject.point_from_proportion(
-                self.line_mob_connecting_proportion,
-            )
-            line.shift(new_end - current_end)
+        # def line_updater(line) -> None:
+        #     current_end = line.get_end()
+        #     new_end = target_mobject.point_from_proportion(
+        #         self.line_mob_connecting_proportion,
+        #     )
+        #     line.shift(new_end - current_end)
 
         if isinstance(end, Mobject):
             self.line.add_updater(self.line_updater)
@@ -381,9 +381,9 @@ class LabeledLine(CustomVMobject):
         if isinstance(start, Mobject):
             self.line.add_updater(self.line_updater)
 
-        def label_updater(label) -> None:
-            label.move_to(self.line.get_start())
-            label.shift(-self.line.get_unit_vector() * self.label_dist)
+        # def label_updater(label) -> None:
+        #     label.move_to(self.line.get_start())
+        #     label.shift(-self.line.get_unit_vector() * self.label_dist)
 
         # self.label.add_updater(label_updater, call_updater=True)
         self.label.add_updater(self.label_updater, call_updater=True)
