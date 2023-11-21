@@ -4,12 +4,28 @@ from collections.abc import Iterable
 
 from .aligned_word import AlignedWord
 
+SCRIPT = "Now, let's analyze the constraints. that is not the case, so the constraint skipping stuff a lot of words. Here, we have a linked list with pointer p situated at the head and we're going to remove the third node."
+
 
 class AlignedScript:
     def __init__(self, text_data: dict[int, str] | dict[int, AlignedWord]):
-        self._words: dict[AlignedWord] = self._strs_to_words(
-            text_data,
-        ) if not self._dict_contains_aligned_words(text_data) else text_data
+        # self._words: dict[AlignedWord] = self._strs_to_words(
+            # text_data,
+        # ) if not self._dict_contains_aligned_words(text_data) else text_data
+        self._words = {}
+
+        time: float = 0.0
+        delta = 0.25
+
+        for index, word in enumerate(SCRIPT.split()):
+            self._words[index + 1] = AlignedWord(
+                {
+                    "start": time,
+                    "end": time + delta,
+                    "text": word
+                }
+            )
+            time += delta
 
     def __str__(self) -> str:
         return '\n'.join(f'{word_num} -> {word}' for word_num, word in self._words.items())

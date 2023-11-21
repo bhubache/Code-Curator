@@ -4,6 +4,9 @@ You can either create a video using custom scenes or test some animation code!
 """
 from __future__ import annotations
 
+import sys
+sys.path.insert(0, "/".join(sys.path[0].split("/")[:-1]))
+
 __all__: Sequence[str] = []
 
 import importlib
@@ -157,7 +160,7 @@ def main() -> None:
     problem_dir = Path(
         Path.home(),
         "ManimCS",
-        "Code_Curator",
+        "Code-Curator",
         "src",
         "code_curator",
         "leetcode",
@@ -165,27 +168,27 @@ def main() -> None:
         "Delete_Node_in_a_Linked_List",
     )
 
-    if generate_ai_speech:
-        # Generate ai_script.txt from the animation script
-        ai_script_path: Path = (
-            problem_dir / "dev_files" / "MFA" / "input" / "ai_script.txt"
-        )
+    # if generate_ai_speech:
+    #     # Generate ai_script.txt from the animation script
+    #     ai_script_path: Path = (
+    #         problem_dir / "dev_files" / "MFA" / "input" / "ai_script.txt"
+    #     )
 
-        script = get_script_text_from_animation_script(
-            yaml.safe_load(
-                (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
-            ),
-        )
-        ai_script_path.write_text(script)
+    #     script = get_script_text_from_animation_script(
+    #         yaml.safe_load(
+    #             (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
+    #         ),
+    #     )
+    #     ai_script_path.write_text(script)
 
-        # with open(ai_script_path, 'w', encoding='UTF-8') as write_file:
-        #     write_file.write(script)
+    #     # with open(ai_script_path, 'w', encoding='UTF-8') as write_file:
+    #     #     write_file.write(script)
 
-        # Generate audio from text
-        audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
-        ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
-            problem_dir / "dev_files"
-        )
+    #     # Generate audio from text
+    #     audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
+    #     ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
+    #         problem_dir / "dev_files"
+    #     )
 
     aligned_animation_script = get_aligned_animation_script(
         alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
@@ -222,11 +225,11 @@ def main() -> None:
             )
         ),
     )
-    audio_clip = AudioFileClip(str(audio_path))
-    final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
-    final_clip.write_videofile(
-        str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")), fps=FRAME_RATE
-    )
+    # audio_clip = AudioFileClip(str(audio_path))
+    # final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
+    # video_clip.write_videofile(
+    #     str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")), fps=FRAME_RATE
+    # )
 
 
 def postmortem_main():
@@ -244,7 +247,7 @@ from manim import config
 
 
 class TestScene(Scene):
-    config["background_color"] = "#FFFFFF"
+    # config["background_color"] = "#FFFFFF"
     config["disable_caching"] = True
 
     def construct(self):
@@ -463,5 +466,5 @@ class TestScene(Scene):
 
 
 if __name__ == "__main__":
-    # main()
-    TestScene().render()
+    main()
+    # TestScene().render()
