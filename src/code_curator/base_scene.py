@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 
 from manim import config
-from manim import Group
 from manim import Mobject
 from manim import Scene
 
@@ -12,11 +10,6 @@ from code_curator.animations.curator_animation_new import CuratorAnimation
 from code_curator.animations.curator_animation_new import ExcludeDuplicationSubmobjectsMobject
 from code_curator.custom_logging.custom_logger import CustomLogger
 
-
-if TYPE_CHECKING:
-    from .script_handling.components.animation_script.composite_animation_script import (  # noqa: E501
-        CompositeAnimationScript,
-    )
 
 logger = CustomLogger.getLogger(__name__)
 
@@ -28,14 +21,6 @@ class MyClass:
 class _AllowOneMobjectList(list):
     def __setitem__(self, key, mobjects) -> None:
         raise NotImplementedError()
-        # if len(mobjects) == 0 and isinstance(mobjects[0], ExcludeDuplicationSubmobjectsMobject):
-        #     super().__setitem__(key, mobjects)
-
-        # if len(mobjects) > 1:
-        #     raise RuntimeError(f"{self.__class__.__name__}.mobjects should never exceed 1, it is currently {len(self.mobjects)}")
-
-        # if len(mobjects) == 1 and not isinstance(mobjects[0], ExcludeDuplicationSubmobjectsMobject):
-        #     raise RuntimeError(f"Only {ExcludeDuplicationSubmobjectsMobject.__name__} should be in {self.__class__.__name__}.mobjects, found {self.mobjects}")
 
 
 class _AllowOneMobjectDescriptor:
@@ -68,28 +53,10 @@ class BaseScene(Scene):
         self.stream_instances = []
         self._setup_attrs(stream_clses)
 
-    # @property
-    # def mobjects(self) -> Sequence[Mobject]:
-    #     if ExcludeDuplicationSubmobjectsMobject() in self._mobjects:
-    #         raise BaseException()
-
-    #     return self._mobjects
-
-    # @mobjects.setter
-    # def mobjects(self, value: Sequence[Mobject]) -> None:
-    #     self._mobjects = value
-
-    # def __instantiate_streams(self, stream_clses: list[type]) -> None:
-    #     attrs_before_scene_init
-
     def _setup_attrs(self, stream_clses: list[type]) -> None:
         attrs_before_attr_setup = set(self.__dict__.keys())
         self.initialize_scene()
         newly_added_attrs = set(self.__dict__.keys()) - attrs_before_attr_setup
-
-        # for stream_inst in self.stream_instances:
-        #     for attr_name in newly_added_attrs:
-        #         setattr(stream_inst, attr_name, getattr(self, attr_name))
 
         dict_to_pass = {attr_name: getattr(self, attr_name) for attr_name in newly_added_attrs}
 
@@ -116,25 +83,24 @@ class BaseScene(Scene):
         return self.mobjects[0].submobjects
 
     def replace(self, old_mobject: Mobject, new_mobject: Mobject) -> None:
-        # There might be a group with submobjects of a SLL that's also in the scene's mobjects. Remove the duplication
-        non_groups = [mob for mob in self.mobjects[0].submobjects if not isinstance(mob, Group)]
-        duplicating_mobs = []
-        for non_group in non_groups:
-            for mob in self.mobjects[0].submobjects:
-                if non_group is mob:
+        self.mobjects[0].submobjects.remove(old_mobject)
+        # TODO: May have to insert new_mobject at the same index old_mobject was at
+        self.mobjects[0].submobjects.append(new_mobject)
+
+        # Keep only the copies of data structures
+        copy_to_original = {}
+        for i, submobject_outer in enumerate(self.mobjects[0].submobjects):
+            for submobject_inner in self.mobjects[0].submobjects[i + 1 :]:
+                try:
+                    if submobject_inner.original_id == str(id(submobject_outer)):
+                        copy_to_original[submobject_inner] = submobject_outer
+                        break
+                except AttributeError:
                     continue
 
-                # FIXME: Only search groups
-                is_duplicating_mob = any(
-                    [sub_mob in mob for sub_mob in non_group],
-                )
-                if is_duplicating_mob:
-                    duplicating_mobs.append(non_group)
-                    break
+        for submobject in copy_to_original:
+            if submobject not in self.mobjects[0].submobjects:
+                self.mobjects[0].submobjects.append(submobject)
 
-        for mob in duplicating_mobs:
-            self.mobjects[0].submobjects.remove(mob)
-
-        insertion_index = self.mobjects[0].submobjects.index(old_mobject)
-        self.mobjects[0].submobjects.insert(insertion_index, new_mobject)
-        self.mobjects[0].submobjects.remove(old_mobject)
+        for submobject in copy_to_original.values():
+            self.mobjects[0].submobjects.remove(submobject)
