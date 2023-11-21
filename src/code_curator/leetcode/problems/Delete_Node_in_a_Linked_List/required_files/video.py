@@ -305,16 +305,26 @@ class PrimaryStream:
     @run_time_can_be_truncated
     def advance_pointer(self):
         # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
+        # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
+        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(1).next_pointer, self.sll_for_normal_removal.get_node(3))
+        # self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         self.sll_for_normal_removal.advance_pointer("p")
-        self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        return animation_two
+        self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
+        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.fade_out_components(
+            self.sll_for_normal_removal.get_node(2),
+            self.sll_for_normal_removal.get_node(2).next_pointer,
+        )
+        return animation
 
     def wave_pointer(self):
         # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
         # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
         #  refer to the same copy!!!
-        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        return animation
+        # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
+        # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
+        # self.sll_for_normal_removal.resume_updating()
+        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
         return Wait()
         self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         return animation
