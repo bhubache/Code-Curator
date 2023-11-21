@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from manim import Animation
@@ -128,16 +129,6 @@ class SinglyLinkedList(CustomVMobject):
     def tail_pointer(self) -> LabeledLine:
         return self.labeled_pointers["tail"]
 
-    def copy(self) -> SinglyLinkedList:
-        copy = super().copy()
-
-        # Update references in updaters
-        copy.clear_updaters()
-        for edge in copy.graph.edges:
-            edge.add_updater(edge.shortest_path_updater)
-
-        return copy
-
     def create_reset_copy(self, remove_indices: Sequence[int] = ()) -> SinglyLinkedList:
         fresh_linked_list = SinglyLinkedList(
             *[value for index, value in enumerate(self.values) if index not in remove_indices],
@@ -211,9 +202,22 @@ class SinglyLinkedList(CustomVMobject):
         else:
             labeled_pointer = copy.get_labeled_pointer(pointer.label)
 
+        # TODO: Clean up
+        # FIXME: Only advances one node regardless of what the num_nodes arg says
+
+        # labeled_pointer_family = labeled_pointer.get_family()
+
         old_labeled_pointer_index: int = copy.nodes.index(labeled_pointer.pointee)
-        copy.remove_labeled_pointer(labeled_pointer.label)
-        copy.add_labeled_pointer(old_labeled_pointer_index + num_nodes, labeled_pointer.label)
+        # copy.get_labeled_pointer(labeled_pointer.label.value).move_to(copy.get_node(1))
+        copy.get_labeled_pointer(labeled_pointer.label.value).shift(
+            labeled_pointer.pointee.next_pointer.vertex_two.get_center() - labeled_pointer.pointee.next_pointer.vertex_one.get_center()
+        )
+        copy.get_labeled_pointer(labeled_pointer.label.value).pointee = copy.get_node(1)
+        # copy.remove_labeled_pointer(labeled_pointer.label)
+        # copy.add_labeled_pointer(old_labeled_pointer_index + num_nodes, labeled_pointer.label)
+
+        # for original_submobject, copied_submobject in zip(labeled_pointer_family, copy.get_labeled_pointer(labeled_pointer.label.value).get_family()):
+        #     copied_submobject.original_id = str(id(original_submobject))
 
         return copy, TransformSinglyLinkedList(
             self,
@@ -266,6 +270,35 @@ class SinglyLinkedList(CustomVMobject):
             self,
             copy,
         )
+
+    def fade_out_components(self, *components: Mobject) -> tuple[SinglyLinkedList, Animation]:
+        copy = self._create_animation_copy()
+        for copied_component in self._get_copy_components(*components, copy=copy):
+            copy.remove(copied_component)
+
+        return copy, TransformSinglyLinkedList(
+            self,
+            copy,
+        )
+
+    def _get_copy_components(self, *original_components: Mobject, copy: SinglyLinkedList) -> Iterable[Mobject]:
+        copied_components = []
+
+        for component in original_components:
+            if isinstance(component, LabeledLine):
+                copied_components.append(copy.labeled_pointers[component.label])
+            elif isinstance(component, Node):
+                copied_components.append(
+                    copy.get_node(self.get_node_index(component)),
+                )
+            elif isinstance(component, Edge):
+                copied_components.append(
+                    copy.get_node(self.get_node_index(component.vertex_one)).next_pointer,
+                )
+            else:
+                raise NotImplementedError(f"Unexpected component type: {type(component)}")
+
+        return copied_components
 
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]

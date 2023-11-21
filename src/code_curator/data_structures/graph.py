@@ -165,6 +165,11 @@ class Edge(CustomVMobject):
 
         self.add(self.line)
 
+    def __deepcopy__(self, memodict):
+        copy = super().__deepcopy__(memodict)
+        copy.add_updater(copy.shortest_path_updater)
+        return copy
+
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
             self.vertex_one.container.get_center(),
@@ -371,19 +376,40 @@ class LabeledLine(CustomVMobject):
             line.shift(new_end - current_end)
 
         if isinstance(end, Mobject):
-            self.line.add_updater(line_updater)
+            self.line.add_updater(self.line_updater)
 
         if isinstance(start, Mobject):
-            self.line.add_updater(line_updater)
+            self.line.add_updater(self.line_updater)
 
         def label_updater(label) -> None:
             label.move_to(self.line.get_start())
             label.shift(-self.line.get_unit_vector() * self.label_dist)
 
-        self.label.add_updater(label_updater, call_updater=True)
+        # self.label.add_updater(label_updater, call_updater=True)
+        self.label.add_updater(self.label_updater, call_updater=True)
 
         self.add(self.line)
         self.add(self.label)
+
+    def line_updater(self, line):
+        current_end = line.get_end()
+        new_end = self.pointee.point_from_proportion(
+            self.line_mob_connecting_proportion,
+        )
+        line.shift(new_end - current_end)
+
+    def label_updater(self, label) -> None:
+        label.move_to(self.line.get_start())
+        label.shift(-self.line.get_unit_vector() * self.label_dist)
+
+    # TODO: Fix updaters when copying
+    # def __deepcopy__(self, memodict):
+    #     copy = super().__deepcopy__(memodict)
+    #     # TODO: Add updater for start if start is tied to a mobject and not just a coordinate
+
+    #     copy.line.add_updater(self.line_updater)
+    #     return copy
+
 
     @property
     def direction(self) -> tuple[float, float, float]:
