@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import difflib
 import os
@@ -11,56 +13,31 @@ class CustomCode(Code):
     def __init__(
         self,
         file_name: str,
-        tab_width=4,
-        font='Monospace',
-        font_size=24,
-        stroke_width=0,
+        tab_width: int = 4,
         margin: float = 0.1,
-        background: str | None = None,
         background_stroke_width: float = 0,
-        background_stroke_color: str = '#FFFFFF',
-        corner_radius=0.0,
-        background_color=None,
+        corner_radius: float = 0.0,
         insert_line_no: bool = False,
+        line_no_buff: float = 0.2,
         style: str = 'nord',
-        language: str = 'java',
-        position_relative_to: Mobject = None,
-        move_up: float = 0.0,
-        move_right: float = 0.0,
+        language: str = 'python',
+        background_color: str | None = None,
         **kwargs,
     ) -> None:
-        self._make_blank_lines_not_empty(file_name)
-
         super().__init__(
             file_name=file_name,
             tab_width=tab_width,
-            font=font,
-            font_size=font_size,
-            stroke_width=stroke_width,
             margin=margin,
-            background=background,
             background_stroke_width=background_stroke_width,
-            background_stroke_color=background_stroke_color,
             corner_radius=corner_radius,
             insert_line_no=insert_line_no,
+            line_no_buff=line_no_buff,
             style=style,
             language=language,
             **kwargs,
         )
-        self._set_background_color(background_color)
+        self.set_background_color(background_color)
         self._highlighter = None
-
-        if position_relative_to is None:
-            position_relative_to = Mobject()
-
-        relatives_x, relatives_y, relatives_z = position_relative_to.get_center()
-        self.move_to(
-            [
-                relatives_x + move_right,
-                relatives_y + move_up,
-                relatives_z,
-            ],
-        )
 
     def get_fade_out_animation(
         self,
@@ -68,7 +45,6 @@ class CustomCode(Code):
         occurrence: int = 1,
     ) -> Animation:
         return FadeOut(self.get_substring_code(string, occurrence))
-
 
     def get_opacity_animation(
         self,
@@ -91,7 +67,6 @@ class CustomCode(Code):
             code_opacity_animation,
             background_opacity_animation,
         )
-        # return FadeIn(self.get_substring_code(string, occurrence))
 
     def get_substring_code(self, substring: str | None, occurrence: int = 1):
         if occurrence < 1:
@@ -134,7 +109,7 @@ class CustomCode(Code):
 
     @property
     def num_lines(self) -> int:
-        return len(self[2])
+        return len(self.line_numbers)
 
     @property
     def highlighter(self) -> CodeHighlighter:
@@ -145,8 +120,8 @@ class CustomCode(Code):
         self._highlighter = highlighter
         self._highlighter.code = self
 
-    def get_line_at(self, line_index: int):
-        return self[2][line_index]
+    def get_line(self, line_number: int):
+        return self.code[line_number - 1]
 
     def get_token_at_line(self, token: str, line_num: int, occurrence: int):
         start_index, end_index = None, None
@@ -181,33 +156,20 @@ class CustomCode(Code):
         token_move_animation = self.highlighter.move_to_token(token, occurrence=occurrence)
         return AnimationGroup(line_move_animation, token_move_animation)
 
-    def _make_blank_lines_not_empty(self, file_path: str) -> None:
-        contents = None
-        with open(file_path, 'r') as read_file:
-            contents = read_file.read()
-
-        content_lines = contents.splitlines()
-        for i, line in enumerate(content_lines):
-            if line.strip() == '':
-                content_lines[i] = ' '
-
-        no_blank_lines_contents = '\n'.join(content_lines)
-
-
-        with open(file_path, 'w') as write_file:
-            write_file.write(no_blank_lines_contents)
-
     @property
     def line_height(self):
-        return CustomCode(file_name=os.path.join(os.getcwd(), 'src/code/helper_files/line_height.java'))[2][0].height
-        # return self.submobjects[2][0].height
+        max_height = 0
+        for line in self.code:
+            max_height = max(max_height, line.height)
+
+        return max_height
 
     @property
     def line_width(self):
         max_width = 0
-        for line in self.submobjects[2]:
-            if line.width > max_width:
-                max_width = line.width
+        for line in self.code:
+            max_width = max(max_width, line.width)
+
         return max_width
 
     def has_more_height(self, other):
@@ -216,5 +178,5 @@ class CustomCode(Code):
     def has_more_width(self, other):
         return self.width >= other.width
 
-    def _set_background_color(self, color: str) -> None:
-        self.submobjects[0].set_color(color)
+    def set_background_color(self, color: str) -> None:
+        self.background_mobject.set(color=color)
