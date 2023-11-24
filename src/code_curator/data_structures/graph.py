@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import collections
 import math
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -17,6 +16,7 @@ from code_curator.custom_vmobject import CustomVMobject
 from code_curator.data_structures.element import Element
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from colour import Color
 
 
@@ -165,11 +165,6 @@ class Edge(CustomVMobject):
 
         self.add(self.line)
 
-    def __deepcopy__(self, memodict):
-        copy = super().__deepcopy__(memodict)
-        copy.add_updater(copy.shortest_path_updater)
-        return copy
-
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
             self.vertex_one.container.get_center(),
@@ -198,7 +193,11 @@ class Edge(CustomVMobject):
     def get_start_and_end(self):  # noqa: FNE007
         return self.line.get_start_and_end()
 
-    def put_start_and_end_on(self, start: Iterable[float] | Mobject, end: Iterable[float] | Mobject) -> None:  # noqa: FNE007
+    def put_start_and_end_on(
+        self,
+        start: Iterable[float] | Mobject,
+        end: Iterable[float] | Mobject,
+    ) -> None:  # noqa: FNE007
         arrow_tip_padding = 0
         if isinstance(start, Mobject) or isinstance(end, Mobject):
             new_line = Line(start, end)
@@ -368,28 +367,20 @@ class LabeledLine(CustomVMobject):
         if directedness.startswith("<"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
 
-        def line_updater(line) -> None:
-            current_end = line.get_end()
-            new_end = target_mobject.point_from_proportion(
-                self.line_mob_connecting_proportion,
-            )
-            line.shift(new_end - current_end)
-
         if isinstance(end, Mobject):
             self.line.add_updater(self.line_updater)
 
         if isinstance(start, Mobject):
             self.line.add_updater(self.line_updater)
 
-        def label_updater(label) -> None:
-            label.move_to(self.line.get_start())
-            label.shift(-self.line.get_unit_vector() * self.label_dist)
-
-        # self.label.add_updater(label_updater, call_updater=True)
         self.label.add_updater(self.label_updater, call_updater=True)
 
         self.add(self.line)
         self.add(self.label)
+
+    @property
+    def direction(self) -> tuple[float, float, float]:
+        return self.line.get_unit_vector()
 
     def line_updater(self, line):
         current_end = line.get_end()
@@ -401,16 +392,3 @@ class LabeledLine(CustomVMobject):
     def label_updater(self, label) -> None:
         label.move_to(self.line.get_start())
         label.shift(-self.line.get_unit_vector() * self.label_dist)
-
-    # TODO: Fix updaters when copying
-    # def __deepcopy__(self, memodict):
-    #     copy = super().__deepcopy__(memodict)
-    #     # TODO: Add updater for start if start is tied to a mobject and not just a coordinate
-
-    #     copy.line.add_updater(self.line_updater)
-    #     return copy
-
-
-    @property
-    def direction(self) -> tuple[float, float, float]:
-        return self.line.get_unit_vector()
