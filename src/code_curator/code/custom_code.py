@@ -1,6 +1,9 @@
-import re
+from __future__ import annotations
+
 import difflib
+import operator
 import os
+import re
 
 from manim import Code, BLACK, RED, YELLOW, BLUE, ORANGE, PURPLE, Rectangle, LEFT, UP, DOWN, RIGHT, AnimationGroup, FadeIn, FadeOut, Mobject
 from manim import Animation
@@ -11,7 +14,7 @@ class CustomCode(Code):
     def __init__(
         self,
         file_name: str,
-        tab_width=4,
+        tab_width: int = 4,
         font='Monospace',
         font_size=24,
         stroke_width=0,
@@ -22,11 +25,10 @@ class CustomCode(Code):
         corner_radius=0.0,
         background_color=None,
         insert_line_no: bool = False,
+        line_no_buff: float = 0.2,
         style: str = 'nord',
-        language: str = 'java',
-        position_relative_to: Mobject = None,
-        move_up: float = 0.0,
-        move_right: float = 0.0,
+        language: str = 'python',
+        background_color: str | None = None,
         **kwargs,
     ) -> None:
         self._make_blank_lines_not_empty(file_name)
@@ -43,24 +45,13 @@ class CustomCode(Code):
             background_stroke_color=background_stroke_color,
             corner_radius=corner_radius,
             insert_line_no=insert_line_no,
+            line_no_buff=line_no_buff,
             style=style,
             language=language,
             **kwargs,
         )
-        self._set_background_color(background_color)
+        self.set_background_color(background_color)
         self._highlighter = None
-
-        if position_relative_to is None:
-            position_relative_to = Mobject()
-
-        relatives_x, relatives_y, relatives_z = position_relative_to.get_center()
-        self.move_to(
-            [
-                relatives_x + move_right,
-                relatives_y + move_up,
-                relatives_z,
-            ],
-        )
 
     def get_fade_out_animation(
         self,
@@ -91,7 +82,6 @@ class CustomCode(Code):
             code_opacity_animation,
             background_opacity_animation,
         )
-        # return FadeIn(self.get_substring_code(string, occurrence))
 
     def get_substring_code(self, substring: str | None, occurrence: int = 1):
         if occurrence < 1:
@@ -120,6 +110,9 @@ class CustomCode(Code):
 
         return self._get_substring_code(num_chars_seen + match.start(), num_chars_seen + match.end())
 
+    def get_line(self, line_number: int):
+        return self.code[line_number - 1]
+
     def _get_substring_code(self, start: int, stop: int):
         """Return substring code.
 
@@ -134,7 +127,7 @@ class CustomCode(Code):
 
     @property
     def num_lines(self) -> int:
-        return len(self[2])
+        return len(self.line_numbers)
 
     @property
     def highlighter(self) -> CodeHighlighter:
@@ -181,34 +174,13 @@ class CustomCode(Code):
         token_move_animation = self.highlighter.move_to_token(token, occurrence=occurrence)
         return AnimationGroup(line_move_animation, token_move_animation)
 
-    def _make_blank_lines_not_empty(self, file_path: str) -> None:
-        contents = None
-        with open(file_path, 'r') as read_file:
-            contents = read_file.read()
-
-        content_lines = contents.splitlines()
-        for i, line in enumerate(content_lines):
-            if line.strip() == '':
-                content_lines[i] = ' '
-
-        no_blank_lines_contents = '\n'.join(content_lines)
-
-
-        with open(file_path, 'w') as write_file:
-            write_file.write(no_blank_lines_contents)
-
     @property
     def line_height(self):
-        return CustomCode(file_name=os.path.join(os.getcwd(), 'src/code/helper_files/line_height.java'))[2][0].height
-        # return self.submobjects[2][0].height
+        return max(self.code, key=operator.attrgetter("height"))
 
     @property
     def line_width(self):
-        max_width = 0
-        for line in self.submobjects[2]:
-            if line.width > max_width:
-                max_width = line.width
-        return max_width
+        return max(self.code, key=operator.attrgetter("width"))
 
     def has_more_height(self, other):
         return self.height >= other.height
@@ -216,5 +188,5 @@ class CustomCode(Code):
     def has_more_width(self, other):
         return self.width >= other.width
 
-    def _set_background_color(self, color: str) -> None:
-        self.submobjects[0].set_color(color)
+    def set_background_color(self, color: str) -> None:
+        self.background_mobject.set(color=color)
