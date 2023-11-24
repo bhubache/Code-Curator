@@ -13,8 +13,9 @@ from .code_highlighter import CodeHighlighter
 class CustomCode(Code):
     def __init__(
         self,
-        file_name: str,
-        tab_width: int = 4,
+        file_name: str | None = None,
+        tab_width: int = 1,
+        indentation_chars: str = " ",
         font='Monospace',
         font_size=24,
         stroke_width=0,
@@ -36,6 +37,7 @@ class CustomCode(Code):
         super().__init__(
             file_name=file_name,
             tab_width=tab_width,
+            indentation_chars=indentation_chars,
             font=font,
             font_size=font_size,
             stroke_width=stroke_width,
