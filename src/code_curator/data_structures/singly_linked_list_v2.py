@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools as it
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -20,7 +21,6 @@ from code_curator.data_structures.graph import Vertex
 
 if TYPE_CHECKING:
     from collections.abc import Hashable
-    from collections.abc import Sequence
     from colour import Color
 
 DEFAULT_NODE_RADIUS = 0.5
@@ -28,6 +28,9 @@ DEFAULT_FONT_SIZE = 17
 DEFAULT_STROKE_WIDTH = 2
 DEFAULT_TIP_WIDTH = 0.2
 DEFAULT_TIP_LENGTH = 0.2
+
+# TODO: Add more flexible positioning options
+RELATIVE_POSITION = (2.0, 0.0, 0.0)
 
 
 class SinglyLinkedList(CustomVMobject):
@@ -48,7 +51,7 @@ class SinglyLinkedList(CustomVMobject):
                 label=index,
                 contents=value,
                 show_label=False,
-                position=(2.0, 0.0, 0.0),
+                position=RELATIVE_POSITION,
                 position_relative_to=position_relative_to,
                 show_container=value != "null",
                 container_stroke_width=DEFAULT_STROKE_WIDTH,
@@ -129,32 +132,14 @@ class SinglyLinkedList(CustomVMobject):
     def tail_pointer(self) -> LabeledLine:
         return self.labeled_pointers["tail"]
 
-    def create_reset_copy(self, remove_indices: Sequence[int] = ()) -> SinglyLinkedList:
-        fresh_linked_list = SinglyLinkedList(
-            *[value for index, value in enumerate(self.values) if index not in remove_indices],
-            show_null=self.show_null,
-            color=self.color,
-        )
+    def reset_positioning(self) -> None:
+        for prev_node, next_node in it.pairwise(self.nodes):
+            relative_center = prev_node.get_center()
+            next_node.move_to(relative_center + RELATIVE_POSITION)
 
-        copy = self.copy()
-        for index in remove_indices:
-            node_to_remove = copy.get_node(index)
-            if node_to_remove is not None and node_to_remove.next_pointer is not None:
-                copy.remove(node_to_remove.next_pointer)
-            elif node_to_remove is not None:
-                copy.remove(node_to_remove)
-
-        for old_pointer, new_pointer in zip(copy.pointers, fresh_linked_list.pointers):
-            old_pointer.become(new_pointer)
-
-        copy.become(fresh_linked_list)
-        for label in fresh_linked_list.labeled_pointers:
-            copy.labeled_pointers[label].become(fresh_linked_list.labeled_pointers[label])
-
-        for label in set(copy.labeled_pointers.keys()) - set(fresh_linked_list.labeled_pointers.keys()):
-            copy.remove_labeled_pointer(label)
-
-        return copy
+        self.move_to(ORIGIN)
+        self.resume_updating()
+        self.update()
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
@@ -173,7 +158,10 @@ class SinglyLinkedList(CustomVMobject):
         return self.nodes.index(node)
 
     def add_labeled_pointer(
-        self, index: int, label: str | Element, direction: tuple[float, float, float] | None = None
+        self,
+        index: int,
+        label: str | Element,
+        direction: tuple[float, float, float] | None = None,
     ) -> None:
         if isinstance(label, Element):
             label = label.value
@@ -182,7 +170,10 @@ class SinglyLinkedList(CustomVMobject):
             direction = -self.head_pointer.direction
 
         self.labeled_pointers[label] = LabeledLine(
-            self.get_node(index), label=label, direction=direction, color=self.color
+            self.get_node(index),
+            label=label,
+            direction=direction,
+            color=self.color,
         )
         self.add(self.labeled_pointers[label])
 
@@ -210,7 +201,8 @@ class SinglyLinkedList(CustomVMobject):
         old_labeled_pointer_index: int = copy.nodes.index(labeled_pointer.pointee)
         # copy.get_labeled_pointer(labeled_pointer.label.value).move_to(copy.get_node(1))
         copy.get_labeled_pointer(labeled_pointer.label.value).shift(
-            labeled_pointer.pointee.next_pointer.vertex_two.get_center() - labeled_pointer.pointee.next_pointer.vertex_one.get_center()
+            labeled_pointer.pointee.next_pointer.vertex_two.get_center()
+            - labeled_pointer.pointee.next_pointer.vertex_one.get_center(),
         )
         copy.get_labeled_pointer(labeled_pointer.label.value).pointee = copy.get_node(1)
         # copy.remove_labeled_pointer(labeled_pointer.label)
@@ -262,10 +254,10 @@ class SinglyLinkedList(CustomVMobject):
                 pointer.get_start(),
                 prev_node_to_copy.next_pointer.get_end(),
                 tip_length=prev_node_to_copy.next_pointer.get_tip().length,
-            )
+            ),
         )
 
-        node_from_copy.next_pointer.vertex_two = node
+        node_from_copy.next_pointer.vertex_two = copy.get_node(node_index_to)
         return copy, TransformSinglyLinkedList(
             self,
             copy,
@@ -275,6 +267,15 @@ class SinglyLinkedList(CustomVMobject):
         copy = self._create_animation_copy()
         for copied_component in self._get_copy_components(*components, copy=copy):
             copy.remove(copied_component)
+
+        return copy, TransformSinglyLinkedList(
+            self,
+            copy,
+        )
+
+    def flatten(self) -> tuple[SinglyLinkedList, Animation]:
+        copy = self._create_animation_copy()
+        copy.reset_positioning()
 
         return copy, TransformSinglyLinkedList(
             self,
