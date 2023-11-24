@@ -8,12 +8,14 @@ from manim import Code, BLACK, RED, YELLOW, BLUE, ORANGE, PURPLE, Rectangle, LEF
 from manim import Animation
 
 from .code_highlighter import CodeHighlighter
+from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 
 class CustomCode(Code):
     def __init__(
         self,
-        file_name: str,
-        tab_width: int = 4,
+        file_name: str | None = None,
+        tab_width: int = 1,
+        indentation_chars: str = " ",
         margin: float = 0.1,
         background_stroke_width: float = 0,
         corner_radius: float = 0.0,
@@ -34,10 +36,69 @@ class CustomCode(Code):
             line_no_buff=line_no_buff,
             style=style,
             language=language,
+            indentation_chars=indentation_chars,
             **kwargs,
         )
-        self.set_background_color(background_color)
+        self.background_mobject.set_opacity(0)
+        # self.set_background_color(background_color)
         self._highlighter = None
+
+    # TOOD: Give better name than fade in. I'd like to have the entire mobject be on the screen just with 0 opacity
+    # So, fading in is misleading because it implies that it's not yet present on the screen.
+    def fade_in_lines(self, *line_numbers: int) -> tuple[CustomCode, Animation]:
+        copy = self._create_animation_copy()
+        for line_no in line_numbers:
+            copy.code[line_no].set_opacity(1)
+
+        return copy, TransformSinglyLinkedList(self, copy)
+    
+    def fade_in_substring(self, substring: str, occurrence: int = 1) -> tuple[CustomCode, Animation]:
+        copy = self._create_animation_copy()
+        copy.get_code_substring(substring, occurrence=occurrence).set_opacity(1)
+        return copy, TransformSinglyLinkedList(self, copy)
+    
+    def saturation_highlight_substring(self, substring: str, occurrence: int = 1) -> tuple[CustomCode, Animation]:
+        copy = self._create_animation_copy()
+        substring_start_index = self.get_substring_starting_index(substring, occurrence=occurrence)
+
+        desaturate_opacity = 0.25
+        copy.code.lines_text[:substring_start_index].set_opacity(desaturate_opacity)
+        copy.code.lines_text[substring_start_index + len(substring):].set_opacity(desaturate_opacity)
+
+        return copy, TransformSinglyLinkedList(self, copy)
+    
+    def change_code_text(self, new_code_string: str) -> tuple[CustomCode, Animation]:
+        copy = self._create_animation_copy()
+        copy._original__init__(code=new_code_string)
+        # copy = CustomCode(code=new_code_string, language="java")
+        # return copy, TransformSinglyLinkedList(self, copy)
+        # code_with_new_text = self._original__init__(code=new_code_string)
+        from code_curator.animations.code_transform import CodeTransform
+
+        return CodeTransform(self, copy).get_animation()
+
+    def get_substring_starting_index(self, substring: str, occurrence: int = 1) -> int:
+        num_found: int = 0
+        start_index: int = 0
+        while True:
+            start_index: int = self.code_string.find(substring, start_index)
+
+            num_found += 1
+            if num_found == occurrence:
+                return start_index
+            
+            start_index += 1
+
+    def get_code_substring(self, substring: str, occurrence: int = 1):
+        start_index: int = self.get_substring_starting_index(substring, occurrence=occurrence)
+        return self.code.lines_text[start_index: start_index + len(substring)]
+    
+    def _create_animation_copy(self) -> CustomCode:
+        attr_name = "_copy_for_animation"
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, self.copy())
+
+        return getattr(self, attr_name)
 
     def get_fade_out_animation(
         self,
@@ -67,45 +128,6 @@ class CustomCode(Code):
             code_opacity_animation,
             background_opacity_animation,
         )
-
-    def get_substring_code(self, substring: str | None, occurrence: int = 1):
-        if occurrence < 1:
-            raise ValueError(f'``occurrence`` must be positive and non-zero. Given: {occurrence}')
-
-        if substring is None:
-            # Return everything including the background
-            return self
-            # substring = self.code_string
-
-        code_string: str = self.code_string
-        occurrences_seen: int = 0
-        num_chars_seen: int = 0
-        while occurrences_seen < occurrence:
-            match = re.search(substring, code_string)
-            try:
-                new_code_string = code_string[match.end():]
-            except (TypeError, AttributeError):
-                raise RuntimeError(f'Unable to find occurrence ``{occurrence}`` for substring ``{substring}`` in code.') from None
-            else:
-                occurrences_seen += 1
-                # TODO: Remove duplicate code check that also occurs in while loop
-                if occurrences_seen < occurrence:
-                    num_chars_seen += len(code_string) - len(new_code_string)
-                    code_string = new_code_string
-
-        return self._get_substring_code(num_chars_seen + match.start(), num_chars_seen + match.end())
-
-    def _get_substring_code(self, start: int, stop: int):
-        """Return substring code.
-
-        Args:
-            start: Starting index of substring.
-            stop: Ending index of substring, exclusive.
-
-        Returns:
-
-        """
-        return self.code.lines_text[start : stop]
 
     @property
     def num_lines(self) -> int:

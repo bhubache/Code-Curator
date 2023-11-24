@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from manim import AnimationGroup
 from manim import config
 from manim import FadeIn
 from manim import FadeOut
 from manim import LEFT
 from manim import Line
+from manim import ORIGIN
 from manim import UP
 from manim import VGroup
 from manim import Wait
@@ -13,6 +16,7 @@ from manim import Write
 
 from code_curator.animations.arrow_transport_transformation import ArrowTransportTransformation
 from code_curator.animations.change_color import ChangeColor
+from code_curator.code.custom_code import CustomCode
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
 from code_curator.data_structures.pointers.simple_pointer import SimplePointer
@@ -292,30 +296,43 @@ class PrimaryStream:
         return FadeOut(*self.scene.scene_mobjects)
 
     def fade_in_linked_list(self):
-        self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
-        self.sll_for_normal_removal.add_labeled_pointer(0, "p")
-        # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
-        # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
-        #     0,
-        #     direction=UP,
-        #     name="p",
-        # )
-        return FadeIn(self.sll_for_normal_removal)
+        # self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
+        # self.sll_for_normal_removal.add_labeled_pointer(2, "p")
+        # self.sll_for_normal_removal.move_to(ORIGIN)
+        self.code = CustomCode(file_name=Path(__file__).parent / "solution.py")
+        self.code = CustomCode(code="class Solution")
+        self.code = CustomCode(file_name=Path(__file__).parent / "src.java", language="java")
+        # self.scene.add(self.code)
+        # self.code.set_opacity(0)
+        # self.code, animation = self.code.fade_in_lines(1, 2)
+        # self.code.fade_in_substring("node.next", occurrence=1)
+        # return animation
+        return FadeIn(self.code)
+        # return FadeIn(self.sll_for_normal_removal)
 
     @run_time_can_be_truncated
     def advance_pointer(self):
-        # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(1).next_pointer, self.sll_for_normal_removal.get_node(3))
-        # self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        self.sll_for_normal_removal.advance_pointer("p")
-        self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
-        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.fade_out_components(
-            self.sll_for_normal_removal.get_node(2),
-            self.sll_for_normal_removal.get_node(2).next_pointer,
-        )
-        return animation
+        # new_code_text = "class Hello:"
+        # self.code, animation = self.code.saturation_highlight_substring("node.next", occurrence=3)
+        # self.code, animation = self.code.change_code_text(new_code_text)
+        # return animation
+        # self.code, animation = self.code.saturation_highlight_substring("node.next", occurrence=2)
+        # return animation
+        # self.code, animation = self.code.change_code_text("class Hello:")
+        # return animation
+        # return self.code.change_code_text("class NewClassName")
+        return self.code.change_code_text((Path(__file__).parent / "dst.java").read_text())
+        return Wait()
+        # self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(3).next_pointer, self.sll_for_normal_removal.get_node(5))
+        # self.sll_for_normal_removal.move_labeled_pointer("p")
+        # self.sll_for_normal_removal.move_labeled_pointer("tail", num_nodes=-1)
+        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
+        # self.sll_for_normal_removal.fade_out_components(
+            # self.sll_for_normal_removal.get_node(4),
+            # self.sll_for_normal_removal.get_node(4).next_pointer,
+        # )
+        # self.sll_for_normal_removal, animation = self.sll_for_normal_removal.flatten()
+        # return animation
 
     def wave_pointer(self):
         # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
@@ -323,8 +340,14 @@ class PrimaryStream:
         #  refer to the same copy!!!
         # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
         # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
-        self.sll_for_normal_removal.resume_updating()
-        return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
+        # self.sll_for_normal_removal.resume_updating()
+        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
+        # self.sll_for_normal_removal, animation = self.sll_for_normal_removal.flatten()
+        # return animation
+        # copy = self.sll_for_normal_removal._create_animation_copy()
+        # copy.reset_positioning()
+        # self.sll_for_normal_removal.resume_updating()
+        # return self.sll_for_normal_removal.get_node(0).animate.move_to([0, 2, 0])
         return Wait()
         self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         return animation

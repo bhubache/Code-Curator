@@ -86,6 +86,7 @@ class CodeTransform:
         return self._src_to_dst_map
 
     def get_animation(self) -> AnimationGroup:
+        breakpoint()
         matching_line_animations = self._get_matching_line_animations()
         added_line_animations = self._get_added_line_animations()
         removed_line_animations = self._get_removed_line_animations()
@@ -139,6 +140,7 @@ class CodeTransform:
                     )
                 ] = self.diff.get_destination_line_index(i)
                 animations.append(src_line.animate.align_to(dst_line, DOWN))
+                # animations.append(src_line.animate.move_to(dst_line))
         return animations
 
     def _get_added_line_animations(self) -> list[Animation]:
@@ -300,7 +302,7 @@ class CodeTransform:
                     )
 
                     animations.append(
-                        self.src_code_obj[2][src_line_index][src_end_index:].animate.align_to(
+                        self.src_code_obj.code[src_line_index][src_end_index:].animate.align_to(
                             self.dst_code_obj[2][dst_line_index][dst_end_index:], LEFT+DOWN,
                         ),
                     )
