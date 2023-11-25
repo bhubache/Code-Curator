@@ -29,14 +29,13 @@ class CustomCode(Code):
         background_stroke_color: str = "#FFFFFF",
         corner_radius=0.0,
         insert_line_no: bool = False,
+        line_spacing: float = 0.5,
         line_no_buff: float = 0.2,
         style: str = "nord",
         language: str = "python",
         background_color: str | None = None,
         **kwargs,
     ) -> None:
-        self._make_blank_lines_not_empty(file_name)
-
         super().__init__(
             file_name=file_name,
             tab_width=tab_width,
@@ -50,14 +49,16 @@ class CustomCode(Code):
             background_stroke_color=background_stroke_color,
             corner_radius=corner_radius,
             insert_line_no=insert_line_no,
+            line_spacing=line_spacing,
             line_no_buff=line_no_buff,
             style=style,
             language=language,
-            background_color=background_color,
             **kwargs,
         )
         self.background_mobject.set_opacity(0)
         self._highlighter = None
+
+        self.scale(0.5)
 
     # TODO: Give better name than fade in. I'd like to have the entire mobject be on the screen just with 0 opacity
     #  So, fading in is misleading because it implies that it's not yet present on the screen.
@@ -90,8 +91,9 @@ class CustomCode(Code):
         # return copy, TransformSinglyLinkedList(self, copy)
         # code_with_new_text = self._original__init__(code=new_code_string)
         from code_curator.animations.code_transform import CodeTransform
+        # return CodeTransform(self, copy).get_animation()
+        return CodeTransform(self, CustomCode(code=new_code_string))
 
-        return CodeTransform(self, copy).get_animation()
 
     def get_substring_starting_index(self, substring: str, occurrence: int = 1) -> int:
         num_found: int = 0
@@ -160,7 +162,7 @@ class CustomCode(Code):
         while occurrences_seen < occurrence:
             match = re.search(substring, code_string)
             try:
-                new_code_string = code_string[match.end() :]
+                new_code_string = code_string[match.end():]
             except (TypeError, AttributeError):
                 raise RuntimeError(
                     f"Unable to find occurrence ``{occurrence}`` for substring ``{substring}`` in code.",
