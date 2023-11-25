@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import operator
+import itertools as it
+import math
 
 from manim import Animation
-from manim import AnimationGroup
 from manim import Code
-from manim import YELLOW
 
-from .code_highlighter import CodeHighlighter
+from code_curator.animations.code_transform import CodeTransform
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
+from code_curator.code.code_highlighter import CodeHighlighter
 
 
 class CustomCode(Code):
@@ -57,6 +57,39 @@ class CustomCode(Code):
 
         self.scale(0.5)
 
+    @property
+    def num_lines(self) -> int:
+        return len(self.code)
+
+    @property
+    def max_line_height(self):
+        # It looks like lines that immediately following an empty line have the height for both of them.
+        #  So, exclude those lines.
+        lines_to_consider = [self.code[0].height]
+        for prev_line, curr_line in it.pairwise(self.code):
+            if math.isclose(prev_line.height, 0):
+                continue
+
+            lines_to_consider.append(curr_line.height)
+
+        return max(lines_to_consider)
+
+    @property
+    def max_line_width(self):
+        # I want the max line width including the indentation chars at the beginning of a line
+        min_starting_x = min(line.get_left()[0] for line in self.code)
+        max_ending_x = max(line.get_right()[0] for line in self.code)
+        return max_ending_x - min_starting_x
+
+    @property
+    def highlighter(self) -> CodeHighlighter:
+        return self._highlighter
+
+    @highlighter.setter
+    def highlighter(self, highlighter: CodeHighlighter) -> None:
+        self._highlighter = highlighter
+        self._highlighter.code = self
+
     # TODO: Give better name than fade in. I'd like to have the entire mobject be on the screen just with 0 opacity
     #  So, fading in is misleading because it implies that it's not yet present on the screen.
     def fade_in_lines(self, *line_numbers: int) -> tuple[CustomCode, Animation]:
@@ -84,15 +117,10 @@ class CustomCode(Code):
     def change_code_text(self, new_code_string: str) -> tuple[CustomCode, Animation]:
         copy = self._create_animation_copy()
         copy._original__init__(code=new_code_string)
-        # copy = CustomCode(code=new_code_string, language="java")
-        # return copy, TransformSinglyLinkedList(self, copy)
-        # code_with_new_text = self._original__init__(code=new_code_string)
-        from code_curator.animations.code_transform import CodeTransform
 
-        # return CodeTransform(self, copy).get_animation()
         return CodeTransform(self, CustomCode(code=new_code_string))
 
-    def get_substring_starting_index(self, substring: str, occurrence: int = 1) -> int:
+    def get_substring_starting_index(self, substring: str, occurrence: int = 1, line_index: int | None = None) -> int:
         num_found: int = 0
         start_index: int = 0
         while True:
@@ -108,28 +136,8 @@ class CustomCode(Code):
         start_index: int = self.get_substring_starting_index(substring, occurrence=occurrence)
         return self.code.lines_text[start_index : start_index + len(substring)]
 
-    def _create_animation_copy(self) -> CustomCode:
-        attr_name = "_copy_for_animation"
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, self.copy())
-
-        return getattr(self, attr_name)
-
     def get_line(self, line_number: int):
         return self.code[line_number - 1]
-
-    @property
-    def num_lines(self) -> int:
-        return len(self.line_numbers)
-
-    @property
-    def highlighter(self) -> CodeHighlighter:
-        return self._highlighter
-
-    @highlighter.setter
-    def highlighter(self, highlighter: CodeHighlighter) -> None:
-        self._highlighter = highlighter
-        self._highlighter.code = self
 
     def get_line_at(self, line_index: int):
         return self[2][line_index]
@@ -137,31 +145,27 @@ class CustomCode(Code):
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
 
-    def create_highlighter(self, color=YELLOW):
+    def create_highlighter(self):
         self.highlighter = CodeHighlighter(self)
+        self.add(self.highlighter)
         return self.highlighter
 
     def move_highlighter(self, num_lines: int) -> None:
         return self.highlighter.move(num_lines)
 
-    def move_highlighter_to_token(self, token: str, occurrence: int, num_lines: int = 0):
-        line_move_animation = self.move_highlighter(num_lines=num_lines)
-        token_move_animation = self.highlighter.move_to_token(token, occurrence=occurrence)
-        return AnimationGroup(line_move_animation, token_move_animation)
-
-    @property
-    def line_height(self):
-        return max(self.code, key=operator.attrgetter("height"))
-
-    @property
-    def line_width(self):
-        return max(self.code, key=operator.attrgetter("width"))
-
-    def has_more_height(self, other):
-        return self.height >= other.height
-
-    def has_more_width(self, other):
-        return self.width >= other.width
+    def move_highlighter_to_substring(self, substring: str, occurrence: int = 1, num_lines: int | None = None):
+        return self.highlighter.move_to_substring(
+            substring,
+            occurrence=occurrence,
+            num_lines=num_lines,
+        )
 
     def set_background_color(self, color: str) -> None:
         self.background_mobject.set(color=color)
+
+    def _create_animation_copy(self) -> CustomCode:
+        attr_name = "_copy_for_animation"
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, self.copy())
+
+        return getattr(self, attr_name)
