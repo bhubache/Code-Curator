@@ -300,6 +300,7 @@ class PrimaryStream:
         # self.sll_for_normal_removal.add_labeled_pointer(0, "p")
 
         self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
+        # self.code.create_highlighter()
         # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
         # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
         #     0,
@@ -311,6 +312,7 @@ class PrimaryStream:
 
     @run_time_can_be_truncated
     def advance_pointer(self):
+        # return self.code.move_highlighter_to_substring("MyFirstClass")
         # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
         # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
         # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
@@ -333,6 +335,9 @@ class PrimaryStream:
         # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
         # self.sll_for_normal_removal.resume_updating()
         # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
+        # return self.code.move_highlighter_to_token("param_one")
+        # return self.code.animate.move_to([-1, 1, 0])
+        # return self.code.move_highlighter_to_substring("my_method")
         return Wait()
         self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
         return animation
