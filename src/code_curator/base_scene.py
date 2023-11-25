@@ -42,7 +42,12 @@ class _AllowOneMobjectDescriptor:
 
 
 class BaseScene(Scene):
-    config["background_color"] = constants.DEFAULT_BACKGROUND_COLOR
+    # config["background_color"] = constants.DEFAULT_BACKGROUND_COLOR
+    # config["background_color"] = "#282C34"
+    # config["background_color"] = "#2D3139"
+    # config["background_color"] = "#414855"
+    # config["background_color"] = "#3D424B"
+    config["background_color"] = "#33373D"
     config["disable_caching"] = True
 
     mobjects = _AllowOneMobjectDescriptor()
