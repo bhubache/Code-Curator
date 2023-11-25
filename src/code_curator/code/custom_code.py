@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import operator
-import re
 
 from manim import Animation
 from manim import AnimationGroup
 from manim import Code
-from manim import FadeOut
-from manim import Mobject
 from manim import YELLOW
 
 from .code_highlighter import CodeHighlighter
@@ -80,7 +77,7 @@ class CustomCode(Code):
 
         desaturate_opacity = 0.25
         copy.code.lines_text[:substring_start_index].set_opacity(desaturate_opacity)
-        copy.code.lines_text[substring_start_index + len(substring):].set_opacity(desaturate_opacity)
+        copy.code.lines_text[substring_start_index + len(substring) :].set_opacity(desaturate_opacity)
 
         return copy, TransformSinglyLinkedList(self, copy)
 
@@ -91,9 +88,9 @@ class CustomCode(Code):
         # return copy, TransformSinglyLinkedList(self, copy)
         # code_with_new_text = self._original__init__(code=new_code_string)
         from code_curator.animations.code_transform import CodeTransform
+
         # return CodeTransform(self, copy).get_animation()
         return CodeTransform(self, CustomCode(code=new_code_string))
-
 
     def get_substring_starting_index(self, substring: str, occurrence: int = 1) -> int:
         num_found: int = 0
@@ -118,78 +115,8 @@ class CustomCode(Code):
 
         return getattr(self, attr_name)
 
-    def get_fade_out_animation(
-        self,
-        string: str | None = None,
-        occurrence: int = 1,
-    ) -> Animation:
-        return FadeOut(self.get_substring_code(string, occurrence))
-
-    def get_opacity_animation(
-        self,
-        string: str | None = None,
-        occurrence: int = 1,
-        opacity: float = 1.0,
-    ) -> Animation:
-        code_opacity_animation = self.get_substring_code(string, occurrence).animate.set_opacity(opacity)
-        no_op_animation = Animation(Mobject())
-        try:
-            if self[0].fill_opacity == 1:
-                background_opacity_animation = no_op_animation
-            else:
-                self[0].fill_opacity = 1
-                background_opacity_animation = self[0].animate.set_opacity(1)
-        except AttributeError:
-            background_opacity_animation = no_op_animation
-
-        return AnimationGroup(
-            code_opacity_animation,
-            background_opacity_animation,
-        )
-
-    def get_substring_code(self, substring: str | None, occurrence: int = 1):
-        if occurrence < 1:
-            raise ValueError(f"``occurrence`` must be positive and non-zero. Given: {occurrence}")
-
-        if substring is None:
-            # Return everything including the background
-            return self
-            # substring = self.code_string
-
-        code_string: str = self.code_string
-        occurrences_seen: int = 0
-        num_chars_seen: int = 0
-        while occurrences_seen < occurrence:
-            match = re.search(substring, code_string)
-            try:
-                new_code_string = code_string[match.end():]
-            except (TypeError, AttributeError):
-                raise RuntimeError(
-                    f"Unable to find occurrence ``{occurrence}`` for substring ``{substring}`` in code.",
-                ) from None
-            else:
-                occurrences_seen += 1
-                # TODO: Remove duplicate code check that also occurs in while loop
-                if occurrences_seen < occurrence:
-                    num_chars_seen += len(code_string) - len(new_code_string)
-                    code_string = new_code_string
-
-        return self._get_substring_code(num_chars_seen + match.start(), num_chars_seen + match.end())
-
     def get_line(self, line_number: int):
         return self.code[line_number - 1]
-
-    def _get_substring_code(self, start: int, stop: int):
-        """Return substring code.
-
-        Args:
-            start: Starting index of substring.
-            stop: Ending index of substring, exclusive.
-
-        Returns:
-
-        """
-        return self.code.lines_text[start:stop]
 
     @property
     def num_lines(self) -> int:
@@ -206,24 +133,6 @@ class CustomCode(Code):
 
     def get_line_at(self, line_index: int):
         return self[2][line_index]
-
-    def get_token_at_line(self, token: str, line_num: int, occurrence: int):
-        start_index, end_index = None, None
-        for i, line in enumerate(self.code_string.splitlines()):
-            if i == line_num:
-                token_start_index = line.find(token)
-                for i in range(occurrence - 1):
-                    token_start_index = line.find(token, token_start_index + 1)
-
-                match = re.search(pattern=token, string=line[token_start_index:])
-
-                if match is None:
-                    raise RuntimeError(f"Unable to find occurrence {occurrence} of token {token} in line {line}")
-
-                start_index = token_start_index
-                end_index = match.end() + token_start_index
-                break
-        return self.get_line_at(line_num)[start_index:end_index]
 
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
