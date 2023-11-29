@@ -3,15 +3,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from manim import BulletedList
+from manim import config
 from manim import Group
 from manim import LEFT
 from manim import MobjectTable
 from manim import RIGHT
 from manim import Tex
+from manim import TexTemplate
 from manim import UP
 
-from code_curator.constants import DEFAULT_MOBJECT_COLOR
 from code_curator._utils.string import partition
+from code_curator.constants import DEFAULT_MOBJECT_COLOR
 
 
 if TYPE_CHECKING:
@@ -25,20 +27,36 @@ class ProblemText(Tex):
     def __init__(
         self,
         text,
-        color: str = '#DBC9B8',
+        color: str = "#DBC9B8",
         **kwargs,
     ) -> None:
-        # self.text_strings = text.split()
-        # self.tex_pieces: list[Tex] = [Tex(word, color=color, **kwargs) for word in text.split()]
-        super().__init__(*text.split(), arg_separator=' ', color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
-        # super().__init__(text, color=color, tex_environment=r'\begin{tabular}{p{15 cm}}', **kwargs)
+        my_template = TexTemplate()
+        my_template.add_to_preamble(r"\usepackage[most]{tcolorbox}")
+        my_template.add_to_preamble(
+            r"\tcbset{on line, boxsep=2pt, left=0pt,right=0pt,top=0pt,bottom=0pt, frame hidden,"
+            r" colframe=white,colback=white, highlight math style={enhanced}}",
+        )
+        super().__init__(
+            *text.split(),
+            arg_separator=" ",
+            color=color,
+            tex_environment=r"\begin{tabular}{p{17.5 cm}}",
+            tex_template=my_template,
+            **kwargs,
+        )
+
+        for word_tex in self:
+            if word_tex.tex_string.startswith("\\tcbox"):
+                # NOTE: Assuming that the background mobject is the second submobject
+                word_tex.submobjects[0].set(color=config["background_color"])
+                word_tex.submobjects[1].set(color="#808080")
 
     @staticmethod
     def create_title(text: str, **kwargs) -> ProblemText:
         return ProblemText(text, **kwargs)
 
     @staticmethod
-    def create_header(text: str, font_size: int = 40, color: str = '#337357', **kwargs) -> ProblemText:
+    def create_header(text: str, font_size: int = 40, color: str = "#337357", **kwargs) -> ProblemText:
         return ProblemText(text, font_size=font_size, color=color, **kwargs)
 
     @staticmethod
@@ -80,7 +98,7 @@ class ProblemText(Tex):
     @staticmethod
     def create_list(
         *list_items,
-        preamble: str = '',
+        preamble: str = "",
         color: str = DEFAULT_MOBJECT_COLOR,
         font_size: int = 20,
         dot_scale_factor: int = 1,
@@ -101,10 +119,6 @@ class ProblemText(Tex):
             bullet.set_color(color)
 
         if preamble:
-            # preamble_tex = ProblemText.create_statement(
-            #     preamble,
-            #     font_size=font_size,
-            # )
             preamble_tex = ProblemText.create_tex(
                 preamble,
                 font_size=font_size,
@@ -123,7 +137,7 @@ class ProblemText(Tex):
     @staticmethod
     def create_constraints_list(
         constraints: Sequence[str],
-        color: str = '#DBC9B8',
+        color: str = "#DBC9B8",
         font_size: int = 25,
         dot_scale_factor: int = 1,
         buff: float = 0.25,
@@ -165,19 +179,16 @@ class ProblemText(Tex):
 
         return MobjectTable(
             rows,
-            col_labels=[
-                ProblemText.create_header(header)
-                for header in row_headers
-            ],
+            col_labels=[ProblemText.create_header(header) for header in row_headers],
             include_outer_lines=True,
-            line_config={'color': color, 'stroke_width': 1.5},
+            line_config={"color": color, "stroke_width": 1.5},
         )
 
     @staticmethod
     def create_constraints_table(
         constraints: Sequence[str],
         explanations: Sequence[str],
-        color: str = '#DBC9B8',
+        color: str = "#DBC9B8",
     ) -> MobjectTable:
         row_list = []
         for constraint, explanation in zip(constraints, explanations):
@@ -185,26 +196,24 @@ class ProblemText(Tex):
                 [
                     ProblemText.create_tex(constraint),
                     ProblemText.create_tex(explanation, fill_opacity=0),
-                    # ProblemText.create_statement(constraint),
-                    # ProblemText.create_statement(explanation, fill_opacity=0),
                 ],
             )
 
         return MobjectTable(
             row_list,
             col_labels=[
-                ProblemText.create_header('Constraint'),
-                ProblemText.create_header('Explanation/Conclusion'),
+                ProblemText.create_header("Constraint"),
+                ProblemText.create_header("Explanation/Conclusion"),
             ],
             include_outer_lines=True,
-            line_config={'color': color, 'stroke_width': 1.5},
+            line_config={"color": color, "stroke_width": 1.5},
         ).scale(0.75)
 
     @staticmethod
     def create_key_points_table(
         points: Sequence[str],
         explanations: Sequence[str],
-        color: str = '#DBC9B8',
+        color: str = "#DBC9B8",
     ) -> MobjectTable:
         row_list = []
         for point, explanation in zip(points, explanations):
@@ -218,17 +227,17 @@ class ProblemText(Tex):
         return MobjectTable(
             row_list,
             col_labels=[
-                ProblemText.create_header('Key Point'),
-                ProblemText.create_header('Explanation/Conclusion'),
+                ProblemText.create_header("Key Point"),
+                ProblemText.create_header("Explanation/Conclusion"),
             ],
             include_outer_lines=True,
-            line_config={'color': color, 'stroke_width': 1.5},
+            line_config={"color": color, "stroke_width": 1.5},
         ).scale(0.75)
 
     def get_sub_tex(self, substring: str):
-        text_partition = partition(' '.join(self.tex_strings), substring)
+        text_partition = partition(" ".join(self.tex_strings), substring)
         start_index = len(text_partition[0].split())
         end_index = start_index + len(text_partition[1].split())
-        sub_tex = self[start_index: end_index]
+        sub_tex = self[start_index:end_index]
         sub_tex.problem_tex_parent = self
         return sub_tex
