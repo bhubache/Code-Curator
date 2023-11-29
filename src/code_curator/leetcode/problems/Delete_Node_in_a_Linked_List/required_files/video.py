@@ -72,7 +72,8 @@ STATEMENT_FONT_SIZE = 25
 class Video(BaseScene):
     config["quality"] = QUALITY
 
-    def initialize_scene(self) -> None:
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.present_problem = PresentProblem(
             title=TITLE,
             statement=STATEMENT,
@@ -94,6 +95,72 @@ class Video(BaseScene):
             font_size=20,
             buff=0.20,
         )
+
+    def fade_out_everything(self):
+        self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
+        return FadeIn(self.code)
+
+    def fade_out_constraints_table_for_constraint_four_explanation(self):
+        return FadeOut(self.code)
+        return Wait()
+        return FadeOut(*self.scene_mobjects)
+
+    def fade_in_linked_list(self):
+        # self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
+        # self.sll_for_normal_removal.add_labeled_pointer(0, "p")
+
+        self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
+        # self.code.create_highlighter()
+        # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
+        # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
+        #     0,
+        #     direction=UP,
+        #     name="p",
+        # )
+        # return FadeIn(self.sll_for_normal_removal)
+        from manim import Circle
+        return FadeIn(Circle())
+
+    @run_time_can_be_truncated
+    def advance_pointer(self):
+        return Wait()
+        # return self.code.move_highlighter_to_substring("MyFirstClass")
+        # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
+        # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
+        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        # self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(1).next_pointer, self.sll_for_normal_removal.get_node(3))
+        # # self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        # self.sll_for_normal_removal.advance_pointer("p")
+        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
+        # self.sll_for_normal_removal, animation = self.sll_for_normal_removal.fade_out_components(
+        #     self.sll_for_normal_removal.get_node(2),
+        #     self.sll_for_normal_removal.get_node(2).next_pointer,
+        # )
+        # return animation
+        return self.code.change_code_text((Path(__file__).parent / "destination.py").read_text())
+
+    def wave_pointer(self):
+        # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
+        # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
+        #  refer to the same copy!!!
+        # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
+        # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
+        # self.sll_for_normal_removal.resume_updating()
+        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
+        # return self.code.move_highlighter_to_token("param_one")
+        # return self.code.animate.move_to([-1, 1, 0])
+        # return self.code.move_highlighter_to_substring("my_method")
+        return Wait()
+        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        return animation
+        # return self.sll_for_normal_removal.wave_pointer(
+        #     self.sll_for_normal_removal[1].pointer_to_next,
+        # )
+
+
+
+
+
 
 
 class PrimaryStream:
@@ -204,11 +271,6 @@ class PrimaryStream:
             # FadeIn(new_statement),
         )
 
-    def fade_out_everything(self):
-        mobjects_to_fade_out = self.scene.scene_mobjects
-        # mobjects_to_fade_out.remove()
-        return FadeOut(*mobjects_to_fade_out)
-
     def start_first_constraint_explanation(self):
         self.fourth_constraint_table_breakdown = ProblemText.create_table(
             [
@@ -291,59 +353,6 @@ class PrimaryStream:
 
     def fade_in_third_constraint_explanation(self):
         return self.problem_analysis.get_constraint_explanations(3).animate.set_opacity(1)
-
-    def fade_out_constraints_table_for_constraint_four_explanation(self):
-        return FadeOut(*self.scene.scene_mobjects)
-
-    def fade_in_linked_list(self):
-        # self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
-        # self.sll_for_normal_removal.add_labeled_pointer(0, "p")
-
-        self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
-        # self.code.create_highlighter()
-        # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
-        # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
-        #     0,
-        #     direction=UP,
-        #     name="p",
-        # )
-        # return FadeIn(self.sll_for_normal_removal)
-        return FadeIn(self.code)
-
-    @run_time_can_be_truncated
-    def advance_pointer(self):
-        # return self.code.move_highlighter_to_substring("MyFirstClass")
-        # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        # self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(1).next_pointer, self.sll_for_normal_removal.get_node(3))
-        # # self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        # self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
-        # self.sll_for_normal_removal, animation = self.sll_for_normal_removal.fade_out_components(
-        #     self.sll_for_normal_removal.get_node(2),
-        #     self.sll_for_normal_removal.get_node(2).next_pointer,
-        # )
-        # return animation
-        return self.code.change_code_text((Path(__file__).parent / "destination.py").read_text())
-
-    def wave_pointer(self):
-        # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
-        # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
-        #  refer to the same copy!!!
-        # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
-        # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
-        # self.sll_for_normal_removal.resume_updating()
-        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
-        # return self.code.move_highlighter_to_token("param_one")
-        # return self.code.animate.move_to([-1, 1, 0])
-        # return self.code.move_highlighter_to_substring("my_method")
-        return Wait()
-        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        return animation
-        # return self.sll_for_normal_removal.wave_pointer(
-        #     self.sll_for_normal_removal[1].pointer_to_next,
-        # )
 
     def shrink_pointer(self):
         return self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)

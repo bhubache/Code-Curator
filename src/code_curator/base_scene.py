@@ -43,43 +43,25 @@ class _AllowOneMobjectDescriptor:
 
 class BaseScene(Scene):
     # config["background_color"] = constants.DEFAULT_BACKGROUND_COLOR
-    # config["background_color"] = "#282C34"
+    config["background_color"] = "#282C34"
     # config["background_color"] = "#2D3139"
     # config["background_color"] = "#414855"
     # config["background_color"] = "#3D424B"
-    config["background_color"] = "#33373D"
+    # config["background_color"] = "#33373D"
     config["disable_caching"] = True
 
     mobjects = _AllowOneMobjectDescriptor()
 
-    def __init__(self, animation_script, stream_clses: list[type]) -> None:
-        super().__init__()
+    def __init__(self, animation_script, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.animation_script = animation_script
-        self.stream_instances = []
-        self._setup_attrs(stream_clses)
-
-    def _setup_attrs(self, stream_clses: list[type]) -> None:
-        attrs_before_attr_setup = set(self.__dict__.keys())
-        self.initialize_scene()
-        newly_added_attrs = set(self.__dict__.keys()) - attrs_before_attr_setup
-
-        dict_to_pass = {attr_name: getattr(self, attr_name) for attr_name in newly_added_attrs}
-
-        shared_instance = MyClass()
-
-        for stream_cls in stream_clses:
-            self.stream_instances.append(stream_cls(**dict_to_pass, scene=self, shared=shared_instance))
-
-    def setup_attrs(self) -> None:
-        pass
 
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
-                self.animation_script._animation_script,
-                stream_instances=self.stream_instances,
-                run_time=self.animation_script.run_time,
+                animation_script=self.animation_script._animation_script["Video"],
                 scene=self,
+                run_time=self.animation_script.run_time,
             ),
         )
 

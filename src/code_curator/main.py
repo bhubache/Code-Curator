@@ -125,16 +125,16 @@ def get_video_and_stream_clses(
         getattr(
             video_module,
             "Video",
-        ),
-        [
-            *(
-                getattr(
-                    video_module,
-                    stream_name,
-                )
-                for stream_name in aligned_animation_script.stream_names
-            ),
-        ],
+        )
+        # [
+        #     *(
+        #         getattr(
+        #             video_module,
+        #             stream_name,
+        #         )
+        #         for stream_name in aligned_animation_script.stream_names
+        #     ),
+        # ],
     )
 
 
@@ -191,12 +191,12 @@ def main() -> None:
         alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
         script_path=problem_dir / ANIMATION_SCRIPT_PATH,
     )
-    video_cls, stream_clses = get_video_and_stream_clses(
+    video_cls = get_video_and_stream_clses(
         module_import_path=CONCRETE_VIDEO_SCRIPT_PATH,
         aligned_animation_script=aligned_animation_script,
     )
 
-    video_instance = video_cls(aligned_animation_script, stream_clses)
+    video_instance = video_cls(animation_script=aligned_animation_script)
 
     # def get_attr(self, attr_name: str):
     #     return getattr(video_instance, attr_name)

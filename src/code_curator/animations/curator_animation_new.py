@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import collections
 from collections.abc import Iterable
 from collections.abc import Sequence
 from types import MethodType
+from typing import Callable
 
 from manim import Animation
 from manim import Group
@@ -134,44 +136,89 @@ class ExcludeDuplicationSubmobjectsMobject(Mobject):
 
 
 class CuratorAnimation(Animation):
-    def __init__(self, stream_map: dict, stream_instances, run_time: float, scene: Scene) -> None:
+    def __init__(self, animation_script, scene, run_time: float) -> None:
         super().__init__(ExcludeDuplicationSubmobjectsMobject(), run_time=run_time)
-        self.stream_map = stream_map
-        self.stream_instance_map = {stream_inst.__class__.__name__: stream_inst for stream_inst in stream_instances}
+        self.animation_script = animation_script
         self.scene = scene
 
+        # TODO: See if this is actually needed
         setattr(self.scene, "mobjects", [self.mobject])
 
-        self.pending_stream_queue = PendingStreamQueue(self.run_time)
-        for stream_name, stream in self.stream_map.items():
-            for entry in stream.entries:
-                animation_method = getattr(self.stream_instance_map[stream_name], entry["name"])
-                animation_method.__func__.start_time = entry["start_time"]
-                self.pending_stream_queue.push(stream_name, animation_method)
+        self.pending_queue = collections.deque()
+        for method_info in animation_script.entries:
+            method = getattr(self.scene, method_info["name"])
+            method.__func__.start_alpha = value_from_range_to_range(
+                value=method_info["start_time"],
+                init_min=0,
+                init_max=self.run_time,
+                new_min=0,
+                new_max=1,
+            )
+            self.pending_queue.append(method)
 
-        self.running_queue = RunningStreamQueue(self.run_time, self.mobject, self.pending_stream_queue, scene=self.scene)
+        self.animation_pool = AnimationPool(mobject=self.mobject, scene=self.scene, total_run_time=self.run_time)
 
     def begin(self) -> None:
         """Override and do nothing to avoid ``interpolate_mobject`` being called twice with alpha equal to 0."""
         pass
 
     def interpolate_mobject(self, alpha: float) -> None:
-        # clean up from scene for ending animations
-        for animation in self.running_queue.get_animations_to_end(alpha):
-            animation.clean_up_from_scene(self.scene)
+        if len(self.pending_queue) == 0:
+            return
 
-            mobjects_to_remove = self._get_remover_animation_mobjects(animation)
-            for mobject in mobjects_to_remove:
-                # if alpha > 0.88:
-                #     breakpoint()
-                self.mobject.remove(mobject)
+        if alpha >= self.pending_queue[0].start_alpha:
+            self.animation_pool.add(self.pending_queue.popleft())
 
-        # begin new animations
-        for stream_name, animation_method in self.pending_stream_queue.get_animation_methods_to_begin(alpha):
-            self.running_queue.push(stream_name, animation_method)
+        self.animation_pool.interpolate(alpha)
 
-        # update running animations
-        self.running_queue.run_animations(alpha)
+
+class AnimationPool:
+    def __init__(self, mobject, scene, total_run_time: float) -> None:
+        self.mobject = mobject
+        self.scene = scene
+        self.total_run_time = total_run_time
+        self.animations: set[Animation] = set()
+
+    def add(self, method: Callable[[], Animation | Iterable[Animation]]) -> None:
+        animations = method()
+        if isinstance(animations, Animation):
+            animations = [animations]
+
+        for anim in animations:
+            anim = prepare_animation(anim)
+            anim.start_alpha = method.start_alpha
+            anim.end_alpha = (
+                method.start_alpha
+                + value_from_range_to_range(
+                      value=anim.run_time,
+                      init_min=0,
+                      init_max=self.total_run_time,
+                      new_min=0,
+                      new_max=1,
+                  )
+            )
+            self.mobject.add(anim.mobject)
+            self.animations.add(anim)
+            anim.begin()
+
+    def interpolate(self, alpha: float) -> None:
+        for anim in self.animations.copy():
+            if alpha <= anim.end_alpha:
+                anim.interpolate(
+                    value_from_range_to_range(
+                        value=alpha,
+                        init_min=anim.start_alpha,
+                        init_max=anim.end_alpha,
+                        new_min=0,
+                        new_max=1,
+                    )
+                )
+            else:
+                anim.clean_up_from_scene(self.scene)
+                self.mobject.remove(
+                    *self._get_remover_animation_mobjects(anim)
+                )
+                self.animations.remove(anim)
 
     def _get_remover_animation_mobjects(self, animation: Animation) -> Sequence[Mobject]:
         mobjects_to_be_removed: list[Mobject] = []
@@ -189,196 +236,3 @@ class CuratorAnimation(Animation):
                     )
 
         return mobjects_to_be_removed
-
-class _MultiStreamAnimationsQueue:
-    def __init__(self, run_time: float) -> None:
-        self.stream_to_queue_map: dict[str, list] = {}
-        self.run_time = run_time
-
-    @property
-    def stream_names(self) -> Iterable[str]:
-        return self.stream_to_queue_map.keys()
-
-    def push(self, stream_name: str, element) -> None:
-        self.stream_to_queue_map.setdefault(stream_name, [])
-        self.stream_to_queue_map[stream_name].append(element)
-
-    def peek(self, stream_name: str):
-        return self.stream_to_queue_map[stream_name][0]
-
-    def peek_start_time(self, stream_name: str) -> float:
-        return self.peek(stream_name).start_time
-
-    def peek_start_alpha(self, stream_name: str) -> float:
-        try:
-            next_element = self.peek(stream_name)
-            return next_element.start_alpha
-        except AttributeError:
-            next_element.__func__.start_alpha = value_from_range_to_range(
-                next_element.start_time,
-                init_min=0.0,
-                init_max=self.run_time,
-                new_min=0.0,
-                new_max=1.0,
-            )
-            return next_element.start_alpha
-
-    def pop(self, stream_name: str):
-        return self.stream_to_queue_map[stream_name].pop(0)
-
-
-class PendingStreamQueue:
-    def __init__(self, run_time: float) -> None:
-        self.queue = _MultiStreamAnimationsQueue(run_time)
-
-    def push(self, stream_name, animation_method: MethodType) -> None:
-        self.queue.push(stream_name, animation_method)
-
-    def peek_start_alpha(self, stream_name) -> float:
-        try:
-            return self.queue.peek_start_alpha(stream_name)
-        except IndexError:
-            return float('inf')
-
-    def get_animation_methods_to_begin(self, curr_alpha: float) -> Sequence[tuple[str, MethodType]]:
-        methods = []
-        for stream_name in self.queue.stream_names:
-            try:
-                if curr_alpha >= self.queue.peek_start_alpha(stream_name):
-                    methods.append((stream_name, self.queue.pop(stream_name)))
-            except IndexError:
-                # All animations in stream with name ``stream_name`` have been exhausted
-                continue
-
-        return methods
-
-
-class RunningStreamQueue:
-    def __init__(self, run_time: float, animation_mobject: Mobject, pending_stream_queue: PendingStreamQueue, scene: Scene) -> None:
-        self.queue = _MultiStreamAnimationsQueue(run_time)
-        self.animation_mobject = animation_mobject
-        self.pending_queue = pending_stream_queue
-        self.scene = scene
-
-    def push(self, stream_name: str, animation_method: MethodType) -> None:
-        try:
-            self.queue.peek(stream_name)
-            # running_animation = self.queue.pop(stream_name)
-        except (IndexError, KeyError):
-            # No running animation in stream, proceed normally!
-            animation_to_start = animation_method()
-            animation_to_start = self._prepare_animation(animation_to_start)
-            # animation_to_start = prepare_animation(animation_to_start)
-            try:
-                self.animation_mobject.add(animation_to_start.mobject)
-            except ValueError:
-                # Attempting to add ExcludeDuplicationSubmobjectsMobject to itself
-                self.animation_mobject.add(
-                    *animation_to_start.mobject.submobjects,
-                )
-
-            # self._add_mobjects(animation_to_start)
-            print(f"STARTING ANIMATION {animation_to_start} with run_time {animation_to_start.run_time}")
-            # TODO: Possible some floating point innaccuracies going on!
-            stop_alpha = animation_method.start_alpha + value_from_range_to_range(
-                animation_to_start.run_time,
-                init_min=0.0,
-                init_max=self.queue.run_time,
-                new_min=0.0,
-                new_max=1.0,
-            )
-
-            if stop_alpha > (next_start_alpha := self.pending_queue.peek_start_alpha(stream_name)):
-                if hasattr(animation_method, "run_time_can_be_truncated"):
-                    stop_alpha = next_start_alpha
-                else:
-                    raise RuntimeError(f"{animation_to_start} is too long and can't be shortened")
-
-            animation_to_start = self.animation_alpha_converter(
-                animation_to_start,
-                start_alpha=animation_method.start_alpha,
-                stop_alpha=stop_alpha,
-            )
-            animation_to_start.start_alpha = animation_method.start_alpha
-            animation_to_start.stop_alpha = stop_alpha
-            # if animation_to_start.__class__.__name__ == "Circumscribe":
-            #     animation_to_start.scene = self.scene
-
-            animation_to_start.begin()
-            self.queue.push(stream_name, animation_to_start)
-        else:
-            # There is an animation running, it should already be cleaned up and removed!
-            raise
-
-    # TODO: Figure this out with  out as well
-    def _add_mobjects(self, animation: Animation) -> None:
-        try:
-            subanimations = animation.animations
-        except AttributeError:
-            self.animation_mobject.add(animation.mobject)
-        else:
-            for sub_anim in subanimations:
-                self._add_mobjects(sub_anim)
-
-    def _prepare_animation(self, animation) -> Animation:
-        if isinstance(animation, Mobject):
-            animation = animation.build_animation()
-        else:
-            animation = prepare_animation(animation)
-
-        return animation
-
-    def peek_stop_alpha(self, stream_name: str) -> float:
-        return self.queue.peek(stream_name).stop_alpha
-
-    def get_animation_methods_to_begin(self, curr_alpha: float) -> Sequence[tuple[str, MethodType]]:
-        methods = []
-        for stream_name in self.queue.stream_names:
-            if curr_alpha >= self.queue.peek_start_alpha(stream_name):
-                methods.append((stream_name, self.queue.pop(stream_name)))
-
-        return methods
-
-    def get_animations_to_end(self, curr_alpha: float) -> Sequence[Animation]:
-        animations: list[Animation] = []
-        for stream_name in self.queue.stream_names:
-            try:
-                if curr_alpha >= self.peek_stop_alpha(stream_name):
-                    animations.append(self.queue.pop(stream_name))
-            except IndexError:
-                # There are currently no running animations in stream ``stream_name``
-                continue
-
-        return animations
-
-    def run_animations(self, curr_alpha: float) -> None:
-        # TODO: Maybe performing interpolate again for animations that just started
-        for stream_name in self.queue.stream_names:
-            try:
-                self.queue.peek(stream_name).interpolate(curr_alpha)
-            except IndexError:
-                # There might not be any animations running in the stream currently
-                continue
-
-    def animation_alpha_converter(self, animation: Animation, start_alpha: float, stop_alpha: float, first_call: bool = True):
-        new_interpolate_name = "_curator_interpolate"
-
-        def interpolate_wrapper(curr_overall_alpha: float):
-            converted_alpha = value_from_range_to_range(
-                curr_overall_alpha,
-                init_min=start_alpha,
-                init_max=stop_alpha,
-                new_min=0.0,
-                new_max=1.0,
-            )
-
-            nonlocal first_call
-            if first_call:
-                converted_alpha = 0.0
-                first_call = False
-
-            getattr(animation, new_interpolate_name)(converted_alpha)
-
-        setattr(animation, new_interpolate_name, animation.interpolate)
-        setattr(animation, 'interpolate', interpolate_wrapper)
-        return animation

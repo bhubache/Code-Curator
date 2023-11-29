@@ -1,7 +1,3 @@
-stream_num_to_class_name:
-  1: PrimaryStream
-  2: TestStream
-  3: ThirdStream
 content:
   # - word: Delete
   #   1:
@@ -78,10 +74,7 @@ content:
   #     name: fade_in_new_statement
   # - let's smooth over the wording and give it another read. There is a singly linked list called head and a node that we wish to remove called node. You will not be given access to the head of the list. Instead, you will be given access to the node to be deleted.
   - word: Now,
-    # 1:
-    #   name: fade_out_everything
-    2:
-      name: fade_in_constraint_setup
+    name: fade_out_everything
   - let's analyze the constraints.
   # - let's analyze the constraints. The first constraint states that the number of nodes in the given list is in the range 2 to 1000 inclusive. This can actually be explained by
   # - word: the
@@ -151,18 +144,14 @@ content:
   #     name: fade_in_third_constraint_explanation
   # - irrelevant. The fourth constraint states that the node to be deleted is in the list and is not a tail node. We saw that this constraint helped explain the first. Can we use the first constraint to explain this one? Well, no. There being at least two nodes in the linked list does not necessitate the node to be deleted being in the list and not the tail. So, let's look at each component of the constraint and ponder what removing the node would like if the opposite were true. Namely, if the node to be deleted is not in the list, and if the node to be deleted could be the tail. But before this, let's get some context by looking at how a node is normally removed from a linked list.
   - word: skipping
-    1:
-      name: fade_out_constraints_table_for_constraint_four_explanation
+    name: fade_out_constraints_table_for_constraint_four_explanation
   - stuff a lot of words.
   - word: Here,
-    1:
-      name: fade_in_linked_list
+    name: fade_in_linked_list
   - we have a linked list with
   - word: pointer
-    1:
-      name: advance_pointer
+    name: advance_pointer
   - p situated at the head
   - word: and
-    1:
-      name: wave_pointer
+    name: wave_pointer
   - we're going to remove the third node.
