@@ -36,6 +36,7 @@ class ProblemText(Tex):
             r"\tcbset{on line, boxsep=2pt, left=0pt,right=0pt,top=0pt,bottom=0pt, frame hidden,"
             r" colframe=white,colback=white, highlight math style={enhanced}}",
         )
+        my_template.add_to_preamble(r"\newcommand{\code}[1]{\tcbox{\texttt{#1}}}")
         super().__init__(
             *text.split(),
             arg_separator=" ",
@@ -46,7 +47,46 @@ class ProblemText(Tex):
         )
 
         for word_tex in self:
-            if word_tex.tex_string.startswith("\\tcbox"):
+            if word_tex.tex_string.startswith("\\code"):
+                # NOTE: Assuming that the background mobject is the second submobject
+
+                word_tex.submobjects[0].set(color=config["background_color"])
+                word_tex.submobjects[1].set(color="#808080")
+
+                class StaticColorWrapper(type(word_tex.submobjects[0])):
+                    def __init__(self, mobject) -> None:
+                        self.mobject = mobject
+
+                    def __getattr__(self, item):
+                        result = getattr(self.mobject, item)
+                        if result is self.mobject:
+                            return self
+
+                        return result
+
+                    def set_fill(
+                        self,
+                        color=None,
+                        opacity=None,
+                        family: bool = True,
+                    ):
+                        # TODO: Figure out why simple delegation doesn't work
+                        color = self.fill_color
+                        if family:
+                            for submobject in self.submobjects:
+                                submobject.set_fill(color, opacity, family)
+                        self.update_rgbas_array("fill_rgbas", color, opacity)
+                        self.fill_rgbas: RGBA_Array_Float
+                        if opacity is not None:
+                            self.fill_opacity = opacity
+                        return self
+
+                word_tex.submobjects[0] = StaticColorWrapper(word_tex.submobjects[0])
+                word_tex.submobjects[1] = StaticColorWrapper(word_tex.submobjects[1])
+
+    def set_color(self, color, family=True):
+        for word_tex in self:
+            if word_tex.tex_string.startswith("\\code"):
                 # NOTE: Assuming that the background mobject is the second submobject
                 word_tex.submobjects[0].set(color=config["background_color"])
                 word_tex.submobjects[1].set(color="#808080")
