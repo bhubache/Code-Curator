@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools as it
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from manim import Animation
@@ -10,6 +9,7 @@ from manim import DOWN
 from manim import Line
 from manim import Mobject
 from manim import ORIGIN
+from manim import UP
 
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.custom_vmobject import CustomVMobject
@@ -21,6 +21,7 @@ from code_curator.data_structures.graph import Vertex
 
 if TYPE_CHECKING:
     from collections.abc import Hashable
+    from collections.abc import Iterable
     from colour import Color
 
 DEFAULT_NODE_RADIUS = 0.5
@@ -83,10 +84,15 @@ class SinglyLinkedList(CustomVMobject):
             direction=DOWN,
             color=self.color,
         )
+        if len(values) == 1:
+            tail_direction = UP
+        else:
+            tail_direction = DOWN
+
         self.labeled_pointers["tail"] = LabeledLine(
             self.get_node(len(self.values) - 1),
             label="tail",
-            direction=DOWN,
+            direction=tail_direction,
             color=self.color,
         )
 
@@ -186,7 +192,11 @@ class SinglyLinkedList(CustomVMobject):
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
 
-    def move_labeled_pointer(self, pointer: str | LabeledLine, num_nodes: int = 1) -> tuple[SinglyLinkedList, Animation]:
+    def move_labeled_pointer(
+        self,
+        pointer: str | LabeledLine,
+        num_nodes: int = 1,
+    ) -> tuple[SinglyLinkedList, Animation]:
         copy = self._create_animation_copy()
         if isinstance(pointer, str):
             labeled_pointer = copy.get_labeled_pointer(pointer)
@@ -272,6 +282,16 @@ class SinglyLinkedList(CustomVMobject):
             copy,
         )
 
+    def get_next_pointers_node_index(self, pointer: Edge) -> int:
+        return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
+
+    def _create_animation_copy(self) -> SinglyLinkedList:
+        attr_name = "_copy_for_animation"
+        if not hasattr(self, attr_name):
+            setattr(self, attr_name, self.copy())
+
+        return getattr(self, attr_name)
+
     def _get_copy_components(self, *original_components: Mobject, copy: SinglyLinkedList) -> Iterable[Mobject]:
         copied_components = []
 
@@ -290,16 +310,6 @@ class SinglyLinkedList(CustomVMobject):
                 raise NotImplementedError(f"Unexpected component type: {type(component)}")
 
         return copied_components
-
-    def get_next_pointers_node_index(self, pointer: Edge) -> int:
-        return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
-
-    def _create_animation_copy(self) -> SinglyLinkedList:
-        attr_name = "_copy_for_animation"
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, self.copy())
-
-        return getattr(self, attr_name)
 
 
 class Node(Vertex):
