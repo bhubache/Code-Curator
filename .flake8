@@ -7,6 +7,7 @@ extend-ignore =
 per-file-ignores =
     src/code_curator/leetcode/scenes/*:N801
     src/code_curator/leetcode/problems/*:N801
+    tests/*:SCS108
 application-import-names = code_curator
 import-order-style = smarkets
 # use-class-attributes-order-strict-mode = true

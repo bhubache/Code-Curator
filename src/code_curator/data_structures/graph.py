@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import collections
 import math
+from typing import Any
 from typing import TYPE_CHECKING
 
 import numpy as np
 from manim import BLACK
 from manim import Circle
-from manim import Dot
 from manim import DOWN
 from manim import Line
 from manim import Mobject
+from manim import ORIGIN
+from manim import Point
 
 from code_curator.custom_vmobject import CustomVMobject
 from code_curator.data_structures.element import Element
@@ -34,9 +36,9 @@ DEFAULT_LINE_LENGTH = 0.75
 class Vertex(CustomVMobject):
     def __init__(
         self,
-        label: str | Mobject | None = None,
+        label: Any = None,
         *,
-        contents: str | Mobject | None = None,
+        contents: Any = None,
         contents_font_size: float = DEFAULT_LABEL_FONT_SIZE,
         position_relative_to: tuple[float, float, float] | Mobject | None = None,
         color: str | Color = DEFAULT_COLOR,
@@ -52,12 +54,8 @@ class Vertex(CustomVMobject):
         show_container: bool = True,
     ) -> None:
         super().__init__()
-        if not isinstance(label, Mobject):
-            label = Element(
-                label,
-                color=color,
-                font_size=DEFAULT_LABEL_FONT_SIZE,
-            )
+        if label is None and contents is None:
+            raise ValueError(f"You must provide at least the label or the contents of the {type(self)}")
 
         if container is None:
             container = Circle(
@@ -66,27 +64,40 @@ class Vertex(CustomVMobject):
                 stroke_width=container_stroke_width,
             )
 
-        self.label = label
-        self.container = container
-        self.contents = contents
-
         if not show_container:
-            self.container.set_opacity(0)
+            container.set_opacity(0)
 
-        if self.contents is not None:
-            self.contents = Element(
+        if position_relative_to is None:
+            position_relative_to = ORIGIN
+        elif isinstance(position_relative_to, Mobject):
+            position_relative_to = position_relative_to.get_center()
+
+        container.move_to(position + position_relative_to)
+
+        self.add(container)
+
+        if not isinstance(contents, Mobject) and contents is not None:
+            contents = Element(
                 contents,
                 color=color,
                 font_size=contents_font_size,
             )
-            self.container.add(self.contents)
 
-        if position_relative_to is None:
-            position_relative_to = np.array([0.0, 0.0, 0.0])
-        elif isinstance(position_relative_to, Mobject):
-            position_relative_to = position_relative_to.get_center()
+        if contents is not None:
+            container.add(contents)
 
-        self.container.move_to(position + position_relative_to)
+        if show_label and label is None:
+            raise ValueError("You must provide a label for it to be shown")
+
+        if not isinstance(label, Mobject) and label is not None:
+            label = Element(
+                label,
+                color=color,
+                font_size=DEFAULT_LABEL_FONT_SIZE,
+            )
+
+        if show_label:
+            self.add(label)
 
         if label_out:
             circumscribing_circle = Circle(
@@ -101,22 +112,30 @@ class Vertex(CustomVMobject):
                 ),
             )
 
-        self.add(container)
-        if show_label:
-            self.add(label)
+        self.label_mobject = label
+        self.container = container
+        self.contents_mobject = contents
 
-        if self.contents is not None and self.contents.value == "null":
+        # TODO: Move to classes that compose graph
+        if self.contents == "null":
             mock_contents = Element("n")
             mock_contents.move_to(self.container.get_center())
-            mock_contents.match_style(self.contents)
-            self.contents.align_to(mock_contents, DOWN)
+            mock_contents.match_style(self.contents_mobject)
+            self.contents_mobject.align_to(mock_contents, DOWN)
 
     @property
-    def value(self):
-        return self.contents.value
+    def contents(self):
+        if self.contents_mobject is None:
+            return None
 
-    def label_is(self, value: str) -> bool:
-        return self.label.value == value
+        return self.contents_mobject.value
+
+    @property
+    def label(self):
+        if self.label_mobject is None:
+            return None
+
+        return self.label_mobject.value
 
     def proportion_from_point(self, point) -> float:
         return self.container.proportion_from_point(point)
@@ -146,6 +165,9 @@ class Edge(CustomVMobject):
         directedness: str = "-",
     ) -> None:
         super().__init__()
+        if not isinstance(vertex_one, Mobject) or not isinstance(vertex_two, Mobject):
+            raise TypeError("You must provide Mobjects as the vertices")
+
         self.vertex_one = vertex_one
         self.vertex_two = vertex_two
         self.line = Line(
@@ -224,15 +246,13 @@ class Edge(CustomVMobject):
 class Graph(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
-        self.vertices: list[Vertex] = []
+        self.vertices: set[Vertex] = set()
         self.edges: set[Edge] = set()
         self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
 
-        self.default_vertex_label_counter: int = 0
-
     def add_vertex(
         self,
-        label_or_vertex: str | Vertex | None = None,
+        label_or_vertex: Any,
         **kwargs,
     ) -> None:
         if not isinstance(label_or_vertex, Vertex):
@@ -242,20 +262,20 @@ class Graph(CustomVMobject):
             return
 
         self.add(label_or_vertex)
-        self.vertices.append(label_or_vertex)
+        self.vertices.add(label_or_vertex)
         if label_or_vertex not in self.adjacency_list:
             self.adjacency_list[label_or_vertex] = []
 
     def add_edge(
         self,
-        vertex_one: str | Mobject,
-        vertex_two: str | Mobject,
+        vertex_one: Any,
+        vertex_two: Any,
         **kwargs,
     ) -> None:
-        if isinstance(vertex_one, str):
+        if not isinstance(vertex_one, Mobject):
             vertex_one = self.get_vertex(vertex_one)
 
-        if isinstance(vertex_two, str):
+        if not isinstance(vertex_two, Mobject):
             vertex_two = self.get_vertex(vertex_two)
 
         edge = Edge(
@@ -268,10 +288,10 @@ class Graph(CustomVMobject):
         self.adjacency_list[edge.vertex_one].append(edge.vertex_two)
 
         if edge.vertex_one not in self.vertices:
-            self.vertices.append(edge.vertex_one)
+            self.vertices.add(edge.vertex_one)
 
         if edge.vertex_two not in self.vertices:
-            self.vertices.append(edge.vertex_two)
+            self.vertices.add(edge.vertex_two)
 
         self.edges.add(edge)
 
@@ -295,6 +315,7 @@ class Graph(CustomVMobject):
 
             elif isinstance(mob, Edge):
                 self.edges.remove(mob)
+                self.adjacency_list[mob.vertex_one].remove(mob.vertex_two)
                 mob.vertex_one = None
                 mob.vertex_two = None
             else:
@@ -303,11 +324,8 @@ class Graph(CustomVMobject):
             self.submobjects.remove(mob)
 
     def get_vertex(self, label: str | int, /) -> Vertex:
-        if isinstance(label, int):
-            return self.vertices[label]
-
         for vertex in self.vertices:
-            if vertex.label_is(label):
+            if vertex.label == label:
                 return vertex
 
         raise LookupError(f"Unable to find vertex with label ``{label}``")
@@ -322,7 +340,7 @@ class LabeledLine(CustomVMobject):
         direction: tuple[float, float, float] | None = None,
         label_font_size: float = DEFAULT_LABEL_FONT_SIZE,
         length: float = DEFAULT_LINE_LENGTH,
-        label: str | Mobject = "",
+        label: Any = "",
         label_dist: float = 0.1,
         color: str | Color = DEFAULT_COLOR,
         label_color: str | Color = DEFAULT_COLOR,
@@ -331,56 +349,71 @@ class LabeledLine(CustomVMobject):
         directedness: str = "->",
     ) -> None:
         super().__init__()
-        if isinstance(label, str):
+        if end is None:
+            if isinstance(start, Mobject):
+                end = start.get_boundary_point(-direction)
+                self.pointee = start
+            else:
+                end = start
+
+            start = Point(end).shift(-direction * length)
+
+        line = Line(
+            start,
+            end,
+            color=color,
+            stroke_width=DEFAULT_EDGE_STROKE_WIDTH,
+        )
+
+        if directedness.endswith(">"):
+            line.add_tip(tip_length=tip_length, tip_width=tip_width)
+
+        if directedness.startswith("<"):
+            line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
+
+        if not isinstance(label, Mobject):
             label = Element(
                 label,
                 color=color,
                 font_size=label_font_size,
             )
 
-        if end is None:
-            # Assume user passed in the location/Mobject they want the line to point to
-            end = start.get_boundary_point(-direction)
-            target_mobject = start
-            self.pointee = start
-            start = Dot(end).shift(-direction * length)
-        else:
-            raise NotImplementedError()
+        self.add(line)
+        self.add(label)
 
-        self.line = Line(
-            start,
-            end,
-            color=color,
-            stroke_width=DEFAULT_EDGE_STROKE_WIDTH,
-        )
-        self.label = label
-
-        if target_mobject:
-            self.line_mob_connecting_proportion: float = target_mobject.proportion_from_point(
-                target_mobject.get_boundary_point(-self.line.get_unit_vector()),
-            )
-
+        self.label_mobject = label
+        self.line = line
         self.label_dist = label_dist
-        if directedness.endswith(">"):
-            self.line.add_tip(tip_length=tip_length, tip_width=tip_width)
 
-        if directedness.startswith("<"):
-            self.line.add_tip(tip_length=tip_length, tip_width=tip_width, at_start=True)
+        label.add_updater(self.label_updater, call_updater=True)
 
         if isinstance(end, Mobject):
-            self.line.add_updater(self.line_updater)
+            line.add_updater(self.line_updater)
 
         if isinstance(start, Mobject):
-            self.line.add_updater(self.line_updater)
-
-        self.label.add_updater(self.label_updater, call_updater=True)
-
-        self.add(self.line)
-        self.add(self.label)
+            line.add_updater(self.line_updater)
 
     @property
     def direction(self) -> tuple[float, float, float]:
         return self.line.get_unit_vector()
+
+    @property
+    def line_mob_connecting_proportion(self) -> float:
+        return self.pointee.proportion_from_point(
+            self.pointee.get_boundary_point(-self.line.get_unit_vector()),
+        )
+
+    @property
+    def start(self) -> Iterable[float]:
+        return self.line.get_start()
+
+    @property
+    def end(self) -> Iterable[float]:
+        return self.line.get_end()
+
+    @property
+    def label(self) -> Any:
+        return self.label_mobject.value
 
     def line_updater(self, line):
         current_end = line.get_end()

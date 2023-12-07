@@ -95,7 +95,7 @@ repos:
             'flake8-no-pep420==2.7.0',
             'flake8-use-pathlib==0.3.0',
             'flake8-builtins==2.1.0',
-            'flake8-functions-names==0.4.0',
+            # 'flake8-functions-names==0.4.0',
             'pep8-naming==0.13.3',
             'flake8-comments==0.1.2',
             'flake8-eradicate==1.5.0',
@@ -104,7 +104,7 @@ repos:
             'flake8-type-checking==2.4.1',
             'flake8-rst-docstrings==0.3.0',
             'flake8-sphinx-links==0.2.1',
-            'flake8-aaa==0.16.0',
+            # 'flake8-aaa==0.16.0',
             'flake8-pytest-style==1.7.2',
         ]
 # -    repo: https://github.com/pre-commit/mirrors-autopep8
