@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "Code-Curator"
 version = "0.0.1"
 dependencies = [
-    "manim >= 0.17.3",
+    "manim >= 0.18",
     "pandas >= 2.0.2",
 ]
 
