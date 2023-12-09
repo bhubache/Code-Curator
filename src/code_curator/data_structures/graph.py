@@ -84,6 +84,7 @@ class Vertex(CustomVMobject):
             )
 
         if contents is not None:
+            contents.move_to(container.get_center())
             container.add(contents)
 
         if show_label and label is None:
