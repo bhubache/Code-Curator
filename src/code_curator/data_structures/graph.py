@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import collections
+import itertools as it
 import math
 from typing import Any
 from typing import TYPE_CHECKING
@@ -21,6 +22,7 @@ from code_curator.data_structures.element import Element
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from colour import Color
+    from manim.typing import Point3D_Array
 
 
 DEFAULT_COLOR = BLACK
@@ -169,6 +171,14 @@ class Vertex(CustomVMobject):
     def point_from_proportion(self, alpha: float) -> np.ndarray:
         return self.container.point_from_proportion(alpha)
 
+    def get_points_defining_boundary(self) -> Point3D_Array:
+        # Probably returns all anchors, but this is weird regarding  the name of the method.
+        family_without_label = [self.container]
+
+        return np.array(
+            tuple(it.chain(*(sm.get_anchors() for sm in family_without_label))),
+        )
+
 
 class Edge(CustomVMobject):
     def __init__(
@@ -216,6 +226,7 @@ class Edge(CustomVMobject):
 
         self.update()
 
+    # TODO: This duplicates code in the __init__
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
             self.vertex_one.container.get_center(),
@@ -233,6 +244,11 @@ class Edge(CustomVMobject):
 
         if self.line.has_tip():
             new_line.add_tip(self.line.tip)
+            new_line.tip.match_style(self.line.tip)
+
+        if self.line.has_start_tip():
+            new_line.add_tip(self.line.start_tip, at_start=True)
+            new_line.start_tip.match_style(self.line.start_tip)
 
         new_line.match_style(self.line)
 
