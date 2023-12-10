@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import collections
-import itertools as it
 import math
 import warnings
 from typing import Any
@@ -23,7 +22,6 @@ from code_curator.data_structures.element import Element
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from colour import Color
-    from manim.typing import Point3D_Array
 
 
 DEFAULT_COLOR = BLACK
@@ -102,7 +100,7 @@ class Vertex(CustomVMobject):
             )
 
         if show_label:
-            self.add(label)
+            self.quasi_add(label)
             label.move_to(container.get_center())
 
             try:
@@ -171,14 +169,6 @@ class Vertex(CustomVMobject):
 
     def point_from_proportion(self, alpha: float) -> np.ndarray:
         return self.container.point_from_proportion(alpha)
-
-    def get_points_defining_boundary(self) -> Point3D_Array:
-        # Probably returns all anchors, but this is weird regarding  the name of the method.
-        family_without_label = [self.container]
-
-        return np.array(
-            tuple(it.chain(*(sm.get_anchors() for sm in family_without_label))),
-        )
 
 
 class Edge(CustomVMobject):
