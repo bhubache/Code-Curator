@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections
 import itertools as it
 import math
+import warnings
 from typing import Any
 from typing import TYPE_CHECKING
 
@@ -233,28 +234,41 @@ class Edge(CustomVMobject):
             self.vertex_two.container.get_center(),
             color=self.color,
         )
-        new_line = Line(
-            reference_line.point_from_proportion(
-                min(1, self.vertex_one.container.radius / reference_line.get_length()),
-            ),
-            reference_line.point_from_proportion(
-                max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
-            ),
-        )
 
-        if self.line.has_tip():
-            new_line.add_tip(self.line.tip)
-            new_line.tip.match_style(self.line.tip)
+        if hasattr(self, "invisible_to_avoid_divide_by_zero"):
+            self.line.restore()
+            delattr(self, "invisible_to_avoid_divide_by_zero")
 
-        if self.line.has_start_tip():
-            new_line.add_tip(self.line.start_tip, at_start=True)
-            new_line.start_tip.match_style(self.line.start_tip)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error")
 
-        new_line.match_style(self.line)
+            try:
+                new_line = Line(
+                    reference_line.point_from_proportion(
+                        min(1, self.vertex_one.container.radius / reference_line.get_length()),
+                    ),
+                    reference_line.point_from_proportion(
+                        max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
+                    ),
+                )
+            except RuntimeWarning:
+                self.line.save_state()
+                self.set_opacity(0)
+                self.invisible_to_avoid_divide_by_zero = True
+            else:
+                if self.line.has_tip():
+                    new_line.add_tip(self.line.tip)
+                    new_line.tip.match_style(self.line.tip)
 
-        self.line.become(
-            new_line,
-        )
+                if self.line.has_start_tip():
+                    new_line.add_tip(self.line.start_tip, at_start=True)
+                    new_line.start_tip.match_style(self.line.start_tip)
+
+                new_line.match_style(self.line)
+
+                self.line.become(
+                    new_line,
+                )
 
     def get_start(self):
         return self.line.get_start()
