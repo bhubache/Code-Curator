@@ -409,8 +409,12 @@ class LabeledLine(CustomVMobject):
                 self.pointee = start
             else:
                 end = start
+                self.pointee = Point(end)
+                self.pointee.proportion_from_point = lambda _: 0
 
             start = Point(end).shift(-direction * length)
+        elif isinstance(end, Mobject):
+            self.pointee = end
 
         line = Line(
             start,
@@ -442,10 +446,10 @@ class LabeledLine(CustomVMobject):
         label.add_updater(self.label_updater, call_updater=True)
 
         if isinstance(end, Mobject):
-            line.add_updater(self.line_updater)
+            line.add_updater(self.line_updater, call_updater=True)
 
         if isinstance(start, Mobject):
-            line.add_updater(self.line_updater)
+            line.add_updater(self.line_updater, call_updater=True)
 
     @property
     def direction(self) -> tuple[float, float, float]:
