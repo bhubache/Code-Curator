@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from manim import VMobject
-from manim.constants import DEFAULT_STROKE_WIDTH
 from manim.utils.family_ops import restructure_list_to_exclude_certain_family_members
 
 from code_curator.custom_logging.custom_logger import CustomLogger
@@ -22,14 +21,6 @@ class CustomVMobject(VMobject):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.quasi_mobjects: list[VMobject] = []
-
-    @property
-    def stroke_width(self) -> int:
-        return DEFAULT_STROKE_WIDTH
-
-    @stroke_width.setter
-    def stroke_width(self, _: int) -> None:
-        pass
 
     def add(self, *mobjects: VMobject) -> None:
         non_null_vmobjects: list[VMobject] = []
@@ -62,6 +53,10 @@ class CustomVMobject(VMobject):
         self.quasi_mobjects.extend(mobjects)
 
     def get_points_defining_boundary(self) -> Point3D_Array:
+        """Exclude quasi_mobjects from defining boundary.
+
+        .. seealso:: :meth:`~custom_vmobject.CustomVMobject.quasi_add`
+        """
         return np.array(
             tuple(
                 it.chain(
