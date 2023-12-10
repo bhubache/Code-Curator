@@ -5,14 +5,20 @@ from typing import Any
 import pytest
 from manim import BLUE
 from manim import Dot
+from manim import DOWN
+from manim import LEFT
+from manim import Mobject
 from manim import ORIGIN
 from manim import RED
+from manim import RIGHT
 from manim import Scene
 from manim import Square
+from manim import UP
 from manim import WHITE
 from manim.utils.testing.frames_comparison import frames_comparison
 
 from code_curator.data_structures.graph import Edge
+from code_curator.data_structures.graph import LabeledLine
 from code_curator.data_structures.graph import Vertex
 
 
@@ -324,3 +330,104 @@ def test_edge_movement(scene: Scene, default_edge_kwargs, kwargs_to_change) -> N
         default_edge_kwargs["vertex_one"].animate.move_to(new_vertex_one_loc),
         default_edge_kwargs["vertex_two"].animate.move_to(new_vertex_two_loc),
     )
+
+
+@pytest.fixture
+def default_labeled_line_kwargs() -> dict[str, Any]:
+    return dict(
+        start=(0.0, 1.0, 0.0),
+        end=(0.0, 0.0, 0.0),
+        direction=None,
+        label_font_size=15,
+        length=0.75,
+        label="",
+        label_dist=0.1,
+        color=WHITE,
+        label_color=WHITE,
+        tip_length=0.1,
+        tip_width=0.075,
+        directedness="->",
+    )
+
+
+@frames_comparison
+@pytest.mark.parametrize(
+    "kwargs_to_change",
+    (
+        {},
+        {"start": (0.0, 3.0, 0.0), "end": (0.0, -2.0, 0.0)},
+        {"label": "pointer"},
+        {"label": "pointer", "label_dist": 0.5},
+        {"color": BLUE},
+        {"label": "pointer", "color": BLUE},
+        {"tip_length": 0.5},
+        {"tip_width": 0.5},
+        {"tip_length": 0.5, "tip_width": 0.5},
+        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN},
+        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN, "label": "pointer"},
+        {"start": Vertex(0, color=WHITE), "end": None, "direction": UP, "label": "pointer"},
+        {"start": Vertex(0, color=WHITE), "end": None, "direction": LEFT, "label": "pointer", "label_dist": 0.5},
+        {"start": Vertex(0, color=WHITE), "end": None, "direction": RIGHT, "label": "pointer", "label_dist": 0.5},
+        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer"},
+        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+        # These scenarios should be unlikely
+        # {"end": (-1.0, 1.0, 0.0), "start": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+        # {"end": Vertex(1, color=WHITE).move_to((-1.0, 1.0, 0.0)), "start": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+    ),
+)
+def test_labeled_line(
+    scene: Scene,
+    default_labeled_line_kwargs: dict[str, Any],
+    kwargs_to_change: dict[str, Any],
+) -> None:
+    default_labeled_line_kwargs.update(kwargs_to_change)
+    if isinstance(default_labeled_line_kwargs.get("start", None), Mobject):
+        scene.add(default_labeled_line_kwargs["start"])
+
+    if isinstance(default_labeled_line_kwargs.get("end", None), Mobject):
+        scene.add(default_labeled_line_kwargs["end"])
+
+    scene.add(LabeledLine(**default_labeled_line_kwargs))
+
+
+# TODO: LabeledLine movement and pointee movement!
+# @frames_comparison(last_frame=False)
+# @pytest.mark.parametrize(
+#     "kwargs_to_change",
+#     (
+#         # {},
+#         # {"start": (0.0, 3.0, 0.0), "end": (0.0, -2.0, 0.0)},
+#         # {"label": "pointer"},
+#         # {"label": "pointer", "label_dist": 0.5},
+#         # {"color": BLUE},
+#         # {"label": "pointer", "color": BLUE},
+#         # {"tip_length": 0.5},
+#         # {"tip_width": 0.5},
+#         # {"tip_length": 0.5, "tip_width": 0.5},
+#         # {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN},
+#         # {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN, "label": "pointer"},
+#         # {"start": Vertex(0, color=WHITE), "end": None, "direction": UP, "label": "pointer"},
+#         # {"start": Vertex(0, color=WHITE), "end": None, "direction": LEFT, "label": "pointer", "label_dist": 0.5},
+#         # {"start": Vertex(0, color=WHITE), "end": None, "direction": RIGHT, "label": "pointer", "label_dist": 0.5},
+#         # {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer"},
+#         # {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+#
+#         # These scenarios should be unlikely
+#         # {"end": (-1.0, 1.0, 0.0), "start": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+#         # {"end": Vertex(1, color=WHITE).move_to((-1.0, 1.0, 0.0)), "start": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+#     ),
+# )
+# def test_labeled_line_movement(scene: Scene, default_labeled_line_kwargs: dict[str, Any], kwargs_to_change: dict[str, Any]) -> None:
+#     default_labeled_line_kwargs.update(kwargs_to_change)
+#     if isinstance(default_labeled_line_kwargs.get("start", None), Mobject):
+#         scene.add(default_labeled_line_kwargs["start"])
+#
+#     if isinstance(default_labeled_line_kwargs.get("end", None), Mobject):
+#         scene.add(default_labeled_line_kwargs["end"])
+#
+#     labeled_line = LabeledLine(**default_labeled_line_kwargs)
+#     scene.add(labeled_line)
+#
+#     scene.play(
+#         labeled_line.animate.move_to()
+#     )
