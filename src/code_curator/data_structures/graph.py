@@ -203,6 +203,7 @@ class Edge(CustomVMobject):
             stroke_width=line_stroke_width,
         )
 
+        # FIXME: It looks like double headed arrow heads aren't the same size
         if directedness.endswith(">"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width)
 
@@ -213,23 +214,30 @@ class Edge(CustomVMobject):
 
         self.add(self.line)
 
+        self.update()
+
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
             self.vertex_one.container.get_center(),
             self.vertex_two.container.get_center(),
             color=self.color,
         )
+        new_line = Line(
+            reference_line.point_from_proportion(
+                min(1, self.vertex_one.container.radius / reference_line.get_length()),
+            ),
+            reference_line.point_from_proportion(
+                max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
+            ),
+        )
+
+        if self.line.has_tip():
+            new_line.add_tip(self.line.tip)
+
+        new_line.match_style(self.line)
+
         self.line.become(
-            Line(
-                reference_line.point_from_proportion(
-                    min(1, self.vertex_one.container.radius / reference_line.get_length()),
-                ),
-                reference_line.point_from_proportion(
-                    max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
-                ),
-            )
-            .add_tip(self.line.tip)
-            .match_style(self.line),
+            new_line,
         )
 
     def get_start(self):
