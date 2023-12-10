@@ -99,16 +99,34 @@ class Vertex(CustomVMobject):
 
         if show_label:
             self.add(label)
+            label.move_to(container.get_center())
 
-        if label_out:
-            circumscribing_circle = Circle(
-                stroke_width=container.stroke_width,
-            ).surround(
-                container,
-                buffer_factor=1 + label_dist,
+            try:
+                container_radius = container.radius
+            except AttributeError:
+                container_radius = container.side_length
+
+            if label_out:
+                buffer_factor = (container_radius + label_dist) / container_radius
+            else:
+                buffer_factor = label_dist / container_radius
+
+            label_placement_helper_circle = (
+                Circle(
+                    stroke_width=container.stroke_width,
+                )
+                .match_style(container)
+                .surround(
+                    container,
+                    stretch=True,
+                    buffer_factor=buffer_factor,
+                )
             )
+
+            label_placement_helper_circle.move_to(container.get_center())
+
             label.move_to(
-                circumscribing_circle.point_at_angle(
+                label_placement_helper_circle.point_at_angle(
                     math.radians(label_revolve_angle_in_degrees),
                 ),
             )
