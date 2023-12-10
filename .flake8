@@ -25,6 +25,10 @@ class_attributes_order =
     private_class_method,
     private_method,
 
+pytest-fixture-no-parentheses = true
+pytest-parametrize-values-type = tuple
+pytest-parametrize-values-row-type = tuple
+
 flake8-2020 = "1.8.0"
 flake8-type-checking = "2.4.1"
 flake8-dunder-all = "0.3.0"

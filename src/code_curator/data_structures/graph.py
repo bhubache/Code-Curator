@@ -9,6 +9,7 @@ import numpy as np
 from manim import BLACK
 from manim import Circle
 from manim import DOWN
+from manim import IN
 from manim import Line
 from manim import Mobject
 from manim import ORIGIN
@@ -72,7 +73,7 @@ class Vertex(CustomVMobject):
         elif isinstance(position_relative_to, Mobject):
             position_relative_to = position_relative_to.get_center()
 
-        container.move_to(position + position_relative_to)
+        container.move_to(position + np.array(position_relative_to))
 
         self.add(container)
 
@@ -104,7 +105,7 @@ class Vertex(CustomVMobject):
             try:
                 container_radius = container.radius
             except AttributeError:
-                container_radius = container.side_length
+                container_radius = Circle().surround(container, stretch=True, buffer_factor=1).radius
 
             if label_out:
                 buffer_factor = (container_radius + label_dist) / container_radius
@@ -129,6 +130,12 @@ class Vertex(CustomVMobject):
                 label_placement_helper_circle.point_at_angle(
                     math.radians(label_revolve_angle_in_degrees),
                 ),
+            )
+
+            label.rotate(
+                math.radians(label_rotate_angle_in_degrees),
+                axis=IN,
+                about_point=label.get_center(),
             )
 
         self.label_mobject = label
