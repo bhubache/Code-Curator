@@ -150,6 +150,9 @@ class Vertex(CustomVMobject):
             mock_contents.match_style(self.contents_mobject)
             self.contents_mobject.align_to(mock_contents, DOWN)
 
+    def __str__(self) -> str:
+        return str(self.contents)
+
     @property
     def contents(self):
         if self.contents_mobject is None:
@@ -217,6 +220,16 @@ class Edge(CustomVMobject):
         self.add(self.line)
 
         self.update()
+
+    def __str__(self) -> str:
+        if self.directedness.endswith(">"):
+            start = self.vertex_one
+            end = self.vertex_two
+        else:
+            start = self.vertex_two
+            end = self.vertex_one
+
+        return f"{start} {self.directedness} {end}"
 
     # TODO: This duplicates code in the __init__
     def shortest_path_updater(self, some_obj) -> None:
