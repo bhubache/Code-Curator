@@ -509,6 +509,8 @@ class SinglyLinkedList(CustomVMobject):
         if center:
             self.move_to(ORIGIN)
 
+        self.update()
+
     def set_next(self, from_: Node | None, to: Node | None) -> None:
         if self.get_next(from_) == to:
             # if from_.next == to:
