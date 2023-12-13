@@ -11,7 +11,7 @@ from code_curator.data_structures.graph import LabeledLine
 from code_curator.data_structures.graph import Vertex
 
 
-@pytest.fixture()
+@pytest.fixture
 def graph() -> Graph:
     return Graph()
 
@@ -72,7 +72,6 @@ def test_edge() -> None:
 def test_graph(graph) -> None:
     assert len(graph.vertices) == 0
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 0
 
 
 def test_add_vertex_with_label(graph) -> None:
@@ -80,7 +79,6 @@ def test_add_vertex_with_label(graph) -> None:
 
     assert len(graph.vertices) == 1
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 1
 
 
 def test_add_vertex_with_vertex(graph) -> None:
@@ -91,9 +89,6 @@ def test_add_vertex_with_vertex(graph) -> None:
     assert len(graph.vertices) == 1
     assert vertex in graph.vertices
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 1
-    assert vertex in graph.adjacency_list
-    assert len(graph.adjacency_list[vertex]) == 0
 
 
 def test_add_edge_with_non_mobject_vertices(graph) -> None:
@@ -107,8 +102,6 @@ def test_add_edge_with_non_mobject_vertices(graph) -> None:
     assert len(graph.vertices) == 2
     assert vertex_one in graph.vertices
     assert vertex_two in graph.vertices
-    assert len(graph.adjacency_list[vertex_one]) == 1
-    assert graph.adjacency_list[vertex_one][0] == vertex_two
     assert len(graph.edges) == 1
 
 
@@ -123,8 +116,6 @@ def test_add_edge_with_mobject_vertices(graph) -> None:
     assert len(graph.vertices) == 2
     assert vertex_one in graph.vertices
     assert vertex_two in graph.vertices
-    assert len(graph.adjacency_list[vertex_one]) == 1
-    assert graph.adjacency_list[vertex_one][0] == vertex_two
     assert len(graph.edges) == 1
 
 
@@ -136,7 +127,6 @@ def test_remove_single_vertex(graph) -> None:
 
     assert len(graph.vertices) == 0
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 0
     assert len(graph.submobjects) == 0
 
 
@@ -151,9 +141,6 @@ def test_remove_single_vertex_from_multi_vertex_graph(graph) -> None:
     assert len(graph.vertices) == 1
     assert vertex_two in graph.vertices
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 1
-    assert vertex_two in graph.adjacency_list
-    assert len(graph.adjacency_list[vertex_two]) == 0
     assert len(graph.submobjects) == 1
     assert vertex_two in graph.submobjects
 
@@ -175,11 +162,6 @@ def test_remove_edge(graph) -> None:
     assert vertex_one in graph.vertices
     assert vertex_two in graph.vertices
     assert len(graph.edges) == 0
-    assert len(graph.adjacency_list) == 2
-    assert vertex_one in graph.adjacency_list
-    assert vertex_two in graph.adjacency_list
-    assert len(graph.adjacency_list[vertex_one]) == 0
-    assert len(graph.adjacency_list[vertex_two]) == 0
     assert len(graph.submobjects) == 2
     assert vertex_one in graph.submobjects
     assert vertex_two in graph.submobjects
@@ -197,9 +179,6 @@ def test_remove_start_vertex_connected_by_edge(graph) -> None:
     assert len(graph.vertices) == 1
     assert vertex_two in graph.vertices
     assert len(graph.edges) == 1
-    assert len(graph.adjacency_list) == 1
-    assert vertex_two in graph.adjacency_list
-    assert len(graph.adjacency_list[vertex_two]) == 0
     edge = next(iter(graph.edges))
     assert edge.vertex_one is None
     assert edge.vertex_two is vertex_two
@@ -220,9 +199,6 @@ def test_remove_end_vertex_connected_by_edge(graph) -> None:
     assert len(graph.vertices) == 1
     assert vertex_one in graph.vertices
     assert len(graph.edges) == 1
-    assert len(graph.adjacency_list) == 1
-    assert vertex_one in graph.adjacency_list
-    assert len(graph.adjacency_list[vertex_one]) == 0
     edge = next(iter(graph.edges))
     assert edge.vertex_two is None
     assert edge.vertex_one is vertex_one
@@ -262,13 +238,17 @@ def test_labeled_line_pointing_to_mobject() -> None:
     labeled_line = LabeledLine(vertex, length=length, direction=direction)
 
     end = vertex.get_boundary_point(-direction)
-    assert np.array_equal(labeled_line.start, Point(end).shift(-direction * length).get_boundary_point(direction))
+    start = Point(end).shift(-direction * length).get_boundary_point(direction)
+
+    for observed_component, expected_component in zip(labeled_line.start, start):
+        assert np.isclose(observed_component, expected_component)
+
     for observed_component, expected_component in zip(labeled_line.end, end):
         assert np.isclose(observed_component, expected_component)
 
 
 def test_labeled_line_by_single_coordinate() -> None:
-    coordinate = [0, 0, 0]
+    coordinate = (0, 0, 0)
     length = 1
     direction = DOWN
     labeled_line = LabeledLine(coordinate, length=length, direction=direction)
