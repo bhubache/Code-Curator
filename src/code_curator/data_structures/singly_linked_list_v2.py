@@ -32,6 +32,9 @@ DEFAULT_TIP_LENGTH = 0.2
 # TODO: Add more flexible positioning options
 RELATIVE_POSITION = (2.0, 0.0, 0.0)
 
+# TODO: Undo operation!!!
+# TODO: Make methods like _insert_node work with ``animate`` attribute
+
 
 class SinglyLinkedList(CustomVMobject):
     def __init__(
@@ -150,7 +153,7 @@ class SinglyLinkedList(CustomVMobject):
     def create_sll(cls, *values, color: str | Color = "#FFFFFF"):
         return SinglyLinkedList(*values, color=color)
 
-    def add_null(self):
+    def add_null(self, center: bool = True):
         if self.has_null:
             return self
 
@@ -162,13 +165,19 @@ class SinglyLinkedList(CustomVMobject):
             null = self.create_node(0, "null", position_relative_to=position_relative_to, position=ORIGIN)
             self.graph.add_vertex(null)
 
+        if center:
+            self.move_to(ORIGIN)
+
         return self
 
     def remove_null(self):
         raise NotImplementedError()
         return self
 
-    def add_head_pointer(self):
+    def add_head_pointer(self, center: bool = True):
+        if not self.has_head:
+            raise RuntimeError("Unable to add head pointer because no head is present")
+
         self.labeled_pointers["head"] = LabeledLine(
             self.head,
             label="head",
@@ -177,6 +186,10 @@ class SinglyLinkedList(CustomVMobject):
         )
         self.add(self.labeled_pointers["head"])
         self.add_updater(self.head_pointer_updater)
+
+        if center:
+            self.move_to(ORIGIN)
+
         return self
 
     # TODO: Understand if it'd be better to use arg rather than self
@@ -187,7 +200,10 @@ class SinglyLinkedList(CustomVMobject):
     def remove_head_pointer(self):
         raise NotImplementedError()
 
-    def add_tail_pointer(self):
+    def add_tail_pointer(self, center: bool = True):
+        if not self.has_tail:
+            raise RuntimeError("Unable to add tail pointer because no tail is present")
+
         if self.head == self.tail:
             tail_direction = UP
         else:
@@ -201,6 +217,10 @@ class SinglyLinkedList(CustomVMobject):
         )
         self.add(self.labeled_pointers["tail"])
         self.add_updater(self.tail_pointer_updater)
+
+        if center:
+            self.move_to(ORIGIN)
+
         return self
 
     def tail_pointer_updater(self, _) -> None:
@@ -250,7 +270,7 @@ class SinglyLinkedList(CustomVMobject):
             if curr_node is edge.vertex_one and edge.directedness.startswith("<"):
                 return edge.vertex_two
 
-            if curr_node is edge.vertex_two and edge.directedness.startswith(">"):
+            if curr_node is edge.vertex_two and edge.directedness.endswith(">"):
                 return edge.vertex_one
 
         return None
@@ -448,7 +468,7 @@ class SinglyLinkedList(CustomVMobject):
 
         return copied_components
 
-    def _insert_node(self, index: int, value) -> None:
+    def _insert_node(self, index: int, value, center: bool = True) -> None:
         positive_index = index if index >= 0 else len(self.nodes) + index
         if positive_index < 0 or positive_index > len(self.nodes):
             raise IndexError(f"Index {index} is invalid for length {len(self.nodes)}")
@@ -485,6 +505,9 @@ class SinglyLinkedList(CustomVMobject):
 
         # TODO: I don't think this is needed
         self.graph.add_vertex(new_node)
+
+        if center:
+            self.move_to(ORIGIN)
 
     def set_next(self, from_: Node | None, to: Node | None) -> None:
         if self.get_next(from_) == to:
