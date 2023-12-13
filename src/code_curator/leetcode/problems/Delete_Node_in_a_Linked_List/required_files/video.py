@@ -4,6 +4,7 @@ from pathlib import Path
 
 from manim import AnimationGroup
 from manim import config
+from manim import DOWN
 from manim import FadeIn
 from manim import FadeOut
 from manim import LEFT
@@ -19,7 +20,6 @@ from code_curator.animations.change_color import ChangeColor
 from code_curator.code.custom_code import CustomCode
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
-from code_curator.data_structures.pointers.simple_pointer import SimplePointer
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
 from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem as PresentProblem
@@ -34,10 +34,10 @@ from code_curator.main import QUALITY
 
 TITLE = "Delete Node in a Linked List"
 STATEMENT = (
-    r"There is a singly linked list head and we want to delete a node node in it. You"
-    r" are given the node to be deleted node. You will not be given access to the first"
-    r" node of head. All the values of the linked list are unique, and it is guaranteed"
-    r" that the given node node is not the last node in the linked list. Delete the"
+    r"There is a singly-linked list \code{head} and we want to delete a node \code{node} in it. You"
+    r" are given the node to be deleted \code{node}. You will \textbf{not be given access} to the first"
+    r" node of \code{head}. All the values of the linked list are \textbf{unique}, and it is guaranteed"
+    r" that the given node \code{node} is not the last node in the linked list. Delete the"
     r" given node. Note that by deleting the node, we do not mean removing it from"
     r" memory. We mean:"
 )
@@ -73,94 +73,209 @@ class Video(BaseScene):
     config["quality"] = QUALITY
 
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.present_problem = PresentProblem(
-            title=TITLE,
-            statement=STATEMENT,
-            constraints=CONSTRAINTS,
-            scene=self,
-        )
-        self.problem_analysis = ProblemAnalysis(
-            constraints=CONSTRAINTS,
-            explanations=CONSTRAINT_EXPLANATIONS,
-        )
-        self.present_problem.statement_tex = self.present_problem._create_statement(
-            STATEMENT, font_size=STATEMENT_FONT_SIZE
-        )
-        self.present_problem.constraints_tex = self.present_problem._create_constraints(
-            CONSTRAINTS, font_size=20, buff=0.20
-        )
-        self.special_notes_list = ProblemText.create_constraints_list(
-            SPECIAL_NOTES,
-            font_size=20,
-            buff=0.20,
+        super().__init__(*args, **kwargs)
+        self.title_tex = ProblemText.create_title(TITLE)
+        self.statement_header_tex = ProblemText.create_header("Statement")
+
+        # TODO: Make the left and right margins equal
+        self.statement_tex = ProblemText.create_statement(STATEMENT, font_size=STATEMENT_FONT_SIZE)
+        self.special_notes_list = ProblemText.create_list(*SPECIAL_NOTES).scale(0.75)
+        self.constraints_header_tex = ProblemText.create_header("Constraints")
+        self.constraints_list = ProblemText.create_list(*CONSTRAINTS)
+
+        self.first_tex_to_remove = self.statement_tex[37:64]
+        self.first_mention_tex = self.statement_tex[10:16]
+        self.second_mention_tex = self.statement_tex.get_sub_tex(
+            "Delete the given node.",
         )
 
-    def fade_out_everything(self):
-        self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
-        return FadeIn(self.code)
+        self.constraints_analysis_title_tex = ProblemText.create_title("Constraints Analysis")
+        self.constraints_analysis_table = ProblemText.create_constraints_table(constraints=CONSTRAINTS, explanations=CONSTRAINT_EXPLANATIONS)
 
-    def fade_out_constraints_table_for_constraint_four_explanation(self):
-        return FadeOut(self.code)
+    def fade_in_title(self):
+        return FadeIn(self.title_tex)
+
+    def move_title(self):
+        # TODO: Make movement smooth
+        return self.title_tex.animate.to_edge(UP)
+
+    def fade_in_statement_header(self):
+        title_copy = self.title_tex.copy().to_edge(UP)
+        self.statement_header_tex.next_to(title_copy, DOWN)
+        self.statement_header_tex.to_edge(LEFT)
+        return FadeIn(self.statement_header_tex)
+
+    def fade_in_statement(self):
+        self.statement_tex.next_to(self.statement_header_tex, DOWN)
+        self.statement_tex.to_edge(LEFT)
+        return FadeIn(self.statement_tex)
+
+    def deleting_point_1(self):
+        self.special_notes_list.next_to(self.statement_tex, DOWN)
+        self.special_notes_list.to_edge(LEFT)
+        return FadeIn(self.special_notes_list[0])
+
+    def deleting_point_2(self):
+        return FadeIn(self.special_notes_list[1])
+
+    def deleting_point_3(self):
+        return FadeIn(self.special_notes_list[2])
+
+    def deleting_point_4(self):
+        return FadeIn(self.special_notes_list[3])
+
+    def fade_in_constraints_header(self):
+        self.constraints_header_tex.next_to(self.special_notes_list, DOWN)
+        self.constraints_header_tex.to_edge(LEFT)
+        return FadeIn(self.constraints_header_tex)
+
+    def fade_in_constraint_one(self):
+        self.constraints_list.next_to(self.constraints_header_tex, DOWN)
+        self.constraints_list.to_edge(LEFT)
+        return FadeIn(self.constraints_list[0])
+
+    def fade_in_constraint_two(self):
+        return FadeIn(self.constraints_list[1])
+
+    def fade_in_constraint_three(self):
+        return FadeIn(self.constraints_list[2])
+
+    def fade_in_constraint_four(self):
+        return FadeIn(self.constraints_list[3])
+
+    def highlight_constraints_duplication(self):
+        return AnimationGroup(
+            ChangeColor(self.constraints_list[2], KEEP_COLOR),
+            ChangeColor(self.constraints_list[3], KEEP_COLOR),
+            ChangeColor(
+                self.first_tex_to_remove,
+                REMOVE_COLOR,
+                starting_color=self.statement_tex.color,
+            ),
+        )
+
+    def remove_constraints_duplication(self):
+        return AnimationGroup(
+            self.first_tex_to_remove.animate.set_opacity(0),
+            ChangeColor(self.constraints_list[2], RESET_COLOR),
+            ChangeColor(self.constraints_list[3], RESET_COLOR),
+        )
+
+    def highlight_statement_duplication(self):
+        return AnimationGroup(
+            ChangeColor(
+                self.first_mention_tex,
+                KEEP_COLOR,
+                starting_color=self.statement_tex.color,
+            ),
+            ChangeColor(
+                self.second_mention_tex,
+                REMOVE_COLOR,
+                starting_color=self.statement_tex.color,
+            ),
+        )
+
+    def remove_statement_duplication(self):
+        return AnimationGroup(
+            self.second_mention_tex.animate.set_opacity(0),
+            ChangeColor(self.first_mention_tex, RESET_COLOR),
+        )
+
+    def smooth_over_wording(self):
+        new_statement_tex = ProblemText.create_statement(
+            "There is a singly linked list called \code{head} and a node that we wish to"
+            " remove called \code{node}. You will not be given access to the head of the"
+            " list. Instead, you will be given access to the node to be deleted.",
+            font_size=STATEMENT_FONT_SIZE,
+        )
+        new_statement_tex.next_to(self.statement_header_tex, DOWN)
+        new_statement_tex.to_edge(LEFT)
+
+        return FadeOut(self.statement_tex), FadeOut(self.first_mention_tex), FadeIn(new_statement_tex)
+
+    def transition_to_constraints_analysis(self):
+        self.constraints_analysis_title_tex.to_edge(UP)
+
+        # FIXME: This is for development, REMOVE THIS FOR PRODUCTION
+        self.mobjects[0].add(self.title_tex)
+
+        return FadeOut(*self.scene_mobjects), FadeIn(self.constraints_analysis_title_tex), FadeIn(self.constraints_analysis_table)
+
+    def start_first_constraint_explanation(self):
+        self.fourth_constraint_table_breakdown = ProblemText.create_table(
+            [
+                "The node to be deleted is in the list",
+                "The node to be deleted is not a tail node",
+            ],
+            [
+                r"$\checkmark$",
+                r"$\checkmark$",
+            ],
+            row_headers=[
+                "Constraint Component",
+                "Requirement Met",
+            ],
+            columns_to_hide=[1],
+        ).scale(0.4)
+
+        self.first_requirement = self.fourth_constraint_table_breakdown.get_columns()[1][1]
+        self.second_requirement = self.fourth_constraint_table_breakdown.get_columns()[1][2]
+
+        self.first_requirement.set_opacity(0)
+        self.second_requirement.set_opacity(0)
+        self.fourth_constraint_table_breakdown.to_edge(UP + LEFT)
+
+        constraint_four_copy = self.constraints_analysis_table.get_columns()[0][4].copy()
+        # self.mobjects[0].add(constraint_four_copy)
+        self.constraints_analysis_table.get_columns()[0][4].set_stroke_opacity(0)
+        self.constraints_analysis_table.get_columns()[0][4].set_opacity(0)
+        return (
+            ArrowTransportTransformation(
+                constraint_four_copy,
+                self.fourth_constraint_table_breakdown,
+            ),
+            FadeOut(self.constraints_analysis_title_tex),
+            FadeOut(self.constraints_analysis_table),
+        )
+
+    def fade_in_node(self):
+        from code_curator.data_structures.graph import Edge
+        from code_curator.data_structures.graph import Vertex
+
+        vertex_one = Vertex(
+            label=1,
+            position=(-1.0, 0.0, 0.0),
+        )
+        vertex_two = Vertex(
+            label=2,
+            position=(1.0, 1.0, 0.0),
+        )
+        self.add(vertex_one)
+        self.add(vertex_two)
+        return FadeIn(
+            Edge(
+                vertex_one,
+                vertex_two,
+                directedness="->",
+            )
+        )
+        self.sll = SinglyLinkedList(0, show_null=True)
+        self.sll.head_pointer.set_opacity(0)
+        self.sll.tail_pointer.set_opacity(0)
+        return FadeIn(self.sll)
+
+    def fade_in_head(self):
         return Wait()
-        return FadeOut(*self.scene_mobjects)
+        return self.sll.head_pointer.animate(run_time=0.3).set_opacity(1)
 
-    def fade_in_linked_list(self):
-        # self.sll_for_normal_removal = SinglyLinkedList(0, 1, 2, 3, 4, show_null=True)
-        # self.sll_for_normal_removal.add_labeled_pointer(0, "p")
-
-        self.code = CustomCode(file_name=Path(__file__).parent / "source.py")
-        # self.code.create_highlighter()
-        # self.pointer_p = LabeledLine(self.sll_for_normal_removal.get_node(0), direction=UP)
-        # self.pointer_p = self.sll_for_normal_removal.add_incoming_arrow_at_index(
-        #     0,
-        #     direction=UP,
-        #     name="p",
-        # )
-        # return FadeIn(self.sll_for_normal_removal)
-        from manim import Circle
-        return FadeIn(Circle())
-
-    @run_time_can_be_truncated
-    def advance_pointer(self):
+    def fade_in_tail(self):
         return Wait()
-        # return self.code.move_highlighter_to_substring("MyFirstClass")
-        # self.sll_for_normal_removal, animation_one = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal, animation_two = self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        # self.sll_for_normal_removal.curve_pointer_to(self.sll_for_normal_removal.get_node(1).next_pointer, self.sll_for_normal_removal.get_node(3))
-        # # self.sll_for_normal_removal.grow_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
-        # self.sll_for_normal_removal.advance_pointer("p")
-        # self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(0).next_pointer)
-        # self.sll_for_normal_removal, animation = self.sll_for_normal_removal.fade_out_components(
-        #     self.sll_for_normal_removal.get_node(2),
-        #     self.sll_for_normal_removal.get_node(2).next_pointer,
-        # )
-        # return animation
-        return self.code.change_code_text((Path(__file__).parent / "destination.py").read_text())
+        return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
-    def wave_pointer(self):
-        # TODO: Make multiple TransformSinglyLinkedList animations work in sequence
-        # TODO: Make multiple TransformSinglyLinkedList animations work in parallel. I believe they'll all have to
-        #  refer to the same copy!!!
-        # return self.sll_for_normal_removal.animate.move_to([0, 2, 0])
-        # return self.sll_for_normal_removal.get_node(1).animate.move_to([-1, -2, 0])
-        # self.sll_for_normal_removal.resume_updating()
-        # return self.sll_for_normal_removal.get_node(0).animate.move_to([-1, -2, 0])
-        # return self.code.move_highlighter_to_token("param_one")
-        # return self.code.animate.move_to([-1, 1, 0])
-        # return self.code.move_highlighter_to_substring("my_method")
+    def add_second_node(self):
         return Wait()
-        self.sll_for_normal_removal, animation = self.sll_for_normal_removal.shrink_pointer(self.sll_for_normal_removal.get_node(1).next_pointer)
+        self.sll, animation = self.sll.insert_node(-1, 1)
         return animation
-        # return self.sll_for_normal_removal.wave_pointer(
-        #     self.sll_for_normal_removal[1].pointer_to_next,
-        # )
-
-
-
-
-
 
 
 class PrimaryStream:
