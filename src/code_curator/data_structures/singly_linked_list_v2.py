@@ -54,6 +54,18 @@ class SinglyLinkedList(CustomVMobject):
 
         self.move_to(ORIGIN)
 
+    def __str__(self):
+        string = ""
+        for node in self.nodes:
+            string += f"{node} -> "
+
+        if self.has_null:
+            string += "null"
+        else:
+            string = string[:-4]
+
+        return string
+
     def __len__(self) -> int:
         return len(self.nodes)
 
@@ -491,8 +503,8 @@ class SinglyLinkedList(CustomVMobject):
         if positive_index == 0:
             self.set_next(new_node, self.head)
         elif positive_index == len(self.nodes):
-            self.set_next(new_node, self.null)
             self.set_next(self.tail, new_node)
+            self.set_next(new_node, self.null)
         else:
             trav = self.head
             trav_index = 0
