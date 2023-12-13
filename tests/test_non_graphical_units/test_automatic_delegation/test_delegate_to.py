@@ -1,25 +1,26 @@
 from __future__ import annotations
 
 import pytest
-from automatic_delegation.delegate_to import delegate_to
-from colour import Color
+from manim import BLACK
 from manim import Line
+from manim import WHITE
 
-from src.custom_vmobject import CustomVMobject
+from code_curator.automatic_delegation.delegate_to import delegate_to
+from code_curator.custom_vmobject import CustomVMobject
 
 
 @delegate_to(
     Line,
-    to='_line',
+    to="_line",
     manim_property_include={
-        'color',
-        'invalid_manim_property_delegate',
+        "color",
+        "invalid_manim_property_delegate",
     },
 )
 class ManimPropertyMobject(CustomVMobject):
     def __init__(self) -> None:
         super().__init__()
-        self._line = Line(color=Color('#FFFFFF'))
+        self._line = Line(color=WHITE)
 
 
 @pytest.fixture
@@ -33,12 +34,12 @@ def test_invalid_manim_property_delegate(manim_delegate: ManimPropertyMobject) -
 
 
 def test_valid_manim_property_delegate(manim_delegate: ManimPropertyMobject) -> None:
-    assert manim_delegate.color == Color('#FFFFFF')
+    assert manim_delegate.color == WHITE
 
 
 def test_valid_manim_property_delegate_assignment(manim_delegate: ManimPropertyMobject) -> None:
-    manim_delegate.color = Color('#000000')
-    assert manim_delegate.color == Color('#000000')
+    manim_delegate.color = BLACK
+    assert manim_delegate.color == BLACK
 
 
 # TODO: Determine if manim properties can or cannot be deleted
@@ -72,9 +73,9 @@ class MobjectWithNonManimProperty(CustomVMobject):
 
 @delegate_to(
     MobjectWithNonManimProperty,
-    to='_mobj',
+    to="_mobj",
     normal_include={
-        '_non_manim_property',
+        "_non_manim_property",
     },
 )
 class DelegatingMobjectWithNonManimProperty(CustomVMobject):

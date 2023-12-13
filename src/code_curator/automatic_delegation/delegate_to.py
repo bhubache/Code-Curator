@@ -1,16 +1,21 @@
 from __future__ import annotations
 
-from types import FunctionType
-
-from code_curator.manim_property import manim_property
+from typing import TYPE_CHECKING
 
 from .delegated_attribute import DelegatedAttribute
 from .simple_property import SimpleProperty
+from code_curator.manim_property import manim_property
+
+if TYPE_CHECKING:
+    from types import FunctionType
+
+
+# TODO: This may be too confusing to reasonably keep
 
 
 def delegate_to(
     delegate_cls: type,
-    to: str = 'delegate',
+    to: str = "delegate",
     manim_property_include: set = frozenset(),
     normal_include: set = frozenset(),
     ignore: set = frozenset(),
@@ -29,12 +34,13 @@ def delegate_to(
     """
     if not isinstance(manim_property_include, set):
         manim_property_include = set(manim_property_include)
+
     if not isinstance(normal_include, set):
         normal_include = set(normal_include)
+
     if not isinstance(ignore, set):
         ignore = set(ignore)
-    # delegates_attrs = set(delegate_cls.__dict__.keys())
-    # normal_attributes = normal_include | delegates_attrs - ignore
+
     normal_attributes = normal_include - ignore
     manim_property_attributes = manim_property_include - ignore
 
@@ -53,17 +59,17 @@ def delegate_to(
 
     def _add_delegating_methods(cls):
         """Delegate attributes to ``delegate_cls``, accounting for those that are manim properties"""
-        normal_attrs_not_implemented_by_delegator = normal_attributes - \
-            set(cls.__dict__.keys())
+        normal_attrs_not_implemented_by_delegator = normal_attributes - set(cls.__dict__.keys())
         for attr in normal_attrs_not_implemented_by_delegator:
             setattr(cls, attr, DelegatedAttribute(to, attr))
 
-        manim_attrs_not_implemented_by_delegator = manim_property_attributes - \
-            set(cls.__dict__.keys())
+        manim_attrs_not_implemented_by_delegator = manim_property_attributes - set(cls.__dict__.keys())
         for attr in manim_attrs_not_implemented_by_delegator:
             delegated_attr = DelegatedAttribute(to, attr)
             attr_manim_property = manim_property(
-                delegated_attr.__get__, delegated_attr.__set__, delegated_attr.__delete__,
+                delegated_attr.__get__,
+                delegated_attr.__set__,
+                delegated_attr.__delete__,
             )
             attr_manim_property.__set_name__(cls, attr)
             setattr(cls, attr, attr_manim_property)
