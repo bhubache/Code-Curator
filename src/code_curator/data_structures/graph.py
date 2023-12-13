@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import collections
 import math
 import warnings
 from typing import Any
@@ -21,6 +20,7 @@ from code_curator.data_structures.element import Element
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from collections.abc import Sequence
     from colour import Color
 
 
@@ -203,6 +203,7 @@ class Edge(CustomVMobject):
             color=color,
             stroke_width=line_stroke_width,
         )
+        self.directedness = directedness
 
         # FIXME: It looks like double headed arrow heads aren't the same size
         if directedness.endswith(">"):
@@ -302,30 +303,35 @@ class Graph(CustomVMobject):
         super().__init__()
         self.vertices: set[Vertex] = set()
         self.edges: set[Edge] = set()
-        self.adjacency_list: dict[Vertex, list[Vertex]] = collections.defaultdict(list)
 
     def add_vertex(
         self,
         label_or_vertex: Any,
+        quasi: bool = False,
         **kwargs,
-    ) -> None:
+    ) -> Vertex:
         if not isinstance(label_or_vertex, Vertex):
             label_or_vertex = Vertex(label_or_vertex, **kwargs)
 
         if label_or_vertex in self.vertices:
-            return
+            return label_or_vertex
 
-        self.add(label_or_vertex)
+        if quasi:
+            self.quasi_add(label_or_vertex)
+        else:
+            self.add(label_or_vertex)
+
         self.vertices.add(label_or_vertex)
-        if label_or_vertex not in self.adjacency_list:
-            self.adjacency_list[label_or_vertex] = []
+
+        return label_or_vertex
 
     def add_edge(
         self,
         vertex_one: Any,
         vertex_two: Any,
+        quasi: bool = False,
         **kwargs,
-    ) -> None:
+    ) -> Edge:
         if not isinstance(vertex_one, Mobject):
             vertex_one = self.get_vertex(vertex_one)
 
@@ -337,28 +343,26 @@ class Graph(CustomVMobject):
             vertex_two,
             **kwargs,
         )
-        self.add(edge)
 
-        self.adjacency_list[edge.vertex_one].append(edge.vertex_two)
+        if quasi:
+            self.quasi_add(edge)
+        else:
+            self.add(edge)
 
         if edge.vertex_one not in self.vertices:
-            self.vertices.add(edge.vertex_one)
+            self.add_vertex(edge.vertex_one, quasi=quasi)
 
         if edge.vertex_two not in self.vertices:
-            self.vertices.add(edge.vertex_two)
+            self.add_vertex(edge.vertex_two, quasi=quasi)
 
         self.edges.add(edge)
+
+        return edge
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
             if isinstance(mob, Vertex):
                 self.vertices.remove(mob)
-                del self.adjacency_list[mob]
-                for vertex in self.adjacency_list:
-                    try:
-                        self.adjacency_list[vertex].remove(mob)
-                    except ValueError:
-                        pass
 
                 for edge in self.edges:
                     if mob is edge.vertex_one:
@@ -369,7 +373,6 @@ class Graph(CustomVMobject):
 
             elif isinstance(mob, Edge):
                 self.edges.remove(mob)
-                self.adjacency_list[mob.vertex_one].remove(mob.vertex_two)
                 mob.vertex_one = None
                 mob.vertex_two = None
             else:
@@ -383,6 +386,60 @@ class Graph(CustomVMobject):
                 return vertex
 
         raise LookupError(f"Unable to find vertex with label ``{label}``")
+
+    def get_edges_connecting_vertices(self, vertex_one: Vertex, vertex_two: Vertex) -> Sequence[Edge]:
+        edges = []
+        for edge in self.edges:
+            if (edge.vertex_one == vertex_one and edge.vertex_two == vertex_two) or (
+                edge.vertex_one == vertex_two and edge.vertex_two == vertex_one
+            ):
+                edges.append(edge)
+
+        return edges
+
+    def get_edge_from_to(self, from_: Vertex, to: Vertex) -> Edge:
+        edges_to_from = []
+        for edge in self.get_edges_connecting_vertices(from_, to):
+            if edge.vertex_one == from_ and edge.vertex_two == to and edge.directedness == "->":
+                edges_to_from.append(edge)
+            elif edge.vertex_one == to and edge.vertex_two == from_ and edge.directedness == "<-":
+                edges_to_from.append(edge)
+
+        if len(edges_to_from) > 1:
+            raise RuntimeError(
+                f"There should only be one edge connecting {from_} to {to} but there are {len(edges_to_from)}:"
+                f" {edges_to_from}",
+            )
+
+        return edges_to_from[0]
+
+    def get_vertices_with_no_incoming_edges(self):
+        vertices_with_no_incoming_edges = []
+        for vertex in self.vertices:
+            for edge in self.edges:
+                if vertex is edge.vertex_one and edge.directedness.startswith("<"):
+                    break
+
+                if vertex is edge.vertex_two and edge.directedness.endswith(">"):
+                    break
+            else:
+                vertices_with_no_incoming_edges.append(vertex)
+
+        return vertices_with_no_incoming_edges
+
+    def get_vertices_with_no_outgoing_edges(self):
+        vertices_with_no_outgoing_edges = []
+        for vertex in self.vertices:
+            for edge in self.edges:
+                if vertex is edge.vertex_one and edge.directedness.endswith(">"):
+                    break
+
+                if vertex is edge.vertex_two and edge.directedness.startswith("<"):
+                    break
+            else:
+                vertices_with_no_outgoing_edges.append(vertex)
+
+        return vertices_with_no_outgoing_edges
 
 
 class LabeledLine(CustomVMobject):
@@ -452,10 +509,6 @@ class LabeledLine(CustomVMobject):
             line.add_updater(self.line_updater, call_updater=True)
 
     @property
-    def direction(self) -> tuple[float, float, float]:
-        return self.line.get_unit_vector()
-
-    @property
     def line_mob_connecting_proportion(self) -> float:
         return self.pointee.proportion_from_point(
             self.pointee.get_boundary_point(-self.line.get_unit_vector()),
@@ -472,6 +525,18 @@ class LabeledLine(CustomVMobject):
     @property
     def label(self) -> Any:
         return self.label_mobject.value
+
+    @property
+    def direction(self) -> tuple[float, float, float]:
+        return self.line.get_unit_vector()
+
+    @direction.setter
+    def direction(self, new_direction) -> None:
+        new_end = self.pointee.get_boundary_point(-new_direction)
+        new_start = Point(new_end).shift(-new_direction * self.line.get_length()).get_center()
+
+        self.line.put_start_and_end_on(new_start, new_end)
+        self.update()
 
     def line_updater(self, line):
         current_end = line.get_end()
