@@ -499,6 +499,269 @@ def test_insert_at_end_of_one_node_sll() -> None:
         sll.get_node(2)
 
 
-# @pytest.mark.parametrize()
-# def test_insert_node() -> None:
-#     ...
+def test_insert_at_front_of_two_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(0, 10)
+
+    assert len(sll) == 3
+    assert len(sll.values) == 3
+    assert len(sll.nodes) == 3
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 10
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 0
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 1
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.null
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(2)
+    with pytest.raises(IndexError):
+        sll.get_node(3)
+
+
+def test_insert_at_end_of_two_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(2, 10)
+
+    assert len(sll) == 3
+    assert len(sll.values) == 3
+    assert len(sll.nodes) == 3
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 0
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 1
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 10
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.null
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(2)
+    with pytest.raises(IndexError):
+        sll.get_node(3)
+
+
+def test_insert_in_middle_of_two_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(1, 10)
+
+    assert len(sll) == 3
+    assert len(sll.values) == 3
+    assert len(sll.nodes) == 3
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 0
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 10
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 1
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.null
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(2)
+    with pytest.raises(IndexError):
+        sll.get_node(3)
+
+
+def test_insert_at_front_of_three_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(0, 10)
+
+    assert len(sll) == 4
+    assert len(sll.values) == 4
+    assert len(sll.nodes) == 4
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 10
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 0
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 1
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_node(3).value == 2
+    assert sll.get_node_index(sll.get_node(3)) == 3
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.get_node(3)) is sll.null
+    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(3)
+    with pytest.raises(IndexError):
+        sll.get_node(4)
+
+
+def test_insert_at_end_of_three_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(3, 10)
+
+    assert len(sll) == 4
+    assert len(sll.values) == 4
+    assert len(sll.nodes) == 4
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 0
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 1
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 2
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_node(3).value == 10
+    assert sll.get_node_index(sll.get_node(3)) == 3
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.get_node(3)) is sll.null
+    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(3)
+    with pytest.raises(IndexError):
+        sll.get_node(4)
+
+
+def test_insert_at_index_one_of_three_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(1, 10)
+
+    assert len(sll) == 4
+    assert len(sll.values) == 4
+    assert len(sll.nodes) == 4
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 0
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 10
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 1
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_node(3).value == 2
+    assert sll.get_node_index(sll.get_node(3)) == 3
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.get_node(3)) is sll.null
+    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(3)
+    with pytest.raises(IndexError):
+        sll.get_node(4)
+
+
+def test_insert_at_index_two_of_three_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+    sll._insert_node(2, 10)
+
+    assert len(sll) == 4
+    assert len(sll.values) == 4
+    assert len(sll.nodes) == 4
+    assert sll.color == WHITE
+    assert sll.has_null is True
+    assert sll.has_head is True
+    assert sll.has_tail is True
+    assert sll.head is not sll.tail
+    assert sll.head is not sll.null
+    assert sll.tail is not sll.null
+    assert sll.has_head_pointer is True
+    assert sll.has_tail_pointer is True
+    assert sll.head_pointer.pointee is sll.head
+    assert sll.tail_pointer.pointee is sll.tail
+    assert sll.get_node(0).value == 0
+    assert sll.get_node_index(sll.get_node(0)) == 0
+    assert sll.get_node(1).value == 1
+    assert sll.get_node_index(sll.get_node(1)) == 1
+    assert sll.get_node(2).value == 10
+    assert sll.get_node_index(sll.get_node(2)) == 2
+    assert sll.get_node(3).value == 2
+    assert sll.get_node_index(sll.get_node(3)) == 3
+    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
+    assert sll.get_prev(sll.get_node(0)) is None
+    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
+    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
+    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
+    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
+    assert sll.get_next(sll.get_node(3)) is sll.null
+    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
+    assert sll.get_next(sll.null) is None
+    assert sll.get_prev(sll.null) is sll.get_node(3)
+    with pytest.raises(IndexError):
+        sll.get_node(4)
