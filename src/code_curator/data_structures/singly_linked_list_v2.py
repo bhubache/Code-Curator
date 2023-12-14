@@ -50,10 +50,10 @@ class SinglyLinkedList(CustomVMobject):
         self.color = color
         self.labeled_pointers: dict[Hashable, LabeledLine] = {}
 
+        self.add(self.graph)
+
         for index, value in enumerate(values):
             self._insert_node(index, value)
-
-        self.add(self.graph)
 
         self.move_to(ORIGIN)
 
@@ -240,6 +240,9 @@ class SinglyLinkedList(CustomVMobject):
 
     def tail_pointer_updater(self, _) -> None:
         self.tail_pointer.pointee = self.tail
+        if np.array_equal(self.tail_pointer.direction, UP) and self.head is not self.tail:
+            self.tail_pointer.direction = DOWN
+
         self.tail_pointer.update()
 
     def remove_tail_pointer(self):
@@ -488,14 +491,7 @@ class SinglyLinkedList(CustomVMobject):
         if positive_index < 0 or positive_index > len(self.nodes):
             raise IndexError(f"Index {index} is invalid for length {len(self.nodes)}")
 
-        if positive_index == 0:
-            position_relative_to = ORIGIN
-        elif positive_index < len(self.nodes):
-            position_relative_to = self.get_node(positive_index)
-        else:
-            position_relative_to = self.get_node(positive_index - 1)
-
-        new_node = self.create_node(value, position_relative_to=position_relative_to)
+        new_node = self.create_node(value, position_relative_to=(10, 10, 0))
 
         if self.head is None and self.tail is None:
             self.graph.add_vertex(new_node)
