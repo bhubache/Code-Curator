@@ -527,16 +527,12 @@ class SinglyLinkedList(CustomVMobject):
 
     def set_next(self, from_: Node | None, to: Node | None) -> None:
         if self.get_next(from_) == to:
-            # if from_.next == to:
             return
 
         if self.get_next(from_) is None:
-            # if from_.next is None:
             edge = self.add_edge(from_, to)
         else:
-            # edge = self.graph.get_edge_from_to(from_, from_.next)
             edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
-            # if edge.vertex_one == from_.next:
             if edge.vertex_one == self.get_next(from_):
                 edge.vertex_one = to
             else:
