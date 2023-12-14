@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools as it
 from typing import TYPE_CHECKING
 
+import numpy as np
 from manim import Animation
 from manim import CurvedArrow
 from manim import DOWN
@@ -520,10 +521,16 @@ class SinglyLinkedList(CustomVMobject):
         # TODO: I don't think this is needed
         self.graph.add_vertex(new_node)
 
-        if center:
-            self.move_to(ORIGIN)
+        trav = self.get_next(self.head)
+        while trav is not None:
+            # FIXME: Hardcoded relative placement of nodes
+            trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
+            trav = self.get_next(trav)
 
         self.update()
+
+        if center:
+            self.move_to(ORIGIN)
 
     def set_next(self, from_: Node | None, to: Node | None) -> None:
         if self.get_next(from_) == to:
