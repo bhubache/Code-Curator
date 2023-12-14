@@ -512,7 +512,7 @@ class SinglyLinkedList(CustomVMobject):
             trav_index = 0
             while trav_index < (positive_index - 1):
                 trav_index += 1
-                trav = trav.next
+                trav = self.get_next(trav)
 
             self.set_next(new_node, self.get_next(trav))
             self.set_next(trav, new_node)
