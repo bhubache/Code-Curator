@@ -37,6 +37,8 @@ RELATIVE_POSITION = (2.0, 0.0, 0.0)
 
 
 class SinglyLinkedList(CustomVMobject):
+    _node_counter: int = 0
+
     def __init__(
         self,
         *values,
@@ -83,8 +85,8 @@ class SinglyLinkedList(CustomVMobject):
 
     @property
     def head(self) -> Node | None:
-        # Vertex with no incoming edges
         heads = self.graph.get_vertices_with_no_incoming_edges()
+
         if len(heads) > 1:
             raise RuntimeError(f"BUG: SLL has more than one head: {heads}")
 
@@ -170,11 +172,11 @@ class SinglyLinkedList(CustomVMobject):
             return self
 
         if self.has_tail:
-            null = self.create_node(len(self.nodes), "null", position_relative_to=self.tail)
+            null = self.create_node("null", position_relative_to=self.tail)
             self.set_next(self.tail, null)
         else:
             position_relative_to = ORIGIN
-            null = self.create_node(0, "null", position_relative_to=position_relative_to, position=ORIGIN)
+            null = self.create_node("null", position_relative_to=position_relative_to, position=ORIGIN)
             self.graph.add_vertex(null)
 
         if center:
@@ -492,7 +494,7 @@ class SinglyLinkedList(CustomVMobject):
         else:
             position_relative_to = self.get_node(positive_index - 1)
 
-        new_node = self.create_node(positive_index, value, position_relative_to=position_relative_to)
+        new_node = self.create_node(value, position_relative_to=position_relative_to)
 
         if self.head is None and self.tail is None:
             self.graph.add_vertex(new_node)
@@ -512,8 +514,8 @@ class SinglyLinkedList(CustomVMobject):
                 trav_index += 1
                 trav = trav.next
 
-            self.set_next(new_node, self.get_node(positive_index))
-            self.set_next(self.get_node(positive_index - 1), new_node)
+            self.set_next(new_node, self.get_next(trav))
+            self.set_next(trav, new_node)
 
         # TODO: I don't think this is needed
         self.graph.add_vertex(new_node)
@@ -544,14 +546,14 @@ class SinglyLinkedList(CustomVMobject):
 
     def create_node(
         self,
-        index: int,
         value,
         position_relative_to,
         position: Iterable[float] = RELATIVE_POSITION,
     ) -> Node:
+        SinglyLinkedList._node_counter += 1
         return Node(
             sll=self,
-            label=index,
+            label=SinglyLinkedList._node_counter,
             contents=value,
             show_label=False,
             position=position,
