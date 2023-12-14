@@ -51,6 +51,67 @@ def test_sll_building(scene: Scene, kwargs: dict[str, Any]) -> None:
     scene.add(sll)
 
 
+@frames_comparison
+@pytest.mark.parametrize(
+    ("unique_value_for_caching_control_data", "sll", "index", "value"),
+    (
+        # Empty
+        (0, SinglyLinkedList.create_sll(color=WHITE), 0, 10),
+        (1, SinglyLinkedList.create_sll(color=WHITE).add_null(), 0, 10),
+        (2, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
+        # One node
+        (3, SinglyLinkedList.create_sll(0, color=WHITE), 0, 10),
+        (4, SinglyLinkedList.create_sll(0, color=WHITE).add_null(), 0, 10),
+        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
+        (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
+        (7, SinglyLinkedList.create_sll(0, color=WHITE), 1, 10),
+        (8, SinglyLinkedList.create_sll(0, color=WHITE).add_null(), 1, 10),
+        (9, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
+        (10, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
+        # Two nodes
+        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE), 0, 10),
+        (12, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 0, 10),
+        (13, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
+        (14, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
+        (15, SinglyLinkedList.create_sll(0, 1, color=WHITE), 1, 10),
+        (16, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 1, 10),
+        (17, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
+        (18, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
+        (19, SinglyLinkedList.create_sll(0, 1, color=WHITE), 2, 10),
+        (20, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 2, 10),
+        (21, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 2, 10),
+        (22, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 2, 10),
+        # Three nodes
+        (23, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 0, 10),
+        (24, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 10),
+        (25, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
+        (26, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
+        (27, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 1, 10),
+        (28, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 1, 10),
+        (29, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
+        (30, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
+        (31, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 2, 10),
+        (32, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 2, 10),
+        (33, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 2, 10),
+        (34, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 2, 10),
+        (35, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 3, 10),
+        (36, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 3, 10),
+        (37, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 3, 10),
+        (38, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 3, 10),
+    ),
+)
+def test_insert(
+    scene: Scene,
+    unique_value_for_caching_control_data: int,
+    sll: SinglyLinkedList,
+    index: int,
+    value: Any,
+) -> None:
+    sll._insert_node(index, value, center=True)
+
+    scene.add(sll)
+
+
 # @frames_comparison
 # @pytest.mark.parametrize(
 #
