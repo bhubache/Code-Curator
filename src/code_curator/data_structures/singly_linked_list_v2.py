@@ -10,6 +10,7 @@ from manim import DOWN
 from manim import Mobject
 from manim import ORIGIN
 from manim import UP
+from manim import WHITE
 
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.custom_vmobject import CustomVMobject
@@ -34,7 +35,7 @@ DEFAULT_TIP_LENGTH = 0.2
 RELATIVE_POSITION = (2.0, 0.0, 0.0)
 
 # TODO: Undo operation!!!
-# TODO: Make methods like _insert_node work with ``animate`` attribute
+# TODO: Make methods like insert_node work with ``animate`` attribute
 
 
 class SinglyLinkedList(CustomVMobject):
@@ -43,7 +44,7 @@ class SinglyLinkedList(CustomVMobject):
     def __init__(
         self,
         *values,
-        color: str | Color,
+        color: str | Color = WHITE,
     ) -> None:
         super().__init__()
         self.graph = Graph()
@@ -53,7 +54,7 @@ class SinglyLinkedList(CustomVMobject):
         self.add(self.graph)
 
         for index, value in enumerate(values):
-            self._insert_node(index, value)
+            self.insert_node(index, value)
 
         self.move_to(ORIGIN)
 
@@ -88,8 +89,26 @@ class SinglyLinkedList(CustomVMobject):
     def head(self) -> Node | None:
         heads = self.graph.get_vertices_with_no_incoming_edges()
 
-        if len(heads) > 1:
+        if len(heads) > 3:
             raise RuntimeError(f"BUG: SLL has more than one head: {heads}")
+
+        if len(heads) == 2:
+            newest_node = None
+            actual_head = None
+            for head_candidate in heads:
+                trav = head_candidate
+                while self.has_next(trav):
+                    trav = self.get_next(trav)
+
+                if newest_node is None:
+                    newest_node = trav
+                    actual_head = head_candidate
+                else:
+                    if trav.label > newest_node.label:
+                        newest_node = trav
+                        actual_head = head_candidate
+
+            return actual_head
 
         try:
             return heads[0]
@@ -283,6 +302,9 @@ class SinglyLinkedList(CustomVMobject):
 
         return None
 
+    def has_next(self, node: Node) -> bool:
+        return self.get_next(node) is not None
+
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
             if curr_node is edge.vertex_one and edge.directedness.startswith("<"):
@@ -430,33 +452,6 @@ class SinglyLinkedList(CustomVMobject):
             copy,
         )
 
-    def insert_node(self, index: int, value) -> tuple[SinglyLinkedList, Animation]:
-        copy = self._create_animation_copy()
-        # Remove link to node at index
-        # Add link from node at index - 1 to new node
-        # Add link from new node to node original at index
-        # Shift all nodes at index + 1 over
-        # Reset positioning
-        copy._insert_node(index, value)
-
-        sll_with_added_node = SinglyLinkedList(*copy.values, show_null=copy.show_null)
-
-        # for shorter_node, longer_node in zip(copy, sll_with_added_node):
-        #     shorter_node.move_to(longer_node)
-        #     if shorter_node.next_pointer is not None:
-        #         shorter_node.next_pointer.move_to(longer_node.next_pointer)
-
-        copy.move_to([0, -2, 0])
-
-        # copy.remove_labeled_pointer("tail")
-        # copy.add_labeled_pointer(-1, "tail")
-
-        # self.resume_updating()
-        # return copy, TransformSinglyLinkedList(self, copy)
-        from manim import FadeIn
-
-        return copy, FadeIn(copy)
-
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
@@ -486,7 +481,7 @@ class SinglyLinkedList(CustomVMobject):
 
         return copied_components
 
-    def _insert_node(self, index: int, value, center: bool = True) -> None:
+    def insert_node(self, index: int, value, center: bool = True) -> None:
         positive_index = index if index >= 0 else len(self.nodes) + index
         if positive_index < 0 or positive_index > len(self.nodes):
             raise IndexError(f"Index {index} is invalid for length {len(self.nodes)}")
@@ -496,7 +491,6 @@ class SinglyLinkedList(CustomVMobject):
         if self.head is None and self.tail is None:
             self.graph.add_vertex(new_node)
             new_node.move_to(ORIGIN)
-
             return
 
         if positive_index == 0:
@@ -523,7 +517,8 @@ class SinglyLinkedList(CustomVMobject):
             trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
             trav = self.get_next(trav)
 
-        self.update()
+        self.resume_updating()
+        self.suspend_updating()
 
         if center:
             self.move_to(ORIGIN)
@@ -541,7 +536,12 @@ class SinglyLinkedList(CustomVMobject):
             else:
                 edge.vertex_two = to
 
-        edge.update()
+            # TODO: Run all unit tests for this
+            if to not in self.graph:
+                self.graph.add_vertex(to)
+
+        edge.resume_updating()
+        edge.suspend_updating()
 
     def create_node(
         self,
