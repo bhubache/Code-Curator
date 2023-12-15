@@ -239,32 +239,35 @@ class Video(BaseScene):
         )
 
     def fade_in_node(self):
-        from code_curator.data_structures.graph import Edge
-        from code_curator.data_structures.graph import Vertex
+        # from code_curator.data_structures.graph import Edge
+        # from code_curator.data_structures.graph import Vertex
 
-        vertex_one = Vertex(
-            label=1,
-            position=(-1.0, 0.0, 0.0),
-        )
-        vertex_two = Vertex(
-            label=2,
-            position=(1.0, 1.0, 0.0),
-        )
-        self.add(vertex_one)
-        self.add(vertex_two)
-        return FadeIn(
-            Edge(
-                vertex_one,
-                vertex_two,
-                directedness="->",
-            )
-        )
-        self.sll = SinglyLinkedList(0, show_null=True)
-        self.sll.head_pointer.set_opacity(0)
-        self.sll.tail_pointer.set_opacity(0)
+        # vertex_one = Vertex(
+        #     label=1,
+        #     position=(-1.0, 0.0, 0.0),
+        # )
+        # vertex_two = Vertex(
+        #     label=2,
+        #     position=(1.0, 1.0, 0.0),
+        # )
+        # self.add(vertex_one)
+        # self.add(vertex_two)
+        # return FadeIn(
+        #     Edge(
+        #         vertex_one,
+        #         vertex_two,
+        #         directedness="->",
+        #     )
+        # )
+        self.sll = SinglyLinkedList(0).add_null()
+        # self.sll.head_pointer.set_opacity(0)
+        # self.sll.tail_pointer.set_opacity(0)
         return FadeIn(self.sll)
 
     def fade_in_head(self):
+        self.sll.insert_node(1, 10)
+        return Wait()
+        return self.sll.animate.insert_node(0, 10)
         return Wait()
         return self.sll.head_pointer.animate(run_time=0.3).set_opacity(1)
 
@@ -420,17 +423,19 @@ class PrimaryStream:
 
     def fade_in_node(self):
         self.sll = SinglyLinkedList(0)
-        self.sll.head_pointer.set_opacity(0)
-        self.sll.tail_pointer.set_opacity(0)
+        # self.sll.head_pointer.set_opacity(0)
+        # self.sll.tail_pointer.set_opacity(0)
         return FadeIn(self.sll)
 
     def fade_in_head(self):
         return self.sll.head_pointer.animate(run_time=0.3).set_opacity(1)
 
     def fade_in_tail(self):
-        return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
+        return Wait()
+        # return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
     def add_second_node(self):
+
         return (
             self.sll.add_last(data=1)
             .subsequently_fade_in_container()

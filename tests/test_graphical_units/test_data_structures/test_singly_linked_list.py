@@ -107,7 +107,7 @@ def test_insert(
     index: int,
     value: Any,
 ) -> None:
-    sll._insert_node(index, value, center=True)
+    sll.insert_node(index, value, center=True)
 
     scene.add(sll)
 
@@ -135,6 +135,6 @@ def test_insert(
 # )
 # def test_insertion(scene: Scene, indices_and_values: Sequence[int, Any], sll: SinglyLinkedList) -> None:
 #     for index, value in indices_and_values:
-#         sll._insert_node(index, value)
+#         sll.insert_node(index, value)
 #
 #     scene.add(sll)

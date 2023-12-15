@@ -409,7 +409,7 @@ def test_three_node_sll_showing_null_with_pointers() -> None:
 def test_insert_into_empty_sll() -> None:
     sll = SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    sll._insert_node(len(sll), 10)
+    sll.insert_node(len(sll), 10)
 
     assert len(sll) == 1
     assert len(sll.values) == 1
@@ -437,7 +437,7 @@ def test_insert_into_empty_sll() -> None:
 def test_insert_at_front_of_one_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    sll._insert_node(0, 10)
+    sll.insert_node(0, 10)
 
     assert len(sll) == 2
     assert len(sll.values) == 2
@@ -469,7 +469,7 @@ def test_insert_at_front_of_one_node_sll() -> None:
 
 def test_insert_at_end_of_one_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(1, 10)
+    sll.insert_node(1, 10)
 
     assert len(sll) == 2
     assert len(sll.values) == 2
@@ -501,7 +501,7 @@ def test_insert_at_end_of_one_node_sll() -> None:
 
 def test_insert_at_front_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(0, 10)
+    sll.insert_node(0, 10)
 
     assert len(sll) == 3
     assert len(sll.values) == 3
@@ -537,7 +537,7 @@ def test_insert_at_front_of_two_node_sll() -> None:
 
 def test_insert_at_end_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(2, 10)
+    sll.insert_node(2, 10)
 
     assert len(sll) == 3
     assert len(sll.values) == 3
@@ -573,7 +573,7 @@ def test_insert_at_end_of_two_node_sll() -> None:
 
 def test_insert_in_middle_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(1, 10)
+    sll.insert_node(1, 10)
 
     assert len(sll) == 3
     assert len(sll.values) == 3
@@ -609,7 +609,7 @@ def test_insert_in_middle_of_two_node_sll() -> None:
 
 def test_insert_at_front_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(0, 10)
+    sll.insert_node(0, 10)
 
     assert len(sll) == 4
     assert len(sll.values) == 4
@@ -649,7 +649,7 @@ def test_insert_at_front_of_three_node_sll() -> None:
 
 def test_insert_at_end_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(3, 10)
+    sll.insert_node(3, 10)
 
     assert len(sll) == 4
     assert len(sll.values) == 4
@@ -689,7 +689,7 @@ def test_insert_at_end_of_three_node_sll() -> None:
 
 def test_insert_at_index_one_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(1, 10)
+    sll.insert_node(1, 10)
 
     assert len(sll) == 4
     assert len(sll.values) == 4
@@ -729,7 +729,7 @@ def test_insert_at_index_one_of_three_node_sll() -> None:
 
 def test_insert_at_index_two_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
-    sll._insert_node(2, 10)
+    sll.insert_node(2, 10)
 
     assert len(sll) == 4
     assert len(sll.values) == 4
