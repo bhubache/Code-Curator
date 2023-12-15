@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from collections.abc import Sequence
     from colour import Color
+    from manim.typing import Vector
 
 
 DEFAULT_COLOR = BLACK
@@ -540,7 +541,7 @@ class LabeledLine(CustomVMobject):
         return self.label_mobject.value
 
     @property
-    def direction(self) -> tuple[float, float, float]:
+    def direction(self) -> Vector:
         return self.line.get_unit_vector()
 
     @direction.setter

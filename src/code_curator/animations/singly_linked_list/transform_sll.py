@@ -10,7 +10,6 @@ from manim import Scene
 from manim import Transform
 
 from code_curator.custom_logging.custom_logger import CustomLogger
-from code_curator.data_structures.graph import Graph
 
 if TYPE_CHECKING:
     from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
@@ -18,14 +17,19 @@ if TYPE_CHECKING:
 logger = CustomLogger.getLogger(__name__)
 
 
+# TODO: Might be duplicating work by having mobjects and their submobjects in the family members sets
+
+
 class TransformSinglyLinkedList(AnimationGroup):
-    def __init__(self, mobject: SinglyLinkedList, target_mobject: SinglyLinkedList, **kwargs) -> None:
+    def __init__(self, mobject: SinglyLinkedList, methods, **kwargs) -> None:
         self.mobject = mobject
-        self.target_mobject = target_mobject
+        self.ungroupified_mobject = mobject
+        self.methods = methods
+        self.target_mobject = self.mobject.target
 
         # TODO: Figure out what these methods do exactly
-        mobject_family_members = set(mobject.family_members_with_points())
-        target_mobject_family_members = set(target_mobject.family_members_with_points())
+        mobject_family_members = set(self.mobject.family_members_with_points())
+        target_mobject_family_members = set(self.target_mobject.family_members_with_points())
 
         def get_original_id(mobject: Mobject) -> str:
             try:
@@ -51,7 +55,7 @@ class TransformSinglyLinkedList(AnimationGroup):
                     break
 
             for mobject in target_mobject_family_members:
-                if mobject.original_id == submobject_id:
+                if get_original_id(mobject) == submobject_id:
                     original_to_target.append(mobject)
                     break
 
@@ -75,32 +79,11 @@ class TransformSinglyLinkedList(AnimationGroup):
 
     def clean_up_from_scene(self, scene: Scene) -> None:
         super().clean_up_from_scene(scene)
-        try:
-            scene.replace(self.mobject, self.target_mobject)
-        except ValueError:
-            logger.warning(
-                "When a submobject is removed from a parent mobject, manim extracts all submobjects from parent and"
-                " places them in scene.mobjects",
-            )
-            mobjects = []
-            for mob in scene.mobjects:
-                if mob in self.mobject:
-                    if self.target_mobject not in mobjects:
-                        mobjects.append(self.target_mobject)
 
-                    continue
+        scene.remove(self.mobject, self.target_mobject)
+        scene.add(self.ungroupified_mobject)
 
-                mobjects.append(mob)
-
-            scene.mobjects = mobjects
-
-        logger.warning(
-            "It seems an extra ``Graph`` is being added to the screen. Removing it. This may interfere with animations"
-            " that actually intend to have a graph as well",
-        )
-        mobjects_without_graph = []
-        for mobject in scene.mobjects:
-            if not isinstance(mobject, Graph):
-                mobjects_without_graph.append(mobject)
-
-        scene.mobjects = mobjects_without_graph
+        # TODO: Figure out why animation works without this!
+        # Apply all methods to self.mobject so it catches up to target in appearance
+        # for method, method_args, method_kwargs in self.methods:
+        #     method.__func__(self.mobject, *method_args, **method_kwargs)

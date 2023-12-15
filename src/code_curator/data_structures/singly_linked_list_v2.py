@@ -11,6 +11,7 @@ from manim import Mobject
 from manim import ORIGIN
 from manim import UP
 from manim import WHITE
+from manim.mobject.mobject import _AnimationBuilder
 
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.custom_vmobject import CustomVMobject
@@ -24,6 +25,8 @@ if TYPE_CHECKING:
     from collections.abc import Hashable
     from collections.abc import Iterable
     from colour import Color
+    from manim.typing import Vector
+    import types
 
 DEFAULT_NODE_RADIUS = 0.5
 DEFAULT_FONT_SIZE = 17
@@ -182,6 +185,10 @@ class SinglyLinkedList(CustomVMobject):
     @property
     def has_tail_pointer(self) -> bool:
         return self.tail_pointer is not None
+
+    @property
+    def animate(self) -> AnimationBuilder:
+        return AnimationBuilder(self)
 
     @classmethod
     def create_sll(cls, *values, color: str | Color = "#FFFFFF"):
@@ -344,47 +351,40 @@ class SinglyLinkedList(CustomVMobject):
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
 
+    # def move_labeled_pointer(
+    #     self,
+    #     pointer: str | LabeledLine,
+    #     num_nodes: int = 1,
+    # ) -> tuple[SinglyLinkedList, Animation]:
+    #     copy = self._create_animation_copy()
+    #     copy._move_labeled_pointer(pointer, num_nodes=num_nodes)
+
+    #     return copy, TransformSinglyLinkedList(
+    #         self,
+    #         copy,
+    #     )
+
     def move_labeled_pointer(
         self,
         pointer: str | LabeledLine,
-        num_nodes: int = 1,
-    ) -> tuple[SinglyLinkedList, Animation]:
-        copy = self._create_animation_copy()
-        copy._move_labeled_pointer(pointer, num_nodes=num_nodes)
-
-        return copy, TransformSinglyLinkedList(
-            self,
-            copy,
-        )
-
-    def _move_labeled_pointer(
-        self,
-        pointer: str | LabeledLine,
-        num_nodes: int = 1,
-        pointer_direction=None,
-        to: Node | None = None,
+        to: Node,
+        pointer_direction: Vector | None = None,
     ) -> None:
         if isinstance(pointer, str):
             labeled_pointer = self.get_labeled_pointer(pointer)
         else:
             labeled_pointer = pointer
 
-        if to is None:
-            old_node_index: int = self.nodes.index(labeled_pointer.pointee)
-            new_node_index: int = old_node_index + num_nodes
-
-            labeled_pointer.shift(
-                self.get_node(new_node_index).get_center() - self.get_node(old_node_index).get_center(),
-            )
-            labeled_pointer.pointee = self.get_node(new_node_index)
-        else:
-            labeled_pointer.shift(
-                to.get_center() - labeled_pointer.pointee.get_center(),
-            )
-            labeled_pointer.pointee = to
+        # labeled_pointer.shift(
+        #     to.get_center() - labeled_pointer.pointee.get_center(),
+        # )
+        labeled_pointer.pointee = to
 
         if pointer_direction is not None:
             labeled_pointer.direction = pointer_direction
+
+        labeled_pointer.resume_updating()
+        labeled_pointer.suspend_updating()
 
     def shrink_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
         node_index: int = self.get_next_pointers_node_index(pointer)
@@ -600,3 +600,76 @@ class Node(Vertex):
             return [edge for edge in self.edges if edge.vertex_one is self][0]
         except IndexError:
             pass  # The last node has no next pointer
+
+
+class AnimationBuilder(_AnimationBuilder):
+    def __getattr__(self, method_name) -> types.MethodType:
+        method = getattr(self.mobject.target, method_name)
+        has_overridden_animation = hasattr(method, "_override_animate")
+
+        if (self.is_chaining and has_overridden_animation) or self.overridden_animation:
+            raise NotImplementedError(
+                "Method chaining is currently not supported for overridden animations",
+            )
+
+        def update_target(*method_args, **method_kwargs):
+            if has_overridden_animation:
+                self.overridden_animation = method._override_animate(
+                    self.mobject,
+                    *method_args,
+                    anim_args=self.anim_args,
+                    **method_kwargs,
+                )
+            else:
+                self.methods.append([method, method_args, method_kwargs])
+                # TODO: In the example of move_labeled_pointer, we pass in the labeled_pointer to move.
+                #  This comes from self.mobject, which is an issue because the method is being applied to
+                #  self.mobject.target. So, for any arg and kwarg passed in that's from self.mobject, we
+                #  need to replace it with the equivalent from self.mobject.target
+
+                method_args_with_target_submobjects = []
+
+                for positional_arg in method_args:
+                    if not isinstance(positional_arg, Mobject):
+                        method_args_with_target_submobjects.append(positional_arg)
+                        continue
+
+                    # TODO: Learn what ``get_family`` is doing
+                    for target_sm in self.mobject.target.get_family():
+                        try:
+                            if target_sm.original_id == str(id(positional_arg)):
+                                method_args_with_target_submobjects.append(target_sm)
+                        except AttributeError:
+                            continue  # sm in target is new and thus not present in self.mobject
+
+                for key, value in method_kwargs.items():
+                    if not isinstance(value, Mobject):
+                        continue
+
+                    # TODO: Learn what ``get_family`` is doing
+                    for target_sm in self.mobject.target.get_family():
+                        try:
+                            if target_sm.original_id == str(id(value)):
+                                method_kwargs[key] = target_sm
+                        except AttributeError:
+                            continue  # sm in target is new and thus not present in self.mobject
+
+                method(*method_args_with_target_submobjects, **method_kwargs)
+
+            return self
+
+        self.is_chaining = True
+        self.cannot_pass_args = True
+
+        return update_target
+
+    def build(self) -> Animation:
+        if self.overridden_animation:
+            anim = self.overridden_animation
+        else:
+            anim = TransformSinglyLinkedList(self.mobject, self.methods)
+
+        for attr, value in self.anim_args.items():
+            setattr(anim, attr, value)
+
+        return anim

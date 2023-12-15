@@ -259,23 +259,26 @@ class Video(BaseScene):
         #         directedness="->",
         #     )
         # )
-        self.sll = SinglyLinkedList(0).add_null()
+        self.sll = SinglyLinkedList(0, 1, 2).add_null().add_head_pointer()
         # self.sll.head_pointer.set_opacity(0)
         # self.sll.tail_pointer.set_opacity(0)
         return FadeIn(self.sll)
 
     def fade_in_head(self):
-        self.sll.insert_node(1, 10)
+        return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
+        # return self.sll.animate.insert_node(1, 10)
         return Wait()
         return self.sll.animate.insert_node(0, 10)
         return Wait()
         return self.sll.head_pointer.animate(run_time=0.3).set_opacity(1)
 
+    # TODO: Try and make animations not interrupt each other
     def fade_in_tail(self):
         return Wait()
         return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
     def add_second_node(self):
+        return self.sll.animate.move_to([1, 1, 0])
         return Wait()
         self.sll, animation = self.sll.insert_node(-1, 1)
         return animation
