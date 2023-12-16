@@ -185,7 +185,7 @@ class AnimationPool:
 
     def interpolate(self, alpha: float) -> None:
         for anim in self.animations.copy():
-            if alpha <= anim.end_alpha:
+            if alpha < anim.end_alpha:
                 anim.interpolate(
                     value_from_range_to_range(
                         value=alpha,
@@ -223,9 +223,9 @@ class AnimationPool:
         return mobjects_to_be_removed
 
     def _get_introducer_animation_mobjects(self, animation: Animation) -> Sequence[Mobject]:
-        mobjects_to_be_removed: list[Mobject] = []
+        mobjects_to_be_introduced: list[Mobject] = []
         if animation.is_introducer():
-            mobjects_to_be_removed.append(animation.mobject)
+            mobjects_to_be_introduced.append(animation.mobject)
         else:
             try:
                 child_animations = animation.animations
@@ -233,8 +233,8 @@ class AnimationPool:
                 pass
             else:
                 for child_anim in child_animations:
-                    mobjects_to_be_removed.extend(
-                        self._get_remover_animation_mobjects(child_anim),
+                    mobjects_to_be_introduced.extend(
+                        self._get_introducer_animation_mobjects(child_anim),
                     )
 
-        return mobjects_to_be_removed
+        return mobjects_to_be_introduced
