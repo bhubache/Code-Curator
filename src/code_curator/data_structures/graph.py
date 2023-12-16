@@ -317,6 +317,7 @@ class Graph(CustomVMobject):
         super().__init__()
         self.vertices: set[Vertex] = set()
         self.edges: set[Edge] = set()
+        self.labeled_pointers: dict[str, LabeledLine] = {}
 
     def add_vertex(
         self,
@@ -373,6 +374,30 @@ class Graph(CustomVMobject):
 
         return edge
 
+    def add_labeled_pointer(
+        self,
+        mobject: Mobject,
+        label: str | Element,
+        direction: Vector,
+        color,
+    ) -> None:
+        if isinstance(label, Element):
+            label = label.value
+
+        self.labeled_pointers[label] = LabeledLine(
+            mobject,
+            label=label,
+            direction=direction,
+            color=color,
+        )
+        self.add(self.labeled_pointers[label])
+
+    def remove_labeled_pointer(self, label: str | Element) -> None:
+        if isinstance(label, Element):
+            label = label.value
+
+        self.remove(self.labeled_pointers[label])
+
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
             if isinstance(mob, Vertex):
@@ -389,6 +414,9 @@ class Graph(CustomVMobject):
                 self.edges.remove(mob)
                 mob.vertex_one = None
                 mob.vertex_two = None
+            elif isinstance(mob, LabeledLine):
+                del self.labeled_pointers[mob.label]
+                self.submobjects.remove(mob)
             else:
                 raise NotImplementedError(f"Removing mob {mob} from {self.__class__.__name__} is not yet supported")
 
@@ -477,11 +505,11 @@ class LabeledLine(CustomVMobject):
         if end is None:
             if isinstance(start, Mobject):
                 end = start.get_boundary_point(-direction)
-                self.pointee = start
+                self._pointee = start
             else:
                 end = start
-                self.pointee = Point(end)
-                self.pointee.proportion_from_point = lambda _: 0
+                self._pointee = Point(end)
+                self._pointee.proportion_from_point = lambda _: 0
 
             start = Point(end).shift(-direction * length)
         elif isinstance(end, Mobject):
@@ -541,6 +569,15 @@ class LabeledLine(CustomVMobject):
         return self.label_mobject.value
 
     @property
+    def pointee(self) -> Mobject | Vector:
+        return self._pointee
+
+    @pointee.setter
+    def pointee(self, new_pointee: Mobject | Vector) -> None:
+        self._pointee = new_pointee
+        self.update()
+
+    @property
     def direction(self) -> Vector:
         return self.line.get_unit_vector()
 
@@ -550,6 +587,7 @@ class LabeledLine(CustomVMobject):
         new_start = Point(new_end).shift(-new_direction * self.line.get_length()).get_center()
 
         self.line.put_start_and_end_on(new_start, new_end)
+        # TODO: May have to resume updating?
         self.update()
 
     def line_updater(self, line):

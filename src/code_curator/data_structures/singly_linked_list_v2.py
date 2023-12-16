@@ -148,14 +148,14 @@ class SinglyLinkedList(CustomVMobject):
     @property
     def head_pointer(self) -> LabeledLine | None:
         try:
-            return self.labeled_pointers["head"]
+            return self.graph.labeled_pointers["head"]
         except LookupError:
             return None
 
     @property
     def tail_pointer(self) -> LabeledLine | None:
         try:
-            return self.labeled_pointers["tail"]
+            return self.graph.labeled_pointers["tail"]
         except LookupError:
             return None
 
@@ -219,14 +219,14 @@ class SinglyLinkedList(CustomVMobject):
         if not self.has_head:
             raise RuntimeError("Unable to add head pointer because no head is present")
 
-        self.labeled_pointers["head"] = LabeledLine(
+        self.graph.add_labeled_pointer(
             self.head,
             label="head",
             direction=DOWN,
             color=self.color,
         )
-        self.add(self.labeled_pointers["head"])
-        self.add_updater(self.head_pointer_updater)
+
+        self.add_updater(self.head_pointer_updater, call_updater=True)
 
         if center:
             self.move_to(ORIGIN)
@@ -250,14 +250,14 @@ class SinglyLinkedList(CustomVMobject):
         else:
             tail_direction = DOWN
 
-        self.labeled_pointers["tail"] = LabeledLine(
+        self.graph.add_labeled_pointer(
             self.tail,
             label="tail",
             direction=tail_direction,
             color=self.color,
         )
-        self.add(self.labeled_pointers["tail"])
-        self.add_updater(self.tail_pointer_updater)
+
+        self.add_updater(self.tail_pointer_updater, call_updater=True)
 
         if center:
             self.move_to(ORIGIN)
@@ -287,9 +287,6 @@ class SinglyLinkedList(CustomVMobject):
         for mob in mobjects:
             if isinstance(mob, (Vertex, Edge)):
                 self.graph.remove(mob)
-            elif isinstance(mob, LabeledLine):
-                del self.labeled_pointers[mob.label.value]
-                self.submobjects.remove(mob)
             else:
                 raise NotImplementedError(f"Removal of mobject {mob} from SLL not yet supported")
 
@@ -328,19 +325,15 @@ class SinglyLinkedList(CustomVMobject):
         label: str | Element,
         direction: tuple[float, float, float] | None = None,
     ) -> None:
-        if isinstance(label, Element):
-            label = label.value
-
         if direction is None:
             direction = -self.head_pointer.direction
 
-        self.labeled_pointers[label] = LabeledLine(
+        self.graph.add_labeled_pointer(
             self.get_node(index),
             label=label,
             direction=direction,
             color=self.color,
         )
-        self.add(self.labeled_pointers[label])
 
     def remove_labeled_pointer(self, label: str | Element) -> None:
         if isinstance(label, Element):
@@ -350,19 +343,6 @@ class SinglyLinkedList(CustomVMobject):
 
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
-
-    # def move_labeled_pointer(
-    #     self,
-    #     pointer: str | LabeledLine,
-    #     num_nodes: int = 1,
-    # ) -> tuple[SinglyLinkedList, Animation]:
-    #     copy = self._create_animation_copy()
-    #     copy._move_labeled_pointer(pointer, num_nodes=num_nodes)
-
-    #     return copy, TransformSinglyLinkedList(
-    #         self,
-    #         copy,
-    #     )
 
     def move_labeled_pointer(
         self,
@@ -375,9 +355,6 @@ class SinglyLinkedList(CustomVMobject):
         else:
             labeled_pointer = pointer
 
-        # labeled_pointer.shift(
-        #     to.get_center() - labeled_pointer.pointee.get_center(),
-        # )
         labeled_pointer.pointee = to
 
         if pointer_direction is not None:
