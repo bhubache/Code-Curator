@@ -26,7 +26,11 @@ class _AllowOneMobjectDescriptor:
         self.private_name = "_" + name
 
     def __get__(self, instance, owner=None):
-        return getattr(instance, self.private_name)
+        # NOTE: Added try/except block to make testing with BaseScene work
+        try:
+            return getattr(instance, self.private_name)
+        except AttributeError:
+            return []
 
     def __set__(self, instance, value) -> None:
         if not hasattr(instance, self.private_name):
@@ -53,6 +57,7 @@ class BaseScene(Scene):
     def __init__(self, animation_script, **kwargs) -> None:
         super().__init__(**kwargs)
         self.animation_script = animation_script
+        self.add(ExcludeDuplicationSubmobjectsMobject())
 
     @property
     def scene_mobjects(self) -> list[Mobject]:
@@ -61,7 +66,8 @@ class BaseScene(Scene):
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
-                animation_script=self.animation_script._animation_script["Video"],
+                # animation_script=self.animation_script._animation_script["Video"],
+                animation_script=self.animation_script,
                 scene=self,
                 run_time=self.animation_script.run_time,
             ),
