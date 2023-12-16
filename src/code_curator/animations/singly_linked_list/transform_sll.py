@@ -80,10 +80,10 @@ class TransformSinglyLinkedList(AnimationGroup):
     def clean_up_from_scene(self, scene: Scene) -> None:
         super().clean_up_from_scene(scene)
 
+        # TODO: Figure out what mobjects stay and go and what need to stay and go
         scene.remove(self.mobject, self.target_mobject)
         scene.add(self.ungroupified_mobject)
 
-        # TODO: Figure out why animation works without this!
         # Apply all methods to self.mobject so it catches up to target in appearance
-        # for method, method_args, method_kwargs in self.methods:
-        #     method.__func__(self.mobject, *method_args, **method_kwargs)
+        for method, method_args, method_kwargs in self.methods:
+            method.__func__(self.ungroupified_mobject, *method_args, **method_kwargs)
