@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from manim import AnimationGroup
 from manim import config
 from manim import DOWN
@@ -9,7 +7,6 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import LEFT
 from manim import Line
-from manim import ORIGIN
 from manim import UP
 from manim import VGroup
 from manim import Wait
@@ -17,7 +14,6 @@ from manim import Write
 
 from code_curator.animations.arrow_transport_transformation import ArrowTransportTransformation
 from code_curator.animations.change_color import ChangeColor
-from code_curator.code.custom_code import CustomCode
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
@@ -90,7 +86,10 @@ class Video(BaseScene):
         )
 
         self.constraints_analysis_title_tex = ProblemText.create_title("Constraints Analysis")
-        self.constraints_analysis_table = ProblemText.create_constraints_table(constraints=CONSTRAINTS, explanations=CONSTRAINT_EXPLANATIONS)
+        self.constraints_analysis_table = ProblemText.create_constraints_table(
+            constraints=CONSTRAINTS,
+            explanations=CONSTRAINT_EXPLANATIONS,
+        )
 
     def fade_in_title(self):
         return FadeIn(self.title_tex)
@@ -183,8 +182,8 @@ class Video(BaseScene):
 
     def smooth_over_wording(self):
         new_statement_tex = ProblemText.create_statement(
-            "There is a singly linked list called \code{head} and a node that we wish to"
-            " remove called \code{node}. You will not be given access to the head of the"
+            r"There is a singly linked list called \code{head} and a node that we wish to"
+            r" remove called \code{node}. You will not be given access to the head of the"
             " list. Instead, you will be given access to the node to be deleted.",
             font_size=STATEMENT_FONT_SIZE,
         )
@@ -199,7 +198,11 @@ class Video(BaseScene):
         # FIXME: This is for development, REMOVE THIS FOR PRODUCTION
         self.mobjects[0].add(self.title_tex)
 
-        return FadeOut(*self.scene_mobjects), FadeIn(self.constraints_analysis_title_tex), FadeIn(self.constraints_analysis_table)
+        return (
+            FadeOut(*self.scene_mobjects),
+            FadeIn(self.constraints_analysis_title_tex),
+            FadeIn(self.constraints_analysis_table),
+        )
 
     def start_first_constraint_explanation(self):
         self.fourth_constraint_table_breakdown = ProblemText.create_table(
@@ -265,6 +268,7 @@ class Video(BaseScene):
         return FadeIn(self.sll)
 
     def fade_in_head(self):
+        # return self.sll.animate.insert_node(1, 10)
         return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
         # return self.sll.animate.insert_node(1, 10)
         return Wait()
@@ -438,7 +442,6 @@ class PrimaryStream:
         # return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
     def add_second_node(self):
-
         return (
             self.sll.add_last(data=1)
             .subsequently_fade_in_container()
