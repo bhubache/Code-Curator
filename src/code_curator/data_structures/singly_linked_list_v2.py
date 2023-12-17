@@ -53,6 +53,7 @@ class SinglyLinkedList(CustomVMobject):
         self.graph = Graph()
         self.color = color
         self.labeled_pointers: dict[Hashable, LabeledLine] = {}
+        self._head: Node | None = None
 
         self.add(self.graph)
 
@@ -90,33 +91,15 @@ class SinglyLinkedList(CustomVMobject):
 
     @property
     def head(self) -> Node | None:
-        heads = self.graph.get_vertices_with_no_incoming_edges()
-
-        if len(heads) > 3:
-            raise RuntimeError(f"BUG: SLL has more than one head: {heads}")
-
-        if len(heads) == 2:
-            newest_node = None
-            actual_head = None
-            for head_candidate in heads:
-                trav = head_candidate
-                while self.has_next(trav):
-                    trav = self.get_next(trav)
-
-                if newest_node is None:
-                    newest_node = trav
-                    actual_head = head_candidate
-                else:
-                    if trav.label > newest_node.label:
-                        newest_node = trav
-                        actual_head = head_candidate
-
-            return actual_head
-
-        try:
-            return heads[0]
-        except IndexError:
+        if self._head is None:
             return None
+
+        trav = self._head
+        while self.get_prev(trav) is not None:
+            trav = self.get_prev(trav)
+
+        self._head = trav
+        return self._head
 
     @property
     def tail(self) -> Node | None:
@@ -134,7 +117,7 @@ class SinglyLinkedList(CustomVMobject):
 
     @property
     def nodes(self) -> list[Node]:
-        if self.head is self.null:
+        if self.head is None:
             return []
 
         nodes = []
@@ -208,6 +191,9 @@ class SinglyLinkedList(CustomVMobject):
 
         if center:
             self.move_to(ORIGIN)
+
+        if self._head is None:
+            self._head = self.null
 
         return self
 
@@ -296,6 +282,9 @@ class SinglyLinkedList(CustomVMobject):
     def get_node_index(self, node: Node) -> int:
         return self.nodes.index(node)
 
+    def get_next_pointer(self, node: Node) -> Edge:
+        return self.graph.get_edge_from_to(node, self.get_next(node))
+
     def get_next(self, curr_node):
         for edge in self.graph.edges:
             if curr_node is edge.vertex_one and edge.directedness.endswith(">"):
@@ -308,6 +297,26 @@ class SinglyLinkedList(CustomVMobject):
 
     def has_next(self, node: Node) -> bool:
         return self.get_next(node) is not None
+
+    def set_next(self, from_: Node | None, to: Node | None, angle_in_degrees: float = 0.0) -> None:
+        if self.get_next(from_) == to:
+            return
+
+        if self.get_next(from_) is None:
+            edge = self.add_edge(from_, to, angle_in_degrees=angle_in_degrees)
+        else:
+            edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
+            if edge.vertex_one == self.get_next(from_):
+                edge.vertex_one = to
+            else:
+                edge.vertex_two = to
+
+            # TODO: Run all unit tests for this
+            if to not in self.graph:
+                self.graph.add_vertex(to)
+
+        edge.resume_updating()
+        edge.suspend_updating()
 
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
@@ -363,7 +372,28 @@ class SinglyLinkedList(CustomVMobject):
         labeled_pointer.resume_updating()
         labeled_pointer.suspend_updating()
 
+    def redirect_next_pointer(self, pointer: Edge, to: Node) -> None:
+        ...
+        node_index_from: int = self.get_node_index(pointer.vertex_one)
+        node_index_to: int = self.get_node_index(node)
+        copy = self._create_animation_copy()
+
+        node_from_copy = copy.get_node(node_index_from)
+        prev_node_to_copy = copy.get_node(node_index_to - 1)
+
+        node_from_copy.next_pointer.become(
+            CurvedArrow(
+                pointer.get_start(),
+                prev_node_to_copy.next_pointer.get_end(),
+                tip_length=prev_node_to_copy.next_pointer.get_tip().length,
+            ),
+        )
+
+        node_from_copy.next_pointer.vertex_two = copy.get_node(node_index_to)
+
     def shrink_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
+
+
         node_index: int = self.get_next_pointers_node_index(pointer)
 
         copy = self._create_animation_copy()
@@ -466,6 +496,7 @@ class SinglyLinkedList(CustomVMobject):
         new_node = self.create_node(value, position_relative_to=(10, 10, 0))
 
         if self.head is None and self.tail is None:
+            self._head = new_node
             self.graph.add_vertex(new_node)
             new_node.move_to(ORIGIN)
             return
@@ -500,26 +531,6 @@ class SinglyLinkedList(CustomVMobject):
         if center:
             self.move_to(ORIGIN)
 
-    def set_next(self, from_: Node | None, to: Node | None) -> None:
-        if self.get_next(from_) == to:
-            return
-
-        if self.get_next(from_) is None:
-            edge = self.add_edge(from_, to)
-        else:
-            edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
-            if edge.vertex_one == self.get_next(from_):
-                edge.vertex_one = to
-            else:
-                edge.vertex_two = to
-
-            # TODO: Run all unit tests for this
-            if to not in self.graph:
-                self.graph.add_vertex(to)
-
-        edge.resume_updating()
-        edge.suspend_updating()
-
     def create_node(
         self,
         value,
@@ -545,6 +556,7 @@ class SinglyLinkedList(CustomVMobject):
         self,
         prev_node,
         next_node,
+        angle_in_degrees: float = 0.0,
         quasi: bool = False,
     ) -> Edge:
         return self.graph.add_edge(
@@ -555,6 +567,7 @@ class SinglyLinkedList(CustomVMobject):
             line_stroke_width=DEFAULT_STROKE_WIDTH,
             tip_length=DEFAULT_TIP_LENGTH,
             tip_width=DEFAULT_TIP_WIDTH,
+            angle_in_degrees=angle_in_degrees,
             quasi=quasi,
         )
 

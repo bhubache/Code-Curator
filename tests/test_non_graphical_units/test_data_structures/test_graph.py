@@ -221,6 +221,41 @@ def test_get_vertex(graph) -> None:
     assert graph.get_vertex(2) is vertex
 
 
+
+# TODO: Test the various ways you can construct a emtpy
+#  1. Adding vertices and then edges connecting them
+#  2. By only adding edges
+#  3. By adding vertices and/or edges by both str and mobject
+
+
+# +---+     +---+     +---+
+# | A +---->| B |  +--+ E |
+# +---+     +-+-+  |  +-+-+
+#           ^ |    |    |
+#   +-------+ |    |    |
+#   |         v    |    v +----+
+# +-+-+     +---+  |  +---+    |
+# | D |<----+ C |<-+  | F |<---+
+# +---+     +---+     +---+
+
+def check_graph(graph) -> None:
+    assert len(graph.vertices) == 6
+
+
+# def test_graph_construction() -> None:
+#     graph = Graph()
+#     breakpoint()
+#     graph.add_edge("A", "B")
+#     graph.add_edge("B", "C")
+#     graph.add_edge("C", "D")
+#     graph.add_edge("D", "B")
+#     graph.add_edge("E", "C")
+#     graph.add_edge("E", "F")
+#     graph.add_edge("F", "F")
+#
+#     check_graph(graph)
+
+
 def test_labeled_line_by_coordinates() -> None:
     labeled_line = LabeledLine([0, 0, 0], [1, 0, 0])
 

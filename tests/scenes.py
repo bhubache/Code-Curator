@@ -49,6 +49,7 @@ class MockBaseScene(BaseScene):
         subcaption_offset=0,
         **kwargs,
     ):
+        breakpoint()
         super().play(
             CuratorAnimation(
                 animation_script=self.animation_script,
