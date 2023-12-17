@@ -42,8 +42,8 @@ def curator_frames_comparison(
 
         # base_scene = BaseScene(animation_script)
 
-        for func in animation_functions:
-            setattr(type(base_scene), func.__name__, func)
+        # for func in animation_functions:
+        #     setattr(type(base_scene), func.__name__, func)
 
         def test_manim_func_wrapper(scene, unique_value, sll):
             breakpoint()
@@ -53,6 +53,7 @@ def curator_frames_comparison(
             return BaseScene.construct(scene)
 
         test_manim_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
+        breakpoint()
 
         nonlocal base_scene
         if base_scene is None:

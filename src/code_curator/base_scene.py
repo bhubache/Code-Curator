@@ -54,7 +54,7 @@ class BaseScene(Scene):
 
     mobjects = _AllowOneMobjectDescriptor()
 
-    def __init__(self, animation_script, **kwargs) -> None:
+    def __init__(self, animation_script=None, **kwargs) -> None:
         super().__init__(**kwargs)
         self.animation_script = animation_script
         self.add(ExcludeDuplicationSubmobjectsMobject())
