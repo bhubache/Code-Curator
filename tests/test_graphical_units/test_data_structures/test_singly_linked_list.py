@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 from typing import Any
 
 import pytest
@@ -9,7 +10,7 @@ from manim import UP
 from manim import WHITE
 from manim.typing import Vector
 from manim.utils.testing.frames_comparison import frames_comparison
-from tests.scenes import MockBaseScene
+# from tests.scenes import MockBaseScene
 
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
 
@@ -17,7 +18,8 @@ from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
 __module_test__ = "data_structures"
 
 
-@frames_comparison(base_scene=MockBaseScene)
+# @frames_comparison(base_scene=MockBaseScene)
+@frames_comparison
 @pytest.mark.parametrize(
     "kwargs",
     (
@@ -55,7 +57,138 @@ def test_sll_building(scene: Scene, kwargs: dict[str, Any]) -> None:
     scene.add(sll)
 
 
-@frames_comparison(base_scene=MockBaseScene)
+from code_curator.base_scene import BaseScene
+
+# TODO: Remove the need to provide ``unique_value_for_caching_control_data``
+
+def curator_frames_comparison(run_time: float | type | None = None, last_frame: bool = True):
+
+    def get_cls(cls):
+        # Translate class into BaseScene instance that plays the CuratorAnimation
+        # Need:
+        # 1. The start time of each animation method
+        # 2. Total run time
+        print(run_time)
+
+        excluded_attr_names = ("pytestmark")
+        animation_functions = []
+
+        for attr_name, attr in cls.__dict__.items():
+            if attr_name not in excluded_attr_names and not attr_name.startswith("__") and not attr_name.endswith("__"):
+                animation_functions.append(attr)
+
+        class AnimationScript:
+            def __init__(self) -> None:
+                self.entries = []
+
+        animation_script = AnimationScript()
+        animation_script.run_time = run_time
+
+        for func in animation_functions:
+            try:
+                start_time = func.start_time
+            except AttributeError:
+                start_time = 0.0
+
+            animation_script.entries.append(
+                {
+                    "name": func.__name__,
+                    "start_time": start_time
+                }
+            )
+
+        base_scene = BaseScene(animation_script)
+
+        for func in animation_functions:
+            setattr(type(base_scene), func.__name__, func)
+
+        def manim_test_func_wrapper(scene, unique_value, sll):
+            base_scene.unique_value = unique_value
+            base_scene.sll = sll
+            scene.__dict__.update(base_scene.__dict__)
+            from manim import Circle
+            from manim import FadeIn
+            return lambda : scene.play(FadeIn(Circle()))
+            # return BaseScene.construct(scene)
+            # return base_scene.construct()
+
+        manim_test_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
+
+        return frames_comparison(func=manim_test_func_wrapper, last_frame=last_frame)
+
+    if callable(run_time):
+        _cls = run_time
+        run_time = 1.0
+        return get_cls(_cls)
+
+    if run_time is None:
+        run_time = 1.0
+
+    return get_cls
+
+
+
+
+# TODO: Don't name methods in CuratorTestClass starting or ending with ``test``?
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    ("unique_value", "sll",),
+    (
+        # (0, SinglyLinkedList.create_sll(color=WHITE)),
+        # (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
+        # (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        # (4, SinglyLinkedList.create_sll(0, color=WHITE)),
+        # (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
+        # (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
+        # (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        # (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
+        # (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
+        # (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
+        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+    )
+)
+class test_adding_null_node_cls:
+
+    def __init__(self, unique_value, sll) -> None:
+        self.sll = sll
+
+    def my_animation(self):
+        return self.sll.animate.add_null()
+
+
+@frames_comparison(
+    last_frame=False,
+    # base_scene=MockBaseScene.set_run_time(1.0).add_animation_method("add_null_node", start_time=0.0),
+)
+@pytest.mark.parametrize(
+    ("unique_value_for_caching_control_data", "sll"),
+    (
+        (1, SinglyLinkedList.create_sll(color=WHITE)),
+        # (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
+        # (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        # (4, SinglyLinkedList.create_sll(0, color=WHITE)),
+        # (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
+        # (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
+        # (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        # (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
+        # (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
+        # (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
+        # (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+    )
+)
+def test_adding_null_node(scene: Scene, unique_value_for_caching_control_data: int, sll: SinglyLinkedList) -> None:
+    scene.add(sll)
+
+    def add_null_node(self):
+        return sll.animate.add_null()
+
+    # scene.register_function(add_null_node)
+
+    scene.play()
+
+
+# @frames_comparison(base_scene=MockBaseScene)
+@frames_comparison
 @pytest.mark.parametrize(
     ("unique_value_for_caching_control_data", "sll", "index", "value"),
     (
@@ -118,7 +251,7 @@ def test_insert(
 
 @frames_comparison(
     last_frame=False,
-    base_scene=MockBaseScene.set_run_time(1.0).add_animation_method("move_head_pointer", start_time=0.0),
+    # base_scene=MockBaseScene.set_run_time(1.0).add_animation_method("move_head_pointer", start_time=0.0),
 )
 @pytest.mark.parametrize(
     ("unique_value_for_caching_control_data", "sll", "index", "pointer_direction"),

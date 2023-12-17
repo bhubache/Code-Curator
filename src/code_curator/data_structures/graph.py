@@ -144,7 +144,7 @@ class Vertex(CustomVMobject):
         self.container = container
         self.contents_mobject = contents
 
-        # TODO: Move to classes that compose graph
+        # TODO: Move to classes that compose emtpy
         if self.contents == "null":
             mock_contents = Element("n")
             mock_contents.move_to(self.container.get_center())
@@ -194,6 +194,7 @@ class Edge(CustomVMobject):
         tip_length: float = DEFAULT_TIP_LENGTH,
         tip_width: float = DEFAULT_TIP_WIDTH,
         directedness: str = "-",
+        angle_in_degrees: float = 0.0,
     ) -> None:
         super().__init__()
         if not isinstance(vertex_one, Mobject) or not isinstance(vertex_two, Mobject):
@@ -206,6 +207,7 @@ class Edge(CustomVMobject):
             self.vertex_two,
             color=color,
             stroke_width=line_stroke_width,
+            path_arc=math.radians(angle_in_degrees),
         )
         self.directedness = directedness
 
