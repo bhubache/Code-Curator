@@ -298,6 +298,7 @@ class SinglyLinkedList(CustomVMobject):
     def has_next(self, node: Node) -> bool:
         return self.get_next(node) is not None
 
+    # TODO: Tests
     def set_next(self, from_: Node | None, to: Node | None, angle_in_degrees: float = 0.0) -> None:
         if self.get_next(from_) == to:
             return
@@ -306,10 +307,7 @@ class SinglyLinkedList(CustomVMobject):
             edge = self.add_edge(from_, to, angle_in_degrees=angle_in_degrees)
         else:
             edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
-            if edge.vertex_one == self.get_next(from_):
-                edge.vertex_one = to
-            else:
-                edge.vertex_two = to
+            edge.reconnect(self.get_next(from_), to, angle_in_degrees)
 
             # TODO: Run all unit tests for this
             if to not in self.graph:
