@@ -126,7 +126,7 @@ class ExcludeDuplicationSubmobjectsMobject(Mobject):
 
 class CuratorAnimation(Animation):
     def __init__(self, animation_script, scene, run_time: float) -> None:
-        super().__init__(ExcludeDuplicationSubmobjectsMobject(), run_time=run_time)
+        super().__init__(ExcludeDuplicationSubmobjectsMobject(), run_time=run_time, suspend_mobject_updating=True)
         self.animation_script = animation_script
         self.scene = scene
 

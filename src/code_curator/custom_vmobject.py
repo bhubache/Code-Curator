@@ -70,3 +70,7 @@ class CustomVMobject(VMobject):
                 ),
             ),
         )
+    
+    def force_update(self) -> None:
+        self.resume_updating()
+        self.suspend_updating()

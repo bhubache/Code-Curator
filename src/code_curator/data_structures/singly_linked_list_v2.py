@@ -313,8 +313,7 @@ class SinglyLinkedList(CustomVMobject):
             if to not in self.graph:
                 self.graph.add_vertex(to)
 
-        edge.resume_updating()
-        edge.suspend_updating()
+        edge.force_update()
 
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
@@ -367,8 +366,7 @@ class SinglyLinkedList(CustomVMobject):
         if pointer_direction is not None:
             labeled_pointer.direction = pointer_direction
 
-        labeled_pointer.resume_updating()
-        labeled_pointer.suspend_updating()
+        labeled_pointer.force_update()
 
     def redirect_next_pointer(self, pointer: Edge, to: Node) -> None:
         ...
@@ -523,8 +521,7 @@ class SinglyLinkedList(CustomVMobject):
             trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
             trav = self.get_next(trav)
 
-        self.resume_updating()
-        self.suspend_updating()
+        self.force_update()
 
         if center:
             self.move_to(ORIGIN)
