@@ -69,7 +69,7 @@ class Video(BaseScene):
     config["quality"] = QUALITY
 
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(args[0], **kwargs)
         self.title_tex = ProblemText.create_title(TITLE)
         self.statement_header_tex = ProblemText.create_header("Statement")
 
@@ -269,6 +269,7 @@ class Video(BaseScene):
 
     def fade_in_head(self):
         # return self.sll.animate.insert_node(1, 10)
+        return self.sll.animate.set_next(self.sll.head, self.sll[2], angle_in_degrees=30.0)
         return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
         # return self.sll.animate.insert_node(1, 10)
         return Wait()
