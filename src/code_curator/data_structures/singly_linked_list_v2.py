@@ -396,7 +396,8 @@ class SinglyLinkedList(CustomVMobject):
         if positive_index < 0 or positive_index > len(self.nodes):
             raise IndexError(f"Index {index} is invalid for length {len(self.nodes)}")
 
-        new_node = self.create_node(value, position_relative_to=(10, 10, 0))
+        # new_node = self.create_node(value, position_relative_to=(10, 10, 0))
+        new_node = self.create_node(value)
 
         if self.head is None and self.tail is None:
             self._head = new_node
@@ -424,13 +425,20 @@ class SinglyLinkedList(CustomVMobject):
 
         self.flatten(center=center)
 
+        # TODO: Should updating only be suspended if animation is about to occur?
+        # breakpoint()
+
     def create_node(
         self,
         value,
-        position_relative_to,
+        position_relative_to: Mobject | None = None,
         position: Iterable[float] = RELATIVE_POSITION,
     ) -> Node:
         SinglyLinkedList._node_counter += 1
+
+        if position_relative_to is None:
+            position_relative_to = ORIGIN
+
         return Node(
             sll=self,
             label=SinglyLinkedList._node_counter,
@@ -550,6 +558,7 @@ class AnimationBuilder(_AnimationBuilder):
         if self.overridden_animation:
             anim = self.overridden_animation
         else:
+            self.mobject.suspend_updating()
             anim = TransformSinglyLinkedList(self.mobject, self.methods)
 
         for attr, value in self.anim_args.items():
