@@ -183,6 +183,15 @@ class BaseScene(Scene):
     @property
     def scene_mobjects(self) -> list[Mobject]:
         return self.mobjects[0].submobjects
+    
+    def add(self, *mobjects):
+        for mob in mobjects:
+            self.mobjects[0].add(mob)
+
+    # TODO: remove
+    # def remove(self, *mobjects):
+    #     for mob in mobjects:
+    #         self.mobjects[0].remove(mob)
 
     def construct(self) -> None:
         self.play(
