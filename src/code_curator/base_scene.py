@@ -164,7 +164,7 @@ class BaseScene(Scene):
         for mob in mobjects:
             self.mobjects[0].add(mob)
 
-    # # TODO: remove method
+    # # FIXME: remove method
     # def remove(self, *mobjects) -> None:
     #     for mob in mobjects:
     #         self.mobjects[0].remove(mob)

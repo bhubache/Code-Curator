@@ -89,6 +89,9 @@ class TransformSinglyLinkedList(AnimationGroup):
     def clean_up_from_scene(self, scene: Scene) -> None:
         super().clean_up_from_scene(scene)
 
+        for fade_in_animation in self.fading_in_animations:
+            scene.mobjects[0].remove(fade_in_animation.mobject)
+
         # TODO: Figure out what mobjects stay and go and what need to stay and go
         scene.remove(self.mobject, self.target_mobject)
         scene.add(self.ungroupified_mobject)
