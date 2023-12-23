@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import itertools as it
 from typing import TYPE_CHECKING
 
 import numpy as np
 from manim import Animation
-from manim import CurvedArrow
 from manim import DOWN
 from manim import Mobject
 from manim import ORIGIN
@@ -260,15 +258,6 @@ class SinglyLinkedList(CustomVMobject):
     def remove_tail_pointer(self):
         raise NotImplementedError()
 
-    def reset_positioning(self) -> None:
-        for prev_node, next_node in it.pairwise(self.nodes):
-            relative_center = prev_node.get_center()
-            next_node.move_to(relative_center + RELATIVE_POSITION)
-
-        self.move_to(ORIGIN)
-        self.resume_updating()
-        self.update()
-
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
             if isinstance(mob, (Vertex, Edge)):
@@ -373,25 +362,6 @@ class SinglyLinkedList(CustomVMobject):
 
         labeled_pointer.force_update()
 
-    def redirect_next_pointer(self, pointer: Edge, to: Node) -> None:
-        ...
-        node_index_from: int = self.get_node_index(pointer.vertex_one)
-        node_index_to: int = self.get_node_index(node)
-        copy = self._create_animation_copy()
-
-        node_from_copy = copy.get_node(node_index_from)
-        prev_node_to_copy = copy.get_node(node_index_to - 1)
-
-        node_from_copy.next_pointer.become(
-            CurvedArrow(
-                pointer.get_start(),
-                prev_node_to_copy.next_pointer.get_end(),
-                tip_length=prev_node_to_copy.next_pointer.get_tip().length,
-            ),
-        )
-
-        node_from_copy.next_pointer.vertex_two = copy.get_node(node_index_to)
-
     def shrink_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
         node_index: int = self.get_next_pointers_node_index(pointer)
 
@@ -403,89 +373,21 @@ class SinglyLinkedList(CustomVMobject):
             copy,
         )
 
-    def grow_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
-        node_index: int = self.get_next_pointers_node_index(pointer)
+    def flatten(self, center: bool = True) -> None:
+        if self.has_head:
+            trav = self.get_next(self.head)
+            while trav is not None:
+                # FIXME: Hardcoded relative placement of nodes
+                trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
+                trav = self.get_next(trav)
 
-        copy = self._create_animation_copy()
-        copy_next_pointer = copy.get_node(node_index).next_pointer
-        copy_next_pointer.put_start_and_end_on(
-            copy_next_pointer.get_start(),
-            copy_next_pointer.vertex_two,
-        )
-        return copy, TransformSinglyLinkedList(
-            self,
-            copy,
-        )
+        if center:
+            self.move_to(ORIGIN)
 
-    def curve_pointer_to(self, pointer: Edge, node: Node) -> tuple[SinglyLinkedList, Animation]:
-        node_index_from: int = self.get_node_index(pointer.vertex_one)
-        node_index_to: int = self.get_node_index(node)
-        copy = self._create_animation_copy()
-
-        node_from_copy = copy.get_node(node_index_from)
-        prev_node_to_copy = copy.get_node(node_index_to - 1)
-
-        node_from_copy.next_pointer.become(
-            CurvedArrow(
-                pointer.get_start(),
-                prev_node_to_copy.next_pointer.get_end(),
-                tip_length=prev_node_to_copy.next_pointer.get_tip().length,
-            ),
-        )
-
-        node_from_copy.next_pointer.vertex_two = copy.get_node(node_index_to)
-        return copy, TransformSinglyLinkedList(
-            self,
-            copy,
-        )
-
-    def fade_out_components(self, *components: Mobject) -> tuple[SinglyLinkedList, Animation]:
-        copy = self._create_animation_copy()
-        for copied_component in self._get_copy_components(*components, copy=copy):
-            copy.remove(copied_component)
-
-        return copy, TransformSinglyLinkedList(
-            self,
-            copy,
-        )
-
-    def flatten(self) -> tuple[SinglyLinkedList, Animation]:
-        copy = self._create_animation_copy()
-        copy.reset_positioning()
-
-        return copy, TransformSinglyLinkedList(
-            self,
-            copy,
-        )
+        self.force_update()
 
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
-
-    def _create_animation_copy(self) -> SinglyLinkedList:
-        attr_name = "_copy_for_animation"
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, self.copy())
-
-        return getattr(self, attr_name)
-
-    def _get_copy_components(self, *original_components: Mobject, copy: SinglyLinkedList) -> Iterable[Mobject]:
-        copied_components = []
-
-        for component in original_components:
-            if isinstance(component, LabeledLine):
-                copied_components.append(copy.labeled_pointers[component.label])
-            elif isinstance(component, Node):
-                copied_components.append(
-                    copy.get_node(self.get_node_index(component)),
-                )
-            elif isinstance(component, Edge):
-                copied_components.append(
-                    copy.get_node(self.get_node_index(component.vertex_one)).next_pointer,
-                )
-            else:
-                raise NotImplementedError(f"Unexpected component type: {type(component)}")
-
-        return copied_components
 
     def insert_node(self, index: int, value, center: bool = True) -> None:
         positive_index = index if index >= 0 else len(self.nodes) + index
@@ -518,16 +420,7 @@ class SinglyLinkedList(CustomVMobject):
         # TODO: I don't think this is needed
         self.graph.add_vertex(new_node)
 
-        trav = self.get_next(self.head)
-        while trav is not None:
-            # FIXME: Hardcoded relative placement of nodes
-            trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
-            trav = self.get_next(trav)
-
-        self.force_update()
-
-        if center:
-            self.move_to(ORIGIN)
+        self.flatten(center=center)
 
     def create_node(
         self,
