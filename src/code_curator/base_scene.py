@@ -160,6 +160,15 @@ class BaseScene(Scene):
     def scene_mobjects(self) -> list[Mobject]:
         return self.mobjects[0].submobjects
 
+    def add(self, *mobjects) -> None:
+        for mob in mobjects:
+            self.mobjects[0].add(mob)
+
+    # # TODO: remove method
+    # def remove(self, *mobjects) -> None:
+    #     for mob in mobjects:
+    #         self.mobjects[0].remove(mob)
+
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
