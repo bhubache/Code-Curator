@@ -75,8 +75,8 @@ class AnimationPool:
                 new_min=0,
                 new_max=1,
             )
-            self.mobject.add(anim.mobject)
             self.animations.add(anim)
+            anim._setup_scene(self.scene)
             anim.begin()
 
     def interpolate(self, alpha: float) -> None:
@@ -92,13 +92,14 @@ class AnimationPool:
                     ),
                 )
             else:
+                anim.finish()
                 anim.clean_up_from_scene(self.scene)
-                self.mobject.remove(
-                    *self._get_remover_animation_mobjects(anim),
-                )
-                self.mobject.add(
-                    *self._get_introducer_animation_mobjects(anim),
-                )
+                # self.mobject.remove(
+                #     *self._get_remover_animation_mobjects(anim),
+                # )
+                # self.mobject.add(
+                #     *self._get_introducer_animation_mobjects(anim),
+                # )
                 self.animations.remove(anim)
 
     def _get_remover_animation_mobjects(self, animation: Animation) -> Sequence[Mobject]:
