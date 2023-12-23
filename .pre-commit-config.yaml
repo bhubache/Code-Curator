@@ -106,6 +106,7 @@ repos:
             'flake8-sphinx-links==0.2.1',
             # 'flake8-aaa==0.16.0',
             'flake8-pytest-style==1.7.2',
+            'flake8-jira-todo-checker',
         ]
 # -    repo: https://github.com/pre-commit/mirrors-autopep8
 #     rev: v1.6.0
