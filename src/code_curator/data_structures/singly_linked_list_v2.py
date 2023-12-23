@@ -325,21 +325,26 @@ class SinglyLinkedList(CustomVMobject):
 
         return None
 
+    # FIXME: Appears immediately on screen at end of animation rather than fading in
     def add_labeled_pointer(
         self,
-        index: int,
+        to: Node,
         label: str | Element,
         direction: tuple[float, float, float] | None = None,
+        center: bool = True,
     ) -> None:
         if direction is None:
             direction = -self.head_pointer.direction
 
         self.graph.add_labeled_pointer(
-            self.get_node(index),
+            to,
             label=label,
             direction=direction,
             color=self.color,
         )
+
+        if center:
+            self.move_to(ORIGIN)
 
     def remove_labeled_pointer(self, label: str | Element) -> None:
         if isinstance(label, Element):
