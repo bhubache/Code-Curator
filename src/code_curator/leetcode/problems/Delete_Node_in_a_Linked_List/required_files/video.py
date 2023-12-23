@@ -140,9 +140,11 @@ class Video(BaseScene):
         return FadeIn(self.constraints_list[2])
 
     def fade_in_constraint_four(self):
+        return Wait()
         return FadeIn(self.constraints_list[3])
 
     def highlight_constraints_duplication(self):
+        return Wait()
         return AnimationGroup(
             ChangeColor(self.constraints_list[2], KEEP_COLOR),
             ChangeColor(self.constraints_list[3], KEEP_COLOR),
@@ -154,6 +156,7 @@ class Video(BaseScene):
         )
 
     def remove_constraints_duplication(self):
+        return Wait()
         return AnimationGroup(
             self.first_tex_to_remove.animate.set_opacity(0),
             ChangeColor(self.constraints_list[2], RESET_COLOR),
@@ -161,6 +164,7 @@ class Video(BaseScene):
         )
 
     def highlight_statement_duplication(self):
+        return Wait()
         return AnimationGroup(
             ChangeColor(
                 self.first_mention_tex,
@@ -175,12 +179,14 @@ class Video(BaseScene):
         )
 
     def remove_statement_duplication(self):
+        return Wait()
         return AnimationGroup(
             self.second_mention_tex.animate.set_opacity(0),
             ChangeColor(self.first_mention_tex, RESET_COLOR),
         )
 
     def smooth_over_wording(self):
+        return Wait()
         new_statement_tex = ProblemText.create_statement(
             r"There is a singly linked list called \code{head} and a node that we wish to"
             r" remove called \code{node}. You will not be given access to the head of the"
@@ -193,6 +199,7 @@ class Video(BaseScene):
         return FadeOut(self.statement_tex), FadeOut(self.first_mention_tex), FadeIn(new_statement_tex)
 
     def transition_to_constraints_analysis(self):
+        return Wait()
         self.constraints_analysis_title_tex.to_edge(UP)
 
         # FIXME: This is for development, REMOVE THIS FOR PRODUCTION
@@ -205,6 +212,7 @@ class Video(BaseScene):
         )
 
     def start_first_constraint_explanation(self):
+        return Wait()
         self.fourth_constraint_table_breakdown = ProblemText.create_table(
             [
                 "The node to be deleted is in the list",
@@ -265,11 +273,14 @@ class Video(BaseScene):
         self.sll = SinglyLinkedList(0, 1, 2).add_null().add_head_pointer()
         # self.sll.head_pointer.set_opacity(0)
         # self.sll.tail_pointer.set_opacity(0)
+        # return Wait()
         return FadeIn(self.sll)
 
     def fade_in_head(self):
         # return self.sll.animate.insert_node(1, 10)
-        return self.sll.animate.set_next(self.sll.head, self.sll[2], angle_in_degrees=30.0)
+        # return self.sll.animate.set_next(self.sll.head, self.sll[2], angle_in_degrees=90.0)
+        # return self.sll.animate.add_labeled_pointer(self.sll[1], "pointer")
+        return self.sll.animate.insert_node(1, 10)
         return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
         # return self.sll.animate.insert_node(1, 10)
         return Wait()
@@ -283,6 +294,7 @@ class Video(BaseScene):
         return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
     def add_second_node(self):
+        # return self.sll.animate.flatten()
         return self.sll.animate.move_to([1, 1, 0])
         return Wait()
         self.sll, animation = self.sll.insert_node(-1, 1)

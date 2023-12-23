@@ -26,8 +26,6 @@ def curator_frames_comparison(
         excluded_attr_names = ("pytestmark")
         animation_functions = []
 
-        breakpoint()
-
         for attr_name, attr in cls.__dict__.items():
             if attr_name not in excluded_attr_names and not attr_name.startswith("__") and not attr_name.endswith("__"):
                 animation_functions.append(attr)
