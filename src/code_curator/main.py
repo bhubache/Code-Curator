@@ -65,9 +65,7 @@ RESOLUTION = QUALITY_MAP[QUALITY]["res"]
 PROBLEM_NAME = "Delete_Node_in_a_Linked_List"
 ALIGNED_SCRIPT_PATH = Path("generated_files", "ai_aligned_script.txt")
 ANIMATION_SCRIPT_PATH = Path("required_files", "animation_script.yaml")
-CONCRETE_VIDEO_SCRIPT_PATH = (
-    f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
-)
+CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
 
 
 def concatenate_scenes(video_dir: str, num_scenes: int) -> None:
@@ -85,7 +83,8 @@ def concatenate_scenes(video_dir: str, num_scenes: int) -> None:
 
 
 def get_aligned_animation_script(
-    alignment_path: str | os.PathLike, script_path: str | os.PathLike
+    alignment_path: str | os.PathLike,
+    script_path: str | os.PathLike,
 ) -> AlignedAnimationScript:
     aligned_script = AlignmentParser(file_path=alignment_path).parse()
     script_parser_factory = SimpleScriptParserFactory(script_path=script_path)
@@ -115,7 +114,8 @@ def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
 
 
 def get_video_and_stream_clses(
-    module_import_path: str, aligned_animation_script
+    module_import_path: str,
+    aligned_animation_script,
 ) -> Sequence[type]:
     video_module: ModuleType = importlib.import_module(module_import_path)
     if video_module.__file__ is None:
@@ -140,9 +140,7 @@ def get_video_and_stream_clses(
 
 def get_script_text_from_animation_script(animation_script_info: Mapping) -> str:
     script_text = ""
-    animation_spec: list[str | Mapping[str | int, str]] = animation_script_info[
-        "content"
-    ]
+    animation_spec: list[str | Mapping[str | int, str]] = animation_script_info["content"]
     for element in animation_spec:
         try:
             script_text += f" {element['word']}"
@@ -153,7 +151,7 @@ def get_script_text_from_animation_script(animation_script_info: Mapping) -> str
 
 
 def main() -> None:
-    generate_ai_speech: bool = True
+    ai_speech_requested = True
     problem_dir = Path(
         Path.home(),
         "ManimCS",
@@ -165,26 +163,20 @@ def main() -> None:
         "Delete_Node_in_a_Linked_List",
     )
 
-    if generate_ai_speech:
-        # Generate ai_script.txt from the animation script
-        ai_script_path: Path = (
-            problem_dir / "dev_files" / "MFA" / "input" / "ai_script.txt"
-        )
-
-        script = get_script_text_from_animation_script(
+    if ai_speech_requested:
+        script_text = get_script_text_from_animation_script(
             yaml.safe_load(
                 (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
             ),
         )
-        ai_script_path.write_text(script)
 
-        # with open(ai_script_path, 'w', encoding='UTF-8') as write_file:
-        #     write_file.write(script)
+        ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
+        ai_script_path.parent.mkdir(parents=True, exist_ok=True)
+        ai_script_path.write_text(script_text)
 
-        # Generate audio from text
         audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
         ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
-            problem_dir / "dev_files"
+            ai_script_path.parents[2],
         )
 
     aligned_animation_script = get_aligned_animation_script(
@@ -219,13 +211,14 @@ def main() -> None:
                 "videos",
                 f"{RESOLUTION}p{FRAME_RATE}",
                 "Video.mp4",
-            )
+            ),
         ),
     )
     audio_clip = AudioFileClip(str(audio_path))
     final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
     final_clip.write_videofile(
-        str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")), fps=FRAME_RATE
+        str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
+        fps=FRAME_RATE,
     )
 
 
@@ -239,7 +232,6 @@ def postmortem_main():
 
 
 from manim import Scene
-from code_curator.data_structures.graph import Graph
 from manim import config
 
 
@@ -425,12 +417,13 @@ class TestScene(Scene):
 
         other_4 = other_3.copy()
         from manim import CurvedArrow
+
         other_4.get_node(1).next_pointer.become(
             CurvedArrow(
                 other_3.get_node(1).next_pointer.get_start(),
                 other_3.get_node(2).next_pointer.get_end(),
                 tip_length=other_3.get_node(2).next_pointer.get_tip().length,
-            )
+            ),
         )
         other_4.get_node(1).next_pointer.vertex_two = other_4.get_node(3)
         self.play(TransformSinglyLinkedList(other_3, other_4))
@@ -451,11 +444,8 @@ class TestScene(Scene):
         # other_6 = SinglyLinkedList(1, 2, 4, 5, show_null=True, color=BLACK)
         # other_6.remove(other_6.get_node(2).next_pointer)
         # other_6.remove(other_6.get_node(2))
-        from manim import FadeIn
         # FIXME: Animation of curved to straight arrow doesn't look right
         self.play(TransformSinglyLinkedList(other_5_5, other_6, debug=True))
-        from manim import TransformMatchingShapes
-        from manim import Transform
         # self.play(Transform(
         #     other_5.get_node(1).next_pointer,
         #     other_6.get_node(1).next_pointer,
