@@ -193,6 +193,7 @@ class Video(BaseScene):
         return FadeOut(self.statement_tex), FadeOut(self.first_mention_tex), FadeIn(new_statement_tex)
 
     def transition_to_constraints_analysis(self):
+        return Wait()
         self.constraints_analysis_title_tex.to_edge(UP)
 
         # FIXME: This is for development, REMOVE THIS FOR PRODUCTION
@@ -205,6 +206,7 @@ class Video(BaseScene):
         )
 
     def start_first_constraint_explanation(self):
+        return Wait()
         self.fourth_constraint_table_breakdown = ProblemText.create_table(
             [
                 "The node to be deleted is in the list",

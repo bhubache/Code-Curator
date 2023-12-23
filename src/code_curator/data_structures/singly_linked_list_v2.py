@@ -431,7 +431,7 @@ class SinglyLinkedList(CustomVMobject):
         SinglyLinkedList._node_counter += 1
 
         if position_relative_to is None:
-            position_relative_to = ORIGIN
+            position_relative_to = (1, 1, 0)
 
         return Node(
             sll=self,
