@@ -257,6 +257,7 @@ class Edge(CustomVMobject):
                     reference_line.point_from_proportion(
                         max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
                     ),
+                    path_arc=self.line.path_arc,
                 )
             except RuntimeWarning:
                 self.line.save_state()
@@ -312,6 +313,14 @@ class Edge(CustomVMobject):
         self.line.become(*args, **kwargs).match_style(old_line_copy).get_tip().match_style(old_line_copy.get_tip())
 
         return self
+
+    def reconnect(self, old_vertex, new_vertex, angle_in_degrees: float) -> None:
+        if self.vertex_one == old_vertex:
+            self.vertex_one = new_vertex
+        else:
+            self.vertex_two = new_vertex
+
+        self.line.set_path_arc(math.radians(angle_in_degrees))
 
 
 class Graph(CustomVMobject):

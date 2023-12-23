@@ -298,6 +298,7 @@ class SinglyLinkedList(CustomVMobject):
     def has_next(self, node: Node) -> bool:
         return self.get_next(node) is not None
 
+    # TODO: Tests
     def set_next(self, from_: Node | None, to: Node | None, angle_in_degrees: float = 0.0) -> None:
         if self.get_next(from_) == to:
             return
@@ -306,17 +307,13 @@ class SinglyLinkedList(CustomVMobject):
             edge = self.add_edge(from_, to, angle_in_degrees=angle_in_degrees)
         else:
             edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
-            if edge.vertex_one == self.get_next(from_):
-                edge.vertex_one = to
-            else:
-                edge.vertex_two = to
+            edge.reconnect(self.get_next(from_), to, angle_in_degrees)
 
             # TODO: Run all unit tests for this
             if to not in self.graph:
                 self.graph.add_vertex(to)
 
-        edge.resume_updating()
-        edge.suspend_updating()
+        edge.force_update()
 
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
@@ -369,8 +366,7 @@ class SinglyLinkedList(CustomVMobject):
         if pointer_direction is not None:
             labeled_pointer.direction = pointer_direction
 
-        labeled_pointer.resume_updating()
-        labeled_pointer.suspend_updating()
+        labeled_pointer.force_update()
 
     def redirect_next_pointer(self, pointer: Edge, to: Node) -> None:
         ...
@@ -392,8 +388,6 @@ class SinglyLinkedList(CustomVMobject):
         node_from_copy.next_pointer.vertex_two = copy.get_node(node_index_to)
 
     def shrink_pointer(self, pointer: Edge) -> tuple[SinglyLinkedList, Animation]:
-
-
         node_index: int = self.get_next_pointers_node_index(pointer)
 
         copy = self._create_animation_copy()
@@ -525,8 +519,7 @@ class SinglyLinkedList(CustomVMobject):
             trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
             trav = self.get_next(trav)
 
-        self.resume_updating()
-        self.suspend_updating()
+        self.force_update()
 
         if center:
             self.move_to(ORIGIN)
