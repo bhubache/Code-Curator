@@ -1,24 +1,132 @@
 from __future__ import annotations
 
 from manim import config
+from manim import Group
 from manim import Mobject
 from manim import Scene
 
 from code_curator.animations.curator_animation_new import CuratorAnimation
-from code_curator.animations.curator_animation_new import ExcludeDuplicationSubmobjectsMobject
 from code_curator.custom_logging.custom_logger import CustomLogger
 
 
 logger = CustomLogger.getLogger(__name__)
 
 
-class MyClass:
-    """Meant to simply hold attributes so one instance can be shared across streams."""
+class _MobjectSentinel(Mobject):
+    def __new__(cls):
+        if not hasattr(cls, "_singleton_instance"):
+            cls._singleton_instance = super().__new__(cls)
+
+        return cls._singleton_instance
 
 
-class _AllowOneMobjectList(list):
-    def __setitem__(self, key, mobjects) -> None:
-        raise NotImplementedError()
+class ExcludeDuplicationSubmobjectsMobject(Mobject):
+    def __new__(cls):
+        if not hasattr(cls, "_singleton_instance"):
+            cls._singleton_instance = super().__new__(cls)
+            cls._singleton_instance.__initialized = False
+
+        return cls._singleton_instance
+
+    def __init__(self, *args, **kwargs) -> None:
+        if self.__initialized:
+            return
+
+        self.__initialized = True
+        super().__init__(*args, **kwargs)
+
+    def remove(self, *mobjects: Mobject) -> Mobject:
+        # If more than one mobject has been passed to a single FadeOut animation,
+        # all the mobjects will be wrapped in a Group. So, we need to iterate over
+        # the group to remove each mobject.
+        for mobject_to_remove in mobjects:
+            if isinstance(mobject_to_remove, Group):
+                for submobject_to_remove in mobject_to_remove:
+                    self.remove(submobject_to_remove)
+
+            self._remove(
+                mobject_to_remove=mobject_to_remove,
+                mobject_to_search=self,
+                mobject_container=None,
+            )
+
+        self._remove_all_sentinels()
+
+        return self
+
+    def _remove(
+        self,
+        *,
+        mobject_to_remove: Mobject,
+        mobject_to_search: Mobject,
+        mobject_container: Mobject | None,
+    ) -> None:
+        try:
+            problem_tex_parent = mobject_to_search.problem_tex_parent
+        except AttributeError:
+            pass
+        else:
+            if mobject_to_remove is problem_tex_parent:
+                self._place_sentinel(
+                    mobject_container=mobject_container,
+                    mobject_to_remove=mobject_to_search,
+                )
+
+        if mobject_to_remove in mobject_to_search.submobjects:
+            self._place_sentinel(
+                mobject_container=mobject_to_search,
+                mobject_to_remove=mobject_to_remove,
+            )
+
+        # FIXME: I think some mobjects aren't being removed because we're modifying
+        #   the length of mobject_to_search.submobjects while iterating?
+
+        for mobject in mobject_to_search.submobjects:
+            self._remove(
+                mobject_to_remove=mobject_to_remove,
+                mobject_to_search=mobject,
+                mobject_container=mobject_to_search,
+            )
+
+    def _place_sentinel(
+        self,
+        *,
+        mobject_container: Mobject,
+        mobject_to_remove: Mobject,
+    ) -> None:
+        index: int = mobject_container.submobjects.index(mobject_to_remove)
+        mobject_container.submobjects[index] = _MobjectSentinel()
+
+    def _remove_all_sentinels(self) -> None:
+        # TODO: Remove empty Groups?
+        new_submobjects = []
+        for submobject in self.submobjects:
+            if isinstance(submobject, _MobjectSentinel):
+                continue
+
+            try:
+                submobject.submobjects = self._remove_all_sentinels_helper(submobject)
+            except AttributeError:
+                pass
+            finally:
+                new_submobjects.append(submobject)
+
+        self.submobjects = new_submobjects
+
+    def _remove_all_sentinels_helper(self, mobject: Mobject):
+        new_submobjects: list[Mobject] = []
+        for submobject in mobject.submobjects:
+            if isinstance(submobject, _MobjectSentinel):
+                continue
+
+            try:
+                submobject.submobjects = self._remove_all_sentinels_helper(submobject)
+            except AttributeError:
+                pass
+            finally:
+                new_submobjects.append(submobject)
+
+        return new_submobjects
 
 
 class _AllowOneMobjectDescriptor:
@@ -27,20 +135,10 @@ class _AllowOneMobjectDescriptor:
 
     def __get__(self, instance, owner=None):
         # NOTE: Added try/except block to make testing with BaseScene work
-        try:
-            return getattr(instance, self.private_name)
-        except AttributeError:
-            return []
+        return [ExcludeDuplicationSubmobjectsMobject()]
 
     def __set__(self, instance, value) -> None:
-        if not hasattr(instance, self.private_name):
-            if len(value) != 1:
-                return
-
-            if not isinstance(value[0], ExcludeDuplicationSubmobjectsMobject):
-                return
-
-            setattr(instance, self.private_name, _AllowOneMobjectList(value[0]))
+        return
 
 
 class BaseScene(Scene):
@@ -57,7 +155,6 @@ class BaseScene(Scene):
     def __init__(self, animation_script=None, **kwargs) -> None:
         super().__init__(**kwargs)
         self.animation_script = animation_script
-        self.add(ExcludeDuplicationSubmobjectsMobject())
 
     @property
     def scene_mobjects(self) -> list[Mobject]:
@@ -66,7 +163,7 @@ class BaseScene(Scene):
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
-                # animation_script=self.animation_script._animation_script["Video"],
+                self.mobjects[0],
                 animation_script=self.animation_script,
                 scene=self,
                 run_time=self.animation_script.run_time,
