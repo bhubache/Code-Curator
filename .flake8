@@ -30,6 +30,7 @@ pytest-parametrize-values-type = tuple
 pytest-parametrize-values-row-type = tuple
 
 jira-project-ids = CUR
+allowed-todo-synonyms = TODO, FIXME
 
 flake8-2020 = "1.8.0"
 flake8-type-checking = "2.4.1"
