@@ -8,81 +8,12 @@ from manim import Scene
 from manim import WHITE
 from manim.typing import Vector
 from manim.utils.testing.frames_comparison import frames_comparison
-# from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 
 
 __module_test__ = "data_structures"
-
-from code_curator.base_scene import BaseScene
-def curator_frames_comparison(
-    run_time: float | type | None = None,
-    last_frame: bool = True,
-    base_scene: Scene | None = None
-):
-
-    def get_cls(cls):
-        excluded_attr_names = ("pytestmark")
-        animation_functions = []
-
-        for attr_name, attr in cls.__dict__.items():
-            if attr_name not in excluded_attr_names and not attr_name.startswith("__") and not attr_name.endswith("__"):
-                animation_functions.append(attr)
-
-        class AnimationScript:
-            def __init__(self) -> None:
-                self.entries = []
-
-        animation_script = AnimationScript()
-        animation_script.run_time = run_time
-
-        for func in animation_functions:
-            try:
-                start_time = func.start_time
-            except AttributeError:
-                start_time = 0.0
-
-            animation_script.entries.append(
-                {
-                    "name": func.__name__,
-                    "start_time": start_time
-                }
-            )
-
-        # base_scene = BaseScene(animation_script)
-        nonlocal base_scene
-        if base_scene is None:
-            base_scene = BaseScene
-
-        for func in animation_functions:
-            # setattr(type(base_scene), func.__name__, func)
-            setattr(base_scene, func.__name__, func)
-
-        # def test_manim_func_wrapper(scene, unique_value, sll):
-        def test_manim_func_wrapper(scene, *args, **kwargs):
-            scene.animation_script = animation_script
-            scene.unique_value = unique_value
-            scene.sll = sll
-            return base_scene.construct(scene)
-
-        test_manim_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
-
-        # nonlocal base_scene
-        # if base_scene is None:
-        #     base_scene = BaseScene
-
-        return frames_comparison(func=test_manim_func_wrapper, last_frame=last_frame, base_scene=BaseScene)
-
-    if callable(run_time):
-        _cls = run_time
-        run_time = 1.0
-        return get_cls(_cls)
-
-    if run_time is None:
-        run_time = 1.0
-
-    return get_cls
 
 
 @frames_comparison
@@ -123,61 +54,67 @@ def test_sll_building(scene: Scene, kwargs: dict[str, Any]) -> None:
     scene.add(sll)
 
 
+# FIXME CUR-5
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
-    ("unique_value", "sll",),
+    ("unique_value", "sll"),
     (
-        # (0, SinglyLinkedList.create_sll(color=WHITE)),
-        # (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
-        # (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-        # (4, SinglyLinkedList.create_sll(0, color=WHITE)),
-        # (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
-        # (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
-        # (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        (0, SinglyLinkedList.create_sll(color=WHITE)),
+        (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
+        (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        (4, SinglyLinkedList.create_sll(0, color=WHITE)),
+        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
+        (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
+        (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
         (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
-        # (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
-        # (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
-        # (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-    )
+        (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
+        (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
+        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+    ),
 )
 class test_adding_null_node_cls:
-
-    def __init__(self, unique_value, sll) -> None:
+    def __init__(self, scene, unique_value, sll) -> None:
+        self.scene = scene
         self.sll = sll
 
     def my_animation(self):
+        self.scene.add(self.sll)
         return self.sll.animate.add_null()
+
+
+from code_curator.base_scene import BaseScene
 
 
 @frames_comparison(
     last_frame=False,
-    # base_scene=MockBaseScene.set_run_time(1.0).add_animation_method("add_null_node", start_time=0.0),
+    base_scene=BaseScene,
 )
 @pytest.mark.parametrize(
     ("unique_value_for_caching_control_data", "sll"),
     (
         (1, SinglyLinkedList.create_sll(color=WHITE)),
-        # (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
-        # (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-        # (4, SinglyLinkedList.create_sll(0, color=WHITE)),
-        # (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
-        # (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
-        # (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-        # (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
-        # (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
-        # (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
-        # (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-    )
+        (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
+        (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        (4, SinglyLinkedList.create_sll(0, color=WHITE)),
+        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
+        (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
+        (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
+        (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
+        (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
+        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+    ),
 )
-def test_adding_null_node(scene: Scene, unique_value_for_caching_control_data: int, sll: SinglyLinkedList) -> None:
+def test_adding_null_node_function(
+    scene: Scene,
+    unique_value_for_caching_control_data: int,
+    sll: SinglyLinkedList,
+) -> None:
+    scene.clear()
     scene.add(sll)
-
-    def add_null_node(self):
-        return sll.animate.add_null()
-
-    # scene.register_function(add_null_node)
-
-    scene.play()
+    scene.play(
+        sll.animate.add_null(),
+    )
 
 
 # @frames_comparison(base_scene=MockBaseScene)
