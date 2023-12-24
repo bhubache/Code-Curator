@@ -52,10 +52,9 @@ class BaseScene(Scene):
         for mob in mobjects:
             self.mobjects[0].add(mob)
 
-    # FIXME CUR-10 CUR-3 remove method
-    # def remove(self, *mobjects) -> None:
-    #     for mob in mobjects:
-    #         self.mobjects[0].remove(mob)
+    def remove(self, *mobjects) -> None:
+        for mob in mobjects:
+            self.mobjects[0].remove(mob)
 
     def clear(self):
         self.mobjects[0].submobjects = []
