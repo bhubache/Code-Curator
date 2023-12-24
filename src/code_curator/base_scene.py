@@ -169,6 +169,11 @@ class BaseScene(Scene):
     #     for mob in mobjects:
     #         self.mobjects[0].remove(mob)
 
+    def clear(self):
+        self.mobjects[0].submobjects = []
+        self.foreground_mobjects = []
+        return self
+
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
