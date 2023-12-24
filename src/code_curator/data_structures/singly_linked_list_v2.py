@@ -32,11 +32,8 @@ DEFAULT_STROKE_WIDTH = 2
 DEFAULT_TIP_WIDTH = 0.2
 DEFAULT_TIP_LENGTH = 0.2
 
-# TODO: Add more flexible positioning options
+# TODO CUR-8: Add more flexible positioning options
 RELATIVE_POSITION = (2.0, 0.0, 0.0)
-
-# TODO: Undo operation!!!
-# TODO: Make methods like insert_node work with ``animate`` attribute
 
 
 class SinglyLinkedList(CustomVMobject):
@@ -217,7 +214,7 @@ class SinglyLinkedList(CustomVMobject):
 
         return self
 
-    # TODO: Understand if it'd be better to use arg rather than self
+    # TODO CUR-9: Understand if it'd be better to use arg rather than self
     def head_pointer_updater(self, _) -> None:
         self.head_pointer.pointee = self.head
         self.head_pointer.update()
@@ -287,7 +284,6 @@ class SinglyLinkedList(CustomVMobject):
     def has_next(self, node: Node) -> bool:
         return self.get_next(node) is not None
 
-    # TODO: Tests
     def set_next(self, from_: Node | None, to: Node | None, angle_in_degrees: float = 0.0) -> None:
         if self.get_next(from_) == to:
             return
@@ -298,7 +294,6 @@ class SinglyLinkedList(CustomVMobject):
             edge = self.graph.get_edge_from_to(from_, self.get_next(from_))
             edge.reconnect(self.get_next(from_), to, angle_in_degrees)
 
-            # TODO: Run all unit tests for this
             if to not in self.graph:
                 self.graph.add_vertex(to)
 
@@ -314,7 +309,6 @@ class SinglyLinkedList(CustomVMobject):
 
         return None
 
-    # FIXME: Appears immediately on screen at end of animation rather than fading in
     def add_labeled_pointer(
         self,
         to: Node,
@@ -377,14 +371,13 @@ class SinglyLinkedList(CustomVMobject):
         if self.has_head:
             trav = self.get_next(self.head)
             while trav is not None:
-                # FIXME: Hardcoded relative placement of nodes
                 trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
                 trav = self.get_next(trav)
 
+        self.force_update()
+
         if center:
             self.move_to(ORIGIN)
-
-        self.force_update()
 
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
@@ -417,9 +410,6 @@ class SinglyLinkedList(CustomVMobject):
             self.set_next(new_node, self.get_next(trav))
             self.set_next(trav, new_node)
 
-        # TODO: I don't think this is needed
-        self.graph.add_vertex(new_node)
-
         self.flatten(center=center)
 
     def create_node(
@@ -431,7 +421,7 @@ class SinglyLinkedList(CustomVMobject):
         SinglyLinkedList._node_counter += 1
 
         if position_relative_to is None:
-            position_relative_to = (1, 1, 0)
+            position_relative_to = (5, 5, 0)
 
         return Node(
             sll=self,
@@ -507,11 +497,6 @@ class AnimationBuilder(_AnimationBuilder):
                 )
             else:
                 self.methods.append([method, method_args, method_kwargs])
-                # TODO: In the example of move_labeled_pointer, we pass in the labeled_pointer to move.
-                #  This comes from self.mobject, which is an issue because the method is being applied to
-                #  self.mobject.target. So, for any arg and kwarg passed in that's from self.mobject, we
-                #  need to replace it with the equivalent from self.mobject.target
-
                 method_args_with_target_submobjects = []
 
                 for positional_arg in method_args:
@@ -519,7 +504,6 @@ class AnimationBuilder(_AnimationBuilder):
                         method_args_with_target_submobjects.append(positional_arg)
                         continue
 
-                    # TODO: Learn what ``get_family`` is doing
                     for target_sm in self.mobject.target.get_family():
                         try:
                             if target_sm.original_id == str(id(positional_arg)):
@@ -531,7 +515,6 @@ class AnimationBuilder(_AnimationBuilder):
                     if not isinstance(value, Mobject):
                         continue
 
-                    # TODO: Learn what ``get_family`` is doing
                     for target_sm in self.mobject.target.get_family():
                         try:
                             if target_sm.original_id == str(id(value)):

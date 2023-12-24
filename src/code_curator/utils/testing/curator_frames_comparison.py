@@ -57,7 +57,6 @@ def curator_frames_comparison(
             # parametrized call through pytest, ``scene`` contains whatever mobjects were
             # added in the previous call. So to fix this side effect, we clear the mobjects
             # from the scene.
-            scene.clear()
 
             scene.scene = scene
             scene.animation_script = animation_script

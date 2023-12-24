@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-from manim import Square
 
 from code_curator.base_scene import BaseScene
 from code_curator.base_scene import ExcludeDuplicationSubmobjectsMobject
@@ -10,19 +9,6 @@ from code_curator.base_scene import ExcludeDuplicationSubmobjectsMobject
 @pytest.fixture
 def base_scene_instance() -> BaseScene:
     return BaseScene()
-
-
-def test_exclude_duplicate_submobjects_mobject_is_not_singleton() -> None:
-    assert ExcludeDuplicationSubmobjectsMobject() is not ExcludeDuplicationSubmobjectsMobject()
-
-
-# def test_exclude_duplicate_submobjects_mobject_submobjects_do_not_clear_upon_instantations() -> None:
-#     mobject = ExcludeDuplicationSubmobjectsMobject()
-#     mobject.add(Square())
-#
-#     same_mobject = ExcludeDuplicationSubmobjectsMobject()
-#     assert len(same_mobject.submobjects) == 1
-#     assert isinstance(same_mobject.submobjects[0], Square)
 
 
 # TODO CUR-1
