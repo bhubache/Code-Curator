@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import inspect
+from typing import TYPE_CHECKING
+
 from manim.utils.testing.frames_comparison import frames_comparison
-from manim import Scene
 
 from code_curator.base_scene import BaseScene
+
+if TYPE_CHECKING:
+    from manim import Scene
 
 
 def curator_frames_comparison(
@@ -11,9 +16,8 @@ def curator_frames_comparison(
     last_frame: bool = True,
     base_scene: Scene | None = None,
 ):
-
     def get_cls(cls):
-        excluded_attr_names = ("pytestmark")
+        excluded_attr_names = "pytestmark"
         animation_functions = []
 
         for attr_name, attr in cls.__dict__.items():
@@ -36,28 +40,34 @@ def curator_frames_comparison(
             animation_script.entries.append(
                 {
                     "name": func.__name__,
-                    "start_time": start_time
-                }
+                    "start_time": start_time,
+                },
             )
 
-        # base_scene = BaseScene(animation_script)
+        nonlocal base_scene
+        if base_scene is None:
+            base_scene = BaseScene
 
-        # for func in animation_functions:
-        #     setattr(type(base_scene), func.__name__, func)
+        for func in animation_functions:
+            setattr(base_scene, func.__name__, func)
 
         def test_manim_func_wrapper(scene, unique_value, sll):
-            breakpoint()
+            scene.scene = scene
             scene.animation_script = animation_script
             scene.unique_value = unique_value
             scene.sll = sll
             return BaseScene.construct(scene)
 
         test_manim_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
-        breakpoint()
 
-        nonlocal base_scene
-        if base_scene is None:
-            base_scene = BaseScene
+        old_sig = inspect.signature(cls.__init__)
+        old_parameters = list(old_sig.parameters.values())
+        old_parameters_without_self = [param for param in old_parameters if param.name != "self"]
+        new_sig = old_sig.replace(parameters=old_parameters_without_self)
+        test_manim_func_wrapper.__signature__ = new_sig
+        test_manim_func_wrapper.__globals__["__module_test__"] = cls.__init__.__globals__["__module_test__"]
+        test_manim_func_wrapper.__globals__["__file__"] = cls.__init__.__globals__["__file__"]
+        test_manim_func_wrapper.__name__ = cls.__name__
 
         return frames_comparison(func=test_manim_func_wrapper, last_frame=last_frame, base_scene=base_scene)
 
@@ -70,5 +80,3 @@ def curator_frames_comparison(
         run_time = 1.0
 
     return get_cls
-
-
