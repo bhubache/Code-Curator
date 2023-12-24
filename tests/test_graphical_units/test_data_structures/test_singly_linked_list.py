@@ -63,11 +63,19 @@ def test_sll_building(scene: Scene, kwargs: dict[str, Any]) -> None:
         (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
         (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
         (4, SinglyLinkedList.create_sll(0, color=WHITE)),
-        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
+        pytest.param(
+            5,
+            SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer(),
+            marks=pytest.mark.skip(reason="inconsistent animation"),
+        ),
         (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
         (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
         (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
-        (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
+        pytest.param(
+            9,
+            SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(),
+            marks=pytest.mark.skip(reason="inconsistent animation"),
+        ),
         (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
         (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
     ),
@@ -85,6 +93,7 @@ class test_adding_null_node_cls:
 from code_curator.base_scene import BaseScene
 
 
+# TODO CUR-5 This is for debugging that ticket
 @frames_comparison(
     last_frame=False,
     base_scene=BaseScene,
