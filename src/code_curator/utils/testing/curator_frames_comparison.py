@@ -66,7 +66,10 @@ def curator_frames_comparison(
 
             return base_scene.construct(scene)
 
-        test_manim_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
+        try:
+            test_manim_func_wrapper.__dict__["pytestmark"] = cls.__dict__["pytestmark"]
+        except KeyError:
+            pass  # pytestmark not being used
 
         old_sig = inspect.signature(cls.__init__)
         old_parameters = list(old_sig.parameters.values())
