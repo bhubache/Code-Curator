@@ -17,9 +17,6 @@ if TYPE_CHECKING:
 logger = CustomLogger.getLogger(__name__)
 
 
-# TODO: Might be duplicating work by having mobjects and their submobjects in the family members sets
-
-
 class TransformSinglyLinkedList(AnimationGroup):
     def __init__(self, mobject: SinglyLinkedList, methods, **kwargs) -> None:
         self.mobject = mobject
@@ -27,7 +24,6 @@ class TransformSinglyLinkedList(AnimationGroup):
         self.methods = methods
         self.target_mobject = self.mobject.target
 
-        # TODO: Figure out what these methods do exactly
         mobject_family_members = set(self.mobject.family_members_with_points())
         target_mobject_family_members = set(self.target_mobject.family_members_with_points())
 
@@ -90,9 +86,10 @@ class TransformSinglyLinkedList(AnimationGroup):
         super().clean_up_from_scene(scene)
 
         for fade_in_animation in self.fading_in_animations:
+            # TODO CUR-3: Change to ``Scene.remove``
             scene.mobjects[0].remove(fade_in_animation.mobject)
 
-        # TODO: Figure out what mobjects stay and go and what need to stay and go
+        # TODO CUR-3: Figure out what mobjects stay and go and what need to stay and go
         scene.remove(self.mobject, self.target_mobject)
         scene.add(self.ungroupified_mobject)
 
