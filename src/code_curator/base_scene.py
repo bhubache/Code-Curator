@@ -11,17 +11,17 @@ from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 
-class ExcludeDuplicationSubmobjectsMobject(Mobject):
+class TopLevelBaseSceneMobject(Mobject):
     """"""
 
 
-class _AllowOneMobjectDescriptor:
+class _OneElementMobjectListDescriptor:
     def __set_name__(self, owner, name: str) -> None:
         self.private_name = "_" + name
 
     def __get__(self, instance, owner=None):
         if not hasattr(instance, self.private_name):
-            setattr(instance, self.private_name, [ExcludeDuplicationSubmobjectsMobject()])
+            setattr(instance, self.private_name, [TopLevelBaseSceneMobject()])
 
         return getattr(instance, self.private_name)
 
@@ -38,7 +38,7 @@ class BaseScene(Scene):
     # config["background_color"] = "#33373D"
     config["disable_caching"] = True
 
-    mobjects = _AllowOneMobjectDescriptor()
+    mobjects = _OneElementMobjectListDescriptor()
 
     def __init__(self, animation_script=None, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -52,7 +52,7 @@ class BaseScene(Scene):
         for mob in mobjects:
             self.mobjects[0].add(mob)
 
-    # # FIXME: remove method
+    # # FIXME CUR-3 remove method
     # def remove(self, *mobjects) -> None:
     #     for mob in mobjects:
     #         self.mobjects[0].remove(mob)
