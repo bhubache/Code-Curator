@@ -11,30 +11,32 @@ from code_curator.custom_logging.custom_logger import CustomLogger
 logger = CustomLogger.getLogger(__name__)
 
 
-class _MobjectSentinel(Mobject):
-    def __new__(cls):
-        if not hasattr(cls, "_singleton_instance"):
-            cls._singleton_instance = super().__new__(cls)
-
-        return cls._singleton_instance
+# class _MobjectSentinel(Mobject):
+#     def __new__(cls):
+#         if not hasattr(cls, "_singleton_instance"):
+#             cls._singleton_instance = super().__new__(cls)
+#
+#         return cls._singleton_instance
 
 
 class ExcludeDuplicationSubmobjectsMobject(Mobject):
-    def __new__(cls):
-        if not hasattr(cls, "_singleton_instance"):
-            cls._singleton_instance = super().__new__(cls)
-            cls._singleton_instance.__initialized = False
+    """"""
+    # def __new__(cls):
+    #     if not hasattr(cls, "_singleton_instance"):
+    #         cls._singleton_instance = super().__new__(cls)
+    #         cls._singleton_instance.__initialized = False
 
-        return cls._singleton_instance
+    #     return cls._singleton_instance
 
-    def __init__(self, *args, **kwargs) -> None:
-        if self.__initialized:
-            return
+    # def __init__(self, *args, **kwargs) -> None:
+    #     if self.__initialized:
+    #         return
 
-        self.__initialized = True
-        super().__init__(*args, **kwargs)
+    #     self.__initialized = True
+    #     super().__init__(*args, **kwargs)
 
     # def remove(self, *mobjects: Mobject) -> Mobject:
+    # TODO Add tests for this
     #     # If more than one mobject has been passed to a single FadeOut animation,
     #     # all the mobjects will be wrapped in a Group. So, we need to iterate over
     #     # the group to remove each mobject.
@@ -127,14 +129,16 @@ class ExcludeDuplicationSubmobjectsMobject(Mobject):
 
     #     return new_submobjects
 
-
+# TODO Remove scene.clear in curator_frames_comparison (maybe)
 class _AllowOneMobjectDescriptor:
     def __set_name__(self, owner, name: str) -> None:
         self.private_name = "_" + name
 
     def __get__(self, instance, owner=None):
-        # NOTE: Added try/except block to make testing with BaseScene work
-        return [ExcludeDuplicationSubmobjectsMobject()]
+        if not hasattr(instance, self.private_name):
+            setattr(instance, self.private_name, [ExcludeDuplicationSubmobjectsMobject()])
+
+        return getattr(instance, self.private_name)
 
     def __set__(self, instance, value) -> None:
         return
@@ -156,7 +160,7 @@ class BaseScene(Scene):
         self.animation_script = animation_script
 
     @property
-    def scene_mobjects(self) -> list[Mobject]:
+    def submobjects(self) -> list[Mobject]:
         return self.mobjects[0].submobjects
 
     def add(self, *mobjects) -> None:

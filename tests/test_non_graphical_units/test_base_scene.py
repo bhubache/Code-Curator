@@ -7,17 +7,22 @@ from code_curator.base_scene import BaseScene
 from code_curator.base_scene import ExcludeDuplicationSubmobjectsMobject
 
 
-def test_exclude_duplicate_submobjects_mobject_is_singleton() -> None:
-    assert ExcludeDuplicationSubmobjectsMobject() is ExcludeDuplicationSubmobjectsMobject()
+@pytest.fixture
+def base_scene_instance() -> BaseScene:
+    return BaseScene()
 
 
-def test_exclude_duplicate_submobjects_mobject_submobjects_do_not_clear_upon_instantations() -> None:
-    mobject = ExcludeDuplicationSubmobjectsMobject()
-    mobject.add(Square())
+def test_exclude_duplicate_submobjects_mobject_is_not_singleton() -> None:
+    assert ExcludeDuplicationSubmobjectsMobject() is not ExcludeDuplicationSubmobjectsMobject()
 
-    same_mobject = ExcludeDuplicationSubmobjectsMobject()
-    assert len(same_mobject.submobjects) == 1
-    assert isinstance(same_mobject.submobjects[0], Square)
+
+# def test_exclude_duplicate_submobjects_mobject_submobjects_do_not_clear_upon_instantations() -> None:
+#     mobject = ExcludeDuplicationSubmobjectsMobject()
+#     mobject.add(Square())
+#
+#     same_mobject = ExcludeDuplicationSubmobjectsMobject()
+#     assert len(same_mobject.submobjects) == 1
+#     assert isinstance(same_mobject.submobjects[0], Square)
 
 
 # TODO CUR-1
@@ -28,28 +33,26 @@ def test_exclude_duplicate_submobjects_mobject_submobjects_do_not_clear_upon_ins
 #  5. Determine what methods on ExcludeDuplicateSubmobjectsMobject are needed
 
 
-def test_initial_base_scene_state() -> None:
-    base_scene = BaseScene()
+def test_getting_mobjects_returns_list_of_just_excluding_duplication_submobjects_mobject(base_scene_instance) -> None:
+    correct_result = [ExcludeDuplicationSubmobjectsMobject()]
 
-    assert base_scene.mobjects == [ExcludeDuplicationSubmobjectsMobject()]
-
-
-# def test_descriptor_get_is_consistent() -> None:
-#     base_scene = BaseScene()
-#     assert base_scene.mobjects == base_scene.mobjects
+    # assert base_scene_instance.mobjects == correct_result
+    assert len(base_scene_instance.mobjects) == 1
+    assert isinstance(base_scene_instance.mobjects[0], ExcludeDuplicationSubmobjectsMobject)
 
 
-def test_setting_mobjects_attribute_does_nothing() -> None:
-    base_scene = BaseScene()
-    initial_mobjects = base_scene.mobjects
+def test_setting_mobjects_attribute_does_nothing(base_scene_instance) -> None:
+    initial_mobjects = base_scene_instance.mobjects
 
-    base_scene.mobjects = []
+    base_scene_instance.mobjects = []
 
-    assert base_scene.mobjects == initial_mobjects
+    assert base_scene_instance.mobjects == initial_mobjects
 
 
-def test_deleting_mobjects_attribute_raises_exception() -> None:
-    base_scene = BaseScene()
-
+def test_deleting_mobjects_attribute_raises_exception(base_scene_instance) -> None:
     with pytest.raises(AttributeError):
-        del base_scene.mobjects
+        del base_scene_instance.mobjects
+
+
+def test_submobjects_is_initially_empty(base_scene_instance) -> None:
+    assert len(base_scene_instance.submobjects) == 0
