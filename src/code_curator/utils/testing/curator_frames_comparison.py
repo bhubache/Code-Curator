@@ -91,3 +91,11 @@ def curator_frames_comparison(
         run_time = 1.0
 
     return get_cls
+
+
+def starts_at(time_in_seconds: float):
+    def inner(fn):
+        fn.start_time = time_in_seconds
+        return fn
+
+    return inner
