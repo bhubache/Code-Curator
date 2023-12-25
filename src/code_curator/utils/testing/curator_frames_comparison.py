@@ -52,12 +52,6 @@ def curator_frames_comparison(
             setattr(base_scene, func.__name__, func)
 
         def test_manim_func_wrapper(scene, **kwargs):
-            # Because :class:`code_curator.base_scene.ExcludeDuplicateSubmobjectsMobject`
-            # is a singleton, even though a new scene instantiation is passed in with each
-            # parametrized call through pytest, ``scene`` contains whatever mobjects were
-            # added in the previous call. So to fix this side effect, we clear the mobjects
-            # from the scene.
-
             scene.scene = scene
             scene.animation_script = animation_script
 
