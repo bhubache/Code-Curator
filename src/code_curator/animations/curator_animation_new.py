@@ -53,6 +53,9 @@ class AnimationPool:
             animations = [animations]
 
         for anim in animations:
+            if anim is None:
+                continue
+
             anim = prepare_animation(anim)
             anim.start_alpha = method.start_alpha
             anim.end_alpha = method.start_alpha + value_from_range_to_range(
