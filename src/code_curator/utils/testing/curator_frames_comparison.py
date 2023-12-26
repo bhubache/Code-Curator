@@ -59,12 +59,12 @@ def curator_frames_comparison(
         for func in animation_functions:
             setattr(base_scene, func.__name__, func)
 
-        def test_manim_func_wrapper(scene, **kwargs):
-            scene.scene = scene
-            scene.animation_script = animation_script
+        scene_init_attr_name = f"{cls.__name__}_{cls.__init__.__name__}"
+        setattr(base_scene, scene_init_attr_name, cls.__init__)
 
-            for attr_name, value in kwargs.items():
-                setattr(scene, attr_name, value)
+        def test_manim_func_wrapper(scene, **kwargs):
+            getattr(scene, scene_init_attr_name)(scene, **kwargs)
+            scene.animation_script = animation_script
 
             return base_scene.construct(scene)
 
