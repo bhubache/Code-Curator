@@ -9,10 +9,12 @@ from manim import Dot
 from manim import DOWN
 from manim import FadeIn
 from manim import FadeOut
+from manim import RED
 from manim import Rotate
 from manim import Square
 from manim import Text
 from manim import UP
+from manim import WHITE
 
 from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 from code_curator.utils.testing.curator_frames_comparison import starts_at
@@ -107,6 +109,36 @@ class test_clearing_scene_makes_all_mobjects_disappear_from_screen:
         self.scene.add(Arrow().move_to((-2, -2, 0)))
 
         self.scene.clear()
+
+
+@curator_frames_comparison(last_frame=False)
+class test_foreground_mobject_appears_in_foreground:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
+
+    def method(self):
+        foreground_dot = Dot(color=WHITE).move_to((-2, 0, 0))
+        self.scene.add_foreground_mobject(foreground_dot)
+        filled_in_circle = Circle(fill_color=RED, fill_opacity=1)
+        self.scene.add(filled_in_circle)
+
+        return foreground_dot.animate.move_to((2, 0, 0))
+
+
+@curator_frames_comparison(last_frame=False)
+class test_removing_foreground_mobject_removes_it_from_foreground:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
+
+    def method(self):
+        foreground_dot = Dot(color=WHITE).move_to((-2, 0, 0))
+        self.scene.add_foreground_mobject(foreground_dot)
+        filled_in_circle = Circle(fill_color=RED, fill_opacity=1)
+        self.scene.add(filled_in_circle)
+
+        self.scene.remove_foreground_mobject(foreground_dot)
+
+        return foreground_dot.animate.move_to((2, 0, 0))
 
 
 @curator_frames_comparison(last_frame=False)
