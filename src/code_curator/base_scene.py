@@ -61,6 +61,13 @@ class BaseScene(Scene):
         self.foreground_mobjects = []
         return self
 
+    def add_foreground_mobject(self, mobject: Mobject):
+        mobject.z_index = 1
+        self.add(mobject)
+
+    def remove_foreground_mobject(self, mobject: Mobject):
+        mobject.z_index = 0
+
     def construct(self) -> None:
         self.play(
             CuratorAnimation(
