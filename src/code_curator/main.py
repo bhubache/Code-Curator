@@ -233,225 +233,67 @@ def postmortem_main():
 
 from manim import Scene
 from manim import config
+from manim import FadeIn
+from manim import Circle
+from manim import Square
+from code_curator.animations.curator_animation_new import CuratorAnimation
+from code_curator.utils.testing.curator_frames_comparison import starts_at
+from code_curator.base_scene import BaseScene
+from manim import Rotate
+from manim import FadeOut
 
 
-class TestScene(Scene):
-    config["background_color"] = "#FFFFFF"
-    config["disable_caching"] = True
+class TestVideo(BaseScene):
+    def __init__(self) -> None:
+        class TestAnimationScript:
+            def __init__(self) -> None:
+                self.entries = []
 
-    def construct(self):
-        # graph = Graph()
-        # graph.add_vertex(
-        #     "u",
-        #     contents="1/4",
-        #     label_out=True,
-        #     label_revolve_angle_in_degrees=90,
-        # )
-        # graph.add_vertex(
-        #     "v",
-        #     label_out=True,
-        #     position=(1.0, 0.0, 0.0),
-        #     label_revolve_angle_in_degrees=90,
-        # )
-        # graph.add_vertex(
-        #     "w",
-        #     label_out=True,
-        #     position=(2.0, 0.0, 0.0),
-        #     label_revolve_angle_in_degrees=90,
-        # )
-        # graph.add_vertex(
-        #     "x",
-        #     label_out=True,
-        #     position=(0.0, -1.0, 0.0),
-        #     label_revolve_angle_in_degrees=-90,
-        # )
-        # graph.add_vertex(
-        #     "y",
-        #     label_out=True,
-        #     position=(1.0, -1.0, 0.0),
-        #     label_revolve_angle_in_degrees=-90,
-        # )
-        # graph.add_vertex(
-        #     "z",
-        #     label_out=True,
-        #     position=(2.0, -1.0, 0.0),
-        #     label_revolve_angle_in_degrees=-90,
-        # )
+        animation_script = TestAnimationScript()
+        animation_script.run_time = 1.5
 
-        # graph.add_edge(
-        #     "u",
-        #     "v",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "u",
-        #     "x",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "v",
-        #     "y",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "y",
-        #     "x",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "x",
-        #     "v",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "w",
-        #     "y",
-        #     directedness="->"
-        # )
-        # graph.add_edge(
-        #     "w",
-        #     "z",
-        #     directedness="->"
-        # )
-        # # graph.add_edge(
-        # #     "z",
-        # #     "z",
-        # #     directedness="->"
-        # # )
-        # graph.move_to([0.0, 0.0, 0.0])
-        # self.add(graph)
+        excluded_attr_names = ("construct")
 
-        # graph.suspend_updating()
-        # self.play(graph.animate.move_to([-2, 2, 0]))
-        # self.play(
-        #     graph.get_vertex("x").animate.move_to([3, 1, 0]),
-        #     graph.get_vertex("u").animate.move_to([-3, 2, 0]),
-        #     graph.get_vertex("w").animate.move_to([0, -3, 0]),
-        #     run_time=1.0,
-        # )
 
-        # sll = Graph()
-        # sll.add_vertex(
-        #     contents=1,
-        #     show_label=False,
-        # )
-        # sll.add_vertex(
-        #     contents=2,
-        #     show_label=False,
-        #     position=(1.0, 0.0, 0.0),
-        # )
-        # sll.add_vertex(
-        #     contents=3,
-        #     show_label=False,
-        #     position=(2.0, 0.0, 0.0),
-        # )
-        # sll.add_vertex(
-        #     contents=4,
-        #     show_label=False,
-        #     position=(3.0, 0.0, 0.0),
-        # )
-        # sll.add_vertex(
-        #     contents="null",
-        #     show_label=False,
-        #     show_container=False,
-        #     position=(4.0, 0.0, 0.0),
-        # )
-        # sll.add_edge(
-        #     "Label0",
-        #     "Label1",
-        #     directedness="->",
-        # )
-        # sll.add_edge(
-        #     "Label1",
-        #     "Label2",
-        #     directedness="->"
-        # )
-        # sll.add_edge(
-        #     "Label2",
-        #     "Label3",
-        #     directedness="->",
-        # )
-        # sll.add_edge(
-        #     "Label3",
-        #     "Label4",
-        #     directedness="->",
-        # )
-        # self.add(sll)
+        for attr_name, func in type(self).__dict__.items():
+            if attr_name in excluded_attr_names or (attr_name.startswith("__") and attr_name.endswith("__")):
+                continue
 
-        # from manim import UP
-        # from manim import RIGHT
-        # from manim import LEFT, DOWN
-        # from code_curator.data_structures.graph import LabeledLine
+            try:
+                start_time = func.start_time
+            except AttributeError:
+                start_time = 0.0
 
-        # line = LabeledLine([0.0, -1.0, 0.0], sll.get_vertex("Label0"), label="trav")
-        # self.add(line)
-        # self.play(
-        #     sll.get_vertex("Label1").animate.shift(UP),
-        #     sll.get_vertex("Label3").animate.shift(LEFT + DOWN),
-        #     sll.get_vertex("Label0").animate.shift(LEFT),
-        #     # line.animate.move_to(sll.get_vertex("Label1"))
-        # )
+            animation_script.entries.append(
+                {
+                    "name": func.__name__,
+                    "start_time": start_time,
+                },
+            )
 
-        from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
-        from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
-        from manim import BLACK
+        super().__init__(animation_script)
 
-        sll = SinglyLinkedList(1, 2, 3, 4, 5, show_null=True, color=BLACK)
-        sll.add_labeled_pointer(0, "pointer")
-
-        other = sll.copy()
-        other.remove_labeled_pointer("pointer")
-        other.add_labeled_pointer(1, "pointer")
-        self.play(TransformSinglyLinkedList(sll, other))
-
-        other_2 = other.copy()
-        other_2_start = other_2.get_node(1).next_pointer.get_start()
-        other_2_original_end = other_2.get_node(1).next_pointer.get_end()
-        other_2.get_node(1).next_pointer.put_start_and_end_on(other_2_start, other_2_start)
-        other_2.suspend_updating()
-        self.play(TransformSinglyLinkedList(other, other_2))
-
-        other_3 = other_2.copy()
-        other_3.get_node(1).next_pointer.put_start_and_end_on(other_2_start, other_2_original_end)
-        self.play(TransformSinglyLinkedList(other_2, other_3))
-
-        other_4 = other_3.copy()
-        from manim import CurvedArrow
-
-        other_4.get_node(1).next_pointer.become(
-            CurvedArrow(
-                other_3.get_node(1).next_pointer.get_start(),
-                other_3.get_node(2).next_pointer.get_end(),
-                tip_length=other_3.get_node(2).next_pointer.get_tip().length,
-            ),
+    def construct(self) -> None:
+        self.play(
+            CuratorAnimation(
+                self.mobjects[0],
+                animation_script=self.animation_script,
+                scene=self,
+                run_time=self.animation_script.run_time,
+            )
         )
-        other_4.get_node(1).next_pointer.vertex_two = other_4.get_node(3)
-        self.play(TransformSinglyLinkedList(other_3, other_4))
 
-        other_5 = other_4.copy()
-        other_5.remove(other_5.get_node(2).next_pointer)
-        # other_5.get_node(1).next_pointer.vertex_two = other_5.get_node(3)
-        self.play(TransformSinglyLinkedList(other_4, other_5))
+    def first_animation(self):
+        square = Square().move_to((1, 1, 0))
+        self.add(square)
 
-        other_5_5 = other_5.copy()
-        other_5_5.remove(other_5_5.get_node(2))
-        self.play(TransformSinglyLinkedList(other_5, other_5_5))
+        return FadeOut(square)
 
-        # other_6 = other_5.create_reset_copy(
-        #     remove_indices=[2],
-        # )
-        other_6 = other_5_5.create_reset_copy()
-        # other_6 = SinglyLinkedList(1, 2, 4, 5, show_null=True, color=BLACK)
-        # other_6.remove(other_6.get_node(2).next_pointer)
-        # other_6.remove(other_6.get_node(2))
-        # FIXME: Animation of curved to straight arrow doesn't look right
-        self.play(TransformSinglyLinkedList(other_5_5, other_6, debug=True))
-        # self.play(Transform(
-        #     other_5.get_node(1).next_pointer,
-        #     other_6.get_node(1).next_pointer,
-        # ))
+    @starts_at(0.5)
+    def second_animation(self):
+        return FadeIn(Circle())
 
 
 if __name__ == "__main__":
     # main()
-    TestScene().render()
+    TestVideo().render()
