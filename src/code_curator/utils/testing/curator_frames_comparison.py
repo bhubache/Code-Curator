@@ -31,6 +31,14 @@ def curator_frames_comparison(
         animation_script = AnimationScript()
         animation_script.run_time = run_time
 
+        # Because the ``curator_frames_comparison`` decorator is run on every
+        # test class before any test case is executed, the ``base_scene`` class
+        # will have all test class methods as attributes. To prevent a method
+        # from being overwritten by another method with the same name, I'm
+        # prepending the method's surrounding class name to make them distinct.
+        for func in animation_functions:
+            func.__name__ = f"{cls.__name__}_{func.__name__}"
+
         for func in animation_functions:
             try:
                 start_time = func.start_time
