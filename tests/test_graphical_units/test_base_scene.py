@@ -13,50 +13,66 @@ from manim import Rotate
 from manim import Square
 from manim import Text
 from manim import UP
-from manim.utils.testing.frames_comparison import frames_comparison
 
-from code_curator.base_scene import BaseScene
 from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 from code_curator.utils.testing.curator_frames_comparison import starts_at
 
 if TYPE_CHECKING:
     from manim import Mobject
+    from code_curator.base_scene import BaseScene
 
 __module_test__ = "base_scene"
 
 
-@frames_comparison(base_scene=BaseScene)
-def test_initial_base_scene_is_blank(scene: BaseScene) -> None:
-    ...
+@curator_frames_comparison
+class test_initial_base_scene_is_blank:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
 
 
-@frames_comparison(base_scene=BaseScene)
-def test_adding_mobject_to_scene_makes_it_appear_on_screen(scene: BaseScene) -> None:
-    scene.add(Square())
+@curator_frames_comparison
+class test_adding_mobject_to_scene_makes_it_appear_on_screen:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
+
+    def method(self):
+        self.scene.add(Square())
 
 
-@frames_comparison(base_scene=BaseScene)
-def test_adding_multiple_mobjects_to_scene_makes_them_appear_on_screen(scene: BaseScene) -> None:
-    scene.add(Square())
-    scene.add(Circle().move_to((2, 2, 0)))
-    scene.add(Arrow().move_to((-2, -2, 0)))
+@curator_frames_comparison
+class test_adding_multiple_mobjects_to_scene_makes_them_appear_on_screen:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
+
+    def method(self):
+        self.scene.add(Square())
+        self.scene.add(Circle().move_to((2, 2, 0)))
+        self.scene.add(Arrow().move_to((-2, -2, 0)))
 
 
-@frames_comparison(base_scene=BaseScene)
-def test_removing_mobject_from_scene_makes_it_disappear_from_screen(scene: BaseScene) -> None:
-    square = Square()
-    scene.add(square)
+@curator_frames_comparison
+class test_removing_mobject_from_scene_makes_it_disappear_from_screen:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
 
-    scene.remove(square)
+    def method(self):
+        square = Square()
+        self.scene.add(square)
+
+        self.scene.remove(square)
 
 
-@frames_comparison(base_scene=BaseScene)
-def test_clearing_scene_makes_all_mobjects_disappear_from_screen(scene: BaseScene) -> None:
-    scene.add(Square())
-    scene.add(Circle().move_to((2, 2, 0)))
-    scene.add(Arrow().move_to((-2, -2, 0)))
+@curator_frames_comparison
+class test_clearing_scene_makes_all_mobjects_disappear_from_screen:
+    def __init__(self, scene: BaseScene) -> None:
+        self.scene = scene
 
-    scene.clear()
+    def method(self):
+        self.scene.add(Square())
+        self.scene.add(Circle().move_to((2, 2, 0)))
+        self.scene.add(Arrow().move_to((-2, -2, 0)))
+
+        self.scene.clear()
 
 
 @curator_frames_comparison(last_frame=False)
