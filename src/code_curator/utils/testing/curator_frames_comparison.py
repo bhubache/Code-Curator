@@ -79,7 +79,7 @@ def curator_frames_comparison(
         new_sig = old_sig.replace(parameters=old_parameters_without_self)
         test_manim_func_wrapper.__signature__ = new_sig
         test_manim_func_wrapper.__globals__["__module_test__"] = cls.__init__.__globals__["__module_test__"]
-        test_manim_func_wrapper.__globals__["__file__"] = cls.__init__.__globals__["__file__"]
+        test_manim_func_wrapper.curator_test_file = cls.__init__.__globals__["__file__"]
         test_manim_func_wrapper.__name__ = cls.__name__
 
         return frames_comparison(func=test_manim_func_wrapper, last_frame=last_frame, base_scene=base_scene)
