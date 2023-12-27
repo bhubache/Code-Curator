@@ -57,6 +57,15 @@ class TransformSinglyLinkedList(AnimationGroup):
 
             self.transform_animations.append(Transform(*original_to_target))
 
+        # Exclude animations that animate submobjects of other FadeIn animations
+        for outer_mob_animtion in self.transform_animations.copy():
+            outer_mob = outer_mob_animtion.mobject
+            for inner_mob_animation in self.transform_animations.copy():
+                inner_mob = inner_mob_animation.mobject
+                # Exclude self by excluding first element from slice
+                if inner_mob in outer_mob.family_members_with_points()[1:]:
+                    self.transform_animations.remove(inner_mob_animation)
+
         self.fading_out_animations = []
 
         for submobject_id in fading_out_submobject_ids:
