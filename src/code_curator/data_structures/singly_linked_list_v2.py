@@ -336,7 +336,7 @@ class SinglyLinkedList(CustomVMobject):
         self.remove(self.labeled_pointers[label])
 
     def get_labeled_pointer(self, name: str) -> LabeledLine:
-        return self.labeled_pointers[name]
+        return self.graph.get_labeled_pointer(name)
 
     def move_labeled_pointer(
         self,

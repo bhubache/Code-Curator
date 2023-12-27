@@ -144,7 +144,6 @@ class Vertex(CustomVMobject):
         self.container = container
         self.contents_mobject = contents
 
-        # TODO: Move to classes that compose emtpy
         if self.contents == "null":
             mock_contents = Element("n")
             mock_contents.move_to(self.container.get_center())
@@ -211,7 +210,6 @@ class Edge(CustomVMobject):
         )
         self.directedness = directedness
 
-        # FIXME: It looks like double headed arrow heads aren't the same size
         if directedness.endswith(">"):
             self.line.add_tip(tip_length=tip_length, tip_width=tip_width)
 
@@ -234,7 +232,6 @@ class Edge(CustomVMobject):
 
         return f"{start} {self.directedness} {end}"
 
-    # TODO: This duplicates code in the __init__
     def shortest_path_updater(self, some_obj) -> None:
         reference_line = Line(
             self.vertex_one.container.get_center(),
@@ -433,6 +430,9 @@ class Graph(CustomVMobject):
 
             self.submobjects.remove(mob)
 
+    def get_labeled_pointer(self, name: str) -> LabeledLine:
+        return self.labeled_pointers[name]
+
     def get_vertex(self, label: str | int, /) -> Vertex:
         for vertex in self.vertices:
             if vertex.label == label:
@@ -594,11 +594,13 @@ class LabeledLine(CustomVMobject):
 
     @direction.setter
     def direction(self, new_direction) -> None:
+        if all(new_direction == self.direction):
+            return
+
         new_end = self.pointee.get_boundary_point(-new_direction)
         new_start = Point(new_end).shift(-new_direction * self.line.get_length()).get_center()
 
         self.line.put_start_and_end_on(new_start, new_end)
-        # TODO: May have to resume updating?
         self.update()
 
     def line_updater(self, line):
