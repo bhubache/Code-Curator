@@ -283,15 +283,27 @@ class TestVideo(BaseScene):
             )
         )
 
-    def first_animation(self):
-        square = Square().move_to((1, 1, 0))
-        self.add(square)
-
-        return FadeOut(square)
-
     @starts_at(0.5)
-    def second_animation(self):
-        return FadeIn(Circle())
+    def first_animation(self):
+        from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+        from manim import WHITE
+        from manim import UP
+        from manim import DOWN
+
+        sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null()
+        sll.add_labeled_pointer(sll[0], label="pointer", direction=UP)
+        self.add(sll)
+        # sll.move_labeled_pointer(
+        #     "pointer",
+        #     sll[2],
+        #     pointer_direction=UP,
+        # )
+
+        return sll.animate.move_labeled_pointer(
+            "pointer",
+            sll[2],
+            pointer_direction=DOWN,
+        )
 
 
 if __name__ == "__main__":
