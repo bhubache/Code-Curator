@@ -370,6 +370,7 @@ class SinglyLinkedList(CustomVMobject):
             trav = self.get_next(self.head)
             while trav is not None:
                 trav.move_to(self.get_prev(trav).get_center() + np.array([RELATIVE_POSITION]))
+                self.get_next_pointer(self.get_prev(trav)).set_path_arc(0)
                 trav = self.get_next(trav)
 
         self.force_update()

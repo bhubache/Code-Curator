@@ -233,12 +233,25 @@ class Edge(CustomVMobject):
             end = self.vertex_one
 
         return f"{start} {self.directedness} {end}"
+    
+    def set_path_arc(self, angle_in_degrees: float):
+        self.line.set_path_arc(math.radians(angle_in_degrees))
 
     # TODO: This duplicates code in the __init__
     def shortest_path_updater(self, some_obj) -> None:
+        if self.vertex_one is None:
+            reference_start = self.line.get_start()
+        else:
+            reference_start = self.vertex_one.container.get_center()
+
+        if self.vertex_two is None:
+            reference_end = self.line.get_end()
+        else:
+            reference_end = self.vertex_two.container.get_center()
+
         reference_line = Line(
-            self.vertex_one.container.get_center(),
-            self.vertex_two.container.get_center(),
+            reference_start,
+            reference_end,
             color=self.color,
         )
 
@@ -246,17 +259,27 @@ class Edge(CustomVMobject):
             self.line.restore()
             delattr(self, "invisible_to_avoid_divide_by_zero")
 
+        if self.vertex_one is None:
+            new_line_start = self.line.get_start()
+        else:
+            new_line_start = reference_line.point_from_proportion(
+                min(1, self.vertex_one.container.radius / reference_line.get_length()),
+            )
+
+        if self.vertex_two is None:
+            new_line_end = self.line.get_end()
+        else:
+            new_line_end = reference_line.point_from_proportion(
+                max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
+            )
+
         with warnings.catch_warnings():
             warnings.filterwarnings("error")
 
             try:
                 new_line = Line(
-                    reference_line.point_from_proportion(
-                        min(1, self.vertex_one.container.radius / reference_line.get_length()),
-                    ),
-                    reference_line.point_from_proportion(
-                        max(0, 1 - (self.vertex_two.container.radius / reference_line.get_length())),
-                    ),
+                    new_line_start,
+                    new_line_end,
                     path_arc=self.line.path_arc,
                 )
             except RuntimeWarning:
@@ -320,7 +343,7 @@ class Edge(CustomVMobject):
         else:
             self.vertex_two = new_vertex
 
-        self.line.set_path_arc(math.radians(angle_in_degrees))
+        self.set_path_arc(angle_in_degrees=angle_in_degrees)
 
 
 class Graph(CustomVMobject):
