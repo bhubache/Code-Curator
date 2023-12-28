@@ -6,6 +6,9 @@ from __future__ import annotations
 
 __all__: Sequence[str] = []
 
+import sys
+sys.path.insert(0, "/".join(sys.path[0].split("/")[:-1]))
+
 import importlib
 import logging
 import os
@@ -155,7 +158,7 @@ def main() -> None:
     problem_dir = Path(
         Path.home(),
         "ManimCS",
-        "Code_Curator",
+        "Code-Curator",
         "src",
         "code_curator",
         "leetcode",
@@ -163,21 +166,21 @@ def main() -> None:
         "Delete_Node_in_a_Linked_List",
     )
 
-    if ai_speech_requested:
-        script_text = get_script_text_from_animation_script(
-            yaml.safe_load(
-                (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
-            ),
-        )
+    # if ai_speech_requested:
+    #     script_text = get_script_text_from_animation_script(
+    #         yaml.safe_load(
+    #             (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
+    #         ),
+    #     )
 
-        ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
-        ai_script_path.parent.mkdir(parents=True, exist_ok=True)
-        ai_script_path.write_text(script_text)
+    #     ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
+    #     ai_script_path.parent.mkdir(parents=True, exist_ok=True)
+    #     ai_script_path.write_text(script_text)
 
-        audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
-        ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
-            ai_script_path.parents[2],
-        )
+    #     audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
+    #     ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
+    #         ai_script_path.parents[2],
+    #     )
 
     aligned_animation_script = get_aligned_animation_script(
         alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
@@ -214,12 +217,12 @@ def main() -> None:
             ),
         ),
     )
-    audio_clip = AudioFileClip(str(audio_path))
-    final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
-    final_clip.write_videofile(
-        str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
-        fps=FRAME_RATE,
-    )
+    # audio_clip = AudioFileClip(str(audio_path))
+    # final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
+    # final_clip.write_videofile(
+    #     str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
+    #     fps=FRAME_RATE,
+    # )
 
 
 def postmortem_main():
@@ -295,5 +298,5 @@ class TestVideo(BaseScene):
 
 
 if __name__ == "__main__":
-    # main()
-    TestVideo().render()
+    main()
+    # TestVideo().render()

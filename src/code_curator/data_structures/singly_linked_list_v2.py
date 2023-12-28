@@ -382,6 +382,10 @@ class SinglyLinkedList(CustomVMobject):
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
+    def remove_node(node: int | Node) -> None:
+        # Can be given index or Node instance
+        ...
+
     def insert_node(self, index: int, value, center: bool = True) -> None:
         positive_index = index if index >= 0 else len(self.nodes) + index
         if positive_index < 0 or positive_index > len(self.nodes):
