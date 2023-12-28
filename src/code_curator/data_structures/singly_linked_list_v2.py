@@ -404,7 +404,8 @@ class SinglyLinkedList(CustomVMobject):
                     self.remove_tail_pointer()
             else:
                 self.remove(node)
-                self._head = new_head
+            
+            self._head = new_head
         elif node is self.tail and not self.has_null:
             self.remove(self.get_next_pointer(self.get_prev(node)))
             self.remove(node)
