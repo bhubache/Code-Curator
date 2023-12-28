@@ -264,13 +264,14 @@ class Video(BaseScene):
         #         directedness="->",
         #     )
         # )
-        self.sll = SinglyLinkedList(0, 1, 2).add_null().add_head_pointer()
+        self.sll = SinglyLinkedList(0, 1).add_null().add_head_pointer().add_tail_pointer()
         # self.sll.head_pointer.set_opacity(0)
         # self.sll.tail_pointer.set_opacity(0)
         return FadeIn(self.sll)
 
     def fade_in_head(self):
         # return self.sll.animate.insert_node(1, 10)
+        return self.sll.animate.remove_node(1)
         return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
         # return self.sll.animate.insert_node(1, 10)
         return Wait()

@@ -382,9 +382,29 @@ class SinglyLinkedList(CustomVMobject):
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
-    def remove_node(node: int | Node) -> None:
+    def remove_node(self, node: int | Node, center: bool = True) -> None:
         # Can be given index or Node instance
-        ...
+        if isinstance(node, int):
+            node = self.get_node(node)
+
+        if node not in self.nodes:
+            raise ValueError(f"Node {node} cannot be removed because it is not present in the singly linked list")
+
+        # TODO: Tail is different when there isn't ``self.null``
+        if node is self.head:
+            # TODO: I don't like that I have to set self._head here but it's handled for me elsewhere
+            new_head = self.get_next(node)
+            self.remove(self.get_next_pointer(node))
+            self.remove(node)
+            self._head = new_head
+        elif node is self.tail and not self.has_null:
+            raise NotImplementedError()
+        else:
+            self.set_next(self.get_prev(node), self.get_next(node))
+            self.remove(self.get_next_pointer(node))
+            self.remove(node)
+
+        self.flatten(center=center)
 
     def insert_node(self, index: int, value, center: bool = True) -> None:
         positive_index = index if index >= 0 else len(self.nodes) + index
