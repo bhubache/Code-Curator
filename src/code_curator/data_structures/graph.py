@@ -427,7 +427,6 @@ class Graph(CustomVMobject):
                 mob.vertex_two = None
             elif isinstance(mob, LabeledLine):
                 del self.labeled_pointers[mob.label]
-                self.submobjects.remove(mob)
             else:
                 raise NotImplementedError(f"Removing mob {mob} from {self.__class__.__name__} is not yet supported")
 
