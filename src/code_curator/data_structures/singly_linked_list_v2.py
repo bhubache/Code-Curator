@@ -249,6 +249,8 @@ class SinglyLinkedList(CustomVMobject):
         self.tail_pointer.pointee = self.tail
         if np.array_equal(self.tail_pointer.direction, UP) and self.head is not self.tail:
             self.tail_pointer.direction = DOWN
+        elif np.array_equal(self.tail_pointer.direction, DOWN) and self.head is self.tail:
+            self.tail_pointer.direction = UP
 
         self.tail_pointer.update()
 
