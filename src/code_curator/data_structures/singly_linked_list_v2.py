@@ -220,7 +220,8 @@ class SinglyLinkedList(CustomVMobject):
         self.head_pointer.update()
 
     def remove_head_pointer(self):
-        raise NotImplementedError()
+        self.remove_updater(self.head_pointer_updater)
+        self.graph.remove_labeled_pointer(self.head_pointer.label)
 
     def add_tail_pointer(self, center: bool = True):
         if not self.has_tail:
@@ -255,7 +256,8 @@ class SinglyLinkedList(CustomVMobject):
         self.tail_pointer.update()
 
     def remove_tail_pointer(self):
-        raise NotImplementedError()
+        self.remove_updater(self.tail_pointer_updater)
+        self.graph.remove_labeled_pointer(self.tail_pointer.label)
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
@@ -331,12 +333,6 @@ class SinglyLinkedList(CustomVMobject):
         if center:
             self.move_to(ORIGIN)
 
-    def remove_labeled_pointer(self, label: str | Element) -> None:
-        if isinstance(label, Element):
-            label = label.value
-
-        self.remove(self.labeled_pointers[label])
-
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
 
@@ -396,11 +392,21 @@ class SinglyLinkedList(CustomVMobject):
         if node is self.head:
             # TODO: I don't like that I have to set self._head here but it's handled for me elsewhere
             new_head = self.get_next(node)
-            self.remove(self.get_next_pointer(node))
-            self.remove(node)
-            self._head = new_head
+            try:
+                self.remove(self.get_next_pointer(node))
+            except IndexError:
+                # Removing the last node or ``self.null`` from SLL. Should probably remove everything
+                self.remove(node)
+                if self.has_head_pointer:
+                    self.remove_head_pointer()
+                if self.has_tail_pointer:
+                    self.remove_tail_pointer()
+            else:
+                self.remove(node)
+                self._head = new_head
         elif node is self.tail and not self.has_null:
-            raise NotImplementedError()
+            self.remove(self.get_next_pointer(self.get_prev(node)))
+            self.remove(node)
         else:
             self.set_next(self.get_prev(node), self.get_next(node))
             self.remove(self.get_next_pointer(node))
