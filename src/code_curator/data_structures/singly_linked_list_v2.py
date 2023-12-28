@@ -259,6 +259,13 @@ class SinglyLinkedList(CustomVMobject):
         self.remove_updater(self.tail_pointer_updater)
         self.graph.remove_labeled_pointer(self.tail_pointer.label)
 
+    def add(self, *mobjects: Mobject):
+        for mob in mobjects:
+            if isinstance(mob, Node):
+                self.graph.add_vertex(mob)
+            else:
+                super().add(mob)
+
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
             if isinstance(mob, (Vertex, Edge)):
@@ -542,8 +549,11 @@ class AnimationBuilder(_AnimationBuilder):
                         try:
                             if target_sm.original_id == str(id(positional_arg)):
                                 method_args_with_target_submobjects.append(target_sm)
+                                break
                         except AttributeError:
                             continue  # sm in target is new and thus not present in self.mobject
+                    else:
+                        method_args_with_target_submobjects.append(positional_arg)
 
                 for key, value in method_kwargs.items():
                     if not isinstance(value, Mobject):
@@ -553,9 +563,12 @@ class AnimationBuilder(_AnimationBuilder):
                         try:
                             if target_sm.original_id == str(id(value)):
                                 method_kwargs[key] = target_sm
+                                break
                         except AttributeError:
                             continue  # sm in target is new and thus not present in self.mobject
-
+                    else:
+                        method_kwargs[key] = value
+                
                 method(*method_args_with_target_submobjects, **method_kwargs)
 
             return self
