@@ -309,6 +309,7 @@ class SinglyLinkedList(CustomVMobject):
                 self.graph.add_vertex(to)
 
         edge.force_update()
+        edge.suspend_updating()
 
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
@@ -519,6 +520,7 @@ class Node(Vertex):
 
 
 class AnimationBuilder(_AnimationBuilder):
+
     def __getattr__(self, method_name) -> types.MethodType:
         method = getattr(self.mobject.target, method_name)
         has_overridden_animation = hasattr(method, "_override_animate")
@@ -568,7 +570,7 @@ class AnimationBuilder(_AnimationBuilder):
                             continue  # sm in target is new and thus not present in self.mobject
                     else:
                         method_kwargs[key] = value
-                
+
                 method(*method_args_with_target_submobjects, **method_kwargs)
 
             return self
@@ -582,10 +584,16 @@ class AnimationBuilder(_AnimationBuilder):
         if self.overridden_animation:
             anim = self.overridden_animation
         else:
-            self.mobject.suspend_updating()
+            for original_mob in self.mobject.get_family():
+                for target_mob in self.mobject.target.get_family():
+                    if hasattr(target_mob, "original_id"):
+                        if str(id(original_mob)) == target_mob.original_id and target_mob.updating_suspended:
+                            original_mob.suspend_updating(recursive=False)
+
             anim = TransformSinglyLinkedList(self.mobject, self.methods)
 
         for attr, value in self.anim_args.items():
             setattr(anim, attr, value)
 
         return anim
+    
