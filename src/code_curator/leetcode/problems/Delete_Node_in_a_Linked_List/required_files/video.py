@@ -193,6 +193,8 @@ class Video(BaseScene):
         return FadeOut(self.statement_tex), FadeOut(self.first_mention_tex), FadeIn(new_statement_tex)
 
     def transition_to_constraints_analysis(self):
+        self.sll = SinglyLinkedList(0, 1, 2).add_null().add_head_pointer().add_tail_pointer()
+        return FadeIn(self.sll)
         return Wait()
         self.constraints_analysis_title_tex.to_edge(UP)
 
@@ -206,6 +208,11 @@ class Video(BaseScene):
         )
 
     def start_first_constraint_explanation(self):
+        self.new_node = self.sll.create_node(10)
+        self.new_node.next_to(self.sll.get_node(-1), DOWN * 2)
+        return self.sll.animate.add(self.new_node)
+        # self.node_to_remove = self.sll.get_node(2)
+        # return self.sll.animate.set_next(self.sll.get_node(1), self.sll.get_node(3), angle_in_degrees=90)
         return Wait()
         self.fourth_constraint_table_breakdown = ProblemText.create_table(
             [
@@ -264,16 +271,20 @@ class Video(BaseScene):
         #         directedness="->",
         #     )
         # )
-        self.sll = SinglyLinkedList(0, 1).add_null().add_head_pointer().add_tail_pointer()
-        # self.sll.head_pointer.set_opacity(0)
-        # self.sll.tail_pointer.set_opacity(0)
-        return FadeIn(self.sll)
+        self.old_prev = self.sll.get_prev(self.sll.get_node(-1))
+        return self.sll.animate.set_next(self.new_node, self.sll.get_node(-1))
+        # self.next_pointer_to_remove = self.sll.get_next_pointer(self.node_to_remove)
+        # return self.sll.animate.remove(self.node_to_remove)
+        # self.sll = SinglyLinkedList(0).add_head_pointer().add_tail_pointer()
+        # return FadeIn(self.sll)
 
     def fade_in_head(self):
         # return self.sll.animate.insert_node(1, 10)
-        return self.sll.animate.remove_node(1)
-        return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
+        # return self.sll.animate.remove_node(0)
+        # return self.sll.animate.move_labeled_pointer(self.sll.head_pointer, self.sll.get_node(1))
         # return self.sll.animate.insert_node(1, 10)
+        return self.sll.animate.set_next(self.old_prev, self.new_node)
+        # return self.sll.animate.remove(self.next_pointer_to_remove)
         return Wait()
         return self.sll.animate.insert_node(0, 10)
         return Wait()
@@ -285,6 +296,7 @@ class Video(BaseScene):
         return self.sll.tail_pointer.animate(run_time=0.3).set_opacity(1)
 
     def add_second_node(self):
+        return self.sll.animate.flatten()
         return self.sll.animate.move_to([1, 1, 0])
         return Wait()
         self.sll, animation = self.sll.insert_node(-1, 1)
