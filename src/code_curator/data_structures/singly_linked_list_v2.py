@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from colour import Color
     from manim.typing import Vector
+    from manim import VMobject
     import types
     from code_curator.data_structures.element import Element
 
@@ -260,6 +261,13 @@ class SinglyLinkedList(CustomVMobject):
     def remove_tail_pointer(self):
         self.remove_updater(self.tail_pointer_updater)
         self.graph.remove_labeled_pointer(self.tail_pointer.label)
+
+    def add(self, *mobjects: VMobject):
+        for mob in mobjects:
+            if isinstance(mob, Node):
+                self.graph.add_vertex(mob)
+            else:
+                super().add(mob)
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
@@ -531,6 +539,9 @@ class AnimationBuilder(_AnimationBuilder):
                     **method_kwargs,
                 )
             else:
+                # We apply the requested method to the target, hence the reason ``method`` is bound to ``self.mobject.target``.
+                # Additionally, any argument from ``method_args`` and ``method_kwargs`` that is a mobject a submobject
+                # of ``self.mobject`` needs to be changed to the corresponding submobject from ``self.mobject.target``.
                 self.methods.append([method, method_args, method_kwargs])
                 method_args_with_target_submobjects = []
 
@@ -543,8 +554,12 @@ class AnimationBuilder(_AnimationBuilder):
                         try:
                             if target_sm.original_id == str(id(positional_arg)):
                                 method_args_with_target_submobjects.append(target_sm)
+                                break
                         except AttributeError:
                             continue  # sm in target is new and thus not present in self.mobject
+                    else:
+                        # ``positional_arg`` is not yet a submobject of ``self.mobject``
+                        method_args_with_target_submobjects.append(positional_arg)
 
                 for key, value in method_kwargs.items():
                     if not isinstance(value, Mobject):
@@ -554,8 +569,12 @@ class AnimationBuilder(_AnimationBuilder):
                         try:
                             if target_sm.original_id == str(id(value)):
                                 method_kwargs[key] = target_sm
+                                break
                         except AttributeError:
                             continue  # sm in target is new and thus not present in self.mobject
+                    else:
+                        # ``value`` is not yet a submobject of ``self.mobject``
+                        method_kwargs[key] = value
 
                 method(*method_args_with_target_submobjects, **method_kwargs)
 
