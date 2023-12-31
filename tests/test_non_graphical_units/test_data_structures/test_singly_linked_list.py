@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from manim import DOWN
 from manim import WHITE
 
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
@@ -542,3 +543,14 @@ def test_removing_node(
         has_tail_pointer=post_removal_has_tail_pointer,
         color=color,
     )
+
+
+def test_adding_node() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
+    node_to_add = sll.create_node(10)
+    node_to_add.next_to(sll[1], DOWN)
+
+    sll.add(node_to_add)
+
+    validate_sll(sll, 0, 1, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)

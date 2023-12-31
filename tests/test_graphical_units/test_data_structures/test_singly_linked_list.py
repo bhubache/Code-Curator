@@ -304,3 +304,16 @@ class test_remove_node:
 
     def animation(self):
         return self.sll.animate.remove_node(self.remove_at_index)
+
+
+@curator_frames_comparison(last_frame=False)
+class test_add_node:
+    def __init__(self, scene: BaseScene) -> None:
+        self.sll = SinglyLinkedList(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+        scene.add(self.sll)
+
+        self.node_to_add = self.sll.create_node(10)
+        self.node_to_add.next_to(self.sll[1], DOWN)
+
+    def animation(self):
+        return self.sll.animate.add(self.node_to_add)
