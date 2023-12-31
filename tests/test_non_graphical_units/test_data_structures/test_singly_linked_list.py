@@ -5,23 +5,81 @@ from manim import WHITE
 
 from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
 
-# TODO: Test with head, tail, and head and tail pointers, test directions of the pointers
+
+def validate_sll(
+    sll: SinglyLinkedList,
+    *values,
+    has_null: bool,
+    has_head_pointer: bool,
+    has_tail_pointer: bool,
+    color,
+) -> None:
+    assert len(sll) == len(values)
+    assert len(sll.nodes) == len(values)
+    assert len(sll.values) == len(values)
+    assert sll.color == color
+
+    if values or has_null:
+        assert sll.has_head
+        assert sll.has_tail
+
+        if values:
+            assert sll.head is sll.get_node(0)
+            assert sll.tail is sll.get_node(-1)
+        elif has_null:
+            assert sll.head is sll.null
+            assert sll.tail is sll.null
+    else:
+        assert not sll.has_head
+        assert not sll.has_tail
+
+    if has_null:
+        assert sll.has_null
+    else:
+        assert not sll.has_null
+
+    if has_head_pointer:
+        assert sll.has_head_pointer
+        assert sll.head_pointer_pointee is sll.head
+    else:
+        assert not sll.has_head_pointer
+
+    if has_tail_pointer:
+        assert sll.has_tail_pointer
+        assert sll.tail_pointer_pointee is sll.tail
+    else:
+        assert not sll.has_tail_pointer
+
+    for index, val in enumerate(values):
+        assert sll.get_node(index).value == val
+
+    assert sll.get_prev(sll.head) is None
+
+    for index, node in enumerate(sll):
+        assert node.value == values[index]
+
+    for index, _ in enumerate(values):
+        if index > 0:
+            assert sll.get_prev(sll.get_node(index)).value == values[index - 1]
+
+        if index < len(values) - 1:
+            assert sll.get_next(sll.get_node(index)).value == values[index + 1]
+
+    if values:
+        if has_null:
+            assert sll.get_next(sll.get_node(-1)) is sll.null
+            assert not sll.has_next(sll.null)
+        else:
+            assert not sll.has_next(sll.get_node(-1))
+    else:
+        if has_null:
+            assert not sll.has_next(sll.null)
 
 
 def test_empty_sll() -> None:
     sll = SinglyLinkedList.create_sll(color=WHITE)
 
-    assert len(sll) == 0
-    assert len(sll.values) == 0
-    assert len(sll.nodes) == 0
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is False
-    assert sll.has_tail is False
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    with pytest.raises(IndexError):
-        sll.get_node(0)
+    validate_sll(sll, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_empty_sll_with_pointers() -> None:
@@ -35,403 +93,93 @@ def test_empty_sll_with_pointers() -> None:
 def test_empty_sll_showing_null() -> None:
     sll = SinglyLinkedList.create_sll(color=WHITE).add_null()
 
-    assert len(sll) == 0
-    assert len(sll.values) == 0
-    assert len(sll.nodes) == 0
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    with pytest.raises(IndexError):
-        sll.get_node(0)
+    validate_sll(sll, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_empty_sll_showing_null_with_pointers() -> None:
     sll = SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 0
-    assert len(sll.values) == 0
-    assert len(sll.nodes) == 0
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    with pytest.raises(IndexError):
-        sll.get_node(0)
+    validate_sll(sll, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_one_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE)
 
-    assert len(sll) == 1
-    assert len(sll.values) == 1
-    assert len(sll.nodes) == 1
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert not sll.has_next(sll.get_node(0))
-    assert sll.get_prev(sll.get_node(0)) is None
-    with pytest.raises(IndexError):
-        sll.get_node(1)
+    validate_sll(sll, 0, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_one_node_sll_with_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 1
-    assert len(sll.values) == 1
-    assert len(sll.nodes) == 1
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert not sll.has_next(sll.get_node(0))
-    assert sll.get_prev(sll.get_node(0)) is None
-    with pytest.raises(IndexError):
-        sll.get_node(1)
+    validate_sll(sll, 0, has_null=False, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_one_node_sll_showing_null() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null()
 
-    assert len(sll) == 1
-    assert len(sll.values) == 1
-    assert len(sll.nodes) == 1
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_next(sll.get_node(0)) is sll.null
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_prev(sll.null) is sll.get_node(0)
-    with pytest.raises(IndexError):
-        sll.get_node(1)
+    validate_sll(sll, 0, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_one_node_sll_showing_null_with_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 1
-    assert len(sll.values) == 1
-    assert len(sll.nodes) == 1
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_next(sll.get_node(0)) is sll.null
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_prev(sll.null) is sll.get_node(0)
-    with pytest.raises(IndexError):
-        sll.get_node(1)
+    validate_sll(sll, 0, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE)
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert not sll.has_next(sll.get_node(1))
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 0, 1, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_two_node_sll_showing_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert not sll.has_next(sll.get_node(1))
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 0, 1, has_null=False, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_two_node_sll_showing_null() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.null
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 0, 1, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
-# TODO: Test order of adding head and tail?
 def test_two_node_sll_showing_null_showing_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.null
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 0, 1, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE)
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 2
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.get_node(2))
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 1, 2, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_three_node_sll_with_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is False
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 2
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.get_node(2))
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 1, 2, has_null=False, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_three_node_sll_showing_null() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null()
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is False
-    assert sll.has_tail_pointer is False
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 2
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.null
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(2)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 1, 2, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_three_node_sll_showing_null_with_pointers() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 2
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.null
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(2)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 1, 2, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
-# TODO: Assuming indices work as expected
 def test_insert_into_empty_sll() -> None:
     sll = SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()
 
     sll.insert_node(len(sll), 10)
 
-    assert len(sll) == 1
-    assert len(sll.values) == 1
-    assert len(sll.nodes) == 1
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is sll.tail
-    assert sll.head is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 10
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_next(sll.get_node(0)) is sll.null
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(0)
-    with pytest.raises(IndexError):
-        sll.get_node(1)
+    validate_sll(sll, 10, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_front_of_one_node_sll() -> None:
@@ -439,332 +187,71 @@ def test_insert_at_front_of_one_node_sll() -> None:
 
     sll.insert_node(0, 10)
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 10
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 0
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.null
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 10, 0, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_end_of_one_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(1, 10)
 
-    assert len(sll) == 2
-    assert len(sll.values) == 2
-    assert len(sll.nodes) == 2
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 10
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.null
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(1)
-    with pytest.raises(IndexError):
-        sll.get_node(2)
+    validate_sll(sll, 0, 10, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_front_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(0, 10)
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 10
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 0
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 1
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.null
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(2)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 10, 0, 1, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_end_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(2, 10)
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 10
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.null
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(2)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 1, 10, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_in_middle_of_two_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(1, 10)
 
-    assert len(sll) == 3
-    assert len(sll.values) == 3
-    assert len(sll.nodes) == 3
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 10
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 1
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.null
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert not sll.get_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(2)
-    with pytest.raises(IndexError):
-        sll.get_node(3)
+    validate_sll(sll, 0, 10, 1, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_front_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(0, 10)
 
-    assert len(sll) == 4
-    assert len(sll.values) == 4
-    assert len(sll.nodes) == 4
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 10
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 0
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 1
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_node(3).value == 2
-    assert sll.get_node_index(sll.get_node(3)) == 3
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert sll.get_next(sll.get_node(3)) is sll.null
-    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(3)
-    with pytest.raises(IndexError):
-        sll.get_node(4)
+    validate_sll(sll, 10, 0, 1, 2, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_end_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(3, 10)
 
-    assert len(sll) == 4
-    assert len(sll.values) == 4
-    assert len(sll.nodes) == 4
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 2
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_node(3).value == 10
-    assert sll.get_node_index(sll.get_node(3)) == 3
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert sll.get_next(sll.get_node(3)) is sll.null
-    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(3)
-    with pytest.raises(IndexError):
-        sll.get_node(4)
+    validate_sll(sll, 0, 1, 2, 10, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_index_one_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(1, 10)
 
-    assert len(sll) == 4
-    assert len(sll.values) == 4
-    assert len(sll.nodes) == 4
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 10
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 1
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_node(3).value == 2
-    assert sll.get_node_index(sll.get_node(3)) == 3
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert sll.get_next(sll.get_node(3)) is sll.null
-    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(3)
-    with pytest.raises(IndexError):
-        sll.get_node(4)
+    validate_sll(sll, 0, 10, 1, 2, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_insert_at_index_two_of_three_node_sll() -> None:
     sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
     sll.insert_node(2, 10)
 
-    assert len(sll) == 4
-    assert len(sll.values) == 4
-    assert len(sll.nodes) == 4
-    assert sll.color == WHITE
-    assert sll.has_null is True
-    assert sll.has_head is True
-    assert sll.has_tail is True
-    assert sll.head is not sll.tail
-    assert sll.head is not sll.null
-    assert sll.tail is not sll.null
-    assert sll.has_head_pointer is True
-    assert sll.has_tail_pointer is True
-    assert sll.head_pointer.pointee is sll.head
-    assert sll.tail_pointer.pointee is sll.tail
-    assert sll.get_node(0).value == 0
-    assert sll.get_node_index(sll.get_node(0)) == 0
-    assert sll.get_node(1).value == 1
-    assert sll.get_node_index(sll.get_node(1)) == 1
-    assert sll.get_node(2).value == 10
-    assert sll.get_node_index(sll.get_node(2)) == 2
-    assert sll.get_node(3).value == 2
-    assert sll.get_node_index(sll.get_node(3)) == 3
-    assert sll.get_next(sll.get_node(0)) is sll.get_node(1)
-    assert sll.get_prev(sll.get_node(0)) is None
-    assert sll.get_next(sll.get_node(1)) is sll.get_node(2)
-    assert sll.get_prev(sll.get_node(1)) is sll.get_node(0)
-    assert sll.get_next(sll.get_node(2)) is sll.get_node(3)
-    assert sll.get_prev(sll.get_node(2)) is sll.get_node(1)
-    assert sll.get_next(sll.get_node(3)) is sll.null
-    assert sll.get_prev(sll.get_node(3)) is sll.get_node(2)
-    assert not sll.has_next(sll.null)
-    assert sll.get_prev(sll.null) is sll.get_node(3)
-    with pytest.raises(IndexError):
-        sll.get_node(4)
+    validate_sll(sll, 0, 1, 10, 2, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
 
 
 def test_add_null_node_to_non_empty_sll() -> None:
@@ -773,12 +260,7 @@ def test_add_null_node_to_non_empty_sll() -> None:
     return_value = sll.add_null()
 
     assert return_value is sll
-    assert sll.has_null
-    assert sll.has_head
-    assert sll.has_tail
-    assert sll.head is sll.tail
-    assert sll.get_next(sll.tail) is sll.null
-    assert not sll.has_next(sll.null)
+    validate_sll(sll, 0, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_add_null_node_to_empty_sll() -> None:
@@ -787,12 +269,7 @@ def test_add_null_node_to_empty_sll() -> None:
     return_value = sll.add_null()
 
     assert return_value is sll
-    assert sll.has_null
-    assert sll.has_head
-    assert sll.has_tail
-    assert sll.head is sll.tail
-    assert sll.head is sll.null
-    assert not sll.has_next(sll.null)
+    validate_sll(sll, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_add_null_node_to_sll_that_already_has_null() -> None:
@@ -801,12 +278,7 @@ def test_add_null_node_to_sll_that_already_has_null() -> None:
     return_value = sll.add_null()
 
     assert return_value is sll
-    assert sll.has_null
-    assert sll.has_head
-    assert sll.has_tail
-    assert sll.head is sll.tail
-    assert sll.head is sll.null
-    assert not sll.has_next(sll.null)
+    validate_sll(sll, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
 
 
 def test_getting_heads_next_node() -> None:
@@ -892,6 +364,7 @@ def test_setting_next_node_to_adjacent_right_node() -> None:
 
     assert sll.head is original_head
     assert sll.tail is original_tail
+    # validate_sll(sll, 0, 2, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
     assert sll.get_next(sll.head) is sll.tail
     assert len(sll) == 2
 
@@ -916,3 +389,156 @@ def test_cutting_out_tail_with_set_next() -> None:
     assert len(sll) == 2
 
 
+def test_removing_from_empty_sll_raises_exception() -> None:
+    sll = SinglyLinkedList.create_sll(color=WHITE)
+
+    with pytest.raises(IndexError):
+        sll.remove_node(0)
+
+
+def test_removing_from_one_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, color=WHITE)
+
+    sll.remove_node(0)
+
+    validate_sll(sll, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
+
+
+def test_removing_from_one_node_sll_with_null() -> None:
+    sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null()
+
+    sll.remove_node(0)
+
+    validate_sll(sll, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
+
+
+def test_removing_from_one_node_sll_with_null_and_head_and_tail_pointers() -> None:
+    sll = SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+
+    sll.remove_node(0)
+
+    validate_sll(sll, has_null=True, has_head_pointer=True, has_tail_pointer=True, color=WHITE)
+
+
+def test_removing_first_node_from_two_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE)
+
+    sll.remove_node(0)
+
+    validate_sll(sll, 1, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
+
+
+def test_removing_second_node_from_two_node_sll() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE)
+
+    sll.remove_node(1)
+
+    validate_sll(sll, 0, has_null=False, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
+
+
+def test_removing_first_node_from_two_node_sll_with_null() -> None:
+    sll = SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()
+
+    sll.remove_node(0)
+
+    validate_sll(sll, 1, has_null=True, has_head_pointer=False, has_tail_pointer=False, color=WHITE)
+
+
+@pytest.mark.parametrize(
+    (
+        "values",
+        "remove_at_index",
+        "color",
+        "initially_has_null",
+        "initially_has_head_pointer",
+        "initially_has_tail_pointer",
+        "post_removal_has_null",
+        "post_removal_has_head_pointer",
+        "post_removal_has_tail_pointer",
+    ),
+    (
+        ([0], 0, WHITE, False, False, False, False, False, False),
+        ([0], 0, WHITE, True, False, False, True, False, False),
+        ([0], 0, WHITE, False, True, False, False, False, False),
+        ([0], 0, WHITE, False, False, True, False, False, False),
+        ([0], 0, WHITE, True, True, False, True, True, False),
+        ([0], 0, WHITE, True, False, True, True, False, True),
+        ([0], 0, WHITE, False, True, True, False, False, False),
+        ([0], 0, WHITE, True, True, True, True, True, True),
+        ([0, 1], 0, WHITE, False, False, False, False, False, False),
+        ([0, 1], 0, WHITE, True, False, False, True, False, False),
+        ([0, 1], 0, WHITE, False, True, False, False, True, False),
+        ([0, 1], 0, WHITE, False, False, True, False, False, True),
+        ([0, 1], 0, WHITE, True, True, False, True, True, False),
+        ([0, 1], 0, WHITE, True, False, True, True, False, True),
+        ([0, 1], 0, WHITE, False, True, True, False, True, True),
+        ([0, 1], 0, WHITE, True, True, True, True, True, True),
+        ([0, 1], 1, WHITE, False, False, False, False, False, False),
+        ([0, 1], 1, WHITE, True, False, False, True, False, False),
+        ([0, 1], 1, WHITE, False, True, False, False, True, False),
+        ([0, 1], 1, WHITE, False, False, True, False, False, True),
+        ([0, 1], 1, WHITE, True, True, False, True, True, False),
+        ([0, 1], 1, WHITE, True, False, True, True, False, True),
+        ([0, 1], 1, WHITE, False, True, True, False, True, True),
+        ([0, 1], 1, WHITE, True, True, True, True, True, True),
+        ([0, 1, 2], 0, WHITE, False, False, False, False, False, False),
+        ([0, 1, 2], 0, WHITE, True, False, False, True, False, False),
+        ([0, 1, 2], 0, WHITE, False, True, False, False, True, False),
+        ([0, 1, 2], 0, WHITE, False, False, True, False, False, True),
+        ([0, 1, 2], 0, WHITE, True, True, False, True, True, False),
+        ([0, 1, 2], 0, WHITE, True, False, True, True, False, True),
+        ([0, 1, 2], 0, WHITE, False, True, True, False, True, True),
+        ([0, 1, 2], 0, WHITE, True, True, True, True, True, True),
+        ([0, 1, 2], 1, WHITE, False, False, False, False, False, False),
+        ([0, 1, 2], 1, WHITE, True, False, False, True, False, False),
+        ([0, 1, 2], 1, WHITE, False, True, False, False, True, False),
+        ([0, 1, 2], 1, WHITE, False, False, True, False, False, True),
+        ([0, 1, 2], 1, WHITE, True, True, False, True, True, False),
+        ([0, 1, 2], 1, WHITE, True, False, True, True, False, True),
+        ([0, 1, 2], 1, WHITE, False, True, True, False, True, True),
+        ([0, 1, 2], 1, WHITE, True, True, True, True, True, True),
+        ([0, 1, 2], 2, WHITE, False, False, False, False, False, False),
+        ([0, 1, 2], 2, WHITE, True, False, False, True, False, False),
+        ([0, 1, 2], 2, WHITE, False, True, False, False, True, False),
+        ([0, 1, 2], 2, WHITE, False, False, True, False, False, True),
+        ([0, 1, 2], 2, WHITE, True, True, False, True, True, False),
+        ([0, 1, 2], 2, WHITE, True, False, True, True, False, True),
+        ([0, 1, 2], 2, WHITE, False, True, True, False, True, True),
+        ([0, 1, 2], 2, WHITE, True, True, True, True, True, True),
+    ),
+)
+def test_removing_node(
+    values,
+    remove_at_index,
+    color,
+    initially_has_null,
+    initially_has_head_pointer,
+    initially_has_tail_pointer,
+    post_removal_has_null,
+    post_removal_has_head_pointer,
+    post_removal_has_tail_pointer,
+) -> None:
+    sll = SinglyLinkedList.create_sll(*values, color=color)
+
+    if initially_has_null:
+        sll.add_null()
+
+    if initially_has_head_pointer:
+        sll.add_head_pointer()
+
+    if initially_has_tail_pointer:
+        sll.add_tail_pointer()
+
+    sll.remove_node(remove_at_index)
+
+    new_values = values
+    new_values.pop(remove_at_index)
+
+    validate_sll(
+        sll,
+        *new_values,
+        has_null=post_removal_has_null,
+        has_head_pointer=post_removal_has_head_pointer,
+        has_tail_pointer=post_removal_has_tail_pointer,
+        color=color,
+    )
