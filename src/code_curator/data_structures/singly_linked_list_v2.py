@@ -13,7 +13,6 @@ from manim.mobject.mobject import _AnimationBuilder
 
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.custom_vmobject import CustomVMobject
-from code_curator.data_structures.element import Element
 from code_curator.data_structures.graph import Edge
 from code_curator.data_structures.graph import Graph
 from code_curator.data_structures.graph import LabeledLine
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
     from colour import Color
     from manim.typing import Vector
     import types
+    from code_curator.data_structures.element import Element
 
 DEFAULT_NODE_RADIUS = 0.5
 DEFAULT_FONT_SIZE = 17
@@ -73,13 +73,7 @@ class SinglyLinkedList(CustomVMobject):
         return len(self.nodes)
 
     def __iter__(self):
-        return self
-
-    def __next__(self):
         yield from self.nodes
-
-        if self.show_null:
-            yield self.null
 
     def __getitem__(self, item: int) -> Node:
         return self.nodes[item]
@@ -131,11 +125,19 @@ class SinglyLinkedList(CustomVMobject):
             return None
 
     @property
+    def head_pointer_pointee(self) -> Mobject:
+        return self.head_pointer.pointee
+
+    @property
     def tail_pointer(self) -> LabeledLine | None:
         try:
             return self.graph.labeled_pointers["tail"]
         except LookupError:
             return None
+
+    @property
+    def tail_pointer_pointee(self) -> Mobject:
+        return self.tail_pointer.pointee
 
     @property
     def null(self):
@@ -220,7 +222,8 @@ class SinglyLinkedList(CustomVMobject):
         self.head_pointer.update()
 
     def remove_head_pointer(self):
-        raise NotImplementedError()
+        self.remove_updater(self.head_pointer_updater)
+        self.graph.remove_labeled_pointer(self.head_pointer.label)
 
     def add_tail_pointer(self, center: bool = True):
         if not self.has_tail:
@@ -247,13 +250,16 @@ class SinglyLinkedList(CustomVMobject):
 
     def tail_pointer_updater(self, _) -> None:
         self.tail_pointer.pointee = self.tail
-        if np.array_equal(self.tail_pointer.direction, UP) and self.head is not self.tail:
+        if self.head is self.tail and self.has_head_pointer:
+            self.tail_pointer.direction = UP
+        else:
             self.tail_pointer.direction = DOWN
 
         self.tail_pointer.update()
 
     def remove_tail_pointer(self):
-        raise NotImplementedError()
+        self.remove_updater(self.tail_pointer_updater)
+        self.graph.remove_labeled_pointer(self.tail_pointer.label)
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
@@ -329,12 +335,6 @@ class SinglyLinkedList(CustomVMobject):
         if center:
             self.move_to(ORIGIN)
 
-    def remove_labeled_pointer(self, label: str | Element) -> None:
-        if isinstance(label, Element):
-            label = label.value
-
-        self.remove(self.labeled_pointers[label])
-
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.graph.get_labeled_pointer(name)
 
@@ -409,6 +409,40 @@ class SinglyLinkedList(CustomVMobject):
 
             self.set_next(new_node, self.get_next(trav))
             self.set_next(trav, new_node)
+
+        self.flatten(center=center)
+
+    def remove_node(self, node: int | Node, center: bool = True) -> None:
+        # Can be given index or Node instance
+        if isinstance(node, int):
+            node = self.get_node(node)
+
+        if node not in self.nodes:
+            raise ValueError(f"Node {node} cannot be removed because it is not present in the singly linked list")
+
+        if node is self.head:
+            new_head = self.get_next(node)
+            try:
+                self.remove(self.get_next_pointer(node))
+            except IndexError:
+                # Removing the last node from SLL. Should probably remove everything
+                self.remove(node)
+                if self.has_head_pointer:
+                    self.remove_head_pointer()
+
+                if self.has_tail_pointer:
+                    self.remove_tail_pointer()
+            else:
+                self.remove(node)
+
+            self._head = new_head
+        elif node is self.tail and not self.has_null:
+            self.remove(self.get_next_pointer(self.get_prev(node)))
+            self.remove(node)
+        else:
+            self.set_next(self.get_prev(node), self.get_next(node))
+            self.remove(self.get_next_pointer(node))
+            self.remove(node)
 
         self.flatten(center=center)
 

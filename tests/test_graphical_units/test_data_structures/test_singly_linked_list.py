@@ -213,3 +213,94 @@ class test_insert_node:
             self.value,
             center=True,
         )
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    (
+        "values",
+        "remove_at_index",
+        "color",
+        "initially_has_null",
+        "initially_has_head_pointer",
+        "initially_has_tail_pointer",
+    ),
+    (
+        ([0], 0, WHITE, False, False, False),
+        ([0], 0, WHITE, True, False, False),
+        ([0], 0, WHITE, False, True, False),
+        ([0], 0, WHITE, False, False, True),
+        ([0], 0, WHITE, True, True, False),
+        ([0], 0, WHITE, True, False, True),
+        ([0], 0, WHITE, False, True, True),
+        ([0], 0, WHITE, True, True, True),
+        ([0, 1], 0, WHITE, False, False, False),
+        ([0, 1], 0, WHITE, True, False, False),
+        ([0, 1], 0, WHITE, False, True, False),
+        ([0, 1], 0, WHITE, False, False, True),
+        ([0, 1], 0, WHITE, True, True, False),
+        ([0, 1], 0, WHITE, True, False, True),
+        ([0, 1], 0, WHITE, False, True, True),
+        ([0, 1], 0, WHITE, True, True, True),
+        ([0, 1], 1, WHITE, False, False, False),
+        ([0, 1], 1, WHITE, True, False, False),
+        ([0, 1], 1, WHITE, False, True, False),
+        ([0, 1], 1, WHITE, False, False, True),
+        ([0, 1], 1, WHITE, True, True, False),
+        ([0, 1], 1, WHITE, True, False, True),
+        ([0, 1], 1, WHITE, False, True, True),
+        ([0, 1], 1, WHITE, True, True, True),
+        ([0, 1, 2], 0, WHITE, False, False, False),
+        ([0, 1, 2], 0, WHITE, True, False, False),
+        ([0, 1, 2], 0, WHITE, False, True, False),
+        ([0, 1, 2], 0, WHITE, False, False, True),
+        ([0, 1, 2], 0, WHITE, True, True, False),
+        ([0, 1, 2], 0, WHITE, True, False, True),
+        ([0, 1, 2], 0, WHITE, False, True, True),
+        ([0, 1, 2], 0, WHITE, True, True, True),
+        ([0, 1, 2], 1, WHITE, False, False, False),
+        ([0, 1, 2], 1, WHITE, True, False, False),
+        ([0, 1, 2], 1, WHITE, False, True, False),
+        ([0, 1, 2], 1, WHITE, False, False, True),
+        ([0, 1, 2], 1, WHITE, True, True, False),
+        ([0, 1, 2], 1, WHITE, True, False, True),
+        ([0, 1, 2], 1, WHITE, False, True, True),
+        ([0, 1, 2], 1, WHITE, True, True, True),
+        ([0, 1, 2], 2, WHITE, False, False, False),
+        ([0, 1, 2], 2, WHITE, True, False, False),
+        ([0, 1, 2], 2, WHITE, False, True, False),
+        ([0, 1, 2], 2, WHITE, False, False, True),
+        ([0, 1, 2], 2, WHITE, True, True, False),
+        ([0, 1, 2], 2, WHITE, True, False, True),
+        ([0, 1, 2], 2, WHITE, False, True, True),
+        ([0, 1, 2], 2, WHITE, True, True, True),
+    ),
+)
+class test_remove_node:
+    def __init__(
+        self,
+        scene: BaseScene,
+        values,
+        remove_at_index: int,
+        color,
+        initially_has_null: bool,
+        initially_has_head_pointer: bool,
+        initially_has_tail_pointer: bool,
+    ) -> None:
+        sll = SinglyLinkedList.create_sll(*values, color=color)
+        scene.add(sll)
+
+        if initially_has_null:
+            sll.add_null()
+
+        if initially_has_head_pointer:
+            sll.add_head_pointer()
+
+        if initially_has_tail_pointer:
+            sll.add_tail_pointer()
+
+        self.sll = sll
+        self.remove_at_index = remove_at_index
+
+    def animation(self):
+        return self.sll.animate.remove_node(self.remove_at_index)
