@@ -55,7 +55,7 @@ class TransformSinglyLinkedList(AnimationGroup):
                     original_to_target.append(mobject)
                     break
 
-            self.transform_animations.append(Transform(*original_to_target))
+            self.transform_animations.append(Transform(*original_to_target, suspend_mobject_updating=False))
 
         # Exclude animations that animate submobjects of other FadeIn animations
         for outer_mob_animtion in self.transform_animations.copy():
@@ -71,7 +71,7 @@ class TransformSinglyLinkedList(AnimationGroup):
         for submobject_id in fading_out_submobject_ids:
             for mobject in mobject_family_members:
                 if str(id(mobject)) == submobject_id:
-                    self.fading_out_animations.append(FadeOut(mobject))
+                    self.fading_out_animations.append(FadeOut(mobject, suspend_mobject_updating=False))
 
         # Exclude animations that animate submobjects of other FadeIn animations
         for outer_mob_animtion in self.fading_out_animations.copy():
@@ -87,7 +87,7 @@ class TransformSinglyLinkedList(AnimationGroup):
         for submobject_id in fading_in_submobject_ids:
             for mobject in target_mobject_family_members:
                 if get_original_id(mobject) == submobject_id:
-                    self.fading_in_animations.append(FadeIn(mobject))
+                    self.fading_in_animations.append(FadeIn(mobject, suspend_mobject_updating=False))
 
         # Exclude animations that animate submobjects of other FadeIn animations
         for outer_mob_animtion in self.fading_in_animations.copy():
@@ -114,3 +114,5 @@ class TransformSinglyLinkedList(AnimationGroup):
         # Apply all methods to self.mobject so it catches up to target in appearance
         for method, method_args, method_kwargs in self.methods:
             method.__func__(self.ungroupified_mobject, *method_args, **method_kwargs)
+
+        self.ungroupified_mobject.resume_updating()
