@@ -232,8 +232,9 @@ class Edge(CustomVMobject):
 
         return f"{start} {self.directedness} {end}"
 
-    def set_path_arc(self, angle_in_degrees: float) -> None:
+    def set_path_arc(self, angle_in_degrees: float):
         self.line.set_path_arc(math.radians(angle_in_degrees))
+        return self
 
     def shortest_path_updater(self, some_obj) -> None:
         if self.vertex_one is None:
