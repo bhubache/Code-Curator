@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import itertools as it
 from typing import TYPE_CHECKING
 
@@ -79,5 +80,19 @@ class CustomVMobject(VMobject):
         for index, mob in enumerate(family):
             if is_suspended_list[index]:
                 mob.suspend_updating(recursive=False)
+
+        return self
+
+    def update(self, dt: float = 0, recursive: bool = True):
+        if not self.updating_suspended:
+            for updater in self.updaters:
+                if "dt" in inspect.signature(updater).parameters:
+                    updater(self, dt)
+                else:
+                    updater(self)
+
+        if recursive:
+            for submob in self.submobjects:
+                submob.update(dt, recursive)
 
         return self
