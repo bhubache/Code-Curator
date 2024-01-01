@@ -431,6 +431,7 @@ class Graph(CustomVMobject):
 
     def remove(self, *mobjects: Mobject):
         for mob in mobjects:
+            mob.suspend_updating()
             if isinstance(mob, Vertex):
                 self.vertices.remove(mob)
 
