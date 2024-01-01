@@ -317,3 +317,63 @@ class test_add_node:
 
     def animation(self):
         return self.sll.animate.add(self.node_to_add)
+
+
+@curator_frames_comparison(last_frame=False)
+class test_flatten_already_flattened_sll:
+    def __init__(self, scene: BaseScene) -> None:
+        self.sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+        scene.add(self.sll)
+
+    def animation(self):
+        return self.sll.animate.flatten(center=True)
+
+
+@curator_frames_comparison(last_frame=False)
+class test_flatten_one_node_sll:
+    def __init__(self, scene: BaseScene) -> None:
+        self.sll = SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()
+        scene.add(self.sll)
+
+        self.sll.move_to((2, 2, 0))
+
+    def animation(self):
+        return self.sll.animate.flatten(center=True)
+
+
+@curator_frames_comparison(last_frame=False)
+class test_flatten_sll_with_curved_next_pointer:
+    def __init__(self, scene: BaseScene) -> None:
+        self.sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+        scene.add(self.sll)
+
+        pointer_to_remove = self.sll.get_next_pointer(self.sll[1])
+        node_to_remove = self.sll.get_node(1)
+
+        self.sll.set_next(self.sll.head, self.sll.tail, angle_in_degrees=90)
+        self.sll.remove(pointer_to_remove)
+        self.sll.remove(node_to_remove)
+
+    def animation(self):
+        return self.sll.animate.flatten(center=True)
+
+
+# @curator_frames_comparison(last_frame=False)
+# class test_flatten_sll_with_scattered_nodes:
+#     def __init__(self, scene: BaseScene) -> None:
+#         self.sll = SinglyLinkedList.create_sll(0, 1, 2, 3, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+#         scene.add(self.sll)
+#
+#         self.sll[0].move_to((2, 2, 0))
+#         self.sll[1].move_to((-3, 1, 0))
+#         self.sll[2].move_to((0, -2, 0))
+#         # self.sll.force_update()
+#         self.sll.resume_updating()
+#
+#     def animation(self):
+#         return self.sll.animate.flatten(center=True)
+
+
+# Flatten:
+# 1. SLL with nodes scattered around
+# 3. SLL with nodes scattered around and curved next pointer
