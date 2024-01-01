@@ -71,6 +71,13 @@ class CustomVMobject(VMobject):
             ),
         )
 
-    def force_update(self) -> None:
+    def force_update(self, recursive: bool = True):
+        family = self.get_family()
+        is_suspended_list = [mob.updating_suspended for mob in family]
         self.resume_updating()
-        self.suspend_updating()
+
+        for index, mob in enumerate(family):
+            if is_suspended_list[index]:
+                mob.suspend_updating(recursive=False)
+
+        return self
