@@ -312,6 +312,7 @@ class SinglyLinkedList(CustomVMobject):
                 self.graph.add_vertex(to)
 
         edge.force_update()
+        edge.suspend_updating()
 
     def get_prev(self, curr_node):
         for edge in self.graph.edges:
@@ -589,7 +590,12 @@ class AnimationBuilder(_AnimationBuilder):
         if self.overridden_animation:
             anim = self.overridden_animation
         else:
-            self.mobject.suspend_updating()
+            # Edge is the only submobject that may need an active updater to animate properly, everything else can
+            # have its updating suspended during animation
+            for mobject in self.mobject.get_family():
+                if not isinstance(mobject, Edge):
+                    mobject.suspend_updating()
+
             anim = TransformSinglyLinkedList(self.mobject, self.methods)
 
         for attr, value in self.anim_args.items():
