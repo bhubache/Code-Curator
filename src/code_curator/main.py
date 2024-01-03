@@ -242,6 +242,7 @@ from code_curator.base_scene import BaseScene
 from manim import Rotate
 from manim import FadeOut
 
+from manim import *
 
 class TestVideo(BaseScene):
     def __init__(self) -> None:
@@ -282,28 +283,49 @@ class TestVideo(BaseScene):
                 run_time=self.animation_script.run_time,
             )
         )
-
-    @starts_at(0.5)
     def first_animation(self):
-        from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
-        from manim import WHITE
-        from manim import UP
-        from manim import DOWN
+        from manim import Rectangle
+        from manim import YELLOW
+        from manim import Tex
+        from code_curator.leetcode.problem_text import ProblemText
 
-        sll = SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null()
-        sll.add_labeled_pointer(sll[0], label="pointer", direction=UP)
-        self.add(sll)
-        # sll.move_labeled_pointer(
-        #     "pointer",
-        #     sll[2],
-        #     pointer_direction=UP,
-        # )
+        text = ProblemText.create_statement("A portion of this text will be highlighted")
+        self.add(text)
+        rec = Rectangle(color=YELLOW, height=text.height, width=0, fill_color=YELLOW, fill_opacity=0.5, stroke_width=0).align_to(text[2], LEFT)
+        self.add(rec)
 
-        return sll.animate.move_labeled_pointer(
-            "pointer",
-            sll[2],
-            pointer_direction=DOWN,
-        )
+        final_rec = Rectangle(color=YELLOW, height=text.height, width=3, fill_color=YELLOW, fill_opacity=0.5, stroke_width=0).align_to(text[2], LEFT)
+
+        return rec.animate.become(final_rec)
+
+        # pre_text = ProblemText.create_statement("BEFORE", color=ORANGE)
+        # post_text = ProblemText.create_statement("AFTER", color=TEAL)
+        # line = Line(2*LEFT, 2*RIGHT, color=RED).rotate(PI/2).next_to(pre_text,LEFT,buff=1)
+        # pre_bk=Square().scale(5).next_to(line, RIGHT, buff=0).set_opacity(0)
+        # post_bk=Square().scale(5).next_to(line,LEFT,buff=0).set_opacity(0)
+        # slider = VGroup(pre_bk, post_bk, line)
+
+        # def get_intersection_updater(pre_mob, bk):
+        #     def updater(pos_mob):
+        #         pos_mob.become(Intersection(pre_mob, bk))
+        #         # pos_mob.become(
+        #         #     VGroup(
+        #         #         *[
+        #         #             Intersection(submob, bk).match_style(submob)
+        #         #             for submob in pre_mob.submobjects
+        #         #         ]
+        #         #     )
+        #         # )
+
+        #     return updater
+
+        # pre_mob = VMobject().add_updater(get_intersection_updater(pre_text, pre_bk))
+        # post_mob = VMobject().add_updater(get_intersection_updater(post_text, post_bk))
+        # self.add(pre_mob, post_mob)
+        # self.add(slider)
+
+        # return slider.animate.shift(post_text.get_right() + RIGHT - slider.get_center())
+        return Wait()
 
 
 if __name__ == "__main__":

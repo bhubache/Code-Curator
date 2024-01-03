@@ -7,10 +7,13 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import LEFT
 from manim import Line
+from manim import Rectangle
+from manim import RIGHT
 from manim import UP
 from manim import VGroup
 from manim import Wait
 from manim import Write
+from manim import YELLOW
 
 from code_curator.animations.arrow_transport_transformation import ArrowTransportTransformation
 from code_curator.animations.change_color import ChangeColor
@@ -79,6 +82,22 @@ class Video(BaseScene):
         self.constraints_header_tex = ProblemText.create_header("Constraints")
         self.constraints_list = ProblemText.create_list(*CONSTRAINTS)
 
+        self.notes_title = ProblemText.create_header("Notes").scale(0.75)
+        self.notes_surrounding_rectangle = Rectangle(
+            height=self.camera.frame_height,
+            width=self.camera.frame_width,
+        )
+        self.notes_list = ProblemText.create_list(
+            *(
+                "Given the node to be deleted rather than the head of the linked list",
+                "All values are unique",
+                "Given node will not be the last node of the linked list",
+                "You don't have to remove the node from memory: see bullet points",
+                "The linked list will contain at least two nodes",
+            ),
+            vertical_buff=0.5,
+        )
+
         self.first_tex_to_remove = self.statement_tex[37:64]
         self.first_mention_tex = self.statement_tex[10:16]
         self.second_mention_tex = self.statement_tex.get_sub_tex(
@@ -108,6 +127,48 @@ class Video(BaseScene):
         self.statement_tex.next_to(self.statement_header_tex, DOWN)
         self.statement_tex.to_edge(LEFT)
         return FadeIn(self.statement_tex)
+
+    def highlight_first_key_point(self):
+        starting_rectangle = Rectangle(
+            color=YELLOW,
+            height=self.statement_tex.height,
+            width=0,
+            fill_color=YELLOW,
+            fill_opacity=0.5,
+            stroke_width=0
+        ).align_to(self.statement_tex[20], LEFT)
+
+        # ending_rectangle = starting_rectangle.copy().stretch_to_fit_width(3)
+        # ending_rectangle = Rectangle()
+
+        ending_rectangle = Rectangle(
+            color=YELLOW,
+            height=self.statement_tex.height,
+            width=3,
+            fill_color=YELLOW,
+            fill_opacity=0.5,
+            stroke_width=0,
+        ).align_to(self.statement_tex[20], LEFT)
+
+        self.add(starting_rectangle)
+
+        return starting_rectangle.animate.become(ending_rectangle)
+
+    def fade_in_first_note(self):
+        self.add(self.notes_list)
+        self.notes_list.set_opacity(0)
+
+        self.notes_surrounding_rectangle.next_to(self.statement_tex, DOWN)
+        self.notes_surrounding_rectangle.shift((self.camera.frame_width / 2) * RIGHT)
+        self.notes_title.next_to(self.notes_surrounding_rectangle.get_top(), DOWN)
+
+        self.notes_title.align_on_border(RIGHT, buff=(self.notes_title.get_left()[0] - self.notes_title.get_right()[0]))
+        self.notes_title.shift((self.notes_title.get_center() - self.notes_surrounding_rectangle.get_left()) / 2 * LEFT)
+
+        self.notes_list.next_to(self.notes_title, DOWN).align_to(self.notes_surrounding_rectangle, LEFT).shift(RIGHT * 0.1)
+
+
+        return FadeIn(self.notes_title, self.notes_surrounding_rectangle), self.notes_list[0].animate.set_opacity(1)
 
     def deleting_point_1(self):
         self.special_notes_list.next_to(self.statement_tex, DOWN)
