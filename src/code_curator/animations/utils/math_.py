@@ -14,6 +14,16 @@ def value_from_range_to_range(
     init_max: float,
     new_min: float,
     new_max: float,
+    clip: bool = False,
 ) -> float:
-    # TODO: Comment an explanation for this
-    return new_min + ((new_max - new_min) / (init_max - init_min)) * (value - init_min)
+    # TODO CUR-14: Add explanation for this
+    new_value = new_min + ((new_max - new_min) / (init_max - init_min)) * (value - init_min)
+
+    if clip:
+        if new_value < new_min:
+            return new_min
+
+        if new_value > new_max:
+            return new_max
+
+    return new_value
