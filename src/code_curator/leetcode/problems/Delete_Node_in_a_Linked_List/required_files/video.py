@@ -16,6 +16,7 @@ from manim import Write
 from manim import YELLOW
 
 from code_curator.animations.arrow_transport_transformation import ArrowTransportTransformation
+from code_curator.animations.sliding_text_highlighter import SlidingTextHighlighter
 from code_curator.animations.change_color import ChangeColor
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
@@ -129,30 +130,31 @@ class Video(BaseScene):
         return FadeIn(self.statement_tex)
 
     def highlight_first_key_point(self):
-        starting_rectangle = Rectangle(
-            color=YELLOW,
-            height=self.statement_tex.height,
-            width=0,
-            fill_color=YELLOW,
-            fill_opacity=0.5,
-            stroke_width=0
-        ).align_to(self.statement_tex[20], LEFT)
+        return SlidingTextHighlighter(self.statement_tex[18:35])
+        # starting_rectangle = Rectangle(
+        #     color=YELLOW,
+        #     height=self.statement_tex.height,
+        #     width=0,
+        #     fill_color=YELLOW,
+        #     fill_opacity=0.5,
+        #     stroke_width=0
+        # ).align_to(self.statement_tex[20], LEFT)
 
-        # ending_rectangle = starting_rectangle.copy().stretch_to_fit_width(3)
-        # ending_rectangle = Rectangle()
+        # # ending_rectangle = starting_rectangle.copy().stretch_to_fit_width(3)
+        # # ending_rectangle = Rectangle()
 
-        ending_rectangle = Rectangle(
-            color=YELLOW,
-            height=self.statement_tex.height,
-            width=3,
-            fill_color=YELLOW,
-            fill_opacity=0.5,
-            stroke_width=0,
-        ).align_to(self.statement_tex[20], LEFT)
+        # ending_rectangle = Rectangle(
+        #     color=YELLOW,
+        #     height=self.statement_tex.height,
+        #     width=3,
+        #     fill_color=YELLOW,
+        #     fill_opacity=0.5,
+        #     stroke_width=0,
+        # ).align_to(self.statement_tex[20], LEFT)
 
-        self.add(starting_rectangle)
+        # self.add(starting_rectangle)
 
-        return starting_rectangle.animate.become(ending_rectangle)
+        # return starting_rectangle.animate.become(ending_rectangle)
 
     def fade_in_first_note(self):
         self.add(self.notes_list)
