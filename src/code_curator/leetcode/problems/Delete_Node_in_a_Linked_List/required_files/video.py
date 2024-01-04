@@ -7,11 +7,13 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import LEFT
 from manim import Line
+from manim import ManimColor
 from manim import Rectangle
 from manim import RIGHT
 from manim import UP
 from manim import VGroup
 from manim import Wait
+from manim import WHITE
 from manim import Write
 from manim import YELLOW
 
@@ -63,9 +65,9 @@ CONSTRAINT_EXPLANATIONS = [
     "It's impossible to delete the tail",
 ]
 
-REMOVE_COLOR = "#FF0000"
-KEEP_COLOR = "#00FF00"
-RESET_COLOR = "#DBC9B8"
+REMOVE_COLOR = ManimColor("#FF0000")
+KEEP_COLOR = ManimColor("#00FF00")
+RESET_COLOR = ManimColor("#DBC9B8")
 STATEMENT_FONT_SIZE = 25
 
 
@@ -82,22 +84,6 @@ class Video(BaseScene):
         self.special_notes_list = ProblemText.create_list(*SPECIAL_NOTES).scale(0.75)
         self.constraints_header_tex = ProblemText.create_header("Constraints")
         self.constraints_list = ProblemText.create_list(*CONSTRAINTS)
-
-        self.notes_title = ProblemText.create_header("Notes").scale(0.75)
-        self.notes_surrounding_rectangle = Rectangle(
-            height=self.camera.frame_height,
-            width=self.camera.frame_width,
-        )
-        self.notes_list = ProblemText.create_list(
-            *(
-                "Given the node to be deleted rather than the head of the linked list",
-                "All values are unique",
-                "Given node will not be the last node of the linked list",
-                "You don't have to remove the node from memory: see bullet points",
-                "The linked list will contain at least two nodes",
-            ),
-            vertical_buff=0.5,
-        )
 
         self.first_tex_to_remove = self.statement_tex[37:64]
         self.first_mention_tex = self.statement_tex[10:16]
@@ -129,48 +115,30 @@ class Video(BaseScene):
         self.statement_tex.to_edge(LEFT)
         return FadeIn(self.statement_tex)
 
-    def highlight_first_key_point(self):
-        return SlidingTextHighlighter(self.statement_tex[18:35])
-        # starting_rectangle = Rectangle(
-        #     color=YELLOW,
-        #     height=self.statement_tex.height,
-        #     width=0,
-        #     fill_color=YELLOW,
-        #     fill_opacity=0.5,
-        #     stroke_width=0
-        # ).align_to(self.statement_tex[20], LEFT)
+    # def highlight_first_key_point(self):
+    #     return SlidingTextHighlighter(
+    #         self.statement_tex[18:35],
+    #         run_time=self.get_start_time(self.end_of_first_highlighting) - self.get_start_time(self.highlight_first_key_point),
+    #     )
 
-        # # ending_rectangle = starting_rectangle.copy().stretch_to_fit_width(3)
-        # # ending_rectangle = Rectangle()
+    # def end_of_first_highlighting(self):
+    #     return Wait()
 
-        # ending_rectangle = Rectangle(
-        #     color=YELLOW,
-        #     height=self.statement_tex.height,
-        #     width=3,
-        #     fill_color=YELLOW,
-        #     fill_opacity=0.5,
-        #     stroke_width=0,
-        # ).align_to(self.statement_tex[20], LEFT)
+    # def fade_in_first_note(self):
+    #     self.add(self.notes_list)
+    #     self.notes_list.set_opacity(0)
 
-        # self.add(starting_rectangle)
+    #     self.notes_surrounding_rectangle.next_to(self.statement_tex, DOWN)
+    #     self.notes_surrounding_rectangle.shift((self.camera.frame_width / 2) * RIGHT)
+    #     self.notes_title.next_to(self.notes_surrounding_rectangle.get_top(), DOWN)
 
-        # return starting_rectangle.animate.become(ending_rectangle)
+    #     self.notes_title.align_on_border(RIGHT, buff=(self.notes_title.get_left()[0] - self.notes_title.get_right()[0]))
+    #     self.notes_title.shift((self.notes_title.get_center() - self.notes_surrounding_rectangle.get_left()) / 2 * LEFT)
 
-    def fade_in_first_note(self):
-        self.add(self.notes_list)
-        self.notes_list.set_opacity(0)
-
-        self.notes_surrounding_rectangle.next_to(self.statement_tex, DOWN)
-        self.notes_surrounding_rectangle.shift((self.camera.frame_width / 2) * RIGHT)
-        self.notes_title.next_to(self.notes_surrounding_rectangle.get_top(), DOWN)
-
-        self.notes_title.align_on_border(RIGHT, buff=(self.notes_title.get_left()[0] - self.notes_title.get_right()[0]))
-        self.notes_title.shift((self.notes_title.get_center() - self.notes_surrounding_rectangle.get_left()) / 2 * LEFT)
-
-        self.notes_list.next_to(self.notes_title, DOWN).align_to(self.notes_surrounding_rectangle, LEFT).shift(RIGHT * 0.1)
+    #     self.notes_list.next_to(self.notes_title, DOWN).align_to(self.notes_surrounding_rectangle, LEFT).shift(RIGHT * 0.1)
 
 
-        return FadeIn(self.notes_title, self.notes_surrounding_rectangle), self.notes_list[0].animate.set_opacity(1)
+    #     return FadeIn(self.notes_title, self.notes_surrounding_rectangle), self.notes_list[0].animate.set_opacity(1)
 
     def deleting_point_1(self):
         self.special_notes_list.next_to(self.statement_tex, DOWN)
@@ -247,13 +215,24 @@ class Video(BaseScene):
         new_statement_tex = ProblemText.create_statement(
             r"There is a singly linked list called \code{head} and a node that we wish to"
             r" remove called \code{node}. You will not be given access to the head of the"
-            " list. Instead, you will be given access to the node to be deleted.",
+            " list. Instead, you will be given access to the node to be deleted."
+            " Note that by deleting the node, we do not mean removing it from memory. We mean:",
             font_size=STATEMENT_FONT_SIZE,
         )
         new_statement_tex.next_to(self.statement_header_tex, DOWN)
         new_statement_tex.to_edge(LEFT)
 
         return FadeOut(self.statement_tex), FadeOut(self.first_mention_tex), FadeIn(new_statement_tex)
+
+    def fade_to_standard_node_removal(self):
+        self.sll = SinglyLinkedList.create_sll(0, 1, 2, 3, color=WHITE).add_null().add_head_pointer().add_tail_pointer()
+        return FadeOut(*self.submobjects), FadeIn(self.sll)
+
+    def fade_in_pointer_p(self):
+        return self.sll.animate.add_labeled_pointer(to=self.sll.head, label="p", direction=UP)
+
+    def advance_pointer_p(self):
+
 
     def transition_to_constraints_analysis(self):
         return Wait()
