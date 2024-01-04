@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import types
+
 from manim import config
 from manim import Mobject
 from manim import Scene
@@ -67,6 +69,11 @@ class BaseScene(Scene):
 
     def remove_foreground_mobject(self, mobject: Mobject):
         mobject.z_index = 0
+
+    def get_start_time(self, method: types.MethodType) -> float:
+        for entry in self.animation_script.entries:
+            if entry["name"] == method.__name__:
+                return entry["start_time"]
 
     def construct(self) -> None:
         self.play(
