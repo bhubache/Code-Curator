@@ -69,20 +69,6 @@ ANIMATION_SCRIPT_PATH = Path("animation_script.yaml")
 CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.videos.interview_problems.{PROBLEM_NAME}.video"
 
 
-def concatenate_scenes(video_dir: str, num_scenes: int) -> None:
-    scene_video_paths = [
-        VideoFileClip(
-            os.path.join(
-                video_dir,
-                f"{str(i)}.mp4",
-            ),
-        )
-        for i in range(num_scenes)
-    ]
-    final_clip = concatenate_videoclips(scene_video_paths)
-    final_clip.write_videofile(os.path.join(video_dir, "output.mp4"))
-
-
 def get_aligned_animation_script(
     alignment_path: str | os.PathLike,
     script_path: str | os.PathLike,
@@ -96,22 +82,6 @@ def get_aligned_animation_script(
         aligned_script=aligned_script,
         animation_script=animation_script,
     )
-
-
-def _give_scene_ordered_name(scene_instance: BaseScene, index: int) -> None:
-    old_file_path = Path(
-        scene_instance.video_dir,
-        f"{type(scene_instance).__name__}.mp4",
-    )
-    new_file_path = Path(
-        scene_instance.video_dir,
-        f"{index}.mp4",
-    )
-
-    new_file_path.unlink()
-
-    subprocess.getoutput(f"mv {old_file_path} {new_file_path}")
-    subprocess.getoutput(f"chmod 777 {new_file_path}")
 
 
 def get_video_and_stream_clses(
