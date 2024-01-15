@@ -16,6 +16,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from manim import config
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
 from moviepy.editor import AudioFileClip
@@ -58,11 +59,11 @@ QUALITY_MAP = {
     },
 }
 
-
 QUALITY = "low_quality"
+config["quality"] = QUALITY
 FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
 RESOLUTION = QUALITY_MAP[QUALITY]["res"]
-PROBLEM_NAME = "Delete_Node_in_a_Linked_List"
+PROBLEM_NAME = "Reverse_Linked_List"
 ALIGNED_SCRIPT_PATH = Path("generated_files", "ai_aligned_script.txt")
 ANIMATION_SCRIPT_PATH = Path("required_files", "animation_script.yaml")
 CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
@@ -160,7 +161,7 @@ def main() -> None:
         "code_curator",
         "leetcode",
         "problems",
-        "Delete_Node_in_a_Linked_List",
+        PROBLEM_NAME,
     )
 
     if ai_speech_requested:
