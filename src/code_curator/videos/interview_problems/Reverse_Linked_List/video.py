@@ -16,7 +16,7 @@ from manim import UP
 from manim import Wait
 
 from code_curator.base_scene import BaseScene
-from code_curator.leetcode.problem_text import ProblemText
+from code_curator.videos.interview_problems.problem_text import ProblemText
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 
