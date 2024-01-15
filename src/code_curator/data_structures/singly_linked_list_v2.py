@@ -389,6 +389,16 @@ class SinglyLinkedList(CustomVMobject):
         if center:
             self.move_to(ORIGIN)
 
+    def saturation_indicate_node_values(self, *, indicated_opacity: float, other_opacity: float):
+        self.set_opacity(other_opacity)
+        if self.has_null:
+            self.null.container.set_opacity(0)
+            self.null.contents_mobject.set_opacity(other_opacity)
+
+        for node in self.nodes:
+            node.container.set_fill(opacity=0)
+            node.value_mobject.set_opacity(indicated_opacity)
+
     def get_next_pointers_node_index(self, pointer: Edge) -> int:
         return [index for index, node in enumerate(self.nodes) if node.next_pointer is pointer][0]
 
@@ -512,6 +522,10 @@ class Node(Vertex):
     @property
     def value(self):
         return self.contents
+
+    @property
+    def value_mobject(self):
+        return self.contents_mobject
 
     @property
     def next_pointer(self) -> Edge:
