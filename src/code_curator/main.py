@@ -111,7 +111,10 @@ def get_video_and_stream_clses(
 
 def get_script_text_from_animation_script(animation_script_info: Mapping) -> str:
     script_text = ""
-    animation_spec: list[str | Mapping[str | int, str]] = animation_script_info["content"]
+    animation_spec: list[str | Mapping[str | int, str]] = " ".join(
+        animation_script_info.values()
+    )
+
     for element in animation_spec:
         try:
             script_text += f" {element['word']}"
