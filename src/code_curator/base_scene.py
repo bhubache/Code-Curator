@@ -1,16 +1,21 @@
 from __future__ import annotations
 
-import types
+from typing import TYPE_CHECKING
 
 from manim import config
 from manim import Mobject
 from manim import Scene
 
-from code_curator.animations.curator_animation_new import CuratorAnimation
+from code_curator.animations.curator_animation import CuratorAnimation
 from code_curator.custom_logging.custom_logger import CustomLogger
 
+if TYPE_CHECKING:
+    import types
 
 logger = CustomLogger.getLogger(__name__)
+
+config["background_color"] = "#282C34"
+config["disable_caching"] = True
 
 
 class TopLevelBaseSceneMobject(Mobject):
@@ -32,14 +37,6 @@ class _OneElementMobjectListDescriptor:
 
 
 class BaseScene(Scene):
-    # config["background_color"] = constants.DEFAULT_BACKGROUND_COLOR
-    config["background_color"] = "#282C34"
-    # config["background_color"] = "#2D3139"
-    # config["background_color"] = "#414855"
-    # config["background_color"] = "#3D424B"
-    # config["background_color"] = "#33373D"
-    config["disable_caching"] = True
-
     mobjects = _OneElementMobjectListDescriptor()
 
     def __init__(self, animation_script=None, **kwargs) -> None:
