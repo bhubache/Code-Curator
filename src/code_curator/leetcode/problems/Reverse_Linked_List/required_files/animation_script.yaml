@@ -1,0 +1,76 @@
+content:
+  - word: Reverse
+    name: fade_in_title
+  - linked
+  - word: list.
+    name: fade_in_statement_header
+  - word: Given
+    name: fade_in_statement
+  - the head of a singly linked list, reverse the list, and return the reversed list. Before we go over the constraints, let's ask clarifying questions. Not only is this an important skill that will be expected of you in interviews, but it also helps with conceptualizing the problem.
+  - word: When
+    name: fade_in_clarifying_questions_header
+  - thinking of clarifying questions to ask, you should look for
+  - word: Parts
+    name: fade_in_first_clarifying_questions_point
+  - of the question that are unclear
+  - word: and
+    name: fade_in_second_clarifying_questions_point
+  - edge cases. I think the problem is clear so let's
+  - word: focus
+    name: fade_in_edge_case_header
+  - on edge cases. The only input is a
+  - word: singly
+    name: fade_in_sll
+  - linked list, so let's take a look at what makes up its state. It has
+  - word: a
+    name: indicate_head_pointer
+  - head pointer. It optionally has a
+  - word: tail
+    name: indicate_optional_tail_pointer
+  - pointer. Each node
+  - word: has
+    name: indicate_node_values
+  - a value. It is
+  - word: made
+    name: indicate_number_of_nodes
+  - up of some number of nodes. For the
+#   - word: first
+#     name: highlight_first_point
+#   - point, there isn't really anything to inspect. The problem tells us we're given the head. For
+#   - word: the
+#     name: move_highlighter_to_second_point
+#   - second point, we're not told that the tail is given. Should we ask if it is? TODO
+#   - For the
+#   - word: third
+#     name: move_highlighter_to_third_point
+#   - point, the problem statement doesn't tell us anything about a node's value. Does it matter though? The solution likely just requires manipulating the next pointers of nodes, so whether a node's # value is 1, -11, or 2,147,483,647, our implementation should remain the same.
+#   - word: Lastly,
+#     name: move_highlighter_to_fourth_point
+#   - does the number of nodes affect how we approach the problem? It does. A singly linked list with zero nodes, and thus no next pointers, can be reversed trivially whereas a list with multiple nodes # cannot. An upper bound on the number of nodes shouldn't be needed TODO. So, you should ask your interviewer for the minimum number of nodes the input can have.
+#   - word: Now
+#     name: fade_in_constraints_header
+#   - for the constraints.
+#   - word: The
+#     name: fade_in_first_constraint
+#   - first constraint states that the number of nodes in the list is in the range 0 inclusive to 5000 inclusive.
+#   - word: The
+#     name: fade_in_second_constraint
+#   - second constraint states that a node's value is greater than or equal to negative 5000 and less than or equal to positive 5000. Great! The one clarifying question we asked was answered by the # constraints and we're confident the remaining information isn't pertinent. The next step is to discuss what you think the time and space complexity will be for your solution. TODO explain why. A good # place to start is the best conceivable runtime. In this case, we know we need to at least visit every node, so the best our runtime can possibly be is linear. Considering this is a foundational # concept, I'm pretty confident we can achieve this. The space complexity will largely be determined by our implementation for traversing the linked list. We can do so iteratively or recursively. The # recursive implementation can at best use linear space due to the call stack. The iterative implementation likely requires a constant number of pointers which would use constant space. If the # interviewer does not request a particular implementation then you should choose whatever you're most comfortable with. Let's work through both,
+#   - word: starting
+#     name: fade_to_recursive_approach
+#   - with the recursive approach. Recall that the steps for solving a recursive problem are as follows.
+#   - word: Identify
+#     name: fade_in_first_recursive_step
+#   - the base cases
+#   - word: Identify
+#     name: fade_in_second_recursive_step
+#   - the recursive cases. The base case or cases are typically the simplest and/or smallest inputs and can be solved trivially without needing to make a recursive call. The smallest input for this # problem is a singly linked list with
+#   - word: zero
+#     name: fade_in_empty_sll
+#   - nodes. The reverse of an empty linked list is just itself so this is a base case. What about a singly linked list with
+#   - word: one
+#     name: fade_to_sll_with_one_node
+#   - node? Well, it
+#   - word: contains
+#     name: show_one_node_list_contains_empty_list
+#   - the empty list, which seems to indicate its a recursive case. However, I'd argue it is also a base case because the reverse of a linked list with one node is itself. How about a linked list with two nodes?
