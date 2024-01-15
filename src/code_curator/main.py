@@ -64,9 +64,9 @@ config["quality"] = QUALITY
 FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
 RESOLUTION = QUALITY_MAP[QUALITY]["res"]
 PROBLEM_NAME = "Reverse_Linked_List"
-ALIGNED_SCRIPT_PATH = Path("generated_files", "ai_aligned_script.txt")
-ANIMATION_SCRIPT_PATH = Path("required_files", "animation_script.yaml")
-CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.leetcode.problems.{PROBLEM_NAME}.required_files.video"
+ALIGNED_SCRIPT_PATH = Path("ai_aligned_script.txt")
+ANIMATION_SCRIPT_PATH = Path("animation_script.yaml")
+CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.videos.interview_problems.{PROBLEM_NAME}.video"
 
 
 def concatenate_scenes(video_dir: str, num_scenes: int) -> None:
@@ -159,8 +159,11 @@ def main() -> None:
         "Code_Curator",
         "src",
         "code_curator",
-        "leetcode",
-        "problems",
+        # "leetcode",
+        # "problems",
+        # PROBLEM_NAME,
+        "videos",
+        "interview_problems",
         PROBLEM_NAME,
     )
 
@@ -288,7 +291,8 @@ class TestVideo(BaseScene):
         from manim import Rectangle
         from manim import YELLOW
         from manim import Tex
-        from code_curator.leetcode.problem_text import ProblemText
+        # from code_curator.leetcode.problem_text import ProblemText
+        from code_curator.videos.interview_problems.problem_text import ProblemText
 
         text = ProblemText.create_statement("A portion of this text will be highlighted")
         self.add(text)
