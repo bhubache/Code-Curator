@@ -43,24 +43,31 @@ class LeetcodeYAMLParser(AnimationScriptParser):
         # del animation_stream_map["word"]
 
         for stream_name, stream in animation_stream_map.items():
-            stream_gap_words: list[str] = []
-            for element in animation_script["content"]:
-                if isinstance(element, str):
-                    stream_gap_words += element.strip().split()
-                else:
-                    if stream_gap_words:
-                        stream.append(text=" ".join(stream_gap_words))
-                        stream_gap_words = []
+            for animation_func_name, text in animation_script.items():
+                stream.append(
+                    text=text,
+                    is_overriding_start=False,
+                    is_overriding_end=False,
+                    name=animation_func_name,
+                )
+            # stream_gap_words: list[str] = []
+            # for element in animation_script["content"]:
+            #     if isinstance(element, str):
+            #         stream_gap_words += element.strip().split()
+            #     else:
+            #         if stream_gap_words:
+            #             stream.append(text=" ".join(stream_gap_words))
+            #             stream_gap_words = []
 
-                    stream.append(
-                        text=element["word"],
-                        is_overriding_start=element.get("is_overriding_start", False),
-                        is_overriding_end=element.get("is_overriding_end", False),
-                        name=element["name"],
-                    )
+            #         stream.append(
+            #             text=element["word"],
+            #             is_overriding_start=element.get("is_overriding_start", False),
+            #             is_overriding_end=element.get("is_overriding_end", False),
+            #             name=element["name"],
+            #         )
 
-            if stream_gap_words:
-                stream.append(text=" ".join(stream_gap_words))
+            # if stream_gap_words:
+            #     stream.append(text=" ".join(stream_gap_words))
 
         # # Change stream names to their aliases
         # for stream_name, stream in animation_stream_map.copy().items():
