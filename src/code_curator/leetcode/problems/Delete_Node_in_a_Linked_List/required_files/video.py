@@ -22,7 +22,7 @@ from code_curator.animations.sliding_text_highlighter import SlidingTextHighligh
 from code_curator.animations.change_color import ChangeColor
 from code_curator.animations.utils.utils import run_time_can_be_truncated
 from code_curator.base_scene import BaseScene
-from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.leetcode.problem_text import ProblemText
 from code_curator.leetcode.scenes.present_problem.base_present_problem import BasePresentProblem as PresentProblem
 from code_curator.leetcode.scenes.problem_analysis.base_problem_analysis import BaseProblemAnalysis as ProblemAnalysis
