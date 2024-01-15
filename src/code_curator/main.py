@@ -237,7 +237,7 @@ from manim import config
 from manim import FadeIn
 from manim import Circle
 from manim import Square
-from code_curator.animations.curator_animation_new import CuratorAnimation
+from code_curator.animations.curator_animation import CuratorAnimation
 from code_curator.utils.testing.curator_frames_comparison import starts_at
 from code_curator.base_scene import BaseScene
 from manim import Rotate
