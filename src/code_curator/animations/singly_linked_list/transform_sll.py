@@ -12,7 +12,7 @@ from manim import Transform
 from code_curator.custom_logging.custom_logger import CustomLogger
 
 if TYPE_CHECKING:
-    from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+    from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 logger = CustomLogger.getLogger(__name__)
 

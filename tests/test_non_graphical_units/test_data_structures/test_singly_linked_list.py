@@ -4,7 +4,7 @@ import pytest
 from manim import DOWN
 from manim import WHITE
 
-from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 
 def validate_sll(

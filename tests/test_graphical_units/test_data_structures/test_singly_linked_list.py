@@ -8,7 +8,7 @@ from manim import DOWN
 from manim import UP
 from manim import WHITE
 
-from code_curator.data_structures.singly_linked_list_v2 import SinglyLinkedList
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 
 if TYPE_CHECKING:
