@@ -98,7 +98,10 @@ class TransformSinglyLinkedList(AnimationGroup):
                 if inner_mob in outer_mob.family_members_with_points()[1:]:
                     self.fading_in_animations.remove(inner_mob_animation)
 
-        super().__init__(*(self.transform_animations + self.fading_out_animations + self.fading_in_animations))
+        super().__init__(
+            *(self.transform_animations + self.fading_out_animations + self.fading_in_animations),
+            **kwargs,
+        )
 
     def clean_up_from_scene(self, scene: Scene) -> None:
         super().clean_up_from_scene(scene)
