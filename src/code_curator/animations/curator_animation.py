@@ -9,12 +9,9 @@ from manim import prepare_animation
 
 from .utils.math_ import value_from_range_to_range
 
-SPEED_FACTOR = 1
-
 
 class CuratorAnimation(Animation):
     def __init__(self, mobject, animation_script, scene, run_time: float) -> None:
-        run_time /= SPEED_FACTOR
         super().__init__(mobject, run_time=run_time)
         self.animation_script = animation_script
         self.scene = scene
@@ -23,7 +20,7 @@ class CuratorAnimation(Animation):
         for method_info in animation_script.entries:
             method = getattr(self.scene, method_info["name"])
             method.__func__.start_alpha = value_from_range_to_range(
-                value=method_info["start_time"] / SPEED_FACTOR,
+                value=method_info["start_time"],
                 init_min=0,
                 init_max=self.run_time,
                 new_min=0,
@@ -62,7 +59,7 @@ class AnimationPool:
             anim = prepare_animation(anim)
             anim.start_alpha = method.start_alpha
             anim.end_alpha = method.start_alpha + value_from_range_to_range(
-                value=anim.run_time / SPEED_FACTOR,
+                value=anim.run_time,
                 init_min=0,
                 init_max=self.total_run_time,
                 new_min=0,
