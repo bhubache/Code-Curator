@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import itertools as it
-import math
 import re
 from pathlib import Path
 
@@ -11,16 +9,17 @@ from manim import ParsableManimColor
 from manim import YELLOW
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
-from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
+from pygments.lexers import get_lexer_by_name
 
 from code_curator.animations.code_transform import CodeTransform
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.code.code_highlighter import CodeHighlighter
 from code_curator.code.one_dark_colors import OneDarkStyle
 from code_curator.code.python_lexer import MyPythonLexer
+from code_curator.custom_vmobject import CustomVMobject
 
 
-class CuratorCode(Code):
+class CuratorCode(CustomVMobject):
     def __init__(
         self,
         file_name: str | None = None,
@@ -37,14 +36,14 @@ class CuratorCode(Code):
         insert_line_no: bool = False,
         line_spacing: float = 0.5,
         line_no_buff: float = 0.2,
-        # style: str = "nord",
         style: str = OneDarkStyle,
         language: str = "python",
         background_color: str | None = None,
         **kwargs,
     ) -> None:
+        super().__init__()
         self.lexer = MyPythonLexer()
-        super().__init__(
+        self.code_mobject = Code(
             file_name=file_name,
             tab_width=tab_width,
             indentation_chars=indentation_chars,
@@ -63,33 +62,73 @@ class CuratorCode(Code):
             language=language,
             **kwargs,
         )
+        self.add(self.code_mobject)
+
         self.background_mobject.set_opacity(0)
         self._highlighter = None
 
         self.scale(0.5)
 
     @property
+    def code_string(self):
+        return self.code_mobject.code_string
+
+    @property
+    def language(self):
+        return self.code_mobject.language
+
+    @property
+    def style(self):
+        return self.code_mobject.style
+
+    @property
+    def insert_line_no(self):
+        return self.code_mobject.insert_line_no
+
+    @property
+    def file_path(self):
+        return self.code_mobject.file_path
+
+    @property
+    def line_no_from(self):
+        return self.code_mobject.line_no_from
+
+    @property
+    def generate_html_file(self):
+        return self.code_mobject.generate_html_file
+
+    @property
     def num_lines(self) -> int:
-        return len(self.code)
+        return len(self.code_mobject.code)
+
+    @property
+    def background_mobject(self):
+        return self.code_mobject.background_mobject
 
     @property
     def max_line_height(self):
-        # It looks like lines that immediately following an empty line have the height for both of them.
-        #  So, exclude those lines.
-        lines_to_consider = [self.code[0].height]
-        for prev_line, curr_line in it.pairwise(self.code):
-            if math.isclose(prev_line.height, 0):
-                continue
+        # Exclude whitespace from consideration
+        max_height = float("-inf")
+        for line_index, line_mobject in enumerate(self.code_mobject.code):
+            tallest_reaching_amount: float = float("-inf")
+            lowest_reaching_amount: float = float("inf")
 
-            lines_to_consider.append(curr_line.height)
+            for char_index, char_mobject in enumerate(line_mobject):
+                if self.code_mobject.code_string.splitlines()[line_index][char_index].isspace():
+                    continue
 
-        return max(lines_to_consider)
+                tallest_reaching_amount = max(tallest_reaching_amount, char_mobject.get_top()[1])
+                lowest_reaching_amount = min(lowest_reaching_amount, char_mobject.get_bottom()[1])
+
+            max_height = max(max_height, tallest_reaching_amount - lowest_reaching_amount)
+
+        return max_height
 
     @property
     def max_line_width(self):
         # I want the max line width including the indentation chars at the beginning of a line
-        min_starting_x = min(line.get_left()[0] for line in self.code)
-        max_ending_x = max(line.get_right()[0] for line in self.code)
+        min_starting_x = min(line.get_left()[0] for line in self.code_mobject.code)
+        max_ending_x = max(line.get_right()[0] for line in self.code_mobject.code)
         return max_ending_x - min_starting_x
 
     @property
@@ -101,8 +140,6 @@ class CuratorCode(Code):
         self._highlighter = highlighter
         self._highlighter.code = self
 
-    # TODO: Give better name than fade in. I'd like to have the entire mobject be on the screen just with 0 opacity
-    #  So, fading in is misleading because it implies that it's not yet present on the screen.
     def fade_in_lines(self, *line_numbers: int) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         for line_no in line_numbers:
@@ -145,13 +182,10 @@ class CuratorCode(Code):
 
     def get_code_substring(self, substring: str, occurrence: int = 1):
         start_index: int = self.get_substring_starting_index(substring, occurrence=occurrence)
-        return self.code.lines_text[start_index : start_index + len(substring)]
+        return self.code_mobject.code.lines_text[start_index : start_index + len(substring)]
 
     def get_line(self, line_number: int):
-        return self.code[line_number - 1]
-
-    def get_line_at(self, line_index: int):
-        return self[2][line_index]
+        return self.code_mobject.code[line_number - 1]
 
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
@@ -176,7 +210,7 @@ class CuratorCode(Code):
         )
 
     def set_background_color(self, color: str) -> None:
-        self.background_mobject.set(color=color)
+        self.code_mobject.background_mobject.set(color=color)
 
     def _create_animation_copy(self) -> CuratorCode:
         attr_name = "_copy_for_animation"
@@ -195,7 +229,7 @@ class CuratorCode(Code):
             "border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;",
             self.file_path,
             self.line_no_from,
-            lexer=self.lexer
+            lexer=self.lexer,
         )
 
         if self.generate_html_file:
@@ -208,7 +242,7 @@ def _insert_line_numbers_in_html(html: str, line_no_from: int):
     """Function that inserts line numbers in the highlighted HTML code.
 
     Parameters
-    ---------
+    ----------
     html
         html string of highlighted code.
     line_no_from
@@ -233,19 +267,19 @@ def _insert_line_numbers_in_html(html: str, line_no_from: int):
     html = html.replace(
         pre_open,
         "<table><tr><td>" + pre_open + lines + "</pre></td><td>" + pre_open,
-        )
+    )
     return html
 
 
 def _hilite_me(
-        code: str,
-        language: str,
-        style: str,
-        insert_line_no: bool,
-        divstyles: str,
-        file_path: Path,
-        line_no_from: int,
-        lexer,
+    code: str,
+    language: str,
+    style: str,
+    insert_line_no: bool,
+    divstyles: str,
+    file_path: Path,
+    line_no_from: int,
+    lexer,
 ):
     """Function to highlight code from string to html.
 
