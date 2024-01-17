@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from manim import Code
 from manim import DOWN
 from manim import LEFT
 from manim import Rectangle
@@ -20,6 +19,7 @@ class CodeHighlighter(Rectangle):
         height: float | None = None,
         width: float | None = None,
         color: str | Color = YELLOW,
+        opacity: float = 0.5,
         stroke_width: float = 0.0,
         start_line: int = 1,
     ) -> None:
@@ -33,8 +33,8 @@ class CodeHighlighter(Rectangle):
 
         self.code = code
         self.curr_line_num = start_line
-        self.set_opacity(0.5)
-        self.align_to(self.code.get_line(self.curr_line_num), DOWN)
+        self.set_opacity(opacity)
+        self.move_to(self.code.get_line(self.curr_line_num)).get_center()
         self.align_to(self.code.get_line(self.curr_line_num), LEFT)
 
     def move_to_substring(self, substring: str, occurrence: int, num_lines: int | None):
@@ -64,7 +64,7 @@ class CodeHighlighter(Rectangle):
     def move_to_line(self, line_num: int) -> None:
         if line_num < 1 or line_num > self.code.num_lines:
             raise ValueError(
-                f"``line_num`` must be in range [1, {self.code.num_lines}]. Given {line_num}"
+                f"``line_num`` must be in range [1, {self.code.num_lines}]. Given {line_num}",
             )
 
         self.curr_line_num = line_num

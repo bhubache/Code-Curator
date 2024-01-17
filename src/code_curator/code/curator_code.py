@@ -190,11 +190,12 @@ class CuratorCode(CustomVMobject):
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
 
-    def add_highlighter(self, start_line: int = 1, color: ParsableManimColor = YELLOW):
+    def add_highlighter(self, start_line: int = 1, color: ParsableManimColor = YELLOW, opacity: float = 0.5):
         self.highlighter = CodeHighlighter(
             code=self,
             color=color,
             start_line=start_line,
+            opacity=opacity,
         )
         self.add(self.highlighter)
         return self
