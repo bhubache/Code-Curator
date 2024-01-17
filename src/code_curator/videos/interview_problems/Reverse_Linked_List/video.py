@@ -94,7 +94,7 @@ class Video(BaseScene):
         )
 
     def fade_in_list_node_code(self):
-        code = CustomCode(
+        self.code = CustomCode(
             code="\n".join(
                 (
                     "class ListNode:",
@@ -104,67 +104,75 @@ class Video(BaseScene):
                 ),
             ),
         )
-        return FadeIn(code)
+        return FadeIn(self.code)
 
-    def fade_in_sll(self):
-        self.sll.shift(DOWN * 1)
-        return FadeIn(self.sll)
+    def highlight_first_node_attr(self):
+        self.code.create_highlighter()
+        self.code.move_highlighter(2)
+        breakpoint()
 
-    def indicate_head_pointer(self):
-        self.add(self.sll_state_list)
-        self.sll_state_list.set_opacity(0)
-        return Flash(self.sll.head_pointer), self.sll_state_list[0].animate.set_opacity(1)
-
-    def indicate_optional_tail_pointer(self):
-        return Flash(self.sll.tail_pointer), self.sll_state_list[1].animate.set_opacity(1)
-
-    def indicate_node_values(self):
-        return self.sll.animate(rate_func=there_and_back, run_time=2).saturation_indicate_node_values(
-            other_opacity=0.25,
-            indicated_opacity=1,
-        ), self.sll_state_list[2].animate.set_opacity(1)
-
-    def indicate_number_of_nodes(self):
-        self.brace = Brace(self.sll, color=self.title_tex.color, stroke_width=0.25)
-        brace_label = ProblemText.create_tex("4 nodes")
-        brace_label.next_to(self.brace, DOWN)
-        return FadeIn(self.brace), FadeIn(brace_label), self.sll_state_list[3].animate.set_opacity(1)
-
-    def highlight_first_point(self):
+    def highlight_second_node_attr(self):
         ...
 
-    def move_highlighter_to_second_point(self):
-        ...
+    # def fade_in_sll(self):
+    #     self.sll.shift(DOWN * 1)
+    #     return FadeIn(self.sll)
 
-    def move_highlighter_to_third_point(self):
-        ...
+    # def indicate_head_pointer(self):
+    #     self.add(self.sll_state_list)
+    #     self.sll_state_list.set_opacity(0)
+    #     return Flash(self.sll.head_pointer), self.sll_state_list[0].animate.set_opacity(1)
 
-    def move_highlighter_to_fourth_point(self):
-        ...
+    # def indicate_optional_tail_pointer(self):
+    #     return Flash(self.sll.tail_pointer), self.sll_state_list[1].animate.set_opacity(1)
 
-    def fade_in_constraints_header(self):
-        ...
+    # def indicate_node_values(self):
+    #     return self.sll.animate(rate_func=there_and_back, run_time=2).saturation_indicate_node_values(
+    #         other_opacity=0.25,
+    #         indicated_opacity=1,
+    #     ), self.sll_state_list[2].animate.set_opacity(1)
 
-    def fade_in_first_constraint(self):
-        ...
+    # def indicate_number_of_nodes(self):
+    #     self.brace = Brace(self.sll, color=self.title_tex.color, stroke_width=0.25)
+    #     brace_label = ProblemText.create_tex("4 nodes")
+    #     brace_label.next_to(self.brace, DOWN)
+    #     return FadeIn(self.brace), FadeIn(brace_label), self.sll_state_list[3].animate.set_opacity(1)
 
-    def fade_in_second_constraint(self):
-        ...
+    # def highlight_first_point(self):
+    #     ...
 
-    def fade_to_recursive_approach(self):
-        ...
+    # def move_highlighter_to_second_point(self):
+    #     ...
 
-    def fade_in_first_recursive_step(self):
-        ...
+    # def move_highlighter_to_third_point(self):
+    #     ...
 
-    def fade_in_second_recursive_step(self):
-        ...
+    # def move_highlighter_to_fourth_point(self):
+    #     ...
 
-    def fade_in_empty_sll(self):
-        ...
+    # def fade_in_constraints_header(self):
+    #     ...
 
-    def fade_to_sll_with_one_node(self):
-        ...
+    # def fade_in_first_constraint(self):
+    #     ...
 
-    def show_one_node_list_contains_empty_list(self):
-        ...
+    # def fade_in_second_constraint(self):
+    #     ...
+
+    # def fade_to_recursive_approach(self):
+    #     ...
+
+    # def fade_in_first_recursive_step(self):
+    #     ...
+
+    # def fade_in_second_recursive_step(self):
+    #     ...
+
+    # def fade_in_empty_sll(self):
+    #     ...
+
+    # def fade_to_sll_with_one_node(self):
+    #     ...
+
+    # def show_one_node_list_contains_empty_list(self):
+    #     ...
