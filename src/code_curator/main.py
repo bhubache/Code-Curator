@@ -20,6 +20,8 @@ from manim import config
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
 from moviepy.editor import AudioFileClip
+from moviepy.editor import CompositeVideoClip
+from moviepy.editor import CompositeAudioClip
 
 from code_curator.ai_audio_creator import AIAudioCreator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
@@ -111,17 +113,13 @@ def get_video_and_stream_clses(
 
 def get_script_text_from_animation_script(animation_script_info: Mapping) -> str:
     script_text = ""
-    animation_spec: list[str | Mapping[str | int, str]] = " ".join(
-        animation_script_info.values()
-    )
-
-    for element in animation_spec:
-        try:
-            script_text += f" {element['word']}"
-        except TypeError:
-            script_text += f" {element}"
-
-    return script_text.strip()
+    return " ".join(
+        [
+            text
+            for text in animation_script_info.values()
+            if text is not None
+        ]
+    ).strip()
 
 
 def main() -> None:
@@ -191,8 +189,9 @@ def main() -> None:
             ),
         ),
     )
+
     audio_clip = AudioFileClip(str(audio_path))
-    final_clip: VideoFileClip = video_clip.set_audio(audio_clip)
+    final_clip = video_clip.set_audio(CompositeAudioClip([audio_clip.set_start(aligned_animation_script.run_time - audio_clip.duration)]))
     final_clip.write_videofile(
         str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
         fps=FRAME_RATE,
