@@ -5,6 +5,7 @@ fade_in_clarifying_questions_header: When thinking of clarifying questions to as
 fade_in_first_clarifying_questions_point: parts of the question that are unclear
 fade_in_second_clarifying_questions_point: and edge cases. I think the problem is clear so let's
 fade_in_edge_case_header: focus on edge cases. The only input is a singly linked list, which is a recursive data structure. Let's take a look at the
+__START__:
 fade_in_list_node_code: ListNode class that makes up this data structure. A ListNode has two attributes
 fade_in_sll: singly linked list, so let's take a look at what makes up its state. It has
 indicate_head_pointer: a head pointer. It optionally has a
