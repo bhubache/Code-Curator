@@ -19,6 +19,7 @@ from code_curator.base_scene import BaseScene
 from code_curator.videos.interview_problems.problem_text import ProblemText
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
+from code_curator.code.custom_code import CustomCode
 
 
 TITLE = "Reverse Linked List"
@@ -91,6 +92,19 @@ class Video(BaseScene):
             self.clarifying_questions_hints_list[0].animate.set_opacity(0),
             self.clarifying_questions_hints_list[1].animate.move_to(self.clarifying_questions_hints_list[0]).to_edge(LEFT),
         )
+
+    def fade_in_list_node_code(self):
+        code = CustomCode(
+            code="\n".join(
+                (
+                    "class ListNode:",
+                    "    def __init__(self, val=0, next=None):",
+                    "        self.val = val",
+                    "        self.next = next",
+                ),
+            ),
+        )
+        return FadeIn(code)
 
     def fade_in_sll(self):
         self.sll.shift(DOWN * 1)
