@@ -19,7 +19,7 @@ from code_curator.base_scene import BaseScene
 from code_curator.videos.interview_problems.problem_text import ProblemText
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
-from code_curator.code.custom_code import CustomCode
+from code_curator.code.curator_code import CuratorCode
 
 
 TITLE = "Reverse Linked List"
@@ -94,7 +94,7 @@ class Video(BaseScene):
         )
 
     def fade_in_list_node_code(self):
-        self.code = CustomCode(
+        self.code = CuratorCode(
             code="\n".join(
                 (
                     "class ListNode:",
@@ -107,9 +107,9 @@ class Video(BaseScene):
         return FadeIn(self.code)
 
     def highlight_first_node_attr(self):
-        self.code.create_highlighter()
-        self.code.move_highlighter(2)
-        breakpoint()
+        self.code.add_highlighter(
+            start_line=2,
+        )
 
     def highlight_second_node_attr(self):
         ...

@@ -7,6 +7,8 @@ from pathlib import Path
 
 from manim import Animation
 from manim import Code
+from manim import ParsableManimColor
+from manim import YELLOW
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
@@ -18,7 +20,7 @@ from code_curator.code.one_dark_colors import OneDarkStyle
 from code_curator.code.python_lexer import MyPythonLexer
 
 
-class CustomCode(Code):
+class CuratorCode(Code):
     def __init__(
         self,
         file_name: str | None = None,
@@ -101,19 +103,19 @@ class CustomCode(Code):
 
     # TODO: Give better name than fade in. I'd like to have the entire mobject be on the screen just with 0 opacity
     #  So, fading in is misleading because it implies that it's not yet present on the screen.
-    def fade_in_lines(self, *line_numbers: int) -> tuple[CustomCode, Animation]:
+    def fade_in_lines(self, *line_numbers: int) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         for line_no in line_numbers:
             copy.code[line_no].set_opacity(1)
 
         return copy, TransformSinglyLinkedList(self, copy)
 
-    def fade_in_substring(self, substring: str, occurrence: int = 1) -> tuple[CustomCode, Animation]:
+    def fade_in_substring(self, substring: str, occurrence: int = 1) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         copy.get_code_substring(substring, occurrence=occurrence).set_opacity(1)
         return copy, TransformSinglyLinkedList(self, copy)
 
-    def saturation_highlight_substring(self, substring: str, occurrence: int = 1) -> tuple[CustomCode, Animation]:
+    def saturation_highlight_substring(self, substring: str, occurrence: int = 1) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         substring_start_index = self.get_substring_starting_index(substring, occurrence=occurrence)
 
@@ -123,11 +125,11 @@ class CustomCode(Code):
 
         return copy, TransformSinglyLinkedList(self, copy)
 
-    def change_code_text(self, new_code_string: str) -> tuple[CustomCode, Animation]:
+    def change_code_text(self, new_code_string: str) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         copy._original__init__(code=new_code_string)
 
-        return CodeTransform(self, CustomCode(code=new_code_string))
+        return CodeTransform(self, CuratorCode(code=new_code_string))
 
     def get_substring_starting_index(self, substring: str, occurrence: int = 1, line_index: int | None = None) -> int:
         num_found: int = 0
@@ -154,13 +156,17 @@ class CustomCode(Code):
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
 
-    def create_highlighter(self):
-        self.highlighter = CodeHighlighter(self)
+    def add_highlighter(self, start_line: int = 1, color: ParsableManimColor = YELLOW):
+        self.highlighter = CodeHighlighter(
+            code=self,
+            color=color,
+            start_line=start_line,
+        )
         self.add(self.highlighter)
-        return self.highlighter
+        return self
 
-    def move_highlighter(self, num_lines: int) -> None:
-        return self.highlighter.move(num_lines)
+    def move_highlighter_to_line(self, line_num: int) -> None:
+        return self.highlighter.move_to_line(line_num)
 
     def move_highlighter_to_substring(self, substring: str, occurrence: int = 1, num_lines: int | None = None):
         return self.highlighter.move_to_substring(
@@ -172,7 +178,7 @@ class CustomCode(Code):
     def set_background_color(self, color: str) -> None:
         self.background_mobject.set(color=color)
 
-    def _create_animation_copy(self) -> CustomCode:
+    def _create_animation_copy(self) -> CuratorCode:
         attr_name = "_copy_for_animation"
         if not hasattr(self, attr_name):
             setattr(self, attr_name, self.copy())

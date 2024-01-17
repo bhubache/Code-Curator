@@ -8,11 +8,11 @@ from manim import FadeOut
 from manim import Mobject
 
 if TYPE_CHECKING:
-    from .custom_code import CustomCode
+    from .curator_code import CuratorCode
 
 
 class CodeDiff:
-    def __init__(self, source_obj: CustomCode, destination_obj: CustomCode) -> None:
+    def __init__(self, source_obj: CuratorCode, destination_obj: CuratorCode) -> None:
         self.source = source_obj
         self.destination = destination_obj
 
