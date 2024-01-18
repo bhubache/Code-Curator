@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from manim import DOWN
 from manim import LEFT
 from manim import Rectangle
 from manim import YELLOW
@@ -32,11 +31,11 @@ class CodeHighlighter(Rectangle):
         if width is None:
             width = code.max_line_width + width_buff
 
+        self.height_buff = height_buff
+        self.width_buff = width_buff
         super().__init__(height=height, width=width, color=color, stroke_width=stroke_width)
 
         self.code = code
-        self.height_buff = height_buff
-        self.width_buff = width_buff
         self.curr_line_num = start_line
         self.set_opacity(opacity)
         self.move_to_line(start_line)
@@ -55,21 +54,27 @@ class CodeHighlighter(Rectangle):
         if num_lines is not None:
             raise NotImplementedError()
 
+        code_substring_line = self.code.get_code_substring_line(
+            substring,
+            occurrence=occurrence,
+        )
+
         code_substring = self.code.get_code_substring(
             substring,
             occurrence=occurrence,
         )
 
-        new_highlighter = (
-            CodeHighlighter(
-                code=self.code,
-                width=code_substring.width,
-            )
-            .align_to(code_substring, DOWN)
-            .align_to(code_substring, LEFT)
-        )
+        try:
+            to_line_copy_with_only_visible_chars = remove_invisible_chars(code_substring_line.copy())
+        except IndexError:
+            to_line_copy_with_only_visible_chars = code_substring_line.copy()
 
-        return self.animate.become(new_highlighter)
+        self.stretch_to_fit_width(code_substring.width)
+        self.move_to(to_line_copy_with_only_visible_chars.get_center())
+        self.align_to(code_substring, LEFT)
+        self.shift(LEFT * (self.width_buff / 2))
+
+        return self
 
     def move_to_line(self, line_num: int):
         if line_num < 1 or line_num > self.code.num_lines:
