@@ -106,3 +106,48 @@ class test_moving_highlighter_from_line_to_line:
 
     def animation(self):
         return self.code.animate.move_highlighter_to_line(self.stop_line)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    ("start_line", "substring", "occurrence"),
+    (
+        (1, "next", 1),
+        (1, "val", 2),
+        (4, "val", 2),
+    ),
+)
+class test_moving_highlighter_from_line_to_substring:
+    def __init__(
+        self,
+        scene: BaseScene,
+        default_code_kwargs: dict[str, Any],
+        start_line: int,
+        substring: str,
+        occurrence: int,
+    ) -> None:
+        default_code_kwargs["code"] = "\n".join(
+            (
+                "class ListNode:",
+                "",
+                "    def __init__(self, val=0, next=None):",
+                "        self.val = val",
+                "        self.next = next",
+            ),
+        )
+        self.code = CuratorCode(**default_code_kwargs)
+        self.code.add_highlighter(
+            start_line=start_line,
+            color=YELLOW,
+            opacity=0.5,
+            height_buff=0.05,
+            width_buff=0.1,
+        )
+
+        scene.add(self.code)
+
+        self.substring = substring
+        self.occurrence = occurrence
+
+    def animation(self):
+        return self.code.animate.move_highlighter_to_substring(substring=self.substring, occurrence=self.occurrence)
