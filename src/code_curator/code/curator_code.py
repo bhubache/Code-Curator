@@ -202,6 +202,14 @@ class CuratorCode(CustomVMobject):
         start_index: int = self.get_substring_starting_index(substring, occurrence=occurrence)
         return self.code_mobject.code.lines_text[start_index : start_index + len(substring)]
 
+    def get_code_substring_line(self, substring: str, occurrence: int = 1):
+        start_index: int = self.get_substring_starting_index(substring, occurrence=occurrence)
+        total_chars_seen = 0
+        for line in self.code_mobject.code:
+            total_chars_seen += len(line)
+            if start_index < total_chars_seen:
+                return line
+
     def get_line(self, line_number: int):
         return self.code_mobject.code[line_number - 1]
 
