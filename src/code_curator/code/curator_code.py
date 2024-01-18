@@ -62,6 +62,9 @@ class CuratorCode(CustomVMobject):
             language=language,
             **kwargs,
         )
+        if background is None:
+            self.code_mobject.remove(self.code_mobject.background_mobject)
+
         self.add(self.code_mobject)
 
         self.background_mobject.set_opacity(0)

@@ -6,6 +6,7 @@ from manim import DOWN
 from manim import LEFT
 from manim import Rectangle
 from manim import YELLOW
+from manim.mobject.text.text_mobject import remove_invisible_chars
 
 if TYPE_CHECKING:
     from code_curator.code.curator_code import CuratorCode
@@ -34,8 +35,12 @@ class CodeHighlighter(Rectangle):
         self.code = code
         self.curr_line_num = start_line
         self.set_opacity(opacity)
-        self.move_to(self.code.get_line(self.curr_line_num)).get_center()
-        self.align_to(self.code.get_line(self.curr_line_num), LEFT)
+        self.move_to(
+            remove_invisible_chars(
+                self.code.get_line(self.curr_line_num).copy(),
+            ).get_center(),
+        )
+        self.align_to(self.code.code_mobject, LEFT)
 
     def move_to_substring(self, substring: str, occurrence: int, num_lines: int | None):
         """
