@@ -43,7 +43,7 @@ class CuratorCode(CustomVMobject):
     ) -> None:
         super().__init__()
         self.lexer = MyPythonLexer()
-        self.code_mobject = Code(
+        self.code_mobject = self._create_code_mobject(
             file_name=file_name,
             tab_width=tab_width,
             indentation_chars=indentation_chars,
@@ -109,14 +109,6 @@ class CuratorCode(CustomVMobject):
         return self.code_mobject.background_mobject
 
     @property
-    def line_spacing(self):
-        return self.code_mobject.line_spacing
-
-    @line_spacing.setter
-    def line_spacing(self, new_value) -> None:
-        self.code_mobject.line_spacing = new_value
-
-    @property
     def max_line_height(self):
         # Exclude whitespace from consideration
         max_height = float("-inf")
@@ -145,6 +137,14 @@ class CuratorCode(CustomVMobject):
     @property
     def highlighter(self) -> CodeHighlighter:
         return self._highlighter
+
+    @property
+    def line_spacing(self):
+        return self.code_mobject.line_spacing
+
+    @line_spacing.setter
+    def line_spacing(self, new_value) -> None:
+        self.code_mobject.line_spacing = new_value
 
     @highlighter.setter
     def highlighter(self, highlighter: CodeHighlighter) -> None:
@@ -208,12 +208,21 @@ class CuratorCode(CustomVMobject):
     def has_highlighter(self) -> bool:
         return self.highlighter is not None
 
-    def add_highlighter(self, start_line: int = 1, color: ParsableManimColor = YELLOW, opacity: float = 0.5):
+    def add_highlighter(
+        self,
+        start_line: int = 1,
+        color: ParsableManimColor = YELLOW,
+        opacity: float = 0.2,
+        height_buff: float = 0.05,
+        width_buff: float = 0.1,
+    ):
         self.highlighter = CodeHighlighter(
             code=self,
             color=color,
             start_line=start_line,
             opacity=opacity,
+            height_buff=height_buff,
+            width_buff=width_buff,
         )
         self.add(self.highlighter)
         return self
@@ -230,6 +239,24 @@ class CuratorCode(CustomVMobject):
 
     def set_background_color(self, color: str) -> None:
         self.code_mobject.background_mobject.set(color=color)
+
+    @staticmethod
+    def _create_code_mobject(**kwargs) -> Code:
+        newline_substitute = "# NEWLINE"
+        code_string_lines = kwargs["code"].splitlines()
+        for index, line in enumerate(code_string_lines):
+            if line.strip() == "":
+                code_string_lines[index] = newline_substitute
+
+        kwargs["code"] = "\n".join(code_string_lines)
+
+        code_mobject = Code(**kwargs)
+
+        for string_line, code_line in zip(code_mobject.code_string.splitlines(), code_mobject.code):
+            if string_line == newline_substitute:
+                code_line.set_opacity(0)
+
+        return code_mobject
 
     def _create_animation_copy(self) -> CuratorCode:
         attr_name = "_copy_for_animation"
