@@ -34,7 +34,7 @@ class CuratorCode(CustomVMobject):
         background_stroke_color: str = "#FFFFFF",
         corner_radius=0.0,
         insert_line_no: bool = False,
-        line_spacing: float = 0.5,
+        line_spacing: float = 0.6,
         line_no_buff: float = 0.2,
         style: str = OneDarkStyle,
         language: str = "python",
@@ -109,6 +109,14 @@ class CuratorCode(CustomVMobject):
         return self.code_mobject.background_mobject
 
     @property
+    def line_spacing(self):
+        return self.code_mobject.line_spacing
+
+    @line_spacing.setter
+    def line_spacing(self, new_value) -> None:
+        self.code_mobject.line_spacing = new_value
+
+    @property
     def max_line_height(self):
         # Exclude whitespace from consideration
         max_height = float("-inf")
@@ -142,6 +150,13 @@ class CuratorCode(CustomVMobject):
     def highlighter(self, highlighter: CodeHighlighter) -> None:
         self._highlighter = highlighter
         self._highlighter.code = self
+
+    def scale(self, factor: float, **kwargs):
+        super().scale(factor, **kwargs)
+
+        self.line_spacing *= factor
+
+        return self
 
     def fade_in_lines(self, *line_numbers: int) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
