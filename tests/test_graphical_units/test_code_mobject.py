@@ -151,3 +151,98 @@ class test_moving_highlighter_from_line_to_substring:
 
     def animation(self):
         return self.code.animate.move_highlighter_to_substring(substring=self.substring, occurrence=self.occurrence)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    ("start_substring", "start_occurrence", "stop_substring", "stop_occurrence"),
+    (("next", 1, "ListNode", 1),),
+)
+class test_moving_highlighter_from_substring_to_substring:
+    def __init__(
+        self,
+        scene: BaseScene,
+        default_code_kwargs: dict[str, Any],
+        start_substring: str,
+        start_occurrence: int,
+        stop_substring: str,
+        stop_occurrence: int,
+    ) -> None:
+        default_code_kwargs["code"] = "\n".join(
+            (
+                "class ListNode:",
+                "",
+                "    def __init__(self, val=0, next=None):",
+                "        self.val = val",
+                "        self.next = next",
+            ),
+        )
+        self.code = CuratorCode(**default_code_kwargs)
+        self.code.add_highlighter(
+            start_line=1,
+            color=YELLOW,
+            opacity=0.5,
+            height_buff=0.05,
+            width_buff=0.1,
+        )
+
+        scene.add(self.code)
+
+        self.code.move_highlighter_to_substring(
+            substring=start_substring,
+            occurrence=start_occurrence,
+        )
+
+        self.stop_substring = stop_substring
+        self.stop_occurrence = stop_occurrence
+
+    def animation(self):
+        return self.code.animate.move_highlighter_to_substring(
+            substring=self.stop_substring,
+            occurrence=self.stop_occurrence,
+        )
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    ("start_substring", "start_occurrence", "end_line_num"),
+    (("next", 1, 1),),
+)
+class test_moving_highlighter_from_substring_to_line:
+    def __init__(
+        self,
+        scene: BaseScene,
+        default_code_kwargs: dict[str, Any],
+        start_substring: str,
+        start_occurrence: int,
+        end_line_num: int,
+    ) -> None:
+        default_code_kwargs["code"] = "\n".join(
+            (
+                "class ListNode:",
+                "",
+                "    def __init__(self, val=0, next=None):",
+                "        self.val = val",
+                "        self.next = next",
+            ),
+        )
+        self.code = CuratorCode(**default_code_kwargs)
+        self.code.add_highlighter(
+            start_line=1,
+            color=YELLOW,
+            opacity=0.5,
+            height_buff=0.05,
+            width_buff=0.1,
+        )
+
+        scene.add(self.code)
+
+        self.code.move_highlighter_to_substring(
+            substring=start_substring,
+            occurrence=start_occurrence,
+        )
+
+        self.end_line_num = end_line_num
+
+    def animation(self):
+        return self.code.animate.move_highlighter_to_line(self.end_line_num)
