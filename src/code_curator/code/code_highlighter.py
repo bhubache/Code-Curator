@@ -69,7 +69,7 @@ class CodeHighlighter(Rectangle):
         except IndexError:
             to_line_copy_with_only_visible_chars = code_substring_line.copy()
 
-        self.stretch_to_fit_width(code_substring.width)
+        self.stretch_to_fit_width(code_substring.width + self.width_buff)
         self.move_to(to_line_copy_with_only_visible_chars.get_center())
         self.align_to(code_substring, LEFT)
         self.shift(LEFT * (self.width_buff / 2))
