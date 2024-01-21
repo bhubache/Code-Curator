@@ -105,6 +105,10 @@ class CuratorCode(CustomVMobject):
         return len(self.code_mobject.code)
 
     @property
+    def code_paragraph(self):
+        return self.code_mobject.code
+
+    @property
     def background_mobject(self):
         return self.code_mobject.background_mobject
 
@@ -169,6 +173,17 @@ class CuratorCode(CustomVMobject):
         copy = self._create_animation_copy()
         copy.get_code_substring(substring, occurrence=occurrence).set_opacity(1)
         return copy, TransformSinglyLinkedList(self, copy)
+
+    def saturation_highlight_lines(self, *line_numbers: int, desaturate_opacity: float = 0.15):
+        for line_index, _ in enumerate(self.code_mobject.code):
+            line_number = line_index + 1
+            if line_number in line_numbers:
+                continue
+
+            if self.code_string.splitlines()[line_index].strip() == "# NEWLINE":
+                continue
+
+            self.get_line(line_number).set_opacity(desaturate_opacity)
 
     def saturation_highlight_substring(self, substring: str, occurrence: int = 1) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()

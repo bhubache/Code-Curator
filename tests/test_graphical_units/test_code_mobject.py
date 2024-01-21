@@ -246,3 +246,26 @@ class test_moving_highlighter_from_substring_to_line:
 
     def animation(self):
         return self.code.animate.move_highlighter_to_line(self.end_line_num)
+
+
+@curator_frames_comparison(last_frame=False)
+class test_saturation_highlight_lines:
+    def __init__(
+        self,
+        scene: BaseScene,
+        default_code_kwargs: dict[str, Any],
+    ) -> None:
+        default_code_kwargs["code"] = "\n".join(
+            (
+                "class ListNode:",
+                "",
+                "    def __init__(self, val=0, next=None):",
+                "        self.val = val",
+                "        self.next = next",
+            ),
+        )
+        self.code = CuratorCode(**default_code_kwargs)
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.saturation_highlight_lines(3, desaturate_opacity=0.25)
