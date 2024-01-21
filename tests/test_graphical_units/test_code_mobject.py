@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 from manim import YELLOW
 
+from code_curator.code import curator_code
 from code_curator.code.curator_code import CuratorCode
 from code_curator.utils.testing.curator_frames_comparison import curator_frames_comparison
 
@@ -269,3 +270,66 @@ class test_saturation_highlight_lines:
 
     def animation(self):
         return self.code.animate.saturation_highlight_lines(3, desaturate_opacity=0.25)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    ("source_text", "destination_text"),
+    (
+        # (
+        #     "\n".join(
+        #         (
+        #             "print('hello')",
+        #         ),
+        #     ),
+        #     "\n".join(
+        #         (
+        #             "print('hello')",
+        #             curator_code.add_line("print('goodbye')"),
+        #         ),
+        #     ),
+        # ),
+        (
+            "\n".join(
+                (
+                    "print('hello')",
+                    "print('goodbye')",
+                ),
+            ),
+            "\n".join(
+                (
+                    "print('hello')",
+                    curator_code.remove_line("print('goodbye')"),
+                ),
+            ),
+        ),
+        # (
+        #     "\n".join(
+        #         (
+        #             "def __init__(self, argument_one: dict[str, int]) -> None:",
+        #         ),
+        #     ),
+        #     "\n".join(
+        #         (
+        #             "def __init__(self, argument_two: dict[str, str]) -> None:",
+        #         ),
+        #     ),
+        # ),
+    ),
+)
+class test_changing_source_code:
+    def __init__(
+        self,
+        scene: BaseScene,
+        default_code_kwargs: dict[str, Any],
+        source_text: str,
+        destination_text: str,
+    ) -> None:
+        default_code_kwargs["code"] = source_text
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = destination_text
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text)
