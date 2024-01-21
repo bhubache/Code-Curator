@@ -276,19 +276,17 @@ class test_saturation_highlight_lines:
 @pytest.mark.parametrize(
     ("source_text", "destination_text"),
     (
-        # (
-        #     "\n".join(
-        #         (
-        #             "print('hello')",
-        #         ),
-        #     ),
-        #     "\n".join(
-        #         (
-        #             "print('hello')",
-        #             curator_code.add_line("print('goodbye')"),
-        #         ),
-        #     ),
-        # ),
+        (
+            "\n".join(
+                ("print('hello')",),
+            ),
+            "\n".join(
+                (
+                    "print('hello')",
+                    curator_code.add_line("print('goodbye')"),
+                ),
+            ),
+        ),
         (
             "\n".join(
                 (
@@ -303,18 +301,13 @@ class test_saturation_highlight_lines:
                 ),
             ),
         ),
-        # (
-        #     "\n".join(
-        #         (
-        #             "def __init__(self, argument_one: dict[str, int]) -> None:",
-        #         ),
-        #     ),
-        #     "\n".join(
-        #         (
-        #             "def __init__(self, argument_two: dict[str, str]) -> None:",
-        #         ),
-        #     ),
-        # ),
+        (
+            "def __init__(self, argument_one: dict[str, int]) -> None:",
+            (  # noqa: 306
+                f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str,"
+                f" {curator_code.edit('int', 'str')}]) -> None:"
+            ),
+        ),
     ),
 )
 class test_changing_source_code:
