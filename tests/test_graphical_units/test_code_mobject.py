@@ -325,4 +325,4 @@ class test_changing_source_code:
         scene.add(self.code)
 
     def animation(self):
-        return self.code.animate.change_source_code(self.destination_text)
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=False)

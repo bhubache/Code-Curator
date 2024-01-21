@@ -168,6 +168,17 @@ class CuratorCode(CustomVMobject):
 
         return self
 
+    def set_lines_opacity(self, *line_numbers: int, opacity: float):
+        for line_index, _ in enumerate(self.code_paragraph):
+            line_number = line_index + 1
+            if line_number not in line_numbers:
+                continue
+
+            if self.code_string.splitlines()[line_index].strip() == "# NEWLINE":
+                continue
+
+            self.get_line(line_number).set_opacity(opacity)
+
     def fade_in_lines(self, *line_numbers: int) -> tuple[CuratorCode, Animation]:
         copy = self._create_animation_copy()
         for line_no in line_numbers:
@@ -201,7 +212,7 @@ class CuratorCode(CustomVMobject):
 
         return copy, TransformSinglyLinkedList(self, copy)
 
-    def change_source_code(self, new_code_string: str):
+    def change_source_code(self, new_code_string: str, *, saturate_edits: bool):
         self.unprocessed_str_lines = new_code_string.splitlines()
         self.remove(self.code_mobject)
         self.code_mobject = CuratorCode(
@@ -437,10 +448,14 @@ class AnimationBuilder(_AnimationBuilder):
         if self.overridden_animation:
             anim = self.overridden_animation
         if any(method.__name__ == "change_source_code" for method, _, _ in self.methods):
+            change_source_code_kwargs = [
+                method_kwargs for method, _, method_kwargs in self.methods if method.__name__ == "change_source_code"
+            ][0]
             anim = CodeTransform(
                 self.mobject,
                 self.mobject.target,
                 methods=self.methods,
+                saturate_edits=change_source_code_kwargs["saturate_edits"],
             )
         else:
             return super().build()

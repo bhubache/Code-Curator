@@ -46,7 +46,7 @@ def pairwise_edited_line_bounds(line: str):
     while substring_pair_index < len(substring_pairs):
         substring_one, substring_two = substring_pairs[substring_pair_index]
         if substring_one == edit_pairs[0][0] and substring_two == edit_pairs[0][1]:
-            yield source_start, source_start + len(substring_one), target_start, target_start + len(substring_two)
+            yield source_start, source_start + len(substring_one), target_start, target_start + len(substring_two), True
 
             source_start += len(substring_one)
             target_start += len(substring_two)
@@ -55,7 +55,9 @@ def pairwise_edited_line_bounds(line: str):
 
             substring_pair_index += 2
         else:
-            yield source_start, source_start + len(substring_one), target_start, target_start + len(substring_one)
+            yield source_start, source_start + len(substring_one), target_start, target_start + len(
+                substring_one,
+            ), False
 
             source_start += len(substring_one)
             target_start += len(substring_one)

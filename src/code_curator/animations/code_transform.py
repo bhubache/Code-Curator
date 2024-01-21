@@ -7,6 +7,7 @@ from manim import FadeIn
 from manim import FadeOut
 from manim import Transform
 
+from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.code import code_edit_parser
 
 if TYPE_CHECKING:
@@ -22,12 +23,15 @@ class CodeTransform(AnimationGroup):
         original_code: CuratorCode,
         target_code: CuratorCode,
         methods,
+        saturate_edits: bool,
         **kwargs,
     ) -> None:
         matching_line_pairs: list[tuple[VGroup, VGroup]] = []
         added_lines: list[VGroup] = []
         removed_lines: list[VGroup] = []
-        changed_code_pairs: list[tuple[VGroup, VGroup]] = []
+        changed_code_pairs: list[tuple[VGroup, VGroup, bool]] = []
+
+        bounds_to_leave_saturated: list[tuple[int, int, int]] = []
 
         source_line_index = 0
         target_line_index = 0
@@ -61,15 +65,27 @@ class CodeTransform(AnimationGroup):
                 removed_lines.append(source_line)
                 source_line_index += 1
             elif code_edit_parser.line_is_edited(unprocessed_line):
-                for source_start, source_end, target_start, target_end in code_edit_parser.pairwise_edited_line_bounds(
+                for (
+                    source_start,
+                    source_end,
+                    target_start,
+                    target_end,
+                    is_edited,
+                ) in code_edit_parser.pairwise_edited_line_bounds(
                     unprocessed_line,
                 ):
                     changed_code_pairs.append(
                         (
                             source_line[source_start:source_end],
                             target_line[target_start:target_end],
+                            is_edited,
                         ),
                     )
+
+                    if is_edited:
+                        bounds_to_leave_saturated.append(
+                            (source_line_index, source_start, source_end),
+                        )
 
                 source_line_index += 1
                 target_line_index += 1
@@ -80,22 +96,56 @@ class CodeTransform(AnimationGroup):
         for line in added_lines:
             self.mobjects_to_remove_on_cleanup.append(line)
 
-        for source_mobject, _ in changed_code_pairs:
+        for source_mobject, *_ in changed_code_pairs:
             original_code.add(source_mobject)
             self.mobjects_to_remove_on_cleanup.append(source_mobject)
 
-        super().__init__(
-            AnimationGroup(
-                *[Transform(source_line, target_line) for source_line, target_line in matching_line_pairs],
-                *[FadeOut(line) for line in removed_lines],
-                *[Transform(source_code, target_code) for source_code, target_code in changed_code_pairs],
-            ),
-            AnimationGroup(
-                *[FadeIn(line) for line in added_lines],
-            ),
-            lag_ratio=0.25,
-            **kwargs,
-        )
+        if saturate_edits:
+            fade_out_and_desaturate_animations = [
+                original_code.code_paragraph.animate.set_opacity(0.15),
+            ]
+
+            for source_line_index, start, end in bounds_to_leave_saturated:
+                fade_out_and_desaturate_animations.append(
+                    FadeOut(original_code.code_paragraph[source_line_index][start:end]),
+                )
+
+            fade_in_and_transform_animations = []
+            editing_started = False
+            for source_line, target_line, is_edited in changed_code_pairs:
+                if is_edited:
+                    editing_started = True
+                    fade_in_and_transform_animations.append(FadeIn(target_line))
+                    self.mobjects_to_remove_on_cleanup.append(target_line)
+                    continue
+
+                if editing_started:
+                    fade_in_and_transform_animations.append(Transform(source_line, target_line.set_opacity(0.15)))
+
+            super().__init__(
+                FixedSuccession(
+                    AnimationGroup(
+                        *fade_out_and_desaturate_animations,
+                    ),
+                    AnimationGroup(
+                        *fade_in_and_transform_animations,
+                    ),
+                    target_code.animate.set_opacity(1),
+                ),
+            )
+        else:
+            super().__init__(
+                AnimationGroup(
+                    *[Transform(source_line, target_line) for source_line, target_line in matching_line_pairs],
+                    *[FadeOut(line) for line in removed_lines],
+                    *[Transform(source_code, target_code) for source_code, target_code, _ in changed_code_pairs],
+                ),
+                AnimationGroup(
+                    *[FadeIn(line) for line in added_lines],
+                ),
+                lag_ratio=0.25,
+                **kwargs,
+            )
 
         self.ungroupified_mobject = original_code
         self.methods = methods
