@@ -110,7 +110,8 @@ class CodeTransform(AnimationGroup):
                     FadeOut(original_code.code_paragraph[source_line_index][start:end]),
                 )
 
-            fade_in_and_transform_animations = []
+            to_opaque_animations = []
+            transform_animations = []
             editing_started = False
             for source_line, target_line, is_edited in changed_code_pairs:
                 if is_edited:
@@ -120,11 +121,11 @@ class CodeTransform(AnimationGroup):
                     original_code.add(target_line)
                     self.mobjects_to_remove_on_cleanup.append(target_line)
 
-                    fade_in_and_transform_animations.append(target_line.animate.set_opacity(1))
+                    to_opaque_animations.append(target_line.animate.set_opacity(1))
                     continue
 
                 if editing_started:
-                    fade_in_and_transform_animations.append(Transform(source_line, target_line.set_opacity(0.15)))
+                    transform_animations.append(Transform(source_line, target_line.set_opacity(0.15)))
 
             super().__init__(
                 FixedSuccession(
@@ -132,9 +133,12 @@ class CodeTransform(AnimationGroup):
                         *fade_out_and_desaturate_animations,
                     ),
                     AnimationGroup(
-                        *fade_in_and_transform_animations,
+                        *transform_animations,
                     ),
-                    target_code.animate.set_opacity(1),
+                    AnimationGroup(
+                        *to_opaque_animations,
+                    ),
+                    original_code.animate.set_opacity(1),
                 ),
                 **kwargs,
             )
