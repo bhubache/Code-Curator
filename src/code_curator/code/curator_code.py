@@ -5,7 +5,9 @@ from pathlib import Path
 
 from manim import Animation
 from manim import Code
+from manim import LEFT
 from manim import ParsableManimColor
+from manim import UP
 from manim import YELLOW
 from manim.mobject.mobject import _AnimationBuilder
 from pygments import highlight
@@ -192,6 +194,7 @@ class CuratorCode(CustomVMobject):
         return copy, TransformSinglyLinkedList(self, copy)
 
     def saturation_highlight_lines(self, *line_numbers: int, desaturate_opacity: float = 0.15):
+        self.code_paragraph.set_opacity(1)
         for line_index, _ in enumerate(self.code_mobject.code):
             line_number = line_index + 1
             if line_number in line_numbers:
@@ -232,7 +235,7 @@ class CuratorCode(CustomVMobject):
             line_no_buff=self.code_mobject.line_no_buff,
             style=self.style,
             language=self.language,
-        ).code_mobject
+        ).code_mobject.align_to(self.code_mobject, LEFT + UP)
 
         self.add(self.code_mobject)
         return self
