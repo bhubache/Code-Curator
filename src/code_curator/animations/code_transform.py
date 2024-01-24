@@ -96,6 +96,7 @@ class CodeTransform(AnimationGroup):
         for line in added_lines:
             self.mobjects_to_remove_on_cleanup.append(line)
 
+        # TODO: This may not be needed
         for source_mobject, *_ in changed_code_pairs:
             original_code.add(source_mobject)
             self.mobjects_to_remove_on_cleanup.append(source_mobject)
@@ -112,6 +113,8 @@ class CodeTransform(AnimationGroup):
 
             to_opaque_animations = []
             transform_animations = []
+            fade_back_in_animations = []
+            original_code_lines_to_fade_back_in = []
             editing_started = False
             for source_line, target_line, is_edited in changed_code_pairs:
                 if is_edited:
@@ -125,6 +128,29 @@ class CodeTransform(AnimationGroup):
                     continue
 
                 if editing_started:
+                    for line in original_code.code_mobject.code:
+                        start_index: int | None = None
+                        end_index: int | None = None
+                        if source_line[0] in line:
+                            for index, char in enumerate(line):
+                                if char == source_line[0]:
+                                    start_index = index
+
+                                if char == source_line[-1]:
+                                    end_index = index + 1
+
+                        if start_index is None:
+                            original_code_lines_to_fade_back_in.append(line.animate.set_opacity(1))
+                        else:
+                            # FIXME: I don't think this will work when there are multiple edits on one line
+                            original_code_lines_to_fade_back_in.append(line[:start_index].animate.set_opacity(1))
+                            original_code_lines_to_fade_back_in.append(line[end_index:].animate.set_opacity(1))
+
+                    target_line_copy = target_line.copy()
+                    target_line_copy.set_opacity(0)
+                    original_code.add(target_line_copy)
+                    self.mobjects_to_remove_on_cleanup.append(target_line_copy)
+                    fade_back_in_animations.append(target_line_copy.animate.set_opacity(1))
                     transform_animations.append(Transform(source_line, target_line.set_opacity(0.15)))
 
             super().__init__(
@@ -138,7 +164,10 @@ class CodeTransform(AnimationGroup):
                     AnimationGroup(
                         *to_opaque_animations,
                     ),
-                    original_code.animate.set_opacity(1),
+                    AnimationGroup(
+                        *original_code_lines_to_fade_back_in,
+                        *fade_back_in_animations,
+                    ),
                 ),
                 **kwargs,
             )
