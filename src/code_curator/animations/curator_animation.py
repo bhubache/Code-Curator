@@ -32,6 +32,8 @@ class CuratorAnimation(Animation):
 
     def begin(self) -> None:
         """Override and do nothing to avoid ``interpolate_mobject`` being called twice with alpha equal to 0."""
+
+    def interpolate_mobject(self, alpha: float) -> None:
         while self.pending_queue and self.pending_queue[0].start_alpha < 0:
             method = self.pending_queue.popleft()
             self.animation_pool.add(method)
@@ -41,7 +43,6 @@ class CuratorAnimation(Animation):
                 animation.clean_up_from_scene(self.scene)
                 self.animation_pool.animations.remove(animation)
 
-    def interpolate_mobject(self, alpha: float) -> None:
         if len(self.pending_queue) > 0 and alpha >= self.pending_queue[0].start_alpha:
             self.animation_pool.add(self.pending_queue.popleft())
 
