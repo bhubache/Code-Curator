@@ -201,6 +201,7 @@ class CuratorCode(CustomVMobject):
                 continue
 
             if self.code_string.splitlines()[line_index].strip() == "# NEWLINE":
+                self.get_line(line_number).set_opacity(0)
                 continue
 
             self.get_line(line_number).set_opacity(desaturate_opacity)
