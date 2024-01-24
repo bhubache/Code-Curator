@@ -115,8 +115,12 @@ class CodeTransform(AnimationGroup):
             for source_line, target_line, is_edited in changed_code_pairs:
                 if is_edited:
                     editing_started = True
-                    fade_in_and_transform_animations.append(FadeIn(target_line))
+
+                    target_line.set_opacity(0)
+                    original_code.add(target_line)
                     self.mobjects_to_remove_on_cleanup.append(target_line)
+
+                    fade_in_and_transform_animations.append(target_line.animate.set_opacity(1))
                     continue
 
                 if editing_started:
@@ -132,6 +136,7 @@ class CodeTransform(AnimationGroup):
                     ),
                     target_code.animate.set_opacity(1),
                 ),
+                **kwargs,
             )
         else:
             super().__init__(
