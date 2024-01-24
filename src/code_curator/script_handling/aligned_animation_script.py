@@ -29,6 +29,9 @@ class AlignedAnimationScript:
             if entry.get("start_here", False):
                 start_time = entry["start_time"]
                 self.run_time = self._aligned_script.get_full_duration() - start_time
+                break
+        else:
+            self.run_time = self._aligned_script.get_full_duration()
 
         for index, _ in enumerate(self.entries):
             self.entries[index]["start_time"] -= start_time
