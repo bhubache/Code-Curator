@@ -38,7 +38,7 @@ class CodeTransform(AnimationGroup):
         source_code_lines: Paragraph = original_code.code_paragraph
         target_code_lines: Paragraph = target_code.code_paragraph
 
-        for unprocessed_line in target_code.unprocessed_str_lines:
+        for unprocessed_str_line in target_code.unprocessed_str_lines:
             try:
                 source_line: VGroup | None = source_code_lines[source_line_index]
             except IndexError:  # Only lines unique to the target code remain
@@ -49,7 +49,7 @@ class CodeTransform(AnimationGroup):
             except IndexError:  # Only lines unique to the source code remain
                 target_line: VGroup | None = None
 
-            if not code_edit_parser.line_changed(unprocessed_line):
+            if not code_edit_parser.line_changed(unprocessed_str_line):
                 matching_line_pairs.append(
                     (
                         source_line,
@@ -58,13 +58,13 @@ class CodeTransform(AnimationGroup):
                 )
                 source_line_index += 1
                 target_line_index += 1
-            elif code_edit_parser.line_is_added(unprocessed_line):
+            elif code_edit_parser.line_is_added(unprocessed_str_line):
                 added_lines.append(target_line)
                 target_line_index += 1
-            elif code_edit_parser.line_is_removed(unprocessed_line):
+            elif code_edit_parser.line_is_removed(unprocessed_str_line):
                 removed_lines.append(source_line)
                 source_line_index += 1
-            elif code_edit_parser.line_is_edited(unprocessed_line):
+            elif code_edit_parser.line_is_edited(unprocessed_str_line):
                 for (
                     source_start,
                     source_end,
@@ -72,7 +72,7 @@ class CodeTransform(AnimationGroup):
                     target_end,
                     is_edited,
                 ) in code_edit_parser.pairwise_edited_line_bounds(
-                    unprocessed_line,
+                    unprocessed_str_line,
                 ):
                     changed_code_pairs.append(
                         (
@@ -90,7 +90,7 @@ class CodeTransform(AnimationGroup):
                 source_line_index += 1
                 target_line_index += 1
             else:
-                raise RuntimeError(f"Unexpected code line to transform: {unprocessed_line}")
+                raise RuntimeError(f"Unexpected code line to transform: {unprocessed_str_line}")
 
         self.mobjects_to_remove_on_cleanup: list[VGroup] = []
         for line in added_lines:
