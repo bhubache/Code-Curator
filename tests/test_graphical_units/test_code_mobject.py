@@ -274,7 +274,7 @@ class test_saturation_highlight_lines:
 
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
-    ("source_text", "destination_text"),
+    ("source_text", "destination_text", "saturate_edits"),
     (
         (
             "\n".join(
@@ -283,9 +283,10 @@ class test_saturation_highlight_lines:
             "\n".join(
                 (
                     "print('hello')",
-                    curator_code.add_line("print('goodbye')"),
+                    curator_code.add("print('goodbye')"),
                 ),
             ),
+            False,
         ),
         (
             "\n".join(
@@ -297,9 +298,32 @@ class test_saturation_highlight_lines:
             "\n".join(
                 (
                     "print('hello')",
-                    curator_code.remove_line("print('goodbye')"),
+                    curator_code.remove("print('goodbye')"),
                 ),
             ),
+            False,
+        ),
+        (
+            "def __init__(self, argument_one: dict[str, int]) -> None:",
+            f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str, int]) -> None:",
+            False,
+        ),
+        (
+            "\n".join(
+                ("print('hello')",),
+            ),
+            "\n".join(
+                (
+                    "print('hello')",
+                    curator_code.add("print('goodbye')"),
+                ),
+            ),
+            True,
+        ),
+        (
+            "def __init__(self, argument_one: dict[str, int]) -> None:",
+            f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str, int]) -> None:",
+            True,
         ),
         (
             "def __init__(self, argument_one: dict[str, int]) -> None:",
@@ -307,6 +331,22 @@ class test_saturation_highlight_lines:
                 f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str,"
                 f" {curator_code.edit('int', 'str')}]) -> None:"
             ),
+            True,
+        ),
+        (
+            "def my_function(arg_one: dict[tuple[str], int]) -> None:",
+            f"def my_{curator_code.add('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
+            False,
+        ),
+        (
+            "def my_function(arg_one: dict[tuple[str], int]) -> None:",
+            f"def my_{curator_code.add('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
+            True,
+        ),
+        (
+            "def my_special_function(arg_one: dict[tuple[str], int]) -> None:",
+            f"def my_{curator_code.remove('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
+            False,
         ),
     ),
 )
@@ -317,12 +357,14 @@ class test_changing_source_code:
         default_code_kwargs: dict[str, Any],
         source_text: str,
         destination_text: str,
+        saturate_edits: bool,
     ) -> None:
         default_code_kwargs["code"] = source_text
         self.code = CuratorCode(**default_code_kwargs)
         self.destination_text = destination_text
+        self.saturate_edits = saturate_edits
 
         scene.add(self.code)
 
     def animation(self):
-        return self.code.animate.change_source_code(self.destination_text, saturate_edits=False)
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
