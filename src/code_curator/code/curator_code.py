@@ -217,10 +217,10 @@ class CuratorCode(CustomVMobject):
         return copy, TransformSinglyLinkedList(self, copy)
 
     def change_source_code(self, new_code_string: str, *, saturate_edits: bool):
-        self.unprocessed_str_lines = new_code_string.splitlines()
+        self.encoded_string = new_code_string
         self.remove(self.code_mobject)
         self.code_mobject = CuratorCode(
-            code=code_edit_parser.clean_code_string(new_code_string),
+            code=code_edit_parser.decode_string(new_code_string),
             tab_width=self.code_mobject.tab_width,
             indentation_chars=self.code_mobject.indentation_chars,
             font=self.code_mobject.font,
@@ -470,13 +470,19 @@ class AnimationBuilder(_AnimationBuilder):
         return anim
 
 
-def remove_line(line: str):
-    return f"<<<<<REMOVE>>>>>{line}"
+def remove(text: str):
+    return "".join(f"<<<<<REMOVE>{char}</REMOVE>>>>>" for char in text)
 
 
-def add_line(line: str):
-    return f"<<<<<ADD>>>>>{line}"
+def add(text: str):
+    return "".join(f"<<<<<ADD>{char}</ADD>>>>>" for char in text)
 
 
 def edit(initial_text: str, final_text: str):
-    return f"<<<<<EDIT({initial_text}, {final_text})>>>>>"
+    return "".join(
+        (
+            remove(initial_text),
+            add(final_text),
+        ),
+    )
+    # return f"<<<<<EDIT>({initial_text}, {final_text})</EDIT>>>>>"
