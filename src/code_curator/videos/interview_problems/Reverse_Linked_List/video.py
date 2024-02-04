@@ -2,16 +2,23 @@ from __future__ import annotations
 
 from manim import AnimationGroup
 from manim import Brace
+from manim import Circumscribe
+from manim import config
 from manim import Create
 from manim import DOWN
 from manim import FadeIn
 from manim import FadeOut
 from manim import Flash
+from manim import GrowFromCenter
 from manim import Indicate
 from manim import LEFT
 from manim import Line
 from manim import ORIGIN
+from manim import Rectangle
+from manim import RIGHT
+from manim import ShrinkToCenter
 from manim import there_and_back
+from manim import Transform
 from manim import UP
 from manim import Wait
 
@@ -20,6 +27,7 @@ from code_curator.videos.interview_problems.problem_text import ProblemText
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.code.curator_code import CuratorCode
+from code_curator.code.curator_code import remove, add, edit
 
 
 TITLE = "Reverse Linked List"
@@ -98,21 +106,178 @@ class Video(BaseScene):
             code="\n".join(
                 (
                     "class ListNode:",
-                    "    def __init__(self, val=0, next=None):",
+                    "    def __init__(self, val=0, next_=None):",
                     "        self.val = val",
-                    "        self.next = next",
+                    "        self.next = next_",
                 ),
             ),
         )
+        # self.code.add_highlighter(
+        #     start_line=1,
+        #     height_buff=0.05,
+        #     width_buff=0.1,
+        # )
+        # self.code.move_highlighter_to_substring(
+        #     substring="next",
+        #     occurrence=1,
+        # )
         return FadeIn(self.code)
 
     def highlight_first_node_attr(self):
-        self.code.add_highlighter(
-            start_line=2,
-        )
+        return self.code.animate.saturation_highlight_lines(3)
 
     def highlight_second_node_attr(self):
+        return self.code.animate.saturation_highlight_lines(4)
+
+    def highlight_first_node_attr_again(self):
+        return self.code.animate.saturation_highlight_lines(3)
+
+    def fade_in_first_clarifying_question(self):
+        self.first_clarifying_question = ProblemText.create_tex("What is the lower and upper bound for a node's value?")
+        self.first_clarifying_question.to_edge(LEFT)
+        return FadeIn(self.first_clarifying_question)
+
+    def highlight_second_node_attr_again(self):
+        return self.code.animate.saturation_highlight_lines(4)
+
+    def fade_in_second_clarifying_question(self):
+        self.second_clarifying_question = ProblemText.create_tex("What is the lower and upper bound on the number of node's in the linked list?")
+        self.second_clarifying_question.to_edge(LEFT)
+        self.second_clarifying_question.next_to(self.first_clarifying_question, DOWN)
+        return FadeIn(self.second_clarifying_question)
+
+    def SKIP_TO_IMPLEMENTATION(self):
         ...
+
+    def fade_to_recursive_implementation(self):
+        return [FadeOut(mobject) for mobject in self.submobjects]
+
+    def fade_in_first_step_for_recursion(self):
+        self.recursive_steps = ProblemText.create_list(
+            "Identify the base cases",
+            "Identify the recursive cases",
+        )
+
+        self.recursive_steps[1].set_opacity(0)
+
+        return FadeIn(self.recursive_steps)
+
+    def fade_in_second_step_for_recursion(self):
+        return self.recursive_steps[1].animate.set_opacity(1)
+
+    def setup_cases_determination(self):
+        self.base_cases_header = (
+            ProblemText.create_header(
+                "Base Cases",
+                color=self.title_tex.color,
+            ).scale(0.75).to_edge(LEFT, buff=0.1).to_edge(UP, buff=0.1)
+        )
+        self.recursive_cases_header = (
+            ProblemText.create_header(
+                "Recursive Cases",
+                color=self.title_tex.color,
+            ).scale(0.75).to_edge(LEFT, buff=0.1)
+        )
+
+        self.line_partitioning_cases = Line(
+            (-config["frame_x_radius"], 0, 0),
+            (config["frame_x_radius"], 0, 0),
+            color=self.title_tex.color,
+            stroke_width=1.5,
+        )
+
+        self.recursive_cases_header.align_to(self.line_partitioning_cases, UP).shift(DOWN * 0.1)
+
+        run_time = 2
+        return (
+            Transform(self.recursive_steps[0], self.base_cases_header, run_time=run_time),
+            Transform(self.recursive_steps[1], self.recursive_cases_header, run_time=run_time),
+            # Create(self.line_partitioning_code_and_cases, run_time=run_time),
+            Create(self.line_partitioning_cases, run_time=run_time),
+        )
+
+    def fade_in_empty_linked_list(self):
+        self.pondering_rectangle = Rectangle(color=self.title_tex.color, fill_color=config["background_color"], fill_opacity=1, stroke_width=1.5)
+        self.empty_sll = SinglyLinkedList.create_sll(color=self.title_tex.color).add_null().add_head_pointer()
+
+        return GrowFromCenter(self.pondering_rectangle), GrowFromCenter(self.empty_sll)
+
+    def move_empty_sll_to_base_cases(self):
+        return self.empty_sll.animate.move_to(
+            (
+                (-config["frame_x_radius"]) / 2,
+                config["frame_y_radius"] / 2,
+                0,
+            ),
+        )
+
+    def fade_in_algorithm_build_up(self):
+        self.line_partitioning_code_and_cases = Line(
+            (0, 10, 0),
+            (0, -10, 0),
+        ).to_edge(RIGHT, buff=0).match_style(self.line_partitioning_cases).set_opacity(0)
+        self.add(self.line_partitioning_code_and_cases)
+
+        # Make sure pondering rectangle stays on top of the line partitioning the code from the cases
+        self.add(self.pondering_rectangle)
+
+        return (
+            self.line_partitioning_code_and_cases.animate.move_to(ORIGIN).set_opacity(1),
+            self.line_partitioning_cases.animate.put_start_and_end_on(
+                self.line_partitioning_cases.get_start(),
+                ORIGIN,
+            )
+        )
+
+    def fade_in_first_base_case_code(self):
+        self.first_recursive_solution_code = CuratorCode(
+            code="\n".join(
+                (
+                    "class Solution:",
+                    "    def reverseList(self, head):",
+                    "        if head is None:",
+                    "            return head",
+                ),
+            ),
+        ).move_to((config["frame_x_radius"] / 2, 0, 0))
+
+        return FadeIn(self.first_recursive_solution_code)
+
+    def fade_in_one_node_linked_list(self):
+        self.one_node_sll = SinglyLinkedList.create_sll(0, color=self.title_tex.color).add_null().add_head_pointer()
+        return GrowFromCenter(self.one_node_sll)
+
+    def indicate_empty_linked_list_as_subproblem(self):
+        return Circumscribe(self.one_node_sll.null, run_time=2, stroke_width=2)
+
+    def move_one_node_sll_to_base_cases(self):
+        return self.empty_sll.animate.move_to(
+            (
+                (-config["frame_x_radius"] + self.empty_sll.get_center()[0]) / 2,
+                self.empty_sll.get_center()[1],
+                0,
+            ),
+        ), self.one_node_sll.animate.move_to(
+            (
+                self.empty_sll.get_center()[0] / 2,
+                self.empty_sll.get_center()[1],
+                0,
+            ),
+        )
+
+    def fade_in_second_base_case_code(self):
+        return self.first_recursive_solution_code.animate(run_time=6).change_source_code(
+            new_code_string="\n".join(
+                (
+                    "class Solution:",
+                    "    def reverseList(self, head):",
+                    f"        if head is None{add(' or head.next is None')}:",
+                    "            return head"
+                ),
+            ),
+            saturate_edits=True,
+        )
+
 
     # def fade_in_sll(self):
     #     self.sll.shift(DOWN * 1)

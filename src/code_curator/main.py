@@ -61,7 +61,7 @@ QUALITY_MAP = {
     },
 }
 
-QUALITY = "low_quality"
+QUALITY = "high_quality"
 config["quality"] = QUALITY
 FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
 RESOLUTION = QUALITY_MAP[QUALITY]["res"]

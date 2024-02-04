@@ -5,7 +5,24 @@ fade_in_clarifying_questions_header: When thinking of clarifying questions to as
 fade_in_first_clarifying_questions_point: parts of the question that are unclear
 fade_in_second_clarifying_questions_point: and edge cases. I think the problem is clear so let's
 fade_in_edge_case_header: focus on edge cases. The only input is a singly linked list, which is a recursive data structure. Let's take a look at the
-__START__:
 fade_in_list_node_code: ListNode class that makes up this data structure. A ListNode has two attributes
 highlight_first_node_attr: a value, which is an integer
-highlight_second_node_attr: a next node, which is another ListNode object
+highlight_second_node_attr: a next node, which is another ListNode object.
+highlight_first_node_attr_again: The edge cases for any number are its minimum and maximum values. So, a clarifying question to ask would be
+fade_in_first_clarifying_question: What is the lower and upper bound for a node's value? Because the solution likely just requires manipulating a node's next pointers, this question may not be necessary.
+highlight_second_node_attr_again: The "next" attribute for a ListNode is what makes the singly linked list recursive, and gives the linked list properties that no single component has. One example is length, which is an integer. As stated earlier, any the edge cases for any number are the lower and upper bounds of its value. In the context of this problem, that means we're concerned with the lower and upper bounds on the number of nodes in a singly linked list. So, a clarifying question to ask would be
+fade_in_second_clarifying_question: What is the lower and upper bound on the number of node's in the linked list? The lower bound is important because a linked list with zero nodes or one node may be handled differently than a linked list with two or more nodes. The reason the upper bound matters is that we need to know if the linked list is finite in size.
+SKIP_TO_IMPLEMENTATION: skipping
+fade_to_recursive_implementation: Let's work through both, starting with the recursive implementation. Recall that the steps for solving a recursive problem are to first
+fade_in_first_step_for_recursion: identify the base cases and then to
+fade_in_second_step_for_recursion: identify the recursive cases
+setup_cases_determination: Base cases don't require any recursion to solve so they'll typically be the simplest and or smallest inputs. The smallest input for this problem is an
+fade_in_empty_linked_list: empty linked list. A reversed empty linked list is itself so no recursion is required and
+move_empty_sll_to_base_cases: we confirm that this is a base case.
+fade_in_algorithm_build_up: With each case, let's translate it to code to start building our solution, starting with,
+fade_in_first_base_case_code: if head is None, return head. Stepping up in size, what about a
+fade_in_one_node_linked_list: linked list with one node? Well, this has the
+indicate_empty_linked_list_as_subproblem: empty list as a subproblem, but we still don't need to recurse because its reverse is itself as well
+move_one_node_sll_to_base_cases: making it a base case! Let's add this base case to our
+# __START__:
+fade_in_second_base_case_code: algorithm by also checking if the head's next node is None. blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
