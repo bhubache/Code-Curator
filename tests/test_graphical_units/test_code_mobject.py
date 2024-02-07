@@ -16,8 +16,7 @@ if TYPE_CHECKING:
 __module_test__ = "code_mobject"
 
 
-@pytest.fixture
-def default_code_kwargs() -> dict[str, Any]:
+def get_default_code_kwargs() -> dict[str, Any]:
     return {
         "file_name": None,
         "tab_width": 1,
@@ -50,7 +49,8 @@ def default_code_kwargs() -> dict[str, Any]:
     ),
 )
 class test_highlighter:
-    def __init__(self, scene: BaseScene, default_code_kwargs: dict[str, Any], highlighter_start_line: int) -> None:
+    def __init__(self, scene: BaseScene, highlighter_start_line: int) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -82,7 +82,8 @@ class test_highlighter:
     ),
 )
 class test_moving_highlighter_from_line_to_line:
-    def __init__(self, scene: BaseScene, default_code_kwargs: dict[str, Any], start_line: int, stop_line: int) -> None:
+    def __init__(self, scene: BaseScene, start_line: int, stop_line: int) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -122,11 +123,11 @@ class test_moving_highlighter_from_line_to_substring:
     def __init__(
         self,
         scene: BaseScene,
-        default_code_kwargs: dict[str, Any],
         start_line: int,
         substring: str,
         occurrence: int,
     ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -163,12 +164,12 @@ class test_moving_highlighter_from_substring_to_substring:
     def __init__(
         self,
         scene: BaseScene,
-        default_code_kwargs: dict[str, Any],
         start_substring: str,
         start_occurrence: int,
         stop_substring: str,
         stop_occurrence: int,
     ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -213,11 +214,11 @@ class test_moving_highlighter_from_substring_to_line:
     def __init__(
         self,
         scene: BaseScene,
-        default_code_kwargs: dict[str, Any],
         start_substring: str,
         start_occurrence: int,
         end_line_num: int,
     ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -254,8 +255,8 @@ class test_saturation_highlight_lines:
     def __init__(
         self,
         scene: BaseScene,
-        default_code_kwargs: dict[str, Any],
     ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
         default_code_kwargs["code"] = "\n".join(
             (
                 "class ListNode:",
@@ -274,94 +275,178 @@ class test_saturation_highlight_lines:
 
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
-    ("source_text", "destination_text", "saturate_edits"),
+    "saturate_edits",
     (
-        (
-            "\n".join(
-                ("print('hello')",),
-            ),
-            "\n".join(
-                (
-                    "print('hello')",
-                    curator_code.add("print('goodbye')"),
-                ),
-            ),
-            False,
-        ),
-        (
-            "\n".join(
-                (
-                    "print('hello')",
-                    "print('goodbye')",
-                ),
-            ),
-            "\n".join(
-                (
-                    "print('hello')",
-                    curator_code.remove("print('goodbye')"),
-                ),
-            ),
-            False,
-        ),
-        (
-            "def __init__(self, argument_one: dict[str, int]) -> None:",
-            f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str, int]) -> None:",
-            False,
-        ),
-        (
-            "\n".join(
-                ("print('hello')",),
-            ),
-            "\n".join(
-                (
-                    "print('hello')",
-                    curator_code.add("print('goodbye')"),
-                ),
-            ),
-            True,
-        ),
-        (
-            "def __init__(self, argument_one: dict[str, int]) -> None:",
-            f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str, int]) -> None:",
-            True,
-        ),
-        (
-            "def __init__(self, argument_one: dict[str, int]) -> None:",
-            (  # noqa: 306
-                f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str,"
-                f" {curator_code.edit('int', 'str')}]) -> None:"
-            ),
-            True,
-        ),
-        (
-            "def my_function(arg_one: dict[tuple[str], int]) -> None:",
-            f"def my_{curator_code.add('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
-            False,
-        ),
-        (
-            "def my_function(arg_one: dict[tuple[str], int]) -> None:",
-            f"def my_{curator_code.add('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
-            True,
-        ),
-        (
-            "def my_special_function(arg_one: dict[tuple[str], int]) -> None:",
-            f"def my_{curator_code.remove('special_')}function(arg_one: dict[tuple[str], int]) -> None:",
-            False,
-        ),
+        False,
+        True,
     ),
 )
-class test_changing_source_code:
+class test_adding_newline_of_text_to_source_code:
     def __init__(
         self,
         scene: BaseScene,
-        default_code_kwargs: dict[str, Any],
-        source_text: str,
-        destination_text: str,
         saturate_edits: bool,
     ) -> None:
-        default_code_kwargs["code"] = source_text
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "print('hello')"
         self.code = CuratorCode(**default_code_kwargs)
-        self.destination_text = destination_text
+        self.destination_text = "\n".join(
+            (
+                "print('hello')",
+                curator_code.add("print('goodbye')"),
+            ),
+        )
+        self.saturate_edits = saturate_edits
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    "saturate_edits",
+    (
+        False,
+        True,
+    ),
+)
+class test_removing_line_of_text_from_source_code:
+    def __init__(
+        self,
+        scene: BaseScene,
+        saturate_edits: bool,
+    ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "\n".join(
+            (
+                "print('hello')",
+                "print('goodbye')",
+            ),
+        )
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = "\n".join(
+            (
+                "print('hello')",
+                curator_code.remove("print('goodbye')"),
+            ),
+        )
+        self.saturate_edits = saturate_edits
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    "saturate_edits",
+    (
+        False,
+        True,
+    ),
+)
+class test_one_edit_in_same_line:
+    def __init__(
+        self,
+        scene: BaseScene,
+        saturate_edits: bool,
+    ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "def __init__(self, argument_one: dict[str, int]) -> None:"
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = (
+            f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str, int]) -> None:"
+        )
+        self.saturate_edits = saturate_edits
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    "saturate_edits",
+    (
+        False,
+        True,
+    ),
+)
+class test_two_edits_in_same_line:
+    def __init__(
+        self,
+        scene: BaseScene,
+        saturate_edits: bool,
+    ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "def __init__(self, argument_one: dict[str, int]) -> None:"
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = " ".join(
+            (
+                f"def __init__(self, argument_{curator_code.edit('one', 'three')}: dict[str,",
+                f"{curator_code.edit('int', 'str')}]) -> None:",
+            ),
+        )
+        self.saturate_edits = saturate_edits
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    "saturate_edits",
+    (
+        False,
+        True,
+    ),
+)
+class test_adding_text_within_line:
+    def __init__(
+        self,
+        scene: BaseScene,
+        saturate_edits: bool,
+    ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "def my_function(arg_one: dict[tuple[str], int]) -> None:"
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = (
+            f"def my_{curator_code.add('special_')}function(arg_one: dict[tuple[str], int]) -> None:"
+        )
+        self.saturate_edits = saturate_edits
+
+        scene.add(self.code)
+
+    def animation(self):
+        return self.code.animate.change_source_code(self.destination_text, saturate_edits=self.saturate_edits)
+
+
+@curator_frames_comparison(last_frame=False)
+@pytest.mark.parametrize(
+    "saturate_edits",
+    (
+        False,
+        True,
+    ),
+)
+class test_removing_text_within_line:
+    def __init__(
+        self,
+        scene: BaseScene,
+        saturate_edits: bool,
+    ) -> None:
+        default_code_kwargs = get_default_code_kwargs()
+        default_code_kwargs["code"] = "def my_special_function(arg_one: dict[tuple[str], int]) -> None:"
+        self.code = CuratorCode(**default_code_kwargs)
+        self.destination_text = (
+            f"def my_{curator_code.remove('special_')}function(arg_one: dict[tuple[str], int]) -> None:"
+        )
         self.saturate_edits = saturate_edits
 
         scene.add(self.code)
