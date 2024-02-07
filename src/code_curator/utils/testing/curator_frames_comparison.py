@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import functools
 import inspect
+import types
 from typing import TYPE_CHECKING
 
 from manim.utils.testing.frames_comparison import frames_comparison
@@ -79,10 +81,39 @@ def curator_frames_comparison(
         new_sig = old_sig.replace(parameters=old_parameters_without_self)
         test_manim_func_wrapper.__signature__ = new_sig
         test_manim_func_wrapper.__globals__["__module_test__"] = cls.__init__.__globals__["__module_test__"]
-        test_manim_func_wrapper.curator_test_file = cls.__init__.__globals__["__file__"]
+        test_manim_func_wrapper.__globals__["__file__"] = cls.__init__.__globals__["__file__"]
         test_manim_func_wrapper.__name__ = cls.__name__
 
-        return frames_comparison(func=test_manim_func_wrapper, last_frame=last_frame, base_scene=base_scene)
+        # Three pieces of context for what's happening below:
+        # 1. To find the control_path directory for a given test, manim looks at
+        #    ``thing.__globals__["__file__"]``, where thing is the func that is
+        #    passed into ``frames_comparison``.
+        #
+        # 2. When ``pytest`` is called on the command line, it rounds up all the tests. This
+        #    causes every instance of ``curator_frames_comparison`` decorator to run before
+        #    any test is run.
+        #
+        # 3. The lines above manipulating ``test_manim_func_wrapper``'s ``__globals__``
+        #    all refer to the same dictionary.
+        #
+        # So, if we pass ``test_manim_func_wrapper`` into ``frames_comparison``,
+        # ``test_manim_func_wrapper.__globals__["__file__"]`` will be the path to
+        # whatever the last file where the ``curator_frames_comparison`` was called.
+        # We can't simply assign a copy of a dictionary to ``test_manim_func_wrapper.__globals__``
+        # because the attribute is read-only. So, we make a custom function type instead, and
+        # makes its globals be a shallow copy of the ``__globals__``.
+        # Based on:
+        # https://stackoverflow.com/questions/49076566/override-globals-in-function-imported-from-another-module
+        independent_func_wrapper = types.FunctionType(
+            code=test_manim_func_wrapper.__code__,
+            globals=test_manim_func_wrapper.__globals__.copy(),
+            name=test_manim_func_wrapper.__name__,
+            argdefs=test_manim_func_wrapper.__defaults__,
+            closure=test_manim_func_wrapper.__closure__,
+        )
+        independent_func_wrapper = functools.update_wrapper(independent_func_wrapper, test_manim_func_wrapper)
+
+        return frames_comparison(func=independent_func_wrapper, last_frame=last_frame, base_scene=base_scene)
 
     if callable(run_time):
         _cls = run_time
