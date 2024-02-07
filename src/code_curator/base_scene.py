@@ -47,6 +47,14 @@ class BaseScene(Scene):
     def submobjects(self) -> list[Mobject]:
         return self.mobjects[0].submobjects
 
+    @property
+    def moving_mobjects(self):
+        return self.get_mobject_family_members()
+
+    @moving_mobjects.setter
+    def moving_mobjects(self, new_value) -> None:
+        pass
+
     def add(self, *mobjects) -> None:
         for mob in mobjects:
             self.mobjects[0].add(mob)
@@ -71,6 +79,8 @@ class BaseScene(Scene):
         for entry in self.animation_script.entries:
             if entry["name"] == method.__name__:
                 return entry["start_time"]
+
+        raise RuntimeError("Unable to get start time")
 
     def construct(self) -> None:
         self.play(
