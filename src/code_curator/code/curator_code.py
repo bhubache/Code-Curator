@@ -15,6 +15,10 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 
 from . import code_edit_parser
+from .code_edit_parser import TEXT_ADD_END_MARKER
+from .code_edit_parser import TEXT_ADD_START_MARKER
+from .code_edit_parser import TEXT_REMOVE_END_MARKER
+from .code_edit_parser import TEXT_REMOVE_START_MARKER
 from code_curator.animations.code_transform import CodeTransform
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.code.code_highlighter import CodeHighlighter
@@ -471,11 +475,11 @@ class AnimationBuilder(_AnimationBuilder):
 
 
 def remove(text: str):
-    return "".join(f"<<<<<REMOVE>{char}</REMOVE>>>>>" for char in text)
+    return "".join(f"{TEXT_REMOVE_START_MARKER}{char}{TEXT_REMOVE_END_MARKER}" for char in text)
 
 
 def add(text: str):
-    return "".join(f"<<<<<ADD>{char}</ADD>>>>>" for char in text)
+    return "".join(f"{TEXT_ADD_START_MARKER}{char}{TEXT_ADD_END_MARKER}" for char in text)
 
 
 def edit(initial_text: str, final_text: str):
@@ -485,4 +489,3 @@ def edit(initial_text: str, final_text: str):
             add(final_text),
         ),
     )
-    # return f"<<<<<EDIT>({initial_text}, {final_text})</EDIT>>>>>"
