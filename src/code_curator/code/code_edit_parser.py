@@ -8,8 +8,15 @@ if TYPE_CHECKING:
     from code_curator.code.curator_code import CuratorCode
 
 
-REMOVED_LINE_PATTERN = "<<<<<REMOVE>(.)</REMOVE>>>>>"
-ADDED_LINE_PATTERN = "<<<<<ADD>(.)</ADD>>>>>"
+TEXT_REMOVE_START_MARKER = "<R>"
+TEXT_REMOVE_END_MARKER = "</R>"
+
+TEXT_ADD_START_MARKER = "<A>"
+TEXT_ADD_END_MARKER = "</A>"
+
+
+REMOVED_LINE_PATTERN = f"{TEXT_REMOVE_START_MARKER}(.){TEXT_REMOVE_END_MARKER}"
+ADDED_LINE_PATTERN = f"{TEXT_ADD_START_MARKER}(.){TEXT_ADD_END_MARKER}"
 
 
 def decode_string(text: str) -> str:
