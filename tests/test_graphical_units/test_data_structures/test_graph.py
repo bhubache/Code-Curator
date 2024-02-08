@@ -9,7 +9,6 @@ from manim import Circle
 from manim import Dot
 from manim import DOWN
 from manim import LEFT
-from manim import Mobject
 from manim import ORIGIN
 from manim import RED
 from manim import RIGHT
@@ -30,8 +29,7 @@ if TYPE_CHECKING:
 __module_test__ = "data_structures"
 
 
-@pytest.fixture
-def default_vertex_kwargs() -> dict[str, Any]:
+def get_default_vertex_kwargs() -> dict[str, Any]:
     return dict(  # noqa: C408
         label=0,
         contents=None,
@@ -75,7 +73,10 @@ def default_vertex_kwargs() -> dict[str, Any]:
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 90, "label_dist": 1},
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "label_dist": 1},
         {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0)},
-        {"position": (2.0, 0.0, 0.0), "position_relative_to": Vertex(label=0, position=(-0.5, 1.0, 0.0))},
+        {
+            "position": (2.0, 0.0, 0.0),
+            "position_relative_to": {"mobject": Vertex, "label": 0, "position": (-0.5, 1.0, 0.0)},
+        },
         {
             "contents": 5,
             "label_out": True,
@@ -94,7 +95,10 @@ def default_vertex_kwargs() -> dict[str, Any]:
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "radius": 1},
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "label_dist": 1, "radius": 1},
         {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0), "radius": 1},
-        {"position": (2.0, 0.0, 0.0), "position_relative_to": Vertex(label=0, position=(-0.5, 1.0, 0.0)), "radius": 1},
+        {
+            "position": (2.0, 0.0, 0.0),
+            "position_relative_to": {"mobject": Vertex, "label": 0, "position": (-0.5, 1.0, 0.0), "radius": 1},
+        },
         {
             "contents": 5,
             "label_out": True,
@@ -115,9 +119,17 @@ def default_vertex_kwargs() -> dict[str, Any]:
     ),
 )
 class test_vertex:
-    def __init__(self, scene: BaseScene, default_vertex_kwargs, kwargs_to_change) -> None:
+    def __init__(self, scene: BaseScene, kwargs_to_change) -> None:
+        default_vertex_kwargs = get_default_vertex_kwargs()
         self.scene = scene
+
         self.vertex_kwargs = default_vertex_kwargs | kwargs_to_change
+        construct_mobject(
+            keyword="position_relative_to",
+            test_kwargs=self.vertex_kwargs,
+            scene=scene,
+            add_to_scene=False,
+        )
 
     def test_vertex(self):
         self.scene.add(
@@ -151,7 +163,10 @@ class test_vertex:
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 90, "label_dist": 1},
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "label_dist": 1},
         {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0)},
-        {"position": (2.0, 0.0, 0.0), "position_relative_to": Vertex(label=0, position=(-0.5, 1.0, 0.0))},
+        {
+            "position": (2.0, 0.0, 0.0),
+            "position_relative_to": {"mobject": Vertex, "label": 0, "position": (-0.5, 1.0, 0.0)},
+        },
         {
             "contents": 5,
             "label_out": True,
@@ -170,7 +185,10 @@ class test_vertex:
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "radius": 1},
         {"contents": 5, "label_out": True, "label_revolve_angle_in_degrees": 45, "label_dist": 1, "radius": 1},
         {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0), "radius": 1},
-        {"position": (2.0, 0.0, 0.0), "position_relative_to": Vertex(label=0, position=(-0.5, 1.0, 0.0)), "radius": 1},
+        {
+            "position": (2.0, 0.0, 0.0),
+            "position_relative_to": {"mobject": Vertex, "label": 0, "position": (-0.5, 1.0, 0.0), "radius": 1},
+        },
         {
             "contents": 5,
             "label_out": True,
@@ -191,9 +209,16 @@ class test_vertex:
     ),
 )
 class test_vertex_movement:
-    def __init__(self, scene: Scene, default_vertex_kwargs: dict[str, Any], kwargs_to_change: dict[str, Any]) -> None:
+    def __init__(self, scene: Scene, kwargs_to_change: dict[str, Any]) -> None:
+        default_vertex_kwargs = get_default_vertex_kwargs()
         self.scene = scene
         self.vertex_kwargs = default_vertex_kwargs | kwargs_to_change
+        construct_mobject(
+            keyword="position_relative_to",
+            test_kwargs=self.vertex_kwargs,
+            scene=scene,
+            add_to_scene=False,
+        )
 
     def move_vertex(self):
         new_loc = (-1.0, 0.0, 0.0)
@@ -205,8 +230,8 @@ class test_vertex_movement:
         return vertex.animate.move_to(new_loc)
 
 
-@pytest.fixture
-def default_edge_kwargs(default_vertex_kwargs: dict[str, Any]) -> dict[str, Any]:
+def get_default_edge_kwargs() -> dict[str, Any]:
+    default_vertex_kwargs = get_default_vertex_kwargs()
     vertex_one_kwargs = default_vertex_kwargs | {
         "label": 1,
         "position": (-1, 0, 0),
@@ -264,7 +289,8 @@ def default_edge_kwargs(default_vertex_kwargs: dict[str, Any]) -> dict[str, Any]
     ),
 )
 class test_edge:
-    def __init__(self, scene: BaseScene, default_edge_kwargs: dict[str, Any], kwargs_to_change: dict[str, Any]) -> None:
+    def __init__(self, scene: BaseScene, kwargs_to_change: dict[str, Any]) -> None:
+        default_edge_kwargs = get_default_edge_kwargs()
         self.scene = scene
         vertex_one_default_kwargs = default_edge_kwargs.pop("vertex_one_kwargs")
         default_edge_kwargs["vertex_one"] = Vertex(
@@ -348,7 +374,8 @@ class test_edge:
     ),
 )
 class test_edge_movement:
-    def __init__(self, scene: BaseScene, default_edge_kwargs: dict[str, Any], kwargs_to_change: dict[str, Any]) -> None:
+    def __init__(self, scene: BaseScene, kwargs_to_change: dict[str, Any]) -> None:
+        default_edge_kwargs = get_default_edge_kwargs()
         vertex_one_default_kwargs = default_edge_kwargs.pop("vertex_one_kwargs")
         default_edge_kwargs["vertex_one"] = Vertex(
             **(vertex_one_default_kwargs | kwargs_to_change.pop("vertex_one_kwargs", {})),
@@ -379,8 +406,7 @@ class test_edge_movement:
         )
 
 
-@pytest.fixture
-def default_labeled_line_kwargs() -> dict[str, Any]:
+def get_default_labeled_line_kwargs() -> dict[str, Any]:
     return dict(  # noqa: C408
         start=(0.0, 1.0, 0.0),
         end=(0.0, 0.0, 0.0),
@@ -410,15 +436,37 @@ def default_labeled_line_kwargs() -> dict[str, Any]:
         {"tip_length": 0.5},
         {"tip_width": 0.5},
         {"tip_length": 0.5, "tip_width": 0.5},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN, "label": "pointer"},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": UP, "label": "pointer"},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": LEFT, "label": "pointer", "label_dist": 0.5},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": RIGHT, "label": "pointer", "label_dist": 0.5},
-        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer"},
-        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": DOWN},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": DOWN, "label": "pointer"},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": UP, "label": "pointer"},
+        {
+            "start": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "end": None,
+            "direction": LEFT,
+            "label": "pointer",
+            "label_dist": 0.5,
+        },
+        {
+            "start": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "end": None,
+            "direction": RIGHT,
+            "label": "pointer",
+            "label_dist": 0.5,
+        },
+        {"start": (-1.0, 1.0, 0.0), "end": {"mobject": Vertex, "label": 0, "color": WHITE}, "label": "pointer"},
+        {
+            "start": (-1.0, 1.0, 0.0),
+            "end": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "label": "pointer",
+            "length": 2.0,
+        },
         pytest.param(
-            {"end": (-1.0, 1.0, 0.0), "start": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+            {
+                "end": (-1.0, 1.0, 0.0),
+                "start": {"mobject": Vertex, "label": 0, "color": WHITE},
+                "label": "pointer",
+                "length": 2.0,
+            },
             marks=pytest.mark.skip(reason="TODO CUR-17"),
         ),
     ),
@@ -427,17 +475,15 @@ class test_labeled_line:
     def __init__(
         self,
         scene: BaseScene,
-        default_labeled_line_kwargs: dict[str, Any],
         kwargs_to_change: dict[str, Any],
     ) -> None:
+        default_labeled_line_kwargs = get_default_labeled_line_kwargs()
         self.scene = scene
 
         default_labeled_line_kwargs.update(kwargs_to_change)
-        if isinstance(default_labeled_line_kwargs.get("start", None), Mobject):
-            scene.add(default_labeled_line_kwargs["start"])
 
-        if isinstance(default_labeled_line_kwargs.get("end", None), Mobject):
-            scene.add(default_labeled_line_kwargs["end"])
+        construct_mobject(keyword="start", test_kwargs=default_labeled_line_kwargs, scene=scene, add_to_scene=True)
+        construct_mobject(keyword="end", test_kwargs=default_labeled_line_kwargs, scene=scene, add_to_scene=True)
 
         self.labeled_line_kwargs = default_labeled_line_kwargs
 
@@ -449,30 +495,44 @@ class test_labeled_line:
 @pytest.mark.parametrize(
     "kwargs_to_change",
     (
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": DOWN, "label": "pointer"},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": UP, "label": "pointer"},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": LEFT, "label": "pointer", "label_dist": 0.5},
-        {"start": Vertex(0, color=WHITE), "end": None, "direction": RIGHT, "label": "pointer", "label_dist": 0.5},
-        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer"},
-        {"start": (-1.0, 1.0, 0.0), "end": Vertex(0, color=WHITE), "label": "pointer", "length": 2.0},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": DOWN},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": DOWN, "label": "pointer"},
+        {"start": {"mobject": Vertex, "label": 0, "color": WHITE}, "end": None, "direction": UP, "label": "pointer"},
+        {
+            "start": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "end": None,
+            "direction": LEFT,
+            "label": "pointer",
+            "label_dist": 0.5,
+        },
+        {
+            "start": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "end": None,
+            "direction": RIGHT,
+            "label": "pointer",
+            "label_dist": 0.5,
+        },
+        {"start": (-1.0, 1.0, 0.0), "end": {"mobject": Vertex, "label": 0, "color": WHITE}, "label": "pointer"},
+        {
+            "start": (-1.0, 1.0, 0.0),
+            "end": {"mobject": Vertex, "label": 0, "color": WHITE},
+            "label": "pointer",
+            "length": 2.0,
+        },
     ),
 )
 class test_labeled_line_movement:
     def __init__(
         self,
         scene: BaseScene,
-        default_labeled_line_kwargs: dict[str, Any],
         kwargs_to_change: dict[str, Any],
     ) -> None:
+        default_labeled_line_kwargs = get_default_labeled_line_kwargs()
         self.scene = scene
 
         default_labeled_line_kwargs.update(kwargs_to_change)
-        if isinstance(default_labeled_line_kwargs.get("start", None), Mobject):
-            scene.add(default_labeled_line_kwargs["start"])
-
-        if isinstance(default_labeled_line_kwargs.get("end", None), Mobject):
-            scene.add(default_labeled_line_kwargs["end"])
+        construct_mobject(keyword="start", test_kwargs=default_labeled_line_kwargs, scene=scene, add_to_scene=True)
+        construct_mobject(keyword="end", test_kwargs=default_labeled_line_kwargs, scene=scene, add_to_scene=True)
 
         self.labeled_line = LabeledLine(**default_labeled_line_kwargs)
         scene.add(self.labeled_line)
@@ -483,7 +543,8 @@ class test_labeled_line_movement:
 
 @curator_frames_comparison(last_frame=False)
 class test_labeled_line_tip_moves_when_pointee_changes_size:
-    def __init__(self, scene: BaseScene, default_labeled_line_kwargs: dict[str, Any]) -> None:
+    def __init__(self, scene: BaseScene) -> None:
+        default_labeled_line_kwargs = get_default_labeled_line_kwargs()
         self.scene = scene
         self.labeled_line_kwargs = default_labeled_line_kwargs
 
@@ -499,3 +560,16 @@ class test_labeled_line_tip_moves_when_pointee_changes_size:
         self.scene.add(labeled_line)
 
         return labeled_line.pointee.animate.scale(3)
+
+
+def construct_mobject(*, keyword: str, test_kwargs, scene: Scene, add_to_scene: bool):
+    mobject_kwargs = test_kwargs[keyword]
+    if not isinstance(mobject_kwargs, dict):
+        return
+
+    if isinstance(mobject_kwargs, dict):
+        test_kwargs[keyword] = mobject_kwargs.pop("mobject")(
+            **mobject_kwargs,
+        )
+
+    scene.add(test_kwargs[keyword])
