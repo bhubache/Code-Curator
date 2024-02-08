@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import hashlib
 import inspect
 import types
 from typing import TYPE_CHECKING
@@ -65,6 +66,11 @@ def curator_frames_comparison(
         setattr(base_scene, scene_init_attr_name, cls.__init__)
 
         def test_manim_func_wrapper(scene, **kwargs):
+            try:
+                kwargs.pop("__")
+            except KeyError:
+                pass  # See the comments at ``return`` of the outer function for explanation
+
             getattr(scene, scene_init_attr_name)(scene, **kwargs)
             scene.animation_script = animation_script
 
@@ -113,7 +119,99 @@ def curator_frames_comparison(
         )
         independent_func_wrapper = functools.update_wrapper(independent_func_wrapper, test_manim_func_wrapper)
 
-        return frames_comparison(func=independent_func_wrapper, last_frame=last_frame, base_scene=base_scene)
+        output = frames_comparison(func=independent_func_wrapper, last_frame=last_frame, base_scene=base_scene)
+
+        # Static reference:
+        # https://github.com/ManimCommunity/manim/blob/ed1b203993382e6cfd0e0ae990f39b0b1679df25/manim/utils/testing/frames_comparison.py#L247
+        # The code within ``manim.utils.testing.frames_comparison._control_data_path`` for adding the ".npz" extension
+        # to the control data file name does so by using ``pathlib.Path.with_suffix(".npz")``. This just searches for
+        # the last ``.`` in the file name (if one exists) and truncates the file name there. The trouble with
+        # this implementation is that unique file names are created by appending the stringified test arguments
+        # to the file name (this accounts for paramatrized tests). It's very possible that these arguments contain a
+        # ``.`` such as with floating-point numbers. This can lead to two different parametrizations pointing to the
+        # same file.
+        #
+        # For example:
+        #
+        #   {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0)}
+        #   {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.0), "radius": 1}
+        #
+        # These would both be truncated to:
+        #
+        #   {"position": (2.0, 0.0, 0.0), "position_relative_to": (-0.5, 1.0, 0.npz
+        #
+        # By appending a keyword argument that has a ``.`` as its value, I'm allowing the entirety of the arguments
+        # to be present in the file name.
+        @functools.wraps(output)
+        def wrapper_to_access_test_arguments(*args, **kwargs):
+            test_kwargs = kwargs.copy()
+            try:
+                test_kwargs.pop("request")
+            except KeyError:
+                pass
+
+            try:
+                test_kwargs.pop("tmp_path")
+            except KeyError:
+                pass
+
+            args_hash = hashlib.sha256(str(test_kwargs).encode("UTF-8")).hexdigest()
+
+            empty_dunder_str = lambda _: ""
+            full_hash_dunder_str = lambda _: args_hash
+
+            for index, (key, value) in enumerate(test_kwargs.copy().items()):
+                del kwargs[key]
+
+                try:
+                    key.__str__ = empty_dunder_str
+                except AttributeError:
+                    try:
+
+                        class _PartitionHashKey(type(key)):
+                            def __str__(self) -> str:
+                                return ""
+
+                    except TypeError:
+                        pass
+                    else:
+                        key = _PartitionHashKey(key)
+
+                if index == (len(test_kwargs) - 1):
+                    try:
+                        value.__str__ = full_hash_dunder_str
+                    except AttributeError:
+                        try:
+
+                            class _EntireHashValue(type(value)):
+                                def __str__(self) -> str:
+                                    return args_hash
+
+                        except TypeError:
+                            pass
+                        else:
+                            value = _EntireHashValue(value)
+                else:
+                    try:
+                        value.__str__ = empty_dunder_str
+                    except AttributeError:
+                        try:
+
+                            class _PartitionHashValue(type(value)):
+                                def __str__(self) -> str:
+                                    return ""
+
+                        except TypeError:
+                            pass
+                        else:
+                            value = _PartitionHashValue(value)
+
+                kwargs[key] = value
+
+            kwargs |= {"__": "."}
+            return output(*args, **kwargs)
+
+        return wrapper_to_access_test_arguments
 
     if callable(run_time):
         _cls = run_time
