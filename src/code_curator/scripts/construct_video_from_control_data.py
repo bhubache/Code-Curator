@@ -10,6 +10,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import extract_frames
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import ImageClip
 
@@ -29,8 +30,10 @@ def main() -> None:
     shutil.rmtree(frames_dir, ignore_errors=True)
     Path.mkdir(frames_dir, parents=True)
 
-    extract_frames_script_path = Path(__file__).parent / "extract_frames.py"
-    subprocess.run(shlex.split(f"python3 {extract_frames_script_path} '{latest_control_data_file}' {frames_dir}"))
+    extract_frames.main(
+        npz_file=latest_control_data_file,
+        output_dir=frames_dir,
+    )
 
     ordered_frame_paths = sorted(
         frames_dir.iterdir(),

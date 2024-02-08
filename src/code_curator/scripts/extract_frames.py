@@ -1,21 +1,14 @@
 from __future__ import annotations
 
-import pathlib
 import sys
 
 import numpy as np
 from PIL import Image
 
 
-def main():
-    if len(sys.argv) != 3:
-        print_usage()
-        sys.exit(1)
-
-    npz_file = sys.argv[1]
-    output_folder = pathlib.Path(sys.argv[2])
-    if not output_folder.exists():
-        output_folder.mkdir(parents=True)
+def main(npz_file, output_dir):
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True)
 
     data = np.load(npz_file)
     if "frame_data" not in data:
@@ -26,9 +19,9 @@ def main():
     frames = data["frame_data"]
     for i, frame in enumerate(frames):
         img = Image.fromarray(frame)
-        img.save(output_folder / f"frame{i}.png")
+        img.save(output_dir / f"frame{i}.png")
 
-    print(f"Saved {len(frames)} frames to {output_folder}")
+    print(f"Saved {len(frames)} frames to {output_dir}")
 
 
 def print_usage():
