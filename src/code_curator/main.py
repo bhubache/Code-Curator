@@ -125,14 +125,9 @@ def get_script_text_from_animation_script(animation_script_info: Mapping) -> str
 def main() -> None:
     ai_speech_requested = True
     problem_dir = Path(
-        Path.home(),
-        "ManimCS",
-        "Code_Curator",
+        Path.cwd(),
         "src",
         "code_curator",
-        # "leetcode",
-        # "problems",
-        # PROBLEM_NAME,
         "videos",
         "interview_problems",
         PROBLEM_NAME,
