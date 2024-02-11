@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import functools
-import hashlib
 import inspect
 import types
 from typing import TYPE_CHECKING
@@ -144,70 +143,6 @@ def curator_frames_comparison(
         # to be present in the file name.
         @functools.wraps(output)
         def wrapper_to_access_test_arguments(*args, **kwargs):
-            test_kwargs = kwargs.copy()
-            try:
-                test_kwargs.pop("request")
-            except KeyError:
-                pass
-
-            try:
-                test_kwargs.pop("tmp_path")
-            except KeyError:
-                pass
-
-            args_hash = hashlib.sha256(str(test_kwargs).encode("UTF-8")).hexdigest()
-
-            empty_dunder_str = lambda _: ""
-            full_hash_dunder_str = lambda _: args_hash
-
-            for index, (key, value) in enumerate(test_kwargs.copy().items()):
-                del kwargs[key]
-
-                try:
-                    key.__str__ = empty_dunder_str
-                except AttributeError:
-                    try:
-
-                        class _PartitionHashKey(type(key)):
-                            def __str__(self) -> str:
-                                return ""
-
-                    except TypeError:
-                        pass
-                    else:
-                        key = _PartitionHashKey(key)
-
-                if index == (len(test_kwargs) - 1):
-                    try:
-                        value.__str__ = full_hash_dunder_str
-                    except AttributeError:
-                        try:
-
-                            class _EntireHashValue(type(value)):
-                                def __str__(self) -> str:
-                                    return args_hash
-
-                        except TypeError:
-                            pass
-                        else:
-                            value = _EntireHashValue(value)
-                else:
-                    try:
-                        value.__str__ = empty_dunder_str
-                    except AttributeError:
-                        try:
-
-                            class _PartitionHashValue(type(value)):
-                                def __str__(self) -> str:
-                                    return ""
-
-                        except TypeError:
-                            pass
-                        else:
-                            value = _PartitionHashValue(value)
-
-                kwargs[key] = value
-
             kwargs |= {"__": "."}
             return output(*args, **kwargs)
 

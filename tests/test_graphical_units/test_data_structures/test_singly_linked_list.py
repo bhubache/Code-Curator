@@ -14,45 +14,55 @@ from code_curator.utils.testing.curator_frames_comparison import curator_frames_
 if TYPE_CHECKING:
     from code_curator.base_scene import BaseScene
     from manim.typing import Vector
+    from manim import ParsableManimColor
+    from collections.abc import Sequence
 
 
-__module_test__ = "data_structures"
+__module_test__ = "singly_linked_list"
 
 
 @curator_frames_comparison
 @pytest.mark.parametrize(
-    "kwargs",
+    ("values", "color", "add_null", "add_head_pointer", "add_tail_pointer"),
     (
-        {"color": WHITE},
-        {"color": WHITE, "add_null": True},
-        {"color": WHITE, "add_null": True, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0], "color": WHITE},
-        {"values": [0], "color": WHITE, "add_null": True},
-        {"values": [0], "color": WHITE, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0], "color": WHITE, "add_null": True, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0, 1], "color": WHITE},
-        {"values": [0, 1], "color": WHITE, "add_null": True},
-        {"values": [0, 1], "color": WHITE, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0, 1], "color": WHITE, "add_null": True, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0, 1, 2], "color": WHITE},
-        {"values": [0, 1, 2], "color": WHITE, "add_null": True},
-        {"values": [0, 1, 2], "color": WHITE, "add_head_pointer": True, "add_tail_pointer": True},
-        {"values": [0, 1, 2], "color": WHITE, "add_null": True, "add_head_pointer": True, "add_tail_pointer": True},
+        ([], WHITE, False, False, False),
+        ([], WHITE, True, False, False),
+        ([], WHITE, True, True, True),
+        ([0], WHITE, False, False, False),
+        ([0], WHITE, True, False, False),
+        ([0], WHITE, False, True, True),
+        ([0], WHITE, True, True, True),
+        ([0, 1], WHITE, False, False, False),
+        ([0, 1], WHITE, True, False, False),
+        ([0, 1], WHITE, False, True, True),
+        ([0, 1], WHITE, True, True, True),
+        ([0, 1, 2], WHITE, False, False, False),
+        ([0, 1, 2], WHITE, True, False, False),
+        ([0, 1, 2], WHITE, False, True, True),
+        ([0, 1, 2], WHITE, True, True, True),
     ),
 )
 class test_sll_building:
-    def __init__(self, scene: BaseScene, kwargs: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        scene: BaseScene,
+        values: Sequence[Any],
+        color: ParsableManimColor,
+        add_null: bool,
+        add_head_pointer: bool,
+        add_tail_pointer: bool,
+    ) -> None:
         self.scene = scene
 
-        sll = SinglyLinkedList.create_sll(*kwargs.get("values", []), color=kwargs["color"])
+        sll = SinglyLinkedList.create_sll(*values, color=color)
 
-        if kwargs.get("add_null", False):
+        if add_null:
             sll.add_null()
 
-        if kwargs.get("add_head_pointer", False):
+        if add_head_pointer:
             sll.add_head_pointer()
 
-        if kwargs.get("add_tail_pointer", False):
+        if add_tail_pointer:
             sll.add_tail_pointer()
 
         scene.add(sll)
@@ -60,25 +70,42 @@ class test_sll_building:
 
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
-    ("unique_value", "sll"),
+    ("values", "color", "add_null", "add_head_pointer", "add_tail_pointer"),
     (
-        (0, SinglyLinkedList.create_sll(color=WHITE)),
-        (2, SinglyLinkedList.create_sll(color=WHITE).add_null()),
-        (3, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-        (4, SinglyLinkedList.create_sll(0, color=WHITE)),
-        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer()),
-        (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null()),
-        (7, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
-        (8, SinglyLinkedList.create_sll(0, 1, color=WHITE)),
-        (9, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer()),
-        (10, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null()),
-        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer()),
+        ([], WHITE, False, False, False),
+        ([], WHITE, True, False, False),
+        ([], WHITE, True, True, True),
+        ([0], WHITE, False, False, False),
+        ([0], WHITE, False, True, True),
+        ([0], WHITE, True, False, False),
+        ([0], WHITE, True, True, True),
+        ([0, 1], WHITE, False, False, False),
+        ([0, 1], WHITE, False, True, True),
+        ([0, 1], WHITE, True, False, False),
+        ([0, 1], WHITE, True, True, True),
     ),
 )
 class test_adding_null_node:
-    def __init__(self, scene, unique_value, sll) -> None:
+    def __init__(
+        self,
+        scene,
+        values: Sequence[Any],
+        color: ParsableManimColor,
+        add_null: bool,
+        add_head_pointer: bool,
+        add_tail_pointer: bool,
+    ) -> None:
         self.scene = scene
-        self.sll = sll
+        self.sll = SinglyLinkedList.create_sll(*values, color=color)
+
+        if add_null:
+            self.sll.add_null()
+
+        if add_head_pointer:
+            self.sll.add_head_pointer()
+
+        if add_tail_pointer:
+            self.sll.add_tail_pointer()
 
     def my_animation(self):
         self.scene.add(self.sll)
@@ -88,122 +115,151 @@ class test_adding_null_node:
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
     (
-        "unique_value_for_caching_control_data",
-        "sll",
-        "starting_index",
-        "ending_index",
-        "starting_pointer_direction",
-        "ending_pointer_direction",
+        "values",
+        "color",
+        "add_null",
+        "add_head_pointer",
+        "add_tail_pointer",
+        "start_index",
+        "end_index",
+        "start_pointer_direction",
+        "end_pointer_direction",
     ),
     (
-        (1, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 0, UP, UP),
-        (2, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 0, UP, DOWN),
-        (3, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 0, DOWN, UP),
-        (4, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 1, UP, UP),
-        (5, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 1, UP, DOWN),
-        (6, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 1, DOWN, UP),
-        (8, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, "null", UP, UP),
+        ([0, 1, 2], WHITE, True, False, False, 0, 0, UP, UP),
+        ([0, 1, 2], WHITE, True, False, False, 0, 0, UP, DOWN),
+        ([0, 1, 2], WHITE, True, False, False, 0, 0, DOWN, UP),
+        ([0, 1, 2], WHITE, True, False, False, 0, 1, UP, UP),
+        ([0, 1, 2], WHITE, True, False, False, 0, 1, UP, DOWN),
+        ([0, 1, 2], WHITE, True, False, False, 0, 1, DOWN, UP),
+        ([0, 1, 2], WHITE, True, False, False, 0, "null", UP, UP),
     ),
 )
 class test_move_pointer:
     def __init__(
         self,
         scene: BaseScene,
-        unique_value_for_caching_control_data: int,
-        sll: SinglyLinkedList,
-        starting_index: int,
-        ending_index: int,
-        starting_pointer_direction: Vector,
-        ending_pointer_direction: Vector,
+        values: Sequence[Any],
+        color: ParsableManimColor,
+        add_null: bool,
+        add_head_pointer: bool,
+        add_tail_pointer: bool,
+        start_index: int,
+        end_index: int,
+        start_pointer_direction: Vector,
+        end_pointer_direction: Vector,
     ) -> None:
         self.scene = scene
-        self.sll = sll
-        self.ending_index = ending_index
-        self.ending_pointer_direction = ending_pointer_direction
+        self.end_index = end_index
+        self.end_pointer_direction = end_pointer_direction
 
-        if starting_index == "null":
-            starting_node = self.sll.null
+        self.sll = SinglyLinkedList.create_sll(*values, color=color)
+
+        if add_null:
+            self.sll.add_null()
+
+        if add_head_pointer:
+            self.sll.add_head_pointer()
+
+        if add_tail_pointer:
+            self.sll.add_tail_pointer()
+
+        if start_index == "null":
+            start_node = self.sll.null
         else:
-            starting_node = self.sll[starting_index]
+            start_node = self.sll[start_index]
 
-        self.sll.add_labeled_pointer(starting_node, label="pointer", direction=starting_pointer_direction)
+        self.sll.add_labeled_pointer(start_node, label="pointer", direction=start_pointer_direction)
         self.scene.add(self.sll)
 
     def animation(self):
-        if self.ending_index == "null":
+        if self.end_index == "null":
             to_node = self.sll.null
         else:
-            to_node = self.sll[self.ending_index]
+            to_node = self.sll[self.end_index]
 
         return self.sll.animate.move_labeled_pointer(
             "pointer",
             to_node,
-            pointer_direction=self.ending_pointer_direction,
+            pointer_direction=self.end_pointer_direction,
         )
 
 
 @curator_frames_comparison(last_frame=False)
 @pytest.mark.parametrize(
-    ("unique_value_for_caching_control_data", "sll", "index", "value"),
+    ("values", "color", "add_null", "add_head_pointer", "add_tail_pointer", "index", "value"),
     (
         # Empty
-        (0, SinglyLinkedList.create_sll(color=WHITE), 0, 10),
-        (1, SinglyLinkedList.create_sll(color=WHITE).add_null(), 0, 10),
-        (2, SinglyLinkedList.create_sll(color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
+        ([], WHITE, False, False, False, 0, 10),
+        ([], WHITE, True, False, False, 0, 10),
+        ([], WHITE, True, True, True, 0, 10),
         # One node
-        (3, SinglyLinkedList.create_sll(0, color=WHITE), 0, 10),
-        (4, SinglyLinkedList.create_sll(0, color=WHITE).add_null(), 0, 10),
-        (5, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
-        (6, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
-        (7, SinglyLinkedList.create_sll(0, color=WHITE), 1, 10),
-        (8, SinglyLinkedList.create_sll(0, color=WHITE).add_null(), 1, 10),
-        (9, SinglyLinkedList.create_sll(0, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
-        (10, SinglyLinkedList.create_sll(0, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
+        ([0], WHITE, False, False, False, 0, 10),
+        ([0], WHITE, True, False, False, 0, 10),
+        ([0], WHITE, False, True, True, 0, 10),
+        ([0], WHITE, True, True, True, 0, 10),
+        ([0], WHITE, False, False, False, 1, 10),
+        ([0], WHITE, True, False, False, 1, 10),
+        ([0], WHITE, False, True, True, 1, 10),
+        ([0], WHITE, True, True, True, 1, 10),
         # Two nodes
-        (11, SinglyLinkedList.create_sll(0, 1, color=WHITE), 0, 10),
-        (12, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 0, 10),
-        (13, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
-        (14, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
-        (15, SinglyLinkedList.create_sll(0, 1, color=WHITE), 1, 10),
-        (16, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 1, 10),
-        (17, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
-        (18, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
-        (19, SinglyLinkedList.create_sll(0, 1, color=WHITE), 2, 10),
-        (20, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null(), 2, 10),
-        (21, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_head_pointer().add_tail_pointer(), 2, 10),
-        (22, SinglyLinkedList.create_sll(0, 1, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 2, 10),
+        ([0, 1], WHITE, False, False, False, 0, 10),
+        ([0, 1], WHITE, True, False, False, 0, 10),
+        ([0, 1], WHITE, False, True, True, 0, 10),
+        ([0, 1], WHITE, True, True, True, 0, 10),
+        ([0, 1], WHITE, False, False, False, 1, 10),
+        ([0, 1], WHITE, True, False, False, 1, 10),
+        ([0, 1], WHITE, False, True, True, 1, 10),
+        ([0, 1], WHITE, True, True, True, 1, 10),
+        ([0, 1], WHITE, False, False, False, 2, 10),
+        ([0, 1], WHITE, True, False, False, 2, 10),
+        ([0, 1], WHITE, False, True, True, 2, 10),
+        ([0, 1], WHITE, True, True, True, 2, 10),
         # Three nodes
-        (23, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 0, 10),
-        (24, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 0, 10),
-        (25, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 0, 10),
-        (26, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 0, 10),
-        (27, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 1, 10),
-        (28, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 1, 10),
-        (29, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 1, 10),
-        (30, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 1, 10),
-        (31, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 2, 10),
-        (32, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 2, 10),
-        (33, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 2, 10),
-        (34, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 2, 10),
-        (35, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE), 3, 10),
-        (36, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null(), 3, 10),
-        (37, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_head_pointer().add_tail_pointer(), 3, 10),
-        (38, SinglyLinkedList.create_sll(0, 1, 2, color=WHITE).add_null().add_head_pointer().add_tail_pointer(), 3, 10),
+        ([0, 1, 2], WHITE, False, False, False, 0, 10),
+        ([0, 1, 2], WHITE, True, False, False, 0, 10),
+        ([0, 1, 2], WHITE, False, True, True, 0, 10),
+        ([0, 1, 2], WHITE, True, True, True, 0, 10),
+        ([0, 1, 2], WHITE, False, False, False, 1, 10),
+        ([0, 1, 2], WHITE, True, False, False, 1, 10),
+        ([0, 1, 2], WHITE, False, True, True, 1, 10),
+        ([0, 1, 2], WHITE, True, True, True, 1, 10),
+        ([0, 1, 2], WHITE, False, False, False, 2, 10),
+        ([0, 1, 2], WHITE, True, False, False, 2, 10),
+        ([0, 1, 2], WHITE, False, True, True, 2, 10),
+        ([0, 1, 2], WHITE, True, True, True, 2, 10),
+        ([0, 1, 2], WHITE, False, False, False, 3, 10),
+        ([0, 1, 2], WHITE, True, False, False, 3, 10),
+        ([0, 1, 2], WHITE, False, True, True, 3, 10),
+        ([0, 1, 2], WHITE, True, True, True, 3, 10),
     ),
 )
 class test_insert_node:
     def __init__(
         self,
         scene: BaseScene,
-        unique_value_for_caching_control_data: int,
-        sll: SinglyLinkedList,
+        values: Sequence[Any],
+        color: ParsableManimColor,
+        add_null: bool,
+        add_head_pointer: bool,
+        add_tail_pointer: bool,
         index: int,
         value: Any,
     ) -> None:
         self.scene = scene
-        self.sll = sll
         self.index = index
         self.value = value
+
+        self.sll = SinglyLinkedList.create_sll(*values, color=color)
+
+        if add_null:
+            self.sll.add_null()
+
+        if add_head_pointer:
+            self.sll.add_head_pointer()
+
+        if add_tail_pointer:
+            self.sll.add_tail_pointer()
 
         self.scene.add(self.sll)
 
