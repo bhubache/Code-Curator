@@ -11,9 +11,9 @@ dependencies = [
 ]
 
 [tool.black]
-line-length = 88
+line-length = 120
 preview = true
-target-version = ['py310']
+target-version = ['py312']
 
 [project.scripts]
 curate = "code_curator.main:main"
