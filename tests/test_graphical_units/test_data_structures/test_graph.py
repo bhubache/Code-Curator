@@ -502,7 +502,7 @@ class test_labeled_line:
             "start": {"mobject": Vertex, "label": 0, "color": WHITE},
             "end": None,
             "direction": LEFT,
-            "label": "pointer",
+            "label": "p",
             "label_dist": 0.5,
         },
         {
