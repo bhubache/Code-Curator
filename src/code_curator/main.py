@@ -146,7 +146,8 @@ def main() -> None:
 
         audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
         ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
-            ai_script_path.parents[2],
+            script_path=ai_script_path,
+            audio_path=audio_path,
         )
 
     aligned_animation_script = get_aligned_animation_script(

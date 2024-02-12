@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-import subprocess
+import tarfile
 from pathlib import Path
+
+import docker
 
 
 ALIGNMENT_HAS_CHANGED = False
@@ -19,11 +21,57 @@ class MontrealForcedAligner:
         self.output_dir_path.mkdir(parents=True, exist_ok=True)
 
     @classmethod
-    def perform_alignment(cls, dev_files_dir_path: Path) -> Path:
-        aligner = MontrealForcedAligner(dev_files_dir_path)
+    def perform_alignment(cls, script_path: str | os.PathLike, audio_path: str | os.PathLike) -> Path:
+        client = docker.from_env()
+        image_name = "mmcauliffe/montreal-forced-aligner"
+        image_tag = "v2.2.17"
 
-        aligner._verify_file_structure()
-        return aligner._perform_alignment()
+        # client.images.pull(image_name, tag=image_tag)
+        # mfa_image = client.images.get(f"{image_name}:{image_tag}")
+
+        # mfa_container = client.containers.create(mfa_image)
+
+        # client.containers.run(mfa_image, command="mfa model download acoustic english_us_arpa")
+        # client.containers.run(mfa_image, command="mfa model download dictionary english_us_arpa")
+
+        script_file_path = Path("/", "tmp", "curator", "MFA", "input", "ai_script.txt")
+        audio_file_path = Path("/", "tmp", "test", "ai_audio.wav")
+        docker_script_file_path = Path("/", "ai_script.txt")
+        docker_audio_file_path = Path("/", "ai_audio.wav")
+
+        tar_path = Path("script_and_audio_tar")
+        with tarfile.open(tar_path, "w") as tar:
+            tar.add(script_file_path, arcname="script.txt")
+            tar.add(audio_file_path, arcname="audio.wav")
+
+        with open(tar_path, "rb") as tar:
+            if not mfa_container.put_archive(path="/", data=tar):
+                raise RuntimeError("Putting archive in MFA container failed")
+
+        docker_alignment_files_dir = Path("/", "mfa", "alignment_files")
+        client.containers.run(mfa_image, command=f"mkdir -p {docker_alignment_files_dir}")
+        client.containers.run(mfa_image, command=f"tar -xvf {Path('/', tar_path)} -C {docker_alignment_files_dir}")
+
+        client.containers.run(
+            mfa_image,
+            command=" ".join(
+                (
+                    "mfa",
+                    "align",
+                    docker_alignment_files_dir,
+                    "english_us_arpa",
+                    "english_us_arpa",
+                    "/mfa/mfa_output",
+                )
+            )
+
+        # tar aligned file
+        # retrieve archive from docker container
+
+        # aligner = MontrealForcedAligner(dev_files_dir_path)
+
+        # aligner._verify_file_structure()
+        # return aligner._perform_alignment()
 
     def _verify_file_structure(self) -> None:
         self._verify_mfa_dir_exists()
