@@ -12,6 +12,7 @@ class AIAudioCreator:
         script_dir_path = script_path.parents[0]
         audio_path = script_dir_path / f'{base_name}{audio_suffix}'
 
-        cmd: str = f'pico2wave --wave={audio_path} "$(cat {script_path})"'
+        # cmd: str = f'pico2wave --wave={audio_path} "$(cat {script_path})"'
+        cmd = f"text2wave -o {audio_path} {script_path}"
         subprocess.getoutput(cmd)
         return audio_path
