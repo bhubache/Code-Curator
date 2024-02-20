@@ -6,9 +6,11 @@ from __future__ import annotations
 
 __all__: Sequence[str] = []
 
+import hashlib
 import importlib
 import logging
 import os
+import shutil
 import subprocess
 import yaml
 from collections.abc import Mapping
@@ -61,7 +63,7 @@ QUALITY_MAP = {
     },
 }
 
-QUALITY = "high_quality"
+QUALITY = "low_quality"
 config["quality"] = QUALITY
 FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
 RESOLUTION = QUALITY_MAP[QUALITY]["res"]
@@ -134,17 +136,40 @@ def main() -> None:
     )
 
     if ai_speech_requested:
+        logger.debug("AI speech requested")
         script_text = get_script_text_from_animation_script(
             yaml.safe_load(
                 (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
             ),
         )
 
+        cached_hash_script_path = Path("/", "tmp", "cached_hash_script")
+        cached_audio_path = Path("/", "tmp", "cached_audio")
+        use_cached_file = True
+        new_hash = hashlib.sha256(script_text.encode("UTF-8")).hexdigest()
+
+        try:
+            cached_hash = cached_hash_script_path.read_text()
+        except FileNotFoundError:
+            use_cached_file = False
+        else:
+            if cached_hash != new_hash or not cached_audio_path.exists():
+                use_cached_file = False
+
         ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
         ai_script_path.parent.mkdir(parents=True, exist_ok=True)
         ai_script_path.write_text(script_text)
 
-        audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
+        if use_cached_file:
+            logger.debug("Using cached audio file")
+            audio_path = cached_audio_path
+        else:
+            logger.debug("Creating new audio file")
+            audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
+
+            cached_hash_script_path.write_text(new_hash)
+            shutil.copy(audio_path, cached_audio_path)
+
         ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
             script_path=ai_script_path,
             audio_path=audio_path,
