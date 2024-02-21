@@ -50,4 +50,6 @@ def perform_alignment(script_path: str | os.PathLike, audio_path: str | os.PathL
         tty=True,
     )
 
+    client.containers.prune()
+
     return output_mfa_dir / "script.TextGrid"
