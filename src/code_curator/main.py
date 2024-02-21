@@ -6,6 +6,7 @@ from __future__ import annotations
 
 __all__: Sequence[str] = []
 
+import argparse
 import hashlib
 import importlib
 import logging
@@ -25,7 +26,7 @@ from moviepy.editor import AudioFileClip
 from moviepy.editor import CompositeVideoClip
 from moviepy.editor import CompositeAudioClip
 
-from code_curator.ai_audio_creator import AIAudioCreator
+from code_curator import ai_audio_creator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
 from code_curator.alignment_text_creation.alignment_text_creator import (
     AlignmentTextCreator,
@@ -45,32 +46,6 @@ if TYPE_CHECKING:
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-QUALITY_MAP = {
-    "fourk_quality": None,
-    "production_quality": None,
-    "high_quality": {
-        "frame_rate": 60,
-        "res": 1080,
-    },
-    "medium_quality": {
-        "frame_rate": 30,
-        "res": 720,
-    },
-    "low_quality": {
-        "frame_rate": 15,
-        "res": 480,
-    },
-}
-
-QUALITY = "low_quality"
-config["quality"] = QUALITY
-FRAME_RATE = QUALITY_MAP[QUALITY]["frame_rate"]
-RESOLUTION = QUALITY_MAP[QUALITY]["res"]
-PROBLEM_NAME = "Reverse_Linked_List"
-ALIGNED_SCRIPT_PATH = Path("ai_aligned_script.txt")
-ANIMATION_SCRIPT_PATH = Path("animation_script.yaml")
-CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.videos.interview_problems.{PROBLEM_NAME}.video"
 
 
 def get_aligned_animation_script(
@@ -123,57 +98,78 @@ def get_script_text_from_animation_script(animation_script_info: Mapping) -> str
         ]
     ).strip()
 
+def _prepare_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ai_audio", help="generate AI audio from script", action="store_true")
+    parser.add_argument("--quality", help="resolution and frame rate of video", choices=("low", "medium", "high"), default="low")
+    parser.add_argument("--video_path", help="dotted path to video module to render", required=True)
+    args = parser.parse_args()
+
+    QUALITY_MAP = {
+        "fourk_quality": None,
+        "production_quality": None,
+        "high_quality": {
+            "frame_rate": 60,
+            "res": 1080,
+        },
+        "medium_quality": {
+            "frame_rate": 30,
+            "res": 720,
+        },
+        "low_quality": {
+            "frame_rate": 15,
+            "res": 480,
+        },
+    }
+
+    config["quality"] = f"{args.quality}_quality"
+    # frame_rate = config["frame_rate"]
+    # resolution = config["pixel_height"]
+    # ALIGNED_SCRIPT_PATH = Path("ai_aligned_script.txt")
+    # ANIMATION_SCRIPT_PATH = Path("animation_script.yaml")
+    # CONCRETE_VIDEO_SCRIPT_PATH = f"code_curator.videos.interview_problems.{PROBLEM_NAME}.video"
+
+    return args
+
 
 def main() -> None:
-    ai_speech_requested = True
-    problem_dir = Path(
-        Path.cwd(),
-        "src",
-        "code_curator",
-        "videos",
-        "interview_problems",
-        PROBLEM_NAME,
-    )
+    args = _prepare_args()
+    # problem_dir = Path(
+    #     Path.cwd(),
+    #     "src",
+    #     "code_curator",
+    #     "videos",
+    #     "interview_problems",
+    #     PROBLEM_NAME,
+    # )
 
-    if ai_speech_requested:
-        logger.debug("AI speech requested")
-        script_text = get_script_text_from_animation_script(
-            yaml.safe_load(
-                (problem_dir / ANIMATION_SCRIPT_PATH).read_text(),
-            ),
+    animation_script_path = Path(Path(__file__).parent, "videos", *args.video_path.split("."), "animation_script.yaml")
+
+    animation_script_map = yaml.safe_load(animation_script_path.read_text())
+
+    script_text = " ".join(
+        (
+            text
+            for text in animation_script_map.values()
+            if text is not None
         )
+    ).strip()
 
-        cached_hash_script_path = Path("/", "tmp", "cached_hash_script")
-        cached_audio_path = Path("/", "tmp", "cached_audio")
-        use_cached_file = True
-        new_hash = hashlib.sha256(script_text.encode("UTF-8")).hexdigest()
+    if args.ai_audio:
+        logger.debug("AI speech requested")
 
-        try:
-            cached_hash = cached_hash_script_path.read_text()
-        except FileNotFoundError:
-            use_cached_file = False
-        else:
-            if cached_hash != new_hash or not cached_audio_path.exists():
-                use_cached_file = False
+        audio_path = ai_audio_creator.create_audio(script_text)
 
         ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
         ai_script_path.parent.mkdir(parents=True, exist_ok=True)
         ai_script_path.write_text(script_text)
 
-        if use_cached_file:
-            logger.debug("Using cached audio file")
-            audio_path = cached_audio_path
-        else:
-            logger.debug("Creating new audio file")
-            audio_path: Path = AIAudioCreator.create_audio(ai_script_path)
-
-            cached_hash_script_path.write_text(new_hash)
-            shutil.copy(audio_path, cached_audio_path)
-
         ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
             script_path=ai_script_path,
             audio_path=audio_path,
         )
+    else:
+        raise NotImplementedError("Use of non-AI audio is not yet supported")
 
     aligned_animation_script = get_aligned_animation_script(
         alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
