@@ -28,9 +28,7 @@ from moviepy.editor import CompositeAudioClip
 
 from code_curator import ai_audio_creator
 from code_curator.script_handling.aligned_animation_script import AlignedAnimationScript
-from code_curator.alignment_text_creation.alignment_text_creator import (
-    AlignmentTextCreator,
-)
+from code_curator.alignment_text_creation import alignment_text_creator
 from code_curator.script_handling.components.alignment_script.alignments.alignment_parser import (
     AlignmentParser,
 )
@@ -87,16 +85,6 @@ def get_video_and_stream_clses(
         # ],
     )
 
-
-def get_script_text_from_animation_script(animation_script_info: Mapping) -> str:
-    script_text = ""
-    return " ".join(
-        [
-            text
-            for text in animation_script_info.values()
-            if text is not None
-        ]
-    ).strip()
 
 def _prepare_args():
     parser = argparse.ArgumentParser()
@@ -160,23 +148,21 @@ def main() -> None:
 
         audio_path = ai_audio_creator.create_audio(script_text)
 
-        ai_script_path = Path("/tmp", "curator", "MFA", "input", "ai_script.txt")
-        ai_script_path.parent.mkdir(parents=True, exist_ok=True)
-        ai_script_path.write_text(script_text)
-
-        ALIGNED_SCRIPT_PATH = AlignmentTextCreator.create_alignment_text(
-            script_path=ai_script_path,
-            audio_path=audio_path,
-        )
     else:
         raise NotImplementedError("Use of non-AI audio is not yet supported")
 
+
+    aligned_script_path = alignment_text_creator.create_alignment_text(
+        script_text=script_text,
+        audio_path=audio_path,
+    )
+
     aligned_animation_script = get_aligned_animation_script(
-        alignment_path=problem_dir / ALIGNED_SCRIPT_PATH,
-        script_path=problem_dir / ANIMATION_SCRIPT_PATH,
+        alignment_path=aligned_script_path,
+        script_path=animation_script_path,
     )
     video_cls = get_video_and_stream_clses(
-        module_import_path=CONCRETE_VIDEO_SCRIPT_PATH,
+        module_import_path=f"code_curator.videos.{args.video_path}.video",
         aligned_animation_script=aligned_animation_script,
     )
 
@@ -201,7 +187,7 @@ def main() -> None:
             Path(
                 Path.cwd() / "media",
                 "videos",
-                f"{RESOLUTION}p{FRAME_RATE}",
+                f"{config['pixel_height']}p{config['frame_rate']}",
                 "Video.mp4",
             ),
         ),
@@ -211,7 +197,7 @@ def main() -> None:
     final_clip = video_clip.set_audio(CompositeAudioClip([audio_clip.set_start(aligned_animation_script.run_time - audio_clip.duration)]))
     final_clip.write_videofile(
         str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
-        fps=FRAME_RATE,
+        fps=config["frame_rate"],
     )
 
 
