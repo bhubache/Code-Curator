@@ -1,6 +1,7 @@
 """Convert TextGrid from forced aligner aligned_script.txt."""
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -11,25 +12,26 @@ if TYPE_CHECKING:
     from textgrids import Interval
 
 
-def create_aligned_script(textgrid_path: Path, output_file_path: Path) -> None:
+def create_aligned_script(textgrid_path: Path) -> Path:
     """Create aligned_script.txt.
 
     If there a silences found, the time they take up are
     given to the first word prior to the silences.
     """
-    word_tier: Tier = TextGrid(textgrid_path)['words']
+    word_tier: Tier = TextGrid(textgrid_path)["words"]
 
     word_tier = fix_initial_intervals(word_tier)
 
     cleaned_intervals: list[Interval] = [word_tier[0]]
 
     for curr_interval in word_tier[1:]:
-        if curr_interval.text == '':
+        if curr_interval.text == "":
             continue
 
         cleaned_intervals[-1].xmax = curr_interval.xmin
         cleaned_intervals.append(curr_interval)
 
+    output_file_path = Path(tempfile.mkstemp()[1])
     write_aligned_script(intervals=cleaned_intervals, output_file_path=output_file_path)
 
     return output_file_path
@@ -49,7 +51,7 @@ def fix_initial_intervals(word_tier: Tier) -> Tier:
     new_start_index: int = 0
 
     for interval in word_tier:
-        if interval.text != '':
+        if interval.text != "":
             break
 
         new_start_index += 1
@@ -74,20 +76,19 @@ def write_aligned_script(intervals: list[Interval], output_file_path: Path) -> N
     for i, inter in enumerate(intervals):
         if i != len(intervals) - 1:
             if inter.xmax != intervals[i + 1].xmin:
-                raise ValueError(f'There is a gap between {inter} and {intervals[i + 1]}')
+                raise ValueError(f"There is a gap between {inter} and {intervals[i + 1]}")
 
         start: float = round(inter.xmin, 2)
         end: float = round(inter.xmax, 2)
         word: str = inter.text
-        text_lines.append(f'{start}  {end}  {word}')
+        text_lines.append(f"{start}  {end}  {word}")
 
-    with open(output_file_path, 'w', encoding='UTF-8') as write_file:
-        write_file.write('\n'.join(text_lines))
+    output_file_path.write_text("\n".join(text_lines))
 
 
 def main():
-    raise NotImplementedError('This cannot be run directly as a script yet.')
+    raise NotImplementedError("This cannot be run directly as a script yet.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_aligned_script()
