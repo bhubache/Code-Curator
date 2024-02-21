@@ -37,6 +37,7 @@ def create_audio(script_text: str) -> Path:
 
     with tempfile.NamedTemporaryFile("r+t") as script_file:
         script_file.write(script_text)
+        script_file.seek(0)
 
         with tempfile.NamedTemporaryFile("r+t") as audio_file:
             cmd = f"text2wave -o {audio_file.name} {script_file.name}"
