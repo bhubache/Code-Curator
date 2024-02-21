@@ -60,7 +60,7 @@ repos:
     rev: 23.7.0
     hooks:
         - id: black
-          language_version: python3.10
+          language_version: python3.12.2
           args:
               - --preview
               - --line-length=120
@@ -68,7 +68,7 @@ repos:
     rev: 6.1.0
     hooks:
     -   id: flake8
-        language_version: python3.10.12
+        language_version: python3.12.2
         args: [
             '--config=./.flake8',
             # '--max-line-length=79',

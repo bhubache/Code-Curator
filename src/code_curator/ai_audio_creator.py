@@ -39,11 +39,10 @@ def create_audio(script_text: str) -> Path:
         script_file.write(script_text)
 
         with tempfile.NamedTemporaryFile("r+t") as audio_file:
-            # cmd: str = f'pico2wave --wave={audio_path} "$(cat {script_path})"'
             cmd = f"text2wave -o {audio_file.name} {script_file.name}"
             subprocess.getoutput(cmd)
 
             cached_hash_script_path.write_text(new_hash)
             shutil.copy(audio_file.name, cached_audio_path)
 
-    return audio_path
+    return cached_audio_path
