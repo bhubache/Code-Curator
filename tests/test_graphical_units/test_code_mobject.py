@@ -21,7 +21,7 @@ def get_default_code_kwargs() -> dict[str, Any]:
         "file_name": None,
         "tab_width": 1,
         "indentation_chars": " ",
-        "font": "Monospace",
+        "font": "MesloLGS Nerd Font Mono",
         "font_size": 24,
         "stroke_width": 0,
         "margin": 0.1,
