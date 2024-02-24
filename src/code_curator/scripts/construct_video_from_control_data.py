@@ -10,6 +10,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import distro
 import extract_frames
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import ImageClip
@@ -44,7 +45,12 @@ def main() -> None:
 
     concatenated_clip = concatenate_videoclips(clips, method="compose")
     concatenated_clip.write_videofile(str(frames_dir / "video.mp4"), fps=6)
-    subprocess.run(shlex.split(f"google-chrome {frames_dir / 'video.mp4'}"))
+    if distro.id() == "arch":
+        google_executable = "google-chrome-stable"
+    elif distro.id() == "ubuntu":
+        google_executable = "google-chrome"
+
+    subprocess.run(shlex.split(f"{google_executable} {frames_dir / 'video.mp4'}"))
 
 
 if __name__ == "__main__":
