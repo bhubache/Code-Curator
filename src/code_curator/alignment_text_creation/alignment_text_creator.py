@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_alignment_text(script_text: str | os.PathLike, audio_path: str | os.PathLike) -> Path:
-    cached_hash_script_path = Path("/", "tmp", "cached_hash_script")
+    cached_hash_script_path = Path("/", "tmp", "_cached_hash_script")
     cached_alignments_path = Path("/", "tmp", "cached_alignments")
     new_hash = hashlib.sha256(script_text.encode("UTF-8")).hexdigest()
     use_cached_file = True
@@ -48,7 +48,7 @@ def create_alignment_text(script_text: str | os.PathLike, audio_path: str | os.P
                 audio_path=audio_path,
             )
 
-        cached_alignments_path.write_text(new_hash)
+        cached_hash_script_path.write_text(new_hash)
         cached_alignments_path.write_text(textgrid_path.read_text())
 
     return create_aligned_script(textgrid_path)
