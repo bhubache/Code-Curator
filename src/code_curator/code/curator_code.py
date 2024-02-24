@@ -33,7 +33,7 @@ class CuratorCode(CustomVMobject):
         file_name: str | None = None,
         tab_width: int = 1,
         indentation_chars: str = " ",
-        font="Monospace",
+        font="MesloLGS Nerd Font Mono",
         font_size=24,
         stroke_width=0,
         margin: float = 0.1,
