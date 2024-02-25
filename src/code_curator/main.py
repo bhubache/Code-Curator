@@ -7,23 +7,17 @@ from __future__ import annotations
 __all__: Sequence[str] = []
 
 import argparse
-import hashlib
 import importlib
 import logging
 import os
-import shutil
-import subprocess
 import yaml
-from collections.abc import Mapping
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from manim import config
-from moviepy.editor import concatenate_videoclips
 from moviepy.editor import VideoFileClip
 from moviepy.editor import AudioFileClip
-from moviepy.editor import CompositeVideoClip
 from moviepy.editor import CompositeAudioClip
 
 from code_curator import ai_audio_creator
@@ -89,8 +83,14 @@ def get_video_and_stream_clses(
 def _prepare_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ai_audio", help="generate AI audio from script", action="store_true")
-    parser.add_argument("--quality", help="resolution and frame rate of video", choices=("low", "medium", "high"), default="low")
+    parser.add_argument(
+        "--quality",
+        help="resolution and frame rate of video",
+        choices=("low", "medium", "high"),
+        default="low",
+    )
     parser.add_argument("--video_path", help="dotted path to video module to render", required=True)
+    parser.add_argument("--pdb", help="enter pdb upon program exit due to unhandled exception", action="store_true")
     args = parser.parse_args()
 
     QUALITY_MAP = {
@@ -120,28 +120,12 @@ def _prepare_args():
     return args
 
 
-def main() -> None:
-    args = _prepare_args()
-    # problem_dir = Path(
-    #     Path.cwd(),
-    #     "src",
-    #     "code_curator",
-    #     "videos",
-    #     "interview_problems",
-    #     PROBLEM_NAME,
-    # )
-
+def _main(args):
     animation_script_path = Path(Path(__file__).parent, "videos", *args.video_path.split("."), "animation_script.yaml")
 
     animation_script_map = yaml.safe_load(animation_script_path.read_text())
 
-    script_text = " ".join(
-        (
-            text
-            for text in animation_script_map.values()
-            if text is not None
-        )
-    ).strip()
+    script_text = " ".join(text for text in animation_script_map.values() if text is not None).strip()
 
     if args.ai_audio:
         logger.debug("AI speech requested")
@@ -150,7 +134,6 @@ def main() -> None:
 
     else:
         raise NotImplementedError("Use of non-AI audio is not yet supported")
-
 
     aligned_script_path = alignment_text_creator.create_alignment_text(
         script_text=script_text,
@@ -194,34 +177,43 @@ def main() -> None:
     )
 
     audio_clip = AudioFileClip(str(audio_path))
-    final_clip = video_clip.set_audio(CompositeAudioClip([audio_clip.set_start(aligned_animation_script.run_time - audio_clip.duration)]))
+    final_clip = video_clip.set_audio(
+        CompositeAudioClip([audio_clip.set_start(aligned_animation_script.run_time - audio_clip.duration)]),
+    )
     final_clip.write_videofile(
         str(Path(Path.home(), "Videos", "FULL_VIDEO.mp4")),
         fps=config["frame_rate"],
     )
 
 
-def postmortem_main():
+def main() -> None:
+    args = _prepare_args()
     try:
-        main()
+        _main(args)
+    except Exception:
+        if args.pdb:
+            import pdb
+
+            pdb.post_mortem()
+        else:
+            raise
+
+
+def postmortem_main(args):
+    try:
+        _main(args)
     except Exception:
         import pdb
 
         pdb.post_mortem()
 
 
-from manim import Scene
 from manim import config
-from manim import FadeIn
-from manim import Circle
-from manim import Square
 from code_curator.animations.curator_animation import CuratorAnimation
-from code_curator.utils.testing.curator_frames_comparison import starts_at
 from code_curator.base_scene import BaseScene
-from manim import Rotate
-from manim import FadeOut
 
 from manim import *
+
 
 class TestVideo(BaseScene):
     def __init__(self) -> None:
@@ -232,8 +224,7 @@ class TestVideo(BaseScene):
         animation_script = TestAnimationScript()
         animation_script.run_time = 1.5
 
-        excluded_attr_names = ("construct")
-
+        excluded_attr_names = "construct"
 
         for attr_name, func in type(self).__dict__.items():
             if attr_name in excluded_attr_names or (attr_name.startswith("__") and attr_name.endswith("__")):
@@ -260,21 +251,36 @@ class TestVideo(BaseScene):
                 animation_script=self.animation_script,
                 scene=self,
                 run_time=self.animation_script.run_time,
-            )
+            ),
         )
+
     def first_animation(self):
         from manim import Rectangle
         from manim import YELLOW
-        from manim import Tex
+
         # from code_curator.leetcode.problem_text import ProblemText
         from code_curator.videos.interview_problems.problem_text import ProblemText
 
         text = ProblemText.create_statement("A portion of this text will be highlighted")
         self.add(text)
-        rec = Rectangle(color=YELLOW, height=text.height, width=0, fill_color=YELLOW, fill_opacity=0.5, stroke_width=0).align_to(text[2], LEFT)
+        rec = Rectangle(
+            color=YELLOW,
+            height=text.height,
+            width=0,
+            fill_color=YELLOW,
+            fill_opacity=0.5,
+            stroke_width=0,
+        ).align_to(text[2], LEFT)
         self.add(rec)
 
-        final_rec = Rectangle(color=YELLOW, height=text.height, width=3, fill_color=YELLOW, fill_opacity=0.5, stroke_width=0).align_to(text[2], LEFT)
+        final_rec = Rectangle(
+            color=YELLOW,
+            height=text.height,
+            width=3,
+            fill_color=YELLOW,
+            fill_opacity=0.5,
+            stroke_width=0,
+        ).align_to(text[2], LEFT)
 
         return rec.animate.become(final_rec)
 
