@@ -4,10 +4,12 @@ from typing import TYPE_CHECKING
 
 from manim import AnimationGroup
 from manim import FadeOut
+from manim import Succession
 from manim import Transform
 
-from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.code import code_edit_parser
+
+# from code_curator.animations.fixed_succession import FixedSuccession
 
 if TYPE_CHECKING:
     from manim import Scene
@@ -61,7 +63,7 @@ class CodeTransform(AnimationGroup):
             )
 
             super().__init__(
-                FixedSuccession(
+                Succession(
                     decrease_opacity_and_fade_out_animation,
                     transform_animation,
                     fade_in_added_chars_animation,
