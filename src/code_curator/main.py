@@ -91,6 +91,7 @@ def _prepare_args():
     )
     parser.add_argument("--video_path", help="dotted path to video module to render", required=True)
     parser.add_argument("--pdb", help="enter pdb upon program exit due to unhandled exception", action="store_true")
+    parser.add_argument("--test", help="Render test scene", action="store_true")
     args = parser.parse_args()
 
     QUALITY_MAP = {
@@ -189,7 +190,10 @@ def _main(args):
 def main() -> None:
     args = _prepare_args()
     try:
-        _main(args)
+        if args.test:
+            TestVideo().render()
+        else:
+            _main(args)
     except Exception:
         if args.pdb:
             import pdb
@@ -211,6 +215,7 @@ def postmortem_main(args):
 from manim import config
 from code_curator.animations.curator_animation import CuratorAnimation
 from code_curator.base_scene import BaseScene
+from code_curator.data_structures.stack import Stack
 
 from manim import *
 
@@ -222,7 +227,7 @@ class TestVideo(BaseScene):
                 self.entries = []
 
         animation_script = TestAnimationScript()
-        animation_script.run_time = 1.5
+        animation_script.run_time = 4
 
         excluded_attr_names = "construct"
 
@@ -255,63 +260,11 @@ class TestVideo(BaseScene):
         )
 
     def first_animation(self):
-        from manim import Rectangle
-        from manim import YELLOW
+        self.call_stack = Stack(width=2, height=4, color=GRAY)
+        self.add(self.call_stack)
 
-        # from code_curator.leetcode.problem_text import ProblemText
-        from code_curator.videos.interview_problems.problem_text import ProblemText
-
-        text = ProblemText.create_statement("A portion of this text will be highlighted")
-        self.add(text)
-        rec = Rectangle(
-            color=YELLOW,
-            height=text.height,
-            width=0,
-            fill_color=YELLOW,
-            fill_opacity=0.5,
-            stroke_width=0,
-        ).align_to(text[2], LEFT)
-        self.add(rec)
-
-        final_rec = Rectangle(
-            color=YELLOW,
-            height=text.height,
-            width=3,
-            fill_color=YELLOW,
-            fill_opacity=0.5,
-            stroke_width=0,
-        ).align_to(text[2], LEFT)
-
-        return rec.animate.become(final_rec)
-
-        # pre_text = ProblemText.create_statement("BEFORE", color=ORANGE)
-        # post_text = ProblemText.create_statement("AFTER", color=TEAL)
-        # line = Line(2*LEFT, 2*RIGHT, color=RED).rotate(PI/2).next_to(pre_text,LEFT,buff=1)
-        # pre_bk=Square().scale(5).next_to(line, RIGHT, buff=0).set_opacity(0)
-        # post_bk=Square().scale(5).next_to(line,LEFT,buff=0).set_opacity(0)
-        # slider = VGroup(pre_bk, post_bk, line)
-
-        # def get_intersection_updater(pre_mob, bk):
-        #     def updater(pos_mob):
-        #         pos_mob.become(Intersection(pre_mob, bk))
-        #         # pos_mob.become(
-        #         #     VGroup(
-        #         #         *[
-        #         #             Intersection(submob, bk).match_style(submob)
-        #         #             for submob in pre_mob.submobjects
-        #         #         ]
-        #         #     )
-        #         # )
-
-        #     return updater
-
-        # pre_mob = VMobject().add_updater(get_intersection_updater(pre_text, pre_bk))
-        # post_mob = VMobject().add_updater(get_intersection_updater(post_text, post_bk))
-        # self.add(pre_mob, post_mob)
-        # self.add(slider)
-
-        # return slider.animate.shift(post_text.get_right() + RIGHT - slider.get_center())
-        return Wait()
+        self.call_stack.push("reverseList(0)")
+        return self.call_stack.animate.push("reverseList(1)")
 
 
 if __name__ == "__main__":
