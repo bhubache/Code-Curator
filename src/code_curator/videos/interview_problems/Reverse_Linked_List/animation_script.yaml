@@ -24,5 +24,21 @@ fade_in_first_base_case_code: if head is None, return head. Stepping up in size,
 fade_in_one_node_linked_list: linked list with one node? Well, this has the
 indicate_empty_linked_list_as_subproblem: empty list as a subproblem, but we still don't need to recurse because its reverse is itself as well
 move_one_node_sll_to_base_cases: making it a base case! Let's add this base case to our
-# __START__:
-fade_in_second_base_case_code: algorithm by also checking if the head's next node is None. blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+fade_in_second_base_case_code: algorithm by also checking if the head's next node is None. Ok what about
+fade_in_two_node_linked_list: two nodes? Well this case isn't trivial so let's try to use recursion to help. As a first step, we know we're going to make a recursive call on the next subproblem, so
+fade_in_recursive_call: let's include that in our algorithm.
+prepare_for_recursive_example_step_through: Let's get our bearings and step through our algorithm with the two node linked list. I'm adding a call stack
+add_call_stack: so we can keep track of our recursive calls. We make our initial call and
+push_initial_call_on_to_call_stack: push it on to the call stack.
+first_base_case: We first check if the head is none. It's not
+second_base_case: so we then check if the head's next node is none. It's not either so we
+move_highlighter_to_recursive_call: move past the conditional to the recursive call.
+make_first_recursive_call: We push onto the call stack and enter the recursive call. Our input now has its head at the node with value one.
+first_base_case_again: We check if the head is none. It's not
+second_base_case_again: so we check if the head's next node is none. It is, so
+enter_if_block: we enter the if block and return the head,
+pop_off_call_stack: popping off the call stack, returning to the line where we made the recursive call, and returning to the input with the head at the node with value zero. There's no code after this line so we implicitly return none
+pop_off_call_stack_last_time: and pop off the call stack. The call stack is empty so our algorithm has completed. Recall that the criteria for a correct algorithm are that the linked list be reversed and to return the head of the reversed linked list. Neither of these have been met so the algorithm is incorrect. Now that we're sure our current algorithm is incorrect, how do proceed? Well we know that we need to add code somewhere, and it could be before the recursive call, after the recursive call or both. Note that it can't be before the base cases because those must be first. To help us understand how the recursion executes, let's place a print statement
+__START__:
+add_print_statements: before and after the recursive call, and
+setup_print_statement_step_through: step through the algorithm with a three node linked list.
