@@ -475,11 +475,21 @@ class AnimationBuilder(_AnimationBuilder):
 
 
 def remove(text: str):
-    return "".join(f"{TEXT_REMOVE_START_MARKER}{char}{TEXT_REMOVE_END_MARKER}" for char in text)
+    return "".join(
+        [
+            f"{TEXT_REMOVE_START_MARKER}{char}{TEXT_REMOVE_END_MARKER}"
+            for char in text
+        ]
+    )
 
 
 def add(text: str):
-    return "".join(f"{TEXT_ADD_START_MARKER}{char}{TEXT_ADD_END_MARKER}" for char in text)
+    return "".join(
+        [
+            f"{TEXT_ADD_START_MARKER}{char}{TEXT_ADD_END_MARKER}"
+            for char in text
+        ]
+    )
 
 
 def edit(initial_text: str, final_text: str):
