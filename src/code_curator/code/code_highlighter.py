@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from manim import DOWN
 from manim import LEFT
 from manim import Rectangle
 from manim import YELLOW
@@ -91,7 +92,16 @@ class CodeHighlighter(Rectangle):
         except IndexError:
             to_line_copy_with_only_visible_chars = self.code.get_line(line_num).copy()
 
-        self.move_to(to_line_copy_with_only_visible_chars.get_center())
+        if len(to_line_copy_with_only_visible_chars) == 0:
+            # Assume empty line has non-empty line above it
+            self.next_to(
+                self.code.get_line(line_num - 1),
+                DOWN,
+                buff=self.height_buff / 2,
+            )
+        else:
+            self.move_to(to_line_copy_with_only_visible_chars.get_center())
+
         self.align_to(self.code.code_mobject, LEFT)
         self.shift(LEFT * (self.width_buff / 2))
 

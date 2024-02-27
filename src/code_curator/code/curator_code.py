@@ -51,7 +51,7 @@ class CuratorCode(CustomVMobject):
     ) -> None:
         super().__init__()
         self.lexer = MyPythonLexer()
-        self.code_mobject = self._create_code_mobject(
+        self.code_mobject = Code(
             file_name=file_name,
             tab_width=tab_width,
             indentation_chars=indentation_chars,
@@ -180,9 +180,6 @@ class CuratorCode(CustomVMobject):
             if line_number not in line_numbers:
                 continue
 
-            if self.code_string.splitlines()[line_index].strip() == "# NEWLINE":
-                continue
-
             self.get_line(line_number).set_opacity(opacity)
 
     def fade_in_lines(self, *line_numbers: int) -> tuple[CuratorCode, Animation]:
@@ -202,10 +199,6 @@ class CuratorCode(CustomVMobject):
         for line_index, _ in enumerate(self.code_mobject.code):
             line_number = line_index + 1
             if line_number in line_numbers:
-                continue
-
-            if self.code_string.splitlines()[line_index].strip() == "# NEWLINE":
-                self.get_line(line_number).set_opacity(0)
                 continue
 
             self.get_line(line_number).set_opacity(desaturate_opacity)
@@ -318,24 +311,6 @@ class CuratorCode(CustomVMobject):
 
     def set_background_color(self, color: str) -> None:
         self.code_mobject.background_mobject.set(color=color)
-
-    @staticmethod
-    def _create_code_mobject(**kwargs) -> Code:
-        newline_substitute = "# NEWLINE"
-        code_string_lines = kwargs["code"].splitlines()
-        for index, line in enumerate(code_string_lines):
-            if line.strip() == "":
-                code_string_lines[index] = newline_substitute
-
-        kwargs["code"] = "\n".join(code_string_lines)
-
-        code_mobject = Code(**kwargs)
-
-        for string_line, code_line in zip(code_mobject.code_string.splitlines(), code_mobject.code):
-            if string_line == newline_substitute:
-                code_line.set_opacity(0)
-
-        return code_mobject
 
     def _create_animation_copy(self) -> CuratorCode:
         attr_name = "_copy_for_animation"
@@ -476,19 +451,13 @@ class AnimationBuilder(_AnimationBuilder):
 
 def remove(text: str):
     return "".join(
-        [
-            f"{TEXT_REMOVE_START_MARKER}{char}{TEXT_REMOVE_END_MARKER}"
-            for char in text
-        ]
+        [f"{TEXT_REMOVE_START_MARKER}{char}{TEXT_REMOVE_END_MARKER}" for char in text],
     )
 
 
 def add(text: str):
     return "".join(
-        [
-            f"{TEXT_ADD_START_MARKER}{char}{TEXT_ADD_END_MARKER}"
-            for char in text
-        ]
+        [f"{TEXT_ADD_START_MARKER}{char}{TEXT_ADD_END_MARKER}" for char in text],
     )
 
 

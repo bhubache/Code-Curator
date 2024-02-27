@@ -44,9 +44,7 @@ def partitioned_chars(original_code: CuratorCode, target_code: CuratorCode):
     #
     # Context
     #    1. The code_paragraph does not contain newlines as characters whereas code_strings do
-    #    2. As a workaround for a weird line spacing issue, empty lines (or lines with just whitespace)
-    #       in the code paragraph are replaced with ``# NEWLINE`` that have zero opacity.
-    #    3. ``target_code`` has an ``encoded_string`` attribute that represents the changes
+    #    2. ``target_code`` has an ``encoded_string`` attribute that represents the changes
     #       from ``original_code`` to ``target_code``.
     #
     # Algorithm
@@ -67,7 +65,7 @@ def partitioned_chars(original_code: CuratorCode, target_code: CuratorCode):
     #        def reverseList(self, head):
     #            if head is None or head.next is None:
     #                return head
-    #    # NEWLINE
+    #
     #            reverseList(head.next)
     #
     #   ``target_code.encoded_string``
@@ -79,13 +77,6 @@ def partitioned_chars(original_code: CuratorCode, target_code: CuratorCode):
     #  <A> </A><A> </A><A> </A><A> </A><A> </A><A> </A><A> </A><A> </A><A>r</A><A>e</A><A>v</A><A>e</A><A>r</A><A>s</A><A>e</A><A>L</A><A>i</A><A>s</A><A>t</A><A>(</A><A>h</A><A>e</A><A>a</A><A>d</A><A>.</A><A>n</A><A>e</A><A>x</A><A>t</A><A>)</A>
     original_code_chars = list(it.chain.from_iterable(original_code.code_paragraph))
     target_code_chars = list(it.chain.from_iterable(target_code.code_paragraph))
-
-    # TODO: Make sure this works with multiple added newlines
-    target_code_string = target_code.code_string.replace("\n", "")
-    while match := re.search("# NEWLINE", target_code_string):
-        start, end = match.span()
-        target_code_chars = target_code_chars[:start] + target_code_chars[end:]
-        target_code_string = target_code_string.replace("# NEWLINE", "", 1)
 
     target_code.encoded_string = target_code.encoded_string.replace(
         f"{TEXT_ADD_START_MARKER}\n{TEXT_ADD_END_MARKER}",
