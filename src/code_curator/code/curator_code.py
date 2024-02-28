@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Self
 
 from manim import Animation
 from manim import Code
 from manim import LEFT
+from manim import MoveToTarget
 from manim import ParsableManimColor
 from manim import UP
 from manim import YELLOW
@@ -142,7 +144,7 @@ class CuratorCode(CustomVMobject):
     @property
     def max_line_width(self):
         # I want the max line width including the indentation chars at the beginning of a line
-        min_starting_x = min(line.get_left()[0] for line in self.code_mobject.code)
+        min_starting_x = min(line.get_left()[0] for line in self.code_mobject.code if line)
         max_ending_x = max(line.get_right()[0] for line in self.code_mobject.code)
         return max_ending_x - min_starting_x
 
@@ -287,7 +289,7 @@ class CuratorCode(CustomVMobject):
         opacity: float = 0.2,
         height_buff: float = 0.05,
         width_buff: float = 0.1,
-    ):
+    ) -> Self:
         self.highlighter = CodeHighlighter(
             code=self,
             color=color,
@@ -297,6 +299,10 @@ class CuratorCode(CustomVMobject):
             width_buff=width_buff,
         )
         self.add(self.highlighter)
+        return self
+
+    def remove_highlighter(self) -> Self:
+        self.remove(self.highlighter)
         return self
 
     def move_highlighter_to_line(self, line_num: int) -> None:
@@ -441,12 +447,30 @@ class AnimationBuilder(_AnimationBuilder):
                 saturate_edits=change_source_code_kwargs["saturate_edits"],
             )
         else:
-            return super().build()
+            anim = MethodAnimation(self.mobject, self.methods)
 
         for attr, value in self.anim_args.items():
             setattr(anim, attr, value)
 
         return anim
+
+
+class MethodAnimation(MoveToTarget):
+    def __init__(self, mobject, methods, **kwargs):
+        self.methods = methods
+        super().__init__(mobject, **kwargs)
+
+    def finish(self) -> None:
+        for sm in self.mobject.submobjects.copy():
+            try:
+                sm.original_id
+            except AttributeError:
+                pass  # Originally part of the mobject
+            else:
+                self.mobject.remove(sm)
+
+        for method, method_args, method_kwargs in self.methods:
+            method.__func__(self.mobject, *method_args, **method_kwargs)
 
 
 def remove(text: str):
