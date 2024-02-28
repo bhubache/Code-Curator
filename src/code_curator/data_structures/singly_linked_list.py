@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Self
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -330,9 +331,12 @@ class SinglyLinkedList(CustomVMobject):
         label: str | Element,
         direction: tuple[float, float, float] | None = None,
         center: bool = True,
-    ) -> None:
+    ) -> Self:
         if direction is None:
-            direction = -self.head_pointer.direction
+            if self.has_head_pointer:
+                direction = -self.head_pointer.direction
+            else:
+                direction = DOWN
 
         self.graph.add_labeled_pointer(
             to,
@@ -343,6 +347,8 @@ class SinglyLinkedList(CustomVMobject):
 
         if center:
             self.move_to(ORIGIN)
+
+        return self
 
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.graph.get_labeled_pointer(name)
@@ -554,9 +560,10 @@ class AnimationBuilder(_AnimationBuilder):
                     **method_kwargs,
                 )
             else:
-                # We apply the requested method to the target, hence the reason ``method`` is bound to ``self.mobject.target``.
-                # Additionally, any argument from ``method_args`` and ``method_kwargs`` that is a mobject a submobject
-                # of ``self.mobject`` needs to be changed to the corresponding submobject from ``self.mobject.target``.
+                # We apply the requested method to the target, hence the reason ``method`` is bound to
+                # ``self.mobject.target``. Additionally, any argument from ``method_args`` and
+                # ``method_kwargs`` that is a mobject a submobject of ``self.mobject`` needs to be
+                # changed to the corresponding submobject from ``self.mobject.target``.
                 self.methods.append([method, method_args, method_kwargs])
                 method_args_with_target_submobjects = []
 
