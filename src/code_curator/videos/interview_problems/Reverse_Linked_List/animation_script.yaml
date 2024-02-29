@@ -38,7 +38,36 @@ first_base_case_again: We check if the head is none. It's not
 second_base_case_again: so we check if the head's next node is none. It is, so
 enter_if_block: we enter the if block and return the head,
 pop_off_call_stack: popping off the call stack, returning to the line where we made the recursive call, and returning to the input with the head at the node with value zero. There's no code after this line so we implicitly return none
-pop_off_call_stack_last_time: and pop off the call stack. The call stack is empty so our algorithm has completed. Recall that the criteria for a correct algorithm are that the linked list be reversed and to return the head of the reversed linked list. Neither of these have been met so the algorithm is incorrect. Now that we're sure our current algorithm is incorrect, how do proceed? Well we know that we need to add code somewhere, and it could be before the recursive call, after the recursive call or both. Note that it can't be before the base cases because those must be first. To help us understand how the recursion executes, let's place a print statement
-__START__:
+pop_off_call_stack_last_time: and pop off the call stack. The call stack is empty so our algorithm has completed. Recall that the criteria for a correct algorithm are that the linked list be reversed and to return the head of the reversed linked list. Neither of these have been met so the algorithm is incorrect. Now that we're sure our current algorithm is incorrect, how do we proceed? Well we know that we need to add code somewhere, and it could be before the recursive call, after the recursive call or both. Note that it can't be before the base cases because those must be first. To help us understand how the recursion executes, let's place a print statement
 add_print_statements: before and after the recursive call, and
 setup_print_statement_step_through: step through the algorithm with a three node linked list.
+print_example_make_initial_call: We make our initial call and push it on to the call stack.
+print_example_initial_call_fail_first_base_case: Neither the head
+print_example_initial_call_fail_second_base_case: nor the head's next node is none so we
+print_example_initial_call_skip_if_block: skip the if block. The before print
+print_example_initial_call_print_before: statement is executed and then we
+print_example_initial_call_move_to_recursive_call_line: move to the next line. We
+print_example_make_first_recursive_call: enter the recursive call, pushing it on to the call stack.
+  # __START__:
+print_example_first_recursive_call_fail_base_cases: Neither the head nor the head's next node is none so we
+print_example_first_recursive_call_skip_if_block: skip the if block. The before print
+print_example_first_recursive_call_before_print: statement is executed and then we
+print_example_first_recursive_call_move_to_recursive_call_line: move to the next line. We
+print_example_make_second_recursive_call: enter the recursive call, pushing it on to the call stack.
+print_example_second_recursive_call_fail_base_cases: Neither the head nor the head's next node is none so we
+print_example_second_recursive_call_skip_if_block: skip the if block. The before print
+print_example_second_recursive_call_before_print: statement is executed and then we
+print_example_second_recursive_call_move_to_recursive_call_line: move to the next line. We
+print_example_make_third_recursive_call: enter the recursive call, pushing it on to the call stack.
+print_example_third_recursive_call_pass_base_cases: The head is not none but the head's next node is. So, we
+print_example_third_recursive_call_enter_if_block: enter the if block and return the head,
+print_example_pop_third_recursive_call: popping off the call stack and return to the line with the recursive call. We
+print_example_second_recursive_call_move_to_last_print: proceed to the next line
+print_example_second_recursive_call_last_print: and execute the print statement. The code then implicitly returns none and we
+print_example_pop_second_recursive_call: pop off the call stack and return to the line with the recursive call. We
+print_example_first_recursive_call_move_to_last_print: proceed to the next line
+print_example_first_recursive_call_last_print: and execute the print statement. The code then implicitly returns none and we
+print_example_pop_first_recursive_call: pop off the call stack and return to the line with the recursive call. We
+print_example_initial_call_move_to_last_print: proceed to the next line
+print_example_initial_call_last_print: and execute the print statement. The code then implicitly returns none and we
+print_example_pop_initial_call: pop off the call stack. The call stack is now empty so the algorithm has finished running. Look carefully at what was printed. All prints before the recursive call come before the prints after the recursive call. The prints before the recursive call are in the same order as the linked list. The prints after the recursive call are in the reverse order of the linked list. What this tells us is that if we place our code before the recursive call, we'll have to reverse a node's pointer before moving to its next node. And if we place our code after the recursive call, we'll have to reverse a node's pointer before it's previous node.

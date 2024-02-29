@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import itertools as it
+
 from manim import AnimationGroup
+from manim import BLACK
 from manim import Brace
 from manim import Circumscribe
 from manim import config
@@ -19,6 +22,7 @@ from manim import Rectangle
 from manim import RIGHT
 from manim import ShrinkToCenter
 from manim import there_and_back
+from manim import Text
 from manim import Transform
 from manim import UP
 from manim import VGroup
@@ -402,8 +406,197 @@ class Video(BaseScene):
 
         return self.first_recursive_solution_code.animate.change_source_code(
             new_code_string=new_code_string,
-            saturate_edits=True,
+            saturate_edits=False,
         )
 
     def setup_print_statement_step_through(self):
-        ...
+        self.four_node_linked_list = (
+            SinglyLinkedList.create_sll(0, 1, 2, 3, color=self.title_tex.color)
+            .add_null()
+        )
+        self.four_node_linked_list.add_labeled_pointer(self.four_node_linked_list.head, label="head").move_to(self.pondering_rectangle)
+        self.terminal = self.recursive_cases_rectangle.copy().set_stroke_width(0).set_fill(color="#1C1C1C").set_fill(color=BLACK)
+        font = "MesloLGS Nerd Font Mono"
+        self.printed_lines = [
+            Text("before: 0", font=font),
+            Text("before: 1", font=font),
+            Text("before: 2", font=font),
+            Text("after: 2", font=font),
+            Text("after: 1", font=font),
+            Text("after: 0", font=font),
+        ]
+
+        self.printed_lines[0].align_to(self.recursive_cases_rectangle, UP + LEFT)
+        for prev, next_ in it.pairwise(self.printed_lines):
+            self.add(prev)
+            self.add(next_)
+            prev.set_opacity(0)
+            next_.set_opacity(0)
+
+            next_.next_to(prev, DOWN)
+            next_.align_to(prev, LEFT)
+
+        self.first_recursive_solution_code.remove(self.first_recursive_solution_code.highlighter)
+        
+        return (
+            FadeOut(self.two_node_sll),
+            self.first_recursive_solution_code.animate.move_to(self.code_rectangle),
+            FadeIn(self.four_node_linked_list),
+            FadeIn(self.terminal),
+        )
+
+    def print_example_make_initial_call(self):
+        return (
+            self.call_stack.animate.push("reverseList(0)"),
+            self.first_recursive_solution_code.animate.add_highlighter(2),
+        )
+
+    def print_example_initial_call_fail_first_base_case(self):
+        return self.first_base_case()
+
+    def print_example_initial_call_fail_second_base_case(self):
+        return self.second_base_case()
+
+    def print_example_initial_call_skip_if_block(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(6)
+
+    def print_example_initial_call_print_before(self):
+        return self.printed_lines[0].animate.set_opacity(1)
+
+    def print_example_initial_call_move_to_recursive_call_line(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(7)
+
+    def print_example_make_first_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+            self.call_stack.animate.push("reverseList(1)"),
+            self.four_node_linked_list.animate.move_labeled_pointer("head", self.four_node_linked_list.get_next(self.four_node_linked_list.head)),
+        )
+
+    def print_example_first_recursive_call_fail_base_cases(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(3)
+
+    def print_example_first_recursive_call_skip_if_block(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(6)
+
+    def print_example_first_recursive_call_before_print(self):
+        return self.printed_lines[1].animate.set_opacity(1)
+
+    def print_example_first_recursive_call_move_to_recursive_call_line(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(7)
+
+    def print_example_make_second_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+            self.call_stack.animate.push("reverseList(2)"),
+            self.four_node_linked_list.animate.move_labeled_pointer(
+                "head",
+                self.four_node_linked_list.get_next(
+                    self.four_node_linked_list.get_next(
+                        self.four_node_linked_list.head,
+                    ),
+                ),
+            ),
+        )
+
+    def print_example_second_recursive_call_fail_base_cases(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(3)
+
+    def print_example_second_recursive_call_skip_if_block(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(6)
+
+    def print_example_second_recursive_call_before_print(self):
+        return self.printed_lines[2].animate.set_opacity(1)
+
+    def print_example_second_recursive_call_move_to_recursive_call_line(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(7)
+
+    def print_example_make_third_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+            self.call_stack.animate.push("reverseList(3)"),
+            self.four_node_linked_list.animate.move_labeled_pointer(
+                "head",
+                self.four_node_linked_list.get_next(
+                    self.four_node_linked_list.get_next(
+                        self.four_node_linked_list.get_next(
+                            self.four_node_linked_list.head,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+    def print_example_third_recursive_call_pass_base_cases(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(3)
+
+    def print_example_third_recursive_call_enter_if_block(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(4)
+
+    def print_example_pop_third_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(7),
+            self.call_stack.animate.pop(),
+            self.four_node_linked_list.animate.move_labeled_pointer(
+                "head",
+                self.four_node_linked_list.get_next(
+                    self.four_node_linked_list.get_next(
+                        self.four_node_linked_list.head,
+                    ),
+                ),
+            ),
+        )
+
+    def print_example_second_recursive_call_move_to_last_print(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(8)
+
+    def print_example_second_recursive_call_last_print(self):
+        return self.printed_lines[3].animate.set_opacity(1)
+
+    def print_example_pop_second_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(7),
+            self.call_stack.animate.pop(),
+            self.four_node_linked_list.animate.move_labeled_pointer(
+                "head",
+                self.four_node_linked_list.get_next(
+                    self.four_node_linked_list.head,
+                ),
+            ),
+        )
+
+    def print_example_first_recursive_call_move_to_last_print(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(8)
+
+    def print_example_first_recursive_call_last_print(self):
+        return self.printed_lines[4].animate.set_opacity(1)
+
+    def print_example_pop_first_recursive_call(self):
+        return (
+            self.first_recursive_solution_code.animate.move_highlighter_to_line(7),
+            self.call_stack.animate.pop(),
+            self.four_node_linked_list.animate.move_labeled_pointer(
+                "head",
+                self.four_node_linked_list.head,
+            ),
+        )
+
+    def print_example_initial_call_move_to_last_print(self):
+        return self.first_recursive_solution_code.animate.move_highlighter_to_line(8)
+
+    def print_example_initial_call_last_print(self):
+        return self.printed_lines[5].animate.set_opacity(1)
+
+    def print_example_pop_initial_call(self):
+        return (
+            # self.first_recursive_solution_code.animate.move_highlighter_to_line(7),
+            self.call_stack.animate.pop(),
+            # self.four_node_linked_list.animate.move_labeled_pointer(
+            #     "head",
+            #     self.four_node_linked_list.get_next(
+            #         self.four_node_linked_list.head,
+            #     ),
+            # ),
+        )
+
+

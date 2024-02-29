@@ -216,8 +216,18 @@ from manim import config
 from code_curator.animations.curator_animation import CuratorAnimation
 from code_curator.base_scene import BaseScene
 from code_curator.data_structures.stack import Stack
+from code_curator.code.curator_code import CuratorCode
+from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 
 from manim import *
+
+def set_start_time(start_time: float):
+    def inner(fn):
+        fn.start_time = start_time
+        return fn
+
+    return inner
+
 
 
 class TestVideo(BaseScene):
@@ -260,11 +270,34 @@ class TestVideo(BaseScene):
         )
 
     def first_animation(self):
-        self.call_stack = Stack(width=2, height=4, color=GRAY)
-        self.add(self.call_stack)
+        self.sll = SinglyLinkedList(0, 1, 2, 3).add_null()
+        first_node = self.sll.head
+        self.second_node = self.sll.get_next(self.sll.head)
+        third_node = self.sll.get_next(self.sll.get_next(self.sll.head))
+        fourth_node = self.sll.get_next(self.sll.get_next(self.sll.get_next(self.sll.head)))
+        self.sll.add_labeled_pointer(self.sll.head, "head")
+        self.add(self.sll)
 
-        self.call_stack.push("reverseList(0)")
-        return self.call_stack.animate.push("reverseList(1)")
+        self.sll.set_next(self.sll.head, self.sll.null, angle_in_degrees=90)
+
+        return self.sll.animate.set_next(self.second_node, first_node)
+        # self.first_recursive_solution_code = CuratorCode(
+        #     code="\n".join(:
+        #         (
+        #             "class ListNode:",
+        #             "",
+        #             "    def __init__(self, val=0, next_=None):",
+        #             "        self.val = val",
+        #             "        self.next = next_",
+        #         ),
+        #     ),
+        # )
+        # self.first_recursive_solution_code.add_highlighter(2)
+        # return FadeIn(self.first_recursive_solution_code)
+
+    @set_start_time(2)
+    def second_animation(self):
+        return self.sll.animate.move_labeled_pointer("head", self.second_node)
 
 
 if __name__ == "__main__":
