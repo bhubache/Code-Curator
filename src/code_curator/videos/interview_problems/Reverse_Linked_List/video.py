@@ -20,7 +20,9 @@ from manim import Line
 from manim import ORIGIN
 from manim import Rectangle
 from manim import RIGHT
+from manim import RoundedRectangle
 from manim import ShrinkToCenter
+from manim import Succession
 from manim import there_and_back
 from manim import Text
 from manim import Transform
@@ -35,6 +37,8 @@ from code_curator.data_structures.stack import Stack
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.code.curator_code import CuratorCode
 from code_curator.code.curator_code import remove, add, edit
+from code_curator.animations.fixed_succession import FixedSuccession
+from code_curator.animations.curator_succession import CuratorSuccession
 
 
 TITLE = "Reverse Linked List"
@@ -231,6 +235,24 @@ class Video(BaseScene):
         self.pondering_rectangle = self.base_cases_rectangle.copy().to_edge(UP, buff=0).to_edge(LEFT, buff=0)
         self.code_rectangle = self.pondering_rectangle.copy().to_edge(RIGHT, buff=0)
 
+        self.finished_first_recursive_solution = CuratorCode(
+            code="\n".join(
+                (
+                    "class Solution:",
+                    "    def reverseList(self, head):",
+                    "        if head is None or head.next is None:",
+                    "            return head",
+                    "",
+                    "        reverseList(head.next)",
+                    "        new_head = head.next",
+                    "        head.next.next = head",
+                    "        head.next = None",
+                    "",
+                    "        return new_head",
+                ),
+            ),
+        ).move_to(self.code_rectangle)
+
         self.first_recursive_solution_code = CuratorCode(
             code="\n".join(
                 (
@@ -238,7 +260,7 @@ class Video(BaseScene):
                     "    def reverseList(self, head):",
                 ),
             ),
-        ).move_to(self.code_rectangle)
+        ).align_to(self.finished_first_recursive_solution, LEFT + UP)
 
         return self.vertical_line.animate.put_start_and_end_on(
             (0, config["frame_y_radius"], 0),
@@ -315,45 +337,166 @@ class Video(BaseScene):
             saturate_edits=False,
         )
 
-    def prepare_for_recursive_example_step_through(self):
-        # Implement some nice transition
-        # TODO CUR-27: Fix adding highlighter via animation (it adds two to the screen)
-        self.shift_off_screen_vgroup = VGroup(
-            self.base_cases_header,
-            self.recursive_cases_header,
-            self.recursive_steps[0],
-            self.recursive_steps[1],
-            self.empty_sll,
-            self.one_node_sll,
-            self.horizontal_line,
+    def put_black_box_before_recursive_call(self):
+        third_line = self.first_recursive_solution_code.get_line(3)
+
+        new_code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                "",
+                "",
+                "",
+                "        reverseList(head.next)",
+            ),
         )
 
-        self.first_recursive_solution_code.add_highlighter(start_line=2)
+        changed_code_copy = self.first_recursive_solution_code.copy().change_source_code(
+            new_code_string=new_code_string,
+            saturate_edits=False,
+        )
 
-        run_time = 2
+        self.black_box_before_call = RoundedRectangle(
+            corner_radius=0.1,
+            stroke_width=0,
+            fill_color=GRAY,
+            fill_opacity=0.5,
+            width=third_line.get_right()[0] - third_line.get_left()[0],
+            height=self.first_recursive_solution_code.get_line(3).get_height() * 3,
+        ).next_to(changed_code_copy.get_line(4), DOWN, buff=0.075).align_to(changed_code_copy.get_line(9), LEFT)
+
+        question_mark = Text("?").match_style(self.black_box_before_call).set_color(BLACK).move_to(self.black_box_before_call)
+        self.black_box_before_call.add(question_mark)
+
 
         return (
-            self.shift_off_screen_vgroup.animate(run_time=run_time).shift(DOWN * (self.horizontal_line.get_length() / 2)),
-            self.two_node_sll.animate(run_time=run_time).align_to(ORIGIN, DOWN),
-            self.first_recursive_solution_code.animate(run_time=run_time).align_to(ORIGIN, DOWN),
+            self.first_recursive_solution_code.animate.change_source_code(
+                new_code_string=new_code_string,
+                saturate_edits=False,
+            ),
+            FadeIn(self.black_box_before_call),
         )
 
-    def add_call_stack(self):
-        self.call_stack = Stack(
-            width=2,
-            height=3,
-            color=GRAY,
+    def put_black_box_after_recursive_call(self):
+        third_line = self.first_recursive_solution_code.get_line(3)
+
+        new_code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                "        reverseList(head.next)",
+            ),
         )
 
-        self.call_stack.move_to(self.base_cases_rectangle)
+        changed_code_copy = self.first_recursive_solution_code.copy().change_source_code(
+            new_code_string=new_code_string,
+            saturate_edits=False,
+        )
+
+        self.black_box_after_call = self.black_box_before_call.copy().next_to(changed_code_copy.get_line(6), DOWN, buff=0.075).align_to(changed_code_copy.get_line(6), LEFT)
 
         return (
-            FadeIn(self.call_stack),
-            self.two_node_sll.animate.move_to(self.pondering_rectangle),
+            self.first_recursive_solution_code.animate.change_source_code(
+                new_code_string=new_code_string,
+                saturate_edits=False,
+            ),
+            FadeOut(self.black_box_before_call),
+            FadeIn(self.black_box_after_call),
         )
 
-    def push_initial_call_on_to_call_stack(self):
-        return self.call_stack.animate.push("reverseList(0)")
+    def put_black_box_before_and_after_recursive_call(self):
+        new_code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                "",
+                "",
+                "",
+                "        reverseList(head.next)",
+            ),
+        )
+
+        changed_code_copy = self.first_recursive_solution_code.copy().change_source_code(
+            new_code_string=new_code_string,
+            saturate_edits=False,
+        )
+
+        return (
+            self.first_recursive_solution_code.animate.change_source_code(
+                new_code_string=new_code_string,
+                saturate_edits=False,
+            ),
+            FadeIn(self.black_box_before_call),
+            self.black_box_after_call.animate.next_to(changed_code_copy, DOWN, buff=0.075).align_to(changed_code_copy.get_line(9), LEFT),
+        )
+
+    def undo_black_boxes(self):
+        return (
+            self.first_recursive_solution_code.animate.change_source_code(
+                new_code_string="\n".join(
+                    (
+                        "class Solution:",
+                        "    def reverseList(self, head):",
+                        "        if head is None or head.next is None:",
+                        "            return head",
+                        "",
+                        "        reverseList(head.next)",
+                    ),
+                ),
+                saturate_edits=False,
+            ),
+            FadeOut(self.black_box_before_call),
+            FadeOut(self.black_box_after_call),
+        )
+
+    # def prepare_for_recursive_example_step_through(self):
+    #     # Implement some nice transition
+    #     # TODO CUR-27: Fix adding highlighter via animation (it adds two to the screen)
+    #     self.shift_off_screen_vgroup = VGroup(
+    #         self.base_cases_header,
+    #         self.recursive_cases_header,
+    #         self.recursive_steps[0],
+    #         self.recursive_steps[1],
+    #         self.empty_sll,
+    #         self.one_node_sll,
+    #         self.horizontal_line,
+    #     )
+
+    #     self.first_recursive_solution_code.add_highlighter(start_line=2)
+
+    #     run_time = 2
+
+    #     return (
+    #         self.shift_off_screen_vgroup.animate(run_time=run_time).shift(DOWN * (self.horizontal_line.get_length() / 2)),
+    #         self.two_node_sll.animate(run_time=run_time).align_to(ORIGIN, DOWN),
+    #         self.first_recursive_solution_code.animate(run_time=run_time).align_to(ORIGIN, DOWN),
+    #     )
+
+    # def add_call_stack(self):
+    #     self.call_stack = Stack(
+    #         width=2,
+    #         height=3,
+    #         color=GRAY,
+    #     )
+
+    #     self.call_stack.move_to(self.base_cases_rectangle)
+
+    #     return (
+    #         FadeIn(self.call_stack),
+    #         self.two_node_sll.animate.move_to(self.pondering_rectangle),
+    #     )
+
+    # def push_initial_call_on_to_call_stack(self):
+    #     return self.call_stack.animate.push("reverseList(0)")
 
     def first_base_case(self):
         return self.first_recursive_solution_code.animate.move_highlighter_to_substring("head is None")
@@ -361,34 +504,34 @@ class Video(BaseScene):
     def second_base_case(self):
         return self.first_recursive_solution_code.animate.move_highlighter_to_substring("head.next is None")
 
-    def move_highlighter_to_recursive_call(self):
-        return self.first_recursive_solution_code.animate.move_highlighter_to_line(6)
+    # def move_highlighter_to_recursive_call(self):
+    #     return self.first_recursive_solution_code.animate.move_highlighter_to_line(6)
 
-    def make_first_recursive_call(self):
-        return (
-            self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
-            self.call_stack.animate.push("reverseList(1)"),
-            self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.head)),
-        )
+    # def make_first_recursive_call(self):
+    #     return (
+    #         self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+    #         self.call_stack.animate.push("reverseList(1)"),
+    #         self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.head)),
+    #     )
 
-    def first_base_case_again(self):
-        return self.first_base_case()
+    # def first_base_case_again(self):
+    #     return self.first_base_case()
 
-    def second_base_case_again(self):
-        return self.second_base_case()
+    # def second_base_case_again(self):
+    #     return self.second_base_case()
 
-    def enter_if_block(self):
-        return self.first_recursive_solution_code.animate.move_highlighter_to_line(4)
+    # def enter_if_block(self):
+    #     return self.first_recursive_solution_code.animate.move_highlighter_to_line(4)
 
-    def pop_off_call_stack(self):
-        return (
-            self.call_stack.animate.pop(),
-            self.first_recursive_solution_code.animate.move_highlighter_to_line(6),
-            self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.head),
-        )
+    # def pop_off_call_stack(self):
+    #     return (
+    #         self.call_stack.animate.pop(),
+    #         self.first_recursive_solution_code.animate.move_highlighter_to_line(6),
+    #         self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.head),
+    #     )
 
-    def pop_off_call_stack_last_time(self):
-        return self.call_stack.animate.pop()
+    # def pop_off_call_stack_last_time(self):
+    #     return self.call_stack.animate.pop()
 
     def add_print_statements(self):
         new_code_string="\n".join(
@@ -414,7 +557,10 @@ class Video(BaseScene):
             SinglyLinkedList.create_sll(0, 1, 2, 3, color=self.title_tex.color)
             .add_null()
         )
-        self.four_node_linked_list.add_labeled_pointer(self.four_node_linked_list.head, label="head").move_to(self.pondering_rectangle)
+        self.four_node_linked_list.add_labeled_pointer(self.four_node_linked_list.head, label="head").move_to(self.pondering_rectangle).scale(0.75)
+
+        code_width = self.first_recursive_solution_code.max_line_width
+        self.code_rectangle.set_length(code_width + 0.5)
         self.terminal = self.recursive_cases_rectangle.copy().set_stroke_width(0).set_fill(color="#1C1C1C").set_fill(color=BLACK)
         font = "MesloLGS Nerd Font Mono"
         self.printed_lines = [
@@ -437,13 +583,30 @@ class Video(BaseScene):
             next_.align_to(prev, LEFT)
 
         self.first_recursive_solution_code.remove(self.first_recursive_solution_code.highlighter)
-        
         return (
             FadeOut(self.two_node_sll),
-            self.first_recursive_solution_code.animate.move_to(self.code_rectangle),
+            # self.first_recursive_solution_code.animate.move_to(self.code_rectangle),
             FadeIn(self.four_node_linked_list),
             FadeIn(self.terminal),
+            self.horizontal_line.animate.put_start_and_end_on(
+                (0, 0, 0),
+                self.horizontal_line.get_end(),
+            ),
+            FadeOut(self.recursive_steps),
+            FadeOut(self.empty_sll),
+            FadeOut(self.one_node_sll),
+            FadeOut(self.two_node_sll),
         )
+
+    def print_example_add_call_stack(self):
+        self.four_node_linked_list.resume_updating()
+        self.call_stack = Stack(
+            width=2,
+            height=3,
+            color=GRAY,
+        ).move_to(self.base_cases_rectangle)
+
+        return FadeIn(self.call_stack)
 
     def print_example_make_initial_call(self):
         return (
@@ -599,4 +762,55 @@ class Video(BaseScene):
             # ),
         )
 
+    def sneak_peak_into_before_recursive_call_implementation(self):
+        new_code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                "",
+                "",
+                "",
+                "        reverseList(head.next)",
+            ),
+        )
 
+        return CuratorSuccession(
+            AnimationGroup(
+                self.first_recursive_solution_code.animate.change_source_code(
+                    new_code_string=new_code_string,
+                    saturate_edits=False,
+                ),
+                # self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+                FadeIn(self.black_box_before_call),
+                FadeOut(self.four_node_linked_list),
+                FadeIn(self.two_node_sll.move_to(self.pondering_rectangle).scale(0.75)),
+                self.call_stack.animate.push("reverseList(0)")
+            ),
+            AnimationGroup(
+                self.first_recursive_solution_code.animate.move_highlighter_to_line(3),
+            ),
+            AnimationGroup(
+                # self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.get_next(self.two_node_sll.head))),
+                # self.call_stack.animate.push("reverseList(1)"),
+                self.first_recursive_solution_code.animate.move_highlighter_to_line(5),
+            ),
+            Succession(
+                self.two_node_sll.animate.set_next(self.two_node_sll.head, self.two_node_sll.null),
+            ),
+            AnimationGroup(
+                self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.head)),
+                self.call_stack.animate.push("reverseList(1)"),
+                self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
+            )
+            # AnimationGroup(
+            #     self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.get_next(self.two_node_sll.head))),
+            #     self.call_stack.animate.push("reverseList(1)"),
+            #     self.first_recursive_solution_code.animate.move_highlighter_to_line(3),
+            # ),
+        )
+
+    def sneak_peak_into_after_recursive_call_implementation(self):
+        ...

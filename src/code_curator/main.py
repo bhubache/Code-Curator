@@ -218,8 +218,10 @@ from code_curator.base_scene import BaseScene
 from code_curator.data_structures.stack import Stack
 from code_curator.code.curator_code import CuratorCode
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
+from code_curator.code.curator_code import add
 
 from manim import *
+from manim import RoundedRectangle
 
 def set_start_time(start_time: float):
     def inner(fn):
@@ -237,7 +239,7 @@ class TestVideo(BaseScene):
                 self.entries = []
 
         animation_script = TestAnimationScript()
-        animation_script.run_time = 4
+        animation_script.run_time = 1
 
         excluded_attr_names = "construct"
 
@@ -269,35 +271,27 @@ class TestVideo(BaseScene):
             ),
         )
 
-    def first_animation(self):
-        self.sll = SinglyLinkedList(0, 1, 2, 3).add_null()
-        first_node = self.sll.head
-        self.second_node = self.sll.get_next(self.sll.head)
-        third_node = self.sll.get_next(self.sll.get_next(self.sll.head))
-        fourth_node = self.sll.get_next(self.sll.get_next(self.sll.get_next(self.sll.head)))
-        self.sll.add_labeled_pointer(self.sll.head, "head")
-        self.add(self.sll)
+    # def first_animation(self):
+        # self.sll = SinglyLinkedList(0, 1, 2, 3).add_null()
+        # first_node = self.sll.head
+        # self.second_node = self.sll.get_next(self.sll.head)
+        # third_node = self.sll.get_next(self.sll.get_next(self.sll.head))
+        # fourth_node = self.sll.get_next(self.sll.get_next(self.sll.get_next(self.sll.head)))
+        # self.sll.add_labeled_pointer(self.sll.head, "head")
+        # self.add(self.sll)
 
-        self.sll.set_next(self.sll.head, self.sll.null, angle_in_degrees=90)
+        # self.sll.set_next(self.sll.head, self.sll.null, angle_in_degrees=90)
 
-        return self.sll.animate.set_next(self.second_node, first_node)
-        # self.first_recursive_solution_code = CuratorCode(
-        #     code="\n".join(:
-        #         (
-        #             "class ListNode:",
-        #             "",
-        #             "    def __init__(self, val=0, next_=None):",
-        #             "        self.val = val",
-        #             "        self.next = next_",
-        #         ),
-        #     ),
-        # )
-        # self.first_recursive_solution_code.add_highlighter(2)
-        # return FadeIn(self.first_recursive_solution_code)
+        # return self.sll.animate.set_next(self.second_node, first_node)
 
-    @set_start_time(2)
-    def second_animation(self):
-        return self.sll.animate.move_labeled_pointer("head", self.second_node)
+    def put_black_box_before_recursive_call(self):
+        sll = SinglyLinkedList.create_sll(0, 1, 2, 3).add_null()
+        sll.add_labeled_pointer(sll.head, "head")
+
+        sll.scale(0.75)
+
+        self.add(sll)
+
 
 
 if __name__ == "__main__":

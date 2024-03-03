@@ -1,0 +1,523 @@
+Reverse Linked List.
+
+Given the head of a singly linked list, reverse the list, and return the reversed list.
+
+Before we go over the constraints, let's first ask clarifying questions. Not only is
+this an important skill that will be expected of you in interviews, but it also helps
+you conceptualize the problem.
+
+When thinking of clarifying questions to ask, you should look for:
+1. Parts of the question that are unclear
+2. Edge cases
+
+I think the problem is clear, so let's focus on edge cases.
+
+The only input is a singly linked list, which is a recursive data structure. For starters, let's look at the ListNode class that makes up this data structure. A ListNode has two attributes:
+1. A value, which is an integer
+2. A next node, which is another ListNode object
+
+When thinking about the edge cases for a node's value, or any integer, you should think about the minimum and maximum value it could be. So, a clarifying question to ask would be:
+What is the lower and upper bound for a node's value? The reason a node's value concerns us is that if this problem involves arithmetic, we want to be aware of possible underflow and overflow. With that said, the solution likely just requires manipulating node's next pointers, so this question may end up not being necessary.
+
+The attribute next for a ListNode object is what makes the singly linked list recursive and can lead to emergent properties, or, properties found in a system but not in any of its individual components. In this case, one such property would be length, which is an integer. And, as stated early, with integers we are interested in the lower and upper bounds of its value. In the context of this problem, that means we're concerned with the lower and upper bounds on the number of nodes in a singly linked list. So, a clarifying question to ask would be:
+What is the lower and upper bound for the number of nodes in the linked list? The reason the lower bound on the number of nodes concerns us is that the way a linked list with zero nodes is handled could likely be different from a linked list with one, two, or more nodes. The reason the upper bound concerns us is that we need to know if the linked list is finite in size.
+
+Now for the constraints.
+
+- The number of nodes in the list is in the range 0 inclusive to 5,000 inclusive
+- A node's value is greater than or equal to -5,000 and less than or equal to positive 5,000
+
+Great! Both clarifying questions we asked were answered by the constraints and there were no constraints covering information we didn't ask about.
+
+Next, let's discuss what we think the time and space complexity will be for our solution.
+A good place to start is the best conceivable runtime. In this case, we need to visit at least every node, so the best our runtime can possibly
+be is linear. Considering this is a foundational concept, I'm pretty confident we can achieve this runtime.
+The space complexity will largely be determined by our implementation for traversing the linked list.
+We can do so iteratively or recursively.
+The recursive implementation can at best use linear space due to the call stack and the iterative solution likely requires a constant number of pointers which
+would use constant space.
+
+If the interviewer does not request a particular implementation then you should choose whatever you're most comfortable with.
+
+Let's work through both, starting with the recursive implementation.
+
+Recall that the steps for solving a recursive problem are as follows:
+1. Identify the base cases
+2. Identify the recursive cases
+
+[TALK ABOUT STRUCTURAL RECURSION OF SINGLY LINKED LIST]
+
+Base cases don't require any recursion to solve so they'll typically be the simplest and/or smallest inputs. The smallest input for this problem is an empty linked list. A reversed empty linked list is.. itself so no recursion is required and we can confirm that it is a base case. Stepping up in size, what about a linked list with one node? Well, this has the empty list as a subproblem, but we still don't need to recurse because its reverse is itself as well! What about two nodes? This case isn't trivial, so let's try now to use recursion to help. We know we're going to need to make a recursive call on the next subproblem so let's note that down. What now? Do we need to have code before the recursive call, after it, both?
+
+Let's add some print statements before and after the recursive call to get an idea for how the recursion proceeds: passing in 0 -> 1 -> 2 -> 3 -> null.
+
+def reverseList(head):
+    if head is None or head.next is None:
+        return head
+
+    print(f"before: {head.val}")
+    reverseList(head.next)
+    print(f"after: {head.val}")
+
+before: 0
+before: 1
+before: 2
+after: 2
+after: 1
+after: 0
+
+<Walk through the alorithm graphically
+
+Notice that:
+- All prints before the recursive call come before the prints after the recursive call
+- The prints before the recursive call are in the same order as the linked list
+- The prints after the recursive call are in the reverse order of the linked list
+
+[WHAT ABOUT HAVING CODE BEFORE AND AFTER RECURSIVE CALL?]
+
+Let's choose to proceed with placing our logic after the recursive call because it seems it may be simpler. We'll come back to placing the code before the recursive call.
+
+Let's step through our algorithm with a two node linked list (0 -> 1 -> null). We start at zero. Neither the head nor the head's next node is none, so we proceed to the recursive call. Within the recursive call, our head is now the node with value one. The head is not None but the head's next node is, so we've hit a base case and return the head, popping off the call stack. The head now points to zero again and we just completed the recursive call. This is the top most function call, so once it's completed, the whole linked list needs to be reversed and we need to return the head of the reversed linked list. We first reverse one's next pointer by setting head dot next dot next equal to head. [WHY DO WE REACH INTO THE NEXT SUBPROBLEM'S STATE?]. Then, we reverse zero's next pointer by setting head dot next equal to None. Lastly, we need to return the head of the reversed linked list.
+
+def reverseList(head):
+    if head is None or head.next is None:
+        return head
+
+    reverseList(head.next)
+    head.next.next = head
+    head.next = None
+
+You may be tempted to, before reversing the pointers, save a reference to zero's next node in order to return the new head. And this works, but only if the linked list has 2 nodes or les. Let's illustrate this by walking through this code with a a three node linked list (0 -> 1 -> 2 -> null).
+
+def reverseList(head):
+    if head is None or head.next is None:
+        return head
+
+    reverseList(head.next)
+    new_head = head.next
+    head.next.next = head
+    head.next = None
+
+    return new_head
+
+We continue to recurse until we hit the last node, which is one of our base cases. We return the head and pop off the call stack. We save a reverse to what the reversed head will be, reverse one's next pointer, and reverse head's next pointer. We then return the new head, pop off the call stack, and we're back to the top function call with the head at 0.
+
+h
+|
+\/
+ 0 -> 1 <- 2    null
+      |__________^
+
+Our attempt to save a reference to the head of the reversed linked list doesn't work because head dot next is not correct now. Where else do have access to the head of the reversed list? The return call from our base cases! We can save the return value from our recursive call and return that. Why does this work? If the algorithm should ultimately return the head of the reversed linked list and we're using recursion as our implementation, then we know that for each subproblem, the recursive call should return the head of the reversed linked list for its subproblem. As long as the head of a reversed linked list is the same for all of its subproblems, then we know this is correct. And it is! [EXPLAIN!]
+
+And this is a correct solution!
+
+Now let's go back to considering what would happen if we place our logic before the recursive call.
+
+def reverseList(head):
+    if head is None or head.next is None:
+        return head
+
+    # Code will go here
+    reverseList(head.next)
+
+Recall that the print statements placed before the recursive call executed in the same order as the linked list. That means the logic we place here will have to do all the reversing for a given node before moving on to its next node. Let's start to build our algorithm with an input linked list of two nodes (0 -> 1 -> null).
+
+def reverseList(head):
+    if head is None or head.next is None:
+        return head
+
+    # Code will go here
+    reverseList(head.next)
+
+For the initial call, the head is 0 and this is not a base case so we proceed passed the if statement. Now we need to reverse this node. We need to point zero's next pointer to its previous node, which we know to be None because it doesn't have a previous node. We can't just set head dot next equal to None though because this won't work for all subproblems. To illustrate this, let's say our input was instead a linked list with three nodes (0 -> 1 -> 2 -> null). We're not at a base case, so we set head dot next equal to None and recurse on head's next node. head is now 1 which is again not a base case so we move passed the if statement. Here, we need to set one's next pointer to zero, but our code is setting it to None. So, we need another way. We need access to a node's previous node. How are we supposed to do that when this is a singly linked list? What if, when we made our recursive call, we passed in not just head dot next, but also head, which would be the next subproblem's previous node. We can't modify the signature of our function, but we can *add* another function and have its signature be whatever we want. This introduces a tool to our tool box, namely the wrapper function. The wrapper function is directly called but does not recurse on itself. It instead makes a call to a helper function that performs the recursion. This is helpful for, among other things, validating input or performing initialization such as auxiliarly variables (https://en.wikipedia.org/wiki/Recursion_(computer_science))
+
+In our case, we'll have a helper function with two parameters: the head and the previous node. The wrapper exists just to delegate to our helper function, so let's move all the code to the helper. Then, let's add the code to the wrapper that calls the helper.
+
+def reverseList(self, head):
+    return _reverse_list_helper(head, prev=None):
+
+def _reverse_list_helper(self, head, prev):
+    if head is None or head.next is None:
+	return head
+
+    return self.reverseList(head.next)
+
+Now, we can reverse the pointer with head dot next equals prev and pass head as the prev argument to the recursive call.
+
+def reverseList(self, head):
+    return _reverse_list_helper(head, prev=None):
+
+def _reverse_list_helper(self, head, prev):
+    if head is None or head.next is None:
+	return head
+
+    head.next = prev
+
+    return self.reverseList(head.next, prev=head)
+
+But, there's actually an issue with the head dot next argument in the recursive call. It should be referring to the node with value one but it's pointing to None, because of the previous line. Before we reverse the head's next pointer, we have to save a reference to the head's next node.
+
+def reverseList(self, head):
+    return _reverse_list_helper(head, prev=None):
+
+def _reverse_list_helper(self, head, prev):
+    if head is None or head.next is None:
+	return head
+
+    next_node = head.next
+    head.next = prev
+
+    return self.reverseList(next_node, prev=head)
+
+Let's walk through the algorithm with a two node linked list (0 -> 1 -> null).
+
+The initial call is made to reverseList, which then delegates to the helper. head is neither None nor is its next node None so we continue passed the if statement. We save a reference to the head's next pointer and then reverse the head's next pointer. Next we make the recursive call. Here, head is the node with value 1 and prev is the node with value 0. head's next node is None, so we've hit a base case and return head, popping off the call stack and returning to the recursive call. We return here as well and go back inside reverseList, which returns as well and the algorithm terminates. Ok, something went wrong. (null <- 0    1 -> null). One's next pointer wasn't reversed because it's a base case and returned. I thought we determined in the previous solution that a linked list with one node is a base case, so what's going on? [EXPLAIN].
+
+We've managed to create two recursive solutions [TALK MORE ABOUT THIS.]
+
+Any recursive algorithm can be converted to an iterative one using loops and by simulating the call stack. Each element of the stack will be the state for a given recursive call, where the state is just the arguments passed in to the recursive function. Let's go back to our first recursive solution and convert it to an iterative one.
+
+Let's first create our stack. I'll be using a list.
+
+def reverseList(head):
+    stack = []
+
+Also, in our initial call to reverseList, the call stack will contain the current call. So let's make sure head is in the stack.
+
+def reverseList(head):
+    stack = [head]
+
+Ok, because all of the code before the recursive call is executed before any of the code after the recursive call, we can break our iterative solution into two corresponding parts.
+
+The first portion involves continuously making recursive calls on the head's next node until a base case is reached. I think the clearest way to emulate this is with an infinite loop that we break out of when the base case is reached.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        if head is None or head.next is None:
+            break
+
+The top of the while loop is equivalent to the start of each recursive call, so we set our state to what it would be if the function were just called. We can do this using our stack. Simply set head equal to the top of the stack.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            break
+
+To simulate the recursive call, we can append the parameters passed to it, which is just head dot next, to the stack.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            break
+
+        stack.append(head.next)
+
+Now, when the base case is reached, we need to pop off the simulated call stack because we're emulating a return from a recursive call.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            stack.pop()
+            break
+
+        stack.append(head.next)
+
+Also, this becomes the head of the reversed linked list, so we can assign it to new head.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            new_head = stack.pop()
+            break
+
+        stack.append(head.next)
+
+Also, this is what will ultimately be returned by the algorithm so let's add that.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            new_head = stack.pop()
+            break
+
+        stack.append(head.next)
+
+    return new_head
+
+Next we need to simulate reversing the next pointers after each recursive call. As long as there remains functions on the call stack, we're going to reverse pointers. The logic for reversing the pointers can be copy pasted from the recursive solution.
+
+def reverseList(head):
+    stack = [head]
+
+    while True:
+        head = stack[-1]
+        if head is None or head.next is None:
+            new_head = stack.pop()
+            break
+
+        stack.append(head.next)
+
+    while stack:
+        head = stack.pop()
+        head.next.next = head
+        head.next = None
+
+    return new_head
+
+Because we translated this from another algorithm rather than building it up, let's step through it with different inputs starting with an empty linked list. Our simulated stack initially contains the value None. Within our first while loop head is None, so we've hit a base case. We pop off the stack and assign the popped value to new head and break out of the while loop. The next while loop isn't entered because the stack is empty. Lastly, we return new head. Ok, this worked with an empty list. Let's check with a one node linked list.
+
+Our simulated stack initially contains the node with value zero. head isn't None, but head dot next is, so we've hit a base case. We pop off the stack and assign the popped value to new head and break out of the while loop. Again, the next while loop isn't entered because the stack is empty so we instead immediately return new head. Great, this works with a one node linked list! Let's check it with a two node linked list.
+
+Our stack initially contains the node with value zero. We enter the first while loop and neither the head nor the head's next node is None so we moved passed the if condition. We simulate the recursive call by appending the head's next node to the stack and make head equal to head dot next. We jump back to the top of the while loop and head still isn't None, but head dot next is, so we've hit a base case. We pop off the stack and assign the popped value to new head and break out of the while loop. This time our stack is not empty, so we enter the second while loop. We pop off the stack and assign the popped value to head, and then perform the same pointer reversal that we did in the recursive implementation. At the top of the while loop again, the stack is empty so we don't enter it again and instead return new head. Ok, this works with two nodes as well! For the sake of time, I won't walk through a three node linked list. Let's just consider ourselves confident this is correct.
+
+Now, let's translate the other recursive solution into an iterative one. This can again be broken down into two portions: code that comes before the recursive call, and code that comes after.
+
+We had to use a wrapper function in the recursive version of this because we needed the recursive function to have a different signature. Here, the stack mimics the calls to the helper so we don't need a wrapper function.
+
+prev is initially None and our stack contains the head and prev.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+We're going to use the same pattern for mimicking the recursive calls with a while True statement and using the base case as a means of breaking out of the while loop.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        if head is None:
+            break
+
+Recall that the top of the while loop is equivalent to the beginning of the function call, so we have to get the state from our simulated call stack.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            break
+
+When our base case is hit, we're going to pop off the stack and assign the prev value to new head: which will ultimately be returned by the algorithm.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+    return new_head
+
+Then we simply copy and paste the pointer reversal logic.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+    return new_head
+
+To simulate the recursive call, just append the state for the call to our stack.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    return new_head
+
+That's all for the code that comes before the recursive call. Because there's no code that comes after the recursive call, all we have to do is pop back up from our simulated call stack.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    while stack:
+        stack.pop()
+
+    return new_head
+
+Let's walk through some examples now: starting with an empty linked list. We set prev to None, initialize our stack with a pairing of None for the head and None for the previous node. We enter the while loop and setup our state from the stack. head is None so we've hit our base case, popping from the stack and saving the previous node as our new head and breaking out of the while loop. On to the second while loop, our stack is empty so we don't enter it and instead return new head, which is correctly None. Alright this works, let's try a singly linked list with one node.
+
+We initialize prev as None and the stack with its head as the node with value zero and prev as None. We enter the first while loop and setup our state from the stack with head being the node with value zero and prev being None. head is not None so pass the if block and proceed to the reversal logic. We save a reference to the head's next node and then reverse the next node. Then we simulate the recursive call by pushing next node paired with head to the stack. Back at the top of the while loop we setup our state with head being None and prev being the node with value zero. head is None so we've hit our base case. We pop from the stack, assign prev to new head, and break out of the while loop. We reach our second while loop which is entered because stack is not yet empty. We pop from the stack and go back to the top of the while loop. The stack is now empty so we don't enter the while loop again and instead return new head. Ok, a one node linked list was also correctly reversed. Let's step through this one more time with a two node linked list.
+
+We initialize prev as None and the stack with its head as the node with value zero and prev as None. We enter the first while loop and setup our state from the stack with head being the node with value zero and prev being None. head is not None so pass the if block and proceed to the reversal logic. We save a reference to the head's next node and then reverse the head's next node. Then we simulate the recursive call by pushing the next node and head to the stack. Back at the top of the while loop, we setup our state from the stack with head being the node with value one and prev being the node with value zero. Again, head is not None so pass the if block and proceed to the reversal logic. We save a reference to the head's next node and then reverse the head's next pointer. Then we simulate the recursive call by pushing the next node and head to the stack. Back at the top of the while loop, we setup our state from the stack with head being None and prev being the node with value one. head is now None so we've hit our base case. Inside the if block we pop from the stack to simulate the return, assign the previous node to new head, and break out of the while loop. We reach the second while loop which we enter because the stack is not empty. We pop from the stack and jump back to the top of the while loop. We enter it again because the stack is not empty and pop from the stack. Now, the stack is empty so we don't enter the while loop and instead return new head. Ok, this correctly reverses a two node linked list. Ok, let's call this a correct solution!
+
+However, this can be improved because it looks like there's some unnecessary code. The second while loop for instance. All it's doing is popping from the stack, which has no affect on the value assigned to new head. So, let's get rid of it.
+
+def reverseList(head):
+    prev = None
+    stack = [(head, prev)]
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    return new_head
+
+Can this be simplified any further? Think about the purpose of the stack in the first recursive solution and its iterative couterpart. When we popped of the stack, we needed the state of previous recursive calls in order to perform the reversal. But here, there is no code after the recursive call, so there's no need to maintain the state of previous recursive calls. Therefore, a stack isn't needed. Let's remove the initialization of the stack:
+
+def reverseList(head):
+    prev = None
+
+    while True:
+        head, prev = stack[-1]
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    return new_head
+
+And the the state setup at the beginning of the while loop:
+
+def reverseList(head):
+    prev = None
+
+    while True:
+        if head is None:
+            _, new_head = stack.pop()
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    return new_head
+
+Within the if block, we can just set new head equal to prev
+
+def reverseList(head):
+    prev = None
+
+    while True:
+        if head is None:
+            new_head = prev
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        stack.append((next_node, head))
+
+    return new_head
+
+and where we append to the stack to simulate the recursive call, we can set prev equal to head and head equal to next node.
+
+def reverseList(head):
+    prev = None
+
+    while True:
+        if head is None:
+            new_head = prev
+            break
+
+        next_node = head.next
+        head.next = prev
+
+        prev = head
+        head = next_node
+
+    return new_head
+
+The order of this last change matters, because if you set head equal to next first you would then be setting prev to the next node as well.
+
+One last change that I think will improve the readability, is if we invert the base case condition, make it the condition for the while loop, and remove the if block.
+
+def reverseList(head):
+    prev = None
+
+    while head is not None:
+        next_node = head.next
+        head.next = prev
+
+        prev = head
+        head = next_node
+
+    return new_head
+
+And we have our iterative solution! Now what was so special about the second recursive solution that allowed us to end up with such a simple iterative implementation? Well remember it's because there was no code that had to be executed after the recursive call, which meant there was no need to simulate the call stack. This type of recursion, one that has the recursive call as its last statement, after other processing, is called tail recursion and can always be translated to an iterative implementation that does not require simulation of the call stack. [TALK ABOUT TAIL-CALL OPTIMIZATION]. The other recursive solution uses head recursion, which is when a recursive call is at the beginning of the function, aside from base cases, before other processing.
+
+Let's discuss the time and space complexity of each solution.
+
+Let's look at each statement in the head recursive solution.
+The comparisons, attribute acccess, and return statement before the recursive call all take constant time and space.
+The assignments, attribute acceses, and return statement after the recursive call all take constant time and space as well.
+So each recursive call takes a constant amount of time and uses a constant amount of space.
+Each recursive call takes as input a singly linked list with one less node than the call before it, meaning there will be a total of n calls where n is the number of nodes in the singly linked list. This means the total time complexity is big o of n and the total space complexity is big of n as well because of the call stack.
+
+Now let's take a look at its iterative counterpart.
+[COMPLETE THIS PART].
+
+Now let's look at the tail recursive solution.
+The initial call just delegates to the helper function.
+Within the helper function the comparison, return prev statement, assignments, and attribute accesses all take constant time. Each recursive call takes as input a singly linked list with one less, meaning there will be a total of n calls where n is the number of nodes in the singly linked list. This means the total time complexity is big o of n and the total space complexity is big of n as well because of the call stack, assuming the language being used doesn't utilize tail-call optimization.
+
+Now let's take a look at its iterative counterpart.
+All off the assignments, comparisons, return statements, and attributes accesses take constant time and space. With each iteration, the singly linked list shrinks by one node, meaning there will be a total of n iterations where n is the number of nodes in the singly linked list. The total time complexity is therefore O(n) * O(1) equals O(n) time. For the space complexity, there are no auxiliary data structures used and there's no overhead incurred by the call stack, so this solution uses O(1) space.
