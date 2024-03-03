@@ -77,7 +77,7 @@ class CodeHighlighter(Rectangle):
 
         return self
 
-    def move_to_line(self, line_num: int):
+    def move_to_line(self, line_num: int, num_line_span: int = 1):
         if line_num < 1 or line_num > self.code.num_lines:
             raise ValueError(
                 f"``line_num`` must be in range [1, {self.code.num_lines}]. Given {line_num}",

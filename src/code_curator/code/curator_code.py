@@ -305,8 +305,9 @@ class CuratorCode(CustomVMobject):
         self.remove(self.highlighter)
         return self
 
-    def move_highlighter_to_line(self, line_num: int) -> None:
-        return self.highlighter.move_to_line(line_num)
+    def move_highlighter_to_line(self, line_num: int, num_line_span: int = 1) -> None:
+        self.highlighter.move_to_line(line_num)
+        ...
 
     def move_highlighter_to_substring(self, substring: str, occurrence: int = 1, num_lines: int | None = None):
         return self.highlighter.move_to_substring(
