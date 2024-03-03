@@ -57,11 +57,24 @@ class AnimationPool:
         self.scene = scene
         self.total_run_time = total_run_time
         self.animations: set[Animation] = set()
+        self.queue = []
 
     def add(self, method: Callable[[], Animation | Iterable[Animation]]) -> None:
         animations = method()
+        from code_curator.animations.curator_succession import CuratorSuccession
+
+        if isinstance(animations, CuratorSuccession):
+            method.__func__.start_alpha = value_from_range_to_range(
+                value=method_info["start_time"],
+                init_min=0,
+                init_max=self.run_time,
+                new_min=0,
+                new_max=1,
+            )
         if not isinstance(animations, Iterable):
             animations = [animations]
+
+        # TODO: Don't start animations within CuratorSuccession until they're meant to be started
 
         for anim in animations:
             if anim is None:
