@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools as it
 from typing import Self
 from typing import TYPE_CHECKING
 
@@ -276,6 +277,30 @@ class SinglyLinkedList(CustomVMobject):
                 self.graph.remove(mob)
             else:
                 raise NotImplementedError(f"Removal of mobject {mob} from SLL not yet supported")
+
+    def scale(self, factor: float) -> Self:
+        original_center = self.get_center()
+
+        self.graph.scale(factor)
+
+        if self.has_next(self.head):
+            nodes = self.nodes + [self.null] if self.has_null else []
+            node_copies = [node.copy() for node in nodes]
+            for (curr, next_), (curr_copy, next_copy) in zip(it.pairwise(nodes), it.pairwise(node_copies)):
+                current_vector = next_copy.get_center() - curr_copy.get_center()
+                new_vector = current_vector * factor
+
+                next_.move_to(curr.get_center() + np.array(new_vector))
+
+        for node in self.nodes:
+            self.get_next_pointer(node).resume_updating()
+
+        for labeled_pointer in self.graph.labeled_pointers.values():
+            labeled_pointer.resume_updating()
+
+        self.move_to(original_center)
+
+        return self
 
     def get_node(self, index: int) -> Node:
         return self.nodes[index]

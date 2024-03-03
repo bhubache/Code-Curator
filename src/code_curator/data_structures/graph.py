@@ -19,6 +19,7 @@ from code_curator.custom_vmobject import CustomVMobject
 from code_curator.data_structures.element import Element
 
 if TYPE_CHECKING:
+    from typing import Self
     from collections.abc import Iterable
     from collections.abc import Sequence
     from colour import Color
@@ -166,6 +167,11 @@ class Vertex(CustomVMobject):
             return None
 
         return self.label_mobject.value
+
+    def scale(self, factor: float) -> Self:
+        super().scale(factor)
+        self.container.radius *= factor
+        return self
 
     def proportion_from_point(self, point) -> float:
         return self.container.proportion_from_point(point)
@@ -453,6 +459,12 @@ class Graph(CustomVMobject):
                 raise NotImplementedError(f"Removing mob {mob} from {self.__class__.__name__} is not yet supported")
 
             self.submobjects.remove(mob)
+
+    def scale(self, factor: float) -> Self:
+        for sm in self.submobjects:
+            sm.scale(factor)
+
+        return self
 
     def get_labeled_pointer(self, name: str) -> LabeledLine:
         return self.labeled_pointers[name]
