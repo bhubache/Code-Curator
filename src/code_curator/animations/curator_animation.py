@@ -43,6 +43,8 @@ class CuratorAnimation(Animation):
                 animation.clean_up_from_scene(self.scene)
                 self.animation_pool.animations.remove(animation)
 
+        self.animation_pool.interpolate_finished_animations(alpha)
+
         if len(self.pending_queue) > 0 and alpha >= self.pending_queue[0].start_alpha:
             self.animation_pool.add(self.pending_queue.popleft())
 
@@ -77,6 +79,13 @@ class AnimationPool:
             self.animations.add(anim)
             anim._setup_scene(self.scene)
             anim.begin()
+
+    def interpolate_finished_animations(self, alpha: float) -> None:
+        for anim in self.animations.copy():
+            if alpha >= anim.end_alpha:
+                anim.finish()
+                anim.clean_up_from_scene(self.scene)
+                self.animations.remove(anim)
 
     def interpolate(self, alpha: float) -> None:
         for anim in self.animations.copy():
