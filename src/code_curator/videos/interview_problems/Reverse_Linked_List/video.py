@@ -39,6 +39,7 @@ from code_curator.code.curator_code import CuratorCode
 from code_curator.code.curator_code import remove, add, edit
 from code_curator.animations.fixed_succession import FixedSuccession
 from code_curator.animations.curator_succession import CuratorSuccession
+from code_curator.animations.curator_animation_group import CuratorAnimationGroup
 
 
 TITLE = "Reverse Linked List"
@@ -778,7 +779,7 @@ class Video(BaseScene):
         )
 
         return CuratorSuccession(
-            AnimationGroup(
+            CuratorAnimationGroup(
                 self.first_recursive_solution_code.animate.change_source_code(
                     new_code_string=new_code_string,
                     saturate_edits=False,
@@ -789,18 +790,18 @@ class Video(BaseScene):
                 FadeIn(self.two_node_sll.move_to(self.pondering_rectangle).scale(0.75)),
                 self.call_stack.animate.push("reverseList(0)")
             ),
-            AnimationGroup(
+            CuratorAnimationGroup(
                 self.first_recursive_solution_code.animate.move_highlighter_to_line(3),
             ),
-            AnimationGroup(
+            CuratorAnimationGroup(
                 # self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.get_next(self.two_node_sll.head))),
                 # self.call_stack.animate.push("reverseList(1)"),
                 self.first_recursive_solution_code.animate.move_highlighter_to_line(5),
             ),
-            Succession(
+            CuratorSuccession(
                 self.two_node_sll.animate.set_next(self.two_node_sll.head, self.two_node_sll.null),
             ),
-            AnimationGroup(
+            CuratorAnimationGroup(
                 self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.head)),
                 self.call_stack.animate.push("reverseList(1)"),
                 self.first_recursive_solution_code.animate.move_highlighter_to_line(2),

@@ -219,6 +219,8 @@ from code_curator.data_structures.stack import Stack
 from code_curator.code.curator_code import CuratorCode
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
 from code_curator.code.curator_code import add
+from code_curator.animations.curator_animation_group import CuratorAnimationGroup
+from code_curator.animations.curator_succession import CuratorSuccession
 
 from manim import *
 from manim import RoundedRectangle
@@ -285,12 +287,30 @@ class TestVideo(BaseScene):
         # return self.sll.animate.set_next(self.second_node, first_node)
 
     def put_black_box_before_recursive_call(self):
-        sll = SinglyLinkedList.create_sll(0, 1, 2, 3).add_null()
-        sll.add_labeled_pointer(sll.head, "head")
+        animation = Succession(
+            Succession(
+                FadeIn(Circle()),
+                FadeIn(Square()),
+            ),
+            AnimationGroup(
+                FadeIn(Circle()),
+                FadeIn(Square()),
+                FadeIn(Circle()),
+            ),
+            Succession(
+                Succession(
+                    FadeIn(Circle()),
+                    FadeIn(Square()),
+                ),
+                AnimationGroup(
+                    FadeIn(Circle()),
+                    FadeIn(Square()),
+                ),
+            ),
+        )
 
-        sll.scale(0.75)
+        return animation
 
-        self.add(sll)
 
 
 
