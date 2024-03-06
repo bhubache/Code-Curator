@@ -9,6 +9,7 @@ from manim import Animation
 from manim import prepare_animation
 
 from .utils.math_ import value_from_range_to_range
+from code_curator.animations.composition import CuratorAnimationGroup
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -41,11 +42,10 @@ class CuratorAnimation(Animation):
         while self.pending_queue and self.pending_queue[0].start_alpha < 0:
             method = self.pending_queue.popleft()
             self.animation_pool.add(method)
-            for animation in self.animation_pool.animations.copy():
-                animation.interpolate(1)
-                animation.finish()
-                animation.clean_up_from_scene(self.scene)
-                self.animation_pool.animations.remove(animation)
+            if len(self.pending_queue) >= 1:
+                self.animation_pool.interpolate(self.pending_queue[0].start_alpha)
+            else:
+                raise NotImplementedError("Likely just have to ``self.animation_pool.interpolate(1)``")
 
         self.animation_pool.interpolate_finished_animations(alpha)
 
@@ -103,13 +103,15 @@ class AnimationPool:
                     new_max=1,
                 )
 
-                self.backlog.append(animation)
+                self._add_to_backlog(animation)
 
-            for a in self.backlog:
-                if a.start_alpha == anim.start_alpha:
-                    self.animations.add(anim)
-                    anim._setup_scene(self.scene)
-                    anim.begin()
+    def _add_to_backlog(self, new_animation: Animation) -> None:
+        for index, anim in enumerate(self.backlog.copy()):
+            if new_animation.start_alpha >= anim.start_alpha:
+                self.backlog.insert(index, new_animation)
+                break
+        else:
+            self.backlog.append(new_animation)
 
     def _extract_animations_with_absolute_timings(
         self,
@@ -176,15 +178,12 @@ class AnimationPool:
         )
 
     def _extract_animations_with_absolute_timings_helper(self, animation: Animation, parent_start_time: float):
-        try:
-            animations_with_timings = animation.anims_with_timings
-        except AttributeError:
+        if not isinstance(animation, CuratorAnimationGroup):
             yield animation, 0, animation.run_time
         else:
+            animations_with_timings = animation.anims_with_timings
             for subanimation, sub_start_time, sub_end_time in animations_with_timings:
-                try:
-                    _ = subanimation.anims_with_timings
-                except AttributeError:
+                if not isinstance(subanimation, CuratorAnimationGroup):
                     yield subanimation, sub_start_time + parent_start_time, sub_end_time + parent_start_time
                 else:
                     extracted_timings = self._extract_animations_with_absolute_timings_helper(
@@ -212,6 +211,13 @@ class AnimationPool:
                 self.animations.remove(anim)
 
     def interpolate(self, alpha: float) -> None:
+        for anim in self.backlog.copy():
+            if anim.start_alpha <= alpha:
+                self.backlog.remove(anim)
+                self.animations.add(anim)
+                anim._setup_scene(self.scene)
+                anim.begin()
+
         for anim in self.animations.copy():
             if alpha < anim.end_alpha:
                 anim.interpolate(
@@ -224,6 +230,7 @@ class AnimationPool:
                     ),
                 )
             else:
+                anim.interpolate(1)
                 anim.finish()
                 anim.clean_up_from_scene(self.scene)
                 self.animations.remove(anim)
