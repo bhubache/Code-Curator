@@ -3,11 +3,15 @@ from __future__ import annotations
 import collections
 from collections.abc import Iterable
 from typing import Callable
+from typing import TYPE_CHECKING
 
 from manim import Animation
 from manim import prepare_animation
 
 from .utils.math_ import value_from_range_to_range
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class CuratorAnimation(Animation):
@@ -80,8 +84,7 @@ class AnimationPool:
                 new_max=1,
             )
 
-            breakpoint()
-            animations_with_timings = self._extract_animations_with_timings(anim)
+            animations_with_timings = self._extract_animations_with_absolute_timings(anim)
 
             for animation, start_time, end_time in animations_with_timings:
                 animation.start_alpha = anim.start_alpha + value_from_range_to_range(
@@ -92,7 +95,7 @@ class AnimationPool:
                     new_max=1,
                 )
 
-                animation.end_alpha = anim.start_alpha + value_from_range_to_value(
+                animation.end_alpha = anim.start_alpha + value_from_range_to_range(
                     value=end_time,
                     init_min=0,
                     init_max=self.total_run_time,
@@ -108,73 +111,98 @@ class AnimationPool:
                     anim._setup_scene(self.scene)
                     anim.begin()
 
-    def _extract_animations_with_timings(self, animation: Animation):
-        animations_with_timings = list(self._extract_animations_with_timings_helper(animation))
+    def _extract_animations_with_absolute_timings(
+        self,
+        animation: Animation,
+    ) -> Sequence[tuple[Animation, float, float]]:
+        """Get animations with their absolute timings.
 
-        # max_value = 0
-        # for index, (anim, start_time, end_time) in enumerate(animations_with_timings.copy()):
-        #     if start_time < max_value:
-        #         start_time += max_value
+        The output is similar to ``AnimationGroup.anims_with_timings`` except
+        that the timings are all relative to the overall animation, rather than
+        an animation's immediate parent. For example, here's an animation and what the
+        output would look like from this method:
 
-        #     if end_time < max_value:
-        #         end_time += max_value
+        Input:
+            animation = Succession(
+                Succession(
+                    FadeIn(Circle()),
+                    FadeIn(Square()),
+                ),
+                AnimationGroup(
+                    FadeIn(Circle()),
+                    FadeIn(Square()),
+                    FadeIn(Circle()),
+                ),
+                Succession(
+                    Succession(
+                        FadeIn(Circle()),
+                        FadeIn(Square()),
+                    ),
+                    AnimationGroup(
+                        FadeIn(Circle()),
+                        Succession(
+                            FadeIn(Rectangle()),
+                            FadeIn(Ellipse()),
+                        ),
+                        FadeIn(Square()),
+                    ),
+                ),
+            )
 
-        #     animations_with_timings[index] = (
-        #         anim,
-        #         start_time,
-        #         end_time,
-        #     )
+        Output:
+            [(FadeIn(Circle), 0, 1.0),
+             (FadeIn(Square), 1.0, 2.0),
+             (FadeIn(Circle), 2.0, 3.0),
+             (FadeIn(Square), 2.0, 3.0),
+             (FadeIn(Circle), 2.0, 3.0),
+             (FadeIn(Circle), 3.0, 4.0),
+             (FadeIn(Square), 4.0, 5.0),
+             (FadeIn(Circle), 5.0, 6.0),
+             (FadeIn(Rectangle), 5.0, 6.0),
+             (FadeIn(Ellipse), 6.0, 7.0),
+             (FadeIn(Square), 5.0, 6.0)]
 
-        #     max_value = max(max_value, start_time, end_time)
+        Args:
+            animation: The animation from which the timings will be extracted
 
-        return animations_with_timings
+        Returns:
+            A list of tuple containing the animation, absolute start time, absolute end time
+        """
+        return list(
+            self._extract_animations_with_absolute_timings_helper(
+                animation,
+                parent_start_time=0,
+            ),
+        )
 
-    def _extract_animations_with_timings_helper(self, animation: Animation):
+    def _extract_animations_with_absolute_timings_helper(self, animation: Animation, parent_start_time: float):
         try:
             animations_with_timings = animation.anims_with_timings
         except AttributeError:
             yield animation, 0, animation.run_time
         else:
-            for anim, start_time, end_time in animations_with_timings:
+            for subanimation, sub_start_time, sub_end_time in animations_with_timings:
                 try:
-                    anims_with_timings = anim.anims_with_timings
+                    _ = subanimation.anims_with_timings
                 except AttributeError:
-                    yield anim, start_time, end_time
+                    yield subanimation, sub_start_time + parent_start_time, sub_end_time + parent_start_time
                 else:
-                    breakpoint()
-                    inter = self._extract_animations_with_timings_helper(anim)
-                    yield from inter
+                    extracted_timings = self._extract_animations_with_absolute_timings_helper(
+                        subanimation,
+                        parent_start_time=sub_start_time,
+                    )
 
-    # def _unpack_animation(self, animation: Animation, start_alpha: float) -> None:
-    #     if not isinstance(animation, CuratorAnimationGroup):
-    #         animation.start_alpha = start_alpha
-    #         animation.end_alpha = start_alpha + value_from_range_to_range(
-    #             value=animation.run_time,
-    #             init_min=0,
-    #             init_max=self.total_run_time,
-    #             new_min=0,
-    #             new_max=1,
-    #         )
+                    subanimations_with_absolute_timings = []
+                    for extracted_subanimation, extracted_start_time, extracted_end_time in extracted_timings:
+                        subanimations_with_absolute_timings.append(
+                            (
+                                extracted_subanimation,
+                                extracted_start_time + parent_start_time,
+                                extracted_end_time + parent_start_time,
+                            ),
+                        )
 
-    #         yield animation
-    #     else:
-    #         offset = 0
-
-    #         for index, anim in enumerate(animation.animations):
-    #             if index > 0:
-    #                 prev_run_time = animation.animations[index - 1].get_run_time()
-    #                 offset += value_from_range_to_range(
-    #                     value=prev_run_time * animation.lag_ratio,
-    #                     init_min=0,
-    #                     init_max=self.total_run_time,
-    #                     new_min=0,
-    #                     new_max=1,
-    #                 )
-
-    #             yield from self._unpack_animation(
-    #                 anim,
-    #                 start_alpha + offset
-    #             )
+                    yield from subanimations_with_absolute_timings
 
     def interpolate_finished_animations(self, alpha: float) -> None:
         for anim in self.animations.copy():
