@@ -218,9 +218,7 @@ from code_curator.base_scene import BaseScene
 from code_curator.data_structures.stack import Stack
 from code_curator.code.curator_code import CuratorCode
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
-from code_curator.code.curator_code import add
-from code_curator.animations.curator_animation_group import CuratorAnimationGroup
-from code_curator.animations.curator_succession import CuratorSuccession
+from code_curator.code.curator_code import add, remove
 
 from manim import *
 from manim import RoundedRectangle
@@ -287,31 +285,44 @@ class TestVideo(BaseScene):
         # return self.sll.animate.set_next(self.second_node, first_node)
 
     def put_black_box_before_recursive_call(self):
-        animation = Succession(
-            Succession(
-                FadeIn(Circle()),
-                FadeIn(Square()),
-            ),
-            AnimationGroup(
-                FadeIn(Circle()),
-                FadeIn(Square()),
-                FadeIn(Circle()),
-            ),
-            Succession(
-                Succession(
-                    FadeIn(Circle()),
-                    FadeIn(Square()),
-                ),
-                AnimationGroup(
-                    FadeIn(Circle()),
-                    FadeIn(Square()),
-                ),
+        code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                '        print("before: {head.val}")',
+                "        reverseList(head.next)",
+                '        print("after: {head.val}")',
             ),
         )
 
-        return animation
+        self.my_code = CuratorCode(
+            code=code_string,
+        )
 
+        self.add(self.my_code)
+        newline = "\n"
 
+        new_code_string = "\n".join(
+            (
+                "class Solution:",
+                "    def reverseList(self, head):",
+                "        if head is None or head.next is None:",
+                "            return head",
+                "",
+                f"{add(newline)}{add(newline)}{add(newline)}",
+                remove('        print("before: {head.val}")'),
+                "        reverseList(head.next)",
+                remove('        print("after: {head.val}")'),
+            ),
+        )
+
+        return self.my_code.animate.change_source_code(
+            new_code_string=new_code_string,
+            saturate_edits=False,
+        )
 
 
 if __name__ == "__main__":

@@ -30,6 +30,8 @@ from manim import UP
 from manim import VGroup
 from manim import Wait
 
+from code_curator.animations.composition import CuratorAnimationGroup
+from code_curator.animations.composition import CuratorSuccession
 from code_curator.base_scene import BaseScene
 from code_curator.videos.interview_problems.problem_text import ProblemText
 from code_curator.data_structures.singly_linked_list import SinglyLinkedList
@@ -37,9 +39,6 @@ from code_curator.data_structures.stack import Stack
 from code_curator.animations.singly_linked_list.transform_sll import TransformSinglyLinkedList
 from code_curator.code.curator_code import CuratorCode
 from code_curator.code.curator_code import remove, add, edit
-from code_curator.animations.fixed_succession import FixedSuccession
-from code_curator.animations.curator_succession import CuratorSuccession
-from code_curator.animations.curator_animation_group import CuratorAnimationGroup
 
 
 TITLE = "Reverse Linked List"
@@ -764,26 +763,31 @@ class Video(BaseScene):
         )
 
     def sneak_peak_into_before_recursive_call_implementation(self):
+        newline = "\n"
         new_code_string = "\n".join(
             (
                 "class Solution:",
                 "    def reverseList(self, head):",
                 "        if head is None or head.next is None:",
                 "            return head",
-                "",
-                "",
-                "",
-                "",
+                f"{add(newline)}{add(newline)}{add(newline)}",
+                remove('        print("before: {head.val}")'),
                 "        reverseList(head.next)",
+                remove('        print("after: {head.val}")'),
             ),
         )
 
+        #  return self.first_recursive_solution_code.animate.change_source_code(
+        #      new_code_string=new_code_string,
+        #      saturate_edits=False,
+        #  )
+
         return CuratorSuccession(
             CuratorAnimationGroup(
-                self.first_recursive_solution_code.animate.change_source_code(
-                    new_code_string=new_code_string,
-                    saturate_edits=False,
-                ),
+                # self.first_recursive_solution_code.animate.change_source_code(
+                #     new_code_string=new_code_string,
+                #     saturate_edits=False,
+                # ),
                 # self.first_recursive_solution_code.animate.move_highlighter_to_line(2),
                 FadeIn(self.black_box_before_call),
                 FadeOut(self.four_node_linked_list),
@@ -799,7 +803,7 @@ class Video(BaseScene):
                 self.first_recursive_solution_code.animate.move_highlighter_to_line(5),
             ),
             CuratorSuccession(
-                self.two_node_sll.animate.set_next(self.two_node_sll.head, self.two_node_sll.null),
+                self.two_node_sll.animate.set_next(self.two_node_sll.head, self.two_node_sll.null, angle_in_degrees=90),
             ),
             CuratorAnimationGroup(
                 self.two_node_sll.animate.move_labeled_pointer("head", self.two_node_sll.get_next(self.two_node_sll.head)),
