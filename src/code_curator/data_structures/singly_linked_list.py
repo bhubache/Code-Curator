@@ -640,7 +640,7 @@ class AnimationBuilder(_AnimationBuilder):
             # have its updating suspended during animation
             for mobject in self.mobject.get_family():
                 if not isinstance(mobject, Edge):
-                    mobject.suspend_updating(recursive=False)
+                    mobject.suspend_updating(recursive=True)
 
             anim = TransformSinglyLinkedList(self.mobject, self.methods)
 

@@ -79,6 +79,17 @@ print_example_initial_call_move_to_last_print: proceed to the next line
 print_example_initial_call_last_print: and execute the print statement. The code then implicitly returns none and we
 print_example_pop_initial_call: pop off the call stack. The call stack is now empty so the algorithm has finished running. Look carefully at what was printed. All prints before the recursive call come before the prints after the recursive call. The prints before the recursive call are in the same order as the linked list. The prints after the recursive call are in the reverse order of the linked list. What this tells us is that
 __START__:
-sneak_peak_into_before_recursive_call_implementation: if we placed the code before the recursive call, we would have to reverse a node's next pointer before its next node's.
-sneak_peak_into_after_recursive_call_implementation: And if we placed the code after the recursive call, we would have to reverese a node's next pointer before its preceding node's.
-# sneak_peak_into_before_and_after_recursive_call_implementation: And if we placed the code before and after the recursive call, well then 
+sneak_peek_into_before_recursive_call_implementation: if we placed the code before the recursive call
+sneak_peek_before_recursive_call_make_initial_call: then as we traversed our algorithm,
+sneak_peek_before_recursive_call_move_to_black_box: we would have to
+sneak_peek_before_recursive_call_perform_reversal: reverse a node's next
+sneak_peek_before_recursive_call_move_to_recursive_call: pointer before its
+sneak_peek_before_recursive_call_make_recursive_call: next node's.
+sneak_peek_into_after_recursive_call_implementation: If instead we placed the code after the recursive call,
+sneak_peek_into_after_recursive_call_make_initial_call: then as we
+sneak_peek_into_after_recursive_call_make_recursive_call: traversed our algorithm,
+sneak_peek_into_after_recursive_call_return_head: we would 
+sneak_peek_into_after_recursive_call_move_to_reversal_code: have to
+sneak_peek_into_after_recursive_call_do_first_reversal: reverse a node's next pointer before
+sneak_peek_into_after_recursive_call_do_second_reversal: its preceeding node's.
+
